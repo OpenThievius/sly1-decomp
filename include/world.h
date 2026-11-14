@@ -82,19 +82,19 @@ struct World : BaseObject {
     Contacts03* tables;     // 0x1AE0: the bodies' contact tables (func_001DC828 numbers one by its place)
     Contacts03* freeTables; // 0x1AE4: the tables not in use (func_001DC7D0 takes the first)
     Contacts03* usedTables; // 0x1AE8: the tables in use
-    s32 f1AEC;              // 0x1AEC
+    s32 sweepSorted;        // 0x1AEC: whether the sweep axes are sorted
     Pool6C pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
     Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
     Pool6C pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
     Pool6C pool1B14;        // 0x1B14: the 0x14-byte QueuedCall entries (func_001DBBD8, func_001DBC18)
     Pool6C pool1B20;        // 0x1B20: the Attachment records (func_00121228 takes one, func_00121358 gives it back)
     Pool6C pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
-    EffectOwner* f1B38;             // 0x1B38
-    EffectOwner* f1B3C;             // 0x1B3C
+    EffectOwner* freeEffectOwners;  // 0x1B38: the unused effect owners, linked through saved564
+    EffectOwner* sharedEffectOwner; // 0x1B3C: the owner handed to every flag 0 request
     Pool6C pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
     u8 pad1B4C[0x1B58 - 0x1B4C];
     Pool6C pool1B58;        // 0x1B58: the 0xEC-byte AnimationPlayer records (func_0012D3F8)
-    void* f1B64;            // 0x1B64
+    void* animationPlayers; // 0x1B64: the list of animation players
     s32 f1B68;              // 0x1B68
     s32 f1B6C;              // 0x1B6C
     void* f1B70;            // 0x1B70
@@ -110,8 +110,8 @@ struct World : BaseObject {
     Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
     List01 list1BDC;        // 0x1BDC
     List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
-    Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::f284
-    List01 list1C00;        // 0x1C00: the PlacedObject::f284 records in use
+    Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::rangeRecord
+    List01 list1C00;        // 0x1C00: the PlacedObject::rangeRecord records in use
     Pool6C pool1C0C;        // 0x1C0C: the 8-byte touch nodes (func_001DC0C8, func_001DC108)
     u8 pad1C18[0x1C24 - 0x1C18];
     u8* f1C24;              // 0x1C24
@@ -148,24 +148,24 @@ struct World : BaseObject {
     };
     union {
         struct {
-            u8 f1D64;       // 0x1D64
-            u8 f1D65;
-            u8 f1D66;
-            u8 f1D67;       // 0x1D67: 0x80 at load (func_001DCEA0)
+            u8 fillRed;     // 0x1D64
+            u8 fillGreen;
+            u8 fillBlue;
+            u8 fillAlpha;   // 0x1D67: 0x80 at load (func_001DCEA0)
         };
         Rgba4 color1D64;    // 0x1D64: the colour the screen is filled with at load
     };
     f32 f1D68;              // 0x1D68
     f32 f1D6C;              // 0x1D6C
-    s32 f1D70;              // 0x1D70: -1
-    KeyRecord* f1D74;       // 0x1D74: the staged sound bank (RequestStagedBank, PlayStagedBank)
-    s32 f1D78;              // 0x1D78: 0 silences volume channel 2 at load (func_001DCEA0)
-    f32 f1D7C;              // 0x1D7C
+    s32 soundBank;          // 0x1D70: -1
+    KeyRecord* stagedBank;  // 0x1D74: the staged sound bank (RequestStagedBank, PlayStagedBank)
+    s32 volumeChannel2On;   // 0x1D78: 0 silences volume channel 2 at load (func_001DCEA0)
+    f32 volumeChannel1Factor; // 0x1D7C
     s32 soundCount;         // 0x1D80: the number of soundEntries (func_001C0A50)
     WorldSoundEntry soundEntries[16];  // 0x1D84: the level's sounds, started by func_001C0B38
-    void* f1EC4;            // 0x1EC4: the class 0x86 object (func_001EE900)
-    QueuedCall* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
-    QueuedCall* f1ECC;         // 0x1ECC: its last
+    void* valueListObject;  // 0x1EC4: the class 0x86 object (func_001EE900)
+    QueuedCall* queuedCallHead; // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
+    QueuedCall* queuedCallTail; // 0x1ECC: its last
     s32 regroupCount;       // 0x1ED0: objects queued for regrouping (func_0015F678; func_0015FA58 clears it)
     union {
         void* buf1ED4;      // 0x1ED4: 0x1000 bytes
@@ -173,29 +173,29 @@ struct World : BaseObject {
     };
     u8 pad1ED8[0x1EE0 - 0x1ED8];
     Vec02 gravity;          // 0x1EE0: every 0x03 object's at set-up (func_001B7968)
-    s32 f1EF0;              // 0x1EF0: the number of f1EF4 entries
-    void* f1EF4;            // 0x1EF4: 8-byte entries, a key and a value (func_001C1190, func_001C1390, func_001C13E8)
-    s32 f1EF8;              // 0x1EF8
-    s32 f1EFC;              // 0x1EFC
-    u8 f1F00[0x40];         // 0x1F00
+    s32 scriptEntryCount;   // 0x1EF0: the number of f1EF4 entries
+    void* scriptEntries;    // 0x1EF4: 8-byte entries, a key and a value (func_001C1190, func_001C1390, func_001C13E8)
+    s32 scopeVariableId;    // 0x1EF8
+    s32 cloneBatchCount;    // 0x1EFC
+    u8 cloneBatches[0x40];  // 0x1F00
     u8 pad1F40[0x2300 - 0x1F40];
     s32 count2300;          // 0x2300: numbers class 0x2E's objects (func_001993F0)
     s32 count2304;          // 0x2304: numbers class 0x38's objects (func_001411A8)
     f32 f2308;              // 0x2308
-    f32 f230C;              // 0x230C
-    void* f2310;            // 0x2310
-    void* f2314;            // 0x2314
-    f32 f2318;              // 0x2318
-    s32 f231C;              // 0x231C
-    s32 f2320;              // 0x2320
-    void* f2324;            // 0x2324
+    f32 timerDuration;      // 0x230C
+    void* commentaryRecord; // 0x2310
+    void* creditsText;      // 0x2314
+    f32 soundLevel;         // 0x2318
+    s32 padSelectHolds;     // 0x231C: how many holds of the pad select flag
+    s32 elementHolds;       // 0x2320: how many holds of the counted screen element
+    void* activeFollower;   // 0x2324
     IopChannelSetting channel2[4]; // 0x2328: the stack of IOP channel 2 settings (func_001C08B0 pushes, func_001C0950 pops)
     s32 channel2Count;      // 0x2348
     f32 f234C;              // 0x234C
-    f32 f2350;              // 0x2350
+    f32 valueTarget;        // 0x2350
     s32 f2354;              // 0x2354
     s32 f2358;              // 0x2358: 1 after func_001EBEB0 (class 0x13)
-    s32 f235C;              // 0x235C
+    s32 flagBits;           // 0x235C
 };
 
 typedef char check_World[sizeof(World) == 0x2360 ? 1 : -1];

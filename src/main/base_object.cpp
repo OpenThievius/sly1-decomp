@@ -374,10 +374,10 @@ void CloneObject(BaseObject* self, BaseObject* src)
 
 void CopyObjectData(BaseObject* self, BaseObject* src)
 {
-    if (src->f04 != 0) {
+    if (src->keyedList != 0) {
         R11B008List* p = NewKeyedList();
-        CopyKeyedList((R11B008List*)src->f04, p);
-        self->f04 = p;
+        CopyKeyedList((R11B008List*)src->keyedList, p);
+        self->keyedList = p;
         AddMarkRootList((MarkStacks*)g_markStacks, p);
     }
     const Desc01* d = src->desc;
@@ -388,12 +388,12 @@ void CopyObjectData(BaseObject* self, BaseObject* src)
     t = GetHashedSlot((u8*)s0, src->id);
     AppendToList((List01*)t, self);
     self->id = src->id;
-    if (src->f2C != 0) {
+    if (src->scriptScope != 0) {
         u8* s1 = g_markStacks;
         MarkPoolLiveEnds((MarkStacks*)s1);
         ScriptScope* p = NewScriptScope();
-        CopyScriptScope((ScriptScope*)src->f2C, p);
-        self->f2C = p;
+        CopyScriptScope((ScriptScope*)src->scriptScope, p);
+        self->scriptScope = p;
         AddUniqueMarkRoot((MarkStacks*)s1, (MarkEntry*)p);
     }
     self->alias = src->alias;
@@ -514,7 +514,7 @@ void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
     InitScriptValue(&q1);
     InitScriptValue(&q2);
     MarkPoolLiveEnds((MarkStacks*)g_markStacks);
-    if (LookupScriptVariable((ScriptScope*)self->f2C, key, 1, &q0) == 0) {
+    if (LookupScriptVariable((ScriptScope*)self->scriptScope, key, 1, &q0) == 0) {
         DestroyScriptValue(&q2, 2);
         DestroyScriptValue(&q1, 2);
         DestroyScriptValue(&q0, 2);
@@ -581,7 +581,7 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
         return 0;
     }
     QueuedCall* prev = 0;
-    for (QueuedCall* n = self->world->f1EC8; n != 0; n = n->next) {
+    for (QueuedCall* n = self->world->queuedCallHead; n != 0; n = n->next) {
         if ((void*)n->fn == (void*)RunScriptEventHandler && (BaseObject*)n->arg == self) {
             if (n->k2 == key) {
                 if (key >= 8) return 1;
@@ -594,13 +594,13 @@ s32 SuppressScriptEvent(BaseObject* self, s32 key, s32 flag, void* out)
             if (n->k2 == tag) {
                 if (prev != 0) {
                     prev->next = n->next;
-                    if (n->next == 0) self->world->f1ECC = prev;
+                    if (n->next == 0) self->world->queuedCallTail = prev;
                 } else if (n->next != 0) {
-                    self->world->f1EC8 = n->next;
+                    self->world->queuedCallHead = n->next;
                 } else {
                     World* c = self->world;
-                    c->f1ECC = 0;
-                    c->f1EC8 = 0;
+                    c->queuedCallTail = 0;
+                    c->queuedCallHead = 0;
                 }
                 n->next = 0;
                 ReleaseCallRecords(self->world, (T219CHook*)n);
@@ -619,7 +619,7 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out)
     s32 a4;
 
     InitScriptValue(&r);
-    if (self->f2C == 0 || LookupScriptVariable((ScriptScope*)self->f2C, idx, 1, &r) == 0) {
+    if (self->scriptScope == 0 || LookupScriptVariable((ScriptScope*)self->scriptScope, idx, 1, &r) == 0) {
         DestroyScriptValue(&r, 2);
         goto done;
     }
@@ -904,7 +904,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::Scalar(-1.0f));
         TransformDirectionBetweenFrames(self, 0, (Vec02*)&self->q340, &up);
         BuildBasisFromXAndZHint(&d, &up, &self->basis);
-        BuildFrustumSideNormals(&self->basis, self->planes, self->f350, self->f354);
+        BuildFrustumSideNormals(&self->basis, self->planes, self->tangentX, self->tangentY);
         Vec02& far = self->planes[4];
         Vec02& near = self->planes[5];
         for (s32 i = 0; i < 4; i++) {
@@ -920,12 +920,12 @@ void RefreshConeVolumeShape(ConeVolume* self)
         u128 neg = Vu0::ScalarInGpr(-1.0f);
         Vu0::Q(self->planes[5]) = Vu0::MulX(Vu0::Q(self->basis.r[0]), neg);
         near.w = 50.0f - Vu0::ToFloat(Vu0::Dot(Vu0::Vec::Of(self->v140), Vu0::Vec::Of(self->planes[5])));
-        BuildProjectionMatrix((Mat4*)proj, one / self->f350, one / self->f354, zero, zero, 50.0f, self->rangeMax);
+        BuildProjectionMatrix((Mat4*)proj, one / self->tangentX, one / self->tangentY, zero, zero, 50.0f, self->rangeMax);
         BuildViewProjectionMatrix((f32*)&self->v140, (f32*)&self->basis, proj, (Quad16*)view);
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(d), Vu0::ScalarInGpr(-1.0f));
         if (self->mode == 2) {
-            FitUnitRampBetweenPair((LinePoints*)&self->f360, &ramp[0][0], &ramp[1][0]);
-            FitUnitRampBetweenPair((LinePoints*)&self->f368, &ramp[0][1], &ramp[1][1]);
+            FitUnitRampBetweenPair((LinePoints*)&self->innerRatioX, &ramp[0][0], &ramp[1][0]);
+            FitUnitRampBetweenPair((LinePoints*)&self->innerRatioY, &ramp[0][1], &ramp[1][1]);
             ramp[0][2] = one;
             ramp[1][2] = zero;
         } else {
@@ -933,7 +933,7 @@ void RefreshConeVolumeShape(ConeVolume* self)
             ramp[1][0] = zero;
             ramp[0][1] = one;
             ramp[1][1] = zero;
-            FitUnitRampBetweenPair((LinePoints*)&self->f358, &ramp[0][2], &ramp[1][2]);
+            FitUnitRampBetweenPair((LinePoints*)&self->innerRatioRoot, &ramp[0][2], &ramp[1][2]);
         }
         FitUnitRampBetweenPair((LinePoints*)&self->rangeMin, &ramp[0][3], &ramp[1][3]);
         CopyWordsToWriter(&w, 0xC, 2, (u32*)ramp, 0x19);
@@ -1054,13 +1054,13 @@ void UpdateConeVolumeTangents(ConeVolume* self)
     f32 a = ClampHelper::Of(self->outerAngle, 0.0f, 175.0f);
     f32 b = ClampHelper::Of(self->innerAngle, 0.0f, a);
     f32 r = Tangent(a * 0.00872664712f);
-    self->f354 = r;
-    self->f350 = r;
+    self->tangentY = r;
+    self->tangentX = r;
     f32 q = Tangent(b * 0.00872664712f);
-    self->f360 = q / self->f350;
-    self->f368 = q / self->f354;
+    self->innerRatioX = q / self->tangentX;
+    self->innerRatioY = q / self->tangentY;
     self->f36C = self->f364 = 1.0f;
-    self->f358 = Fpu::Sqrt(self->f360);
+    self->innerRatioRoot = Fpu::Sqrt(self->innerRatioX);
     self->f35C = 1.0f;
 }
 
@@ -1078,7 +1078,7 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         self->mask = 0x0FFFFFFF;
         break;
     case 1:
-        QueryValueListMask((ValueListObject*)self->world->f1EC4, self->rangeMax, (Bits128*)&self->v140, &self->mask);
+        QueryValueListMask((ValueListObject*)self->world->valueListObject, self->rangeMax, (Bits128*)&self->v140, &self->mask);
         break;
     case 2:
     case 3: {
@@ -1093,7 +1093,7 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         f32 r = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(v)));
         Vu0::Q(v) = Vu0::MulX(Vu0::Q(self->axis), Vu0::Scalar(self->rangeMax * 0.5f));
         Vu0::Q(center) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(v));
-        QueryValueListMask((ValueListObject*)self->world->f1EC4, r, (Bits128*)&center, &self->mask);
+        QueryValueListMask((ValueListObject*)self->world->valueListObject, r, (Bits128*)&center, &self->mask);
         break;
     }
     }

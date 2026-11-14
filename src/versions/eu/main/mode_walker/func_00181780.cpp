@@ -10,6 +10,6 @@ void HandleModeWalkerActivation(ModeWalker* self, void* active)
         Vu0::Q(*(Vec02*)((u8*)e + 0x580)) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
         D_00270650.vt->m16(&D_00270650, 0);
-        self->fBF0 = 0;
+        self->pulseActive = 0;
     }
 }

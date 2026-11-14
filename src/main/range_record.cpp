@@ -65,7 +65,7 @@ void PrepareRangeRecord(RangeRecord* self)
 
 void InvalidateRangeRecordPacket(RangeRecord* self)
 {
-    self->fC0 = 0;
+    self->packetValid = 0;
 }
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
@@ -75,15 +75,15 @@ void UpdateRangeRecordBounds(RangeRecord* self)
     Vec02 scaled;
     f32 half;
     f32 t;
-    if (AreFloatsNearlyEqual(self->f04, self->f08, 1e-4f)) {
-        half = (__builtin_fabsf(self->f44 - self->f40)) * 0.5f;
-        t = self->f40 + half;
-        self->f60 = half;
+    if (AreFloatsNearlyEqual(self->nearRange, self->farRange, 1e-4f)) {
+        half = (__builtin_fabsf(self->outerDistance - self->innerDistance)) * 0.5f;
+        t = self->innerDistance + half;
+        self->halfLength = half;
     } else {
-        f32 a = self->f40;
-        f32 q = self->f08;
-        f32 b = self->f44;
-        f32 p = self->f04;
+        f32 a = self->innerDistance;
+        f32 q = self->farRange;
+        f32 b = self->outerDistance;
+        f32 p = self->nearRange;
         f32 m = (a * q - b * p) / (p - q);
         f32 d = b - a;
         f32 a2 = a + m;
@@ -94,7 +94,7 @@ void UpdateRangeRecordBounds(RangeRecord* self)
         f32 r = u * w / a2;
         half = Fpu::Sqrt((b2 - r) * (b2 - r) + q * q);
         t = r - m;
-        self->f60 = half;
+        self->halfLength = half;
     }
     Vu0::Q(scaled) = Vu0::MulX(Vu0::Q(self->v20), Vu0::Scalar(t));
     Vu0::Q(self->v50) = Vu0::Add(Vu0::Q(self->v10), Vu0::Q(scaled));
@@ -111,24 +111,24 @@ void LinkRangeRecord(RangeRecord* self, s32 key)
 s32 HasRangeRecordRanges(RangeRecord* p)
 {
     s32 r = 0;
-    if (0.0f <= p->f04 && 0.0f <= p->f08)
+    if (0.0f <= p->nearRange && 0.0f <= p->farRange)
         r = 1;
     return r;
 }
 
 void StoreRangeRecordNear(RangeRecord* p, f32 v)
 {
-    p->f04 = v;
-    if (p->f08 < 0.0f)
-        p->f08 = v;
+    p->nearRange = v;
+    if (p->farRange < 0.0f)
+        p->farRange = v;
     InvalidateRangeRecordPacket(p);
 }
 
 void StoreRangeRecordFar(RangeRecord* o, f32 v)
 {
-    o->f08 = v;
-    if (o->f04 < 0.0f) {
-        o->f04 = v;
+    o->farRange = v;
+    if (o->nearRange < 0.0f) {
+        o->nearRange = v;
     }
     InvalidateRangeRecordPacket(o);
 }
@@ -174,22 +174,22 @@ void SetRangeRecordDirection(RangeRecord* self, Vec02* v)
 
 void StoreRangeRecordInner(RangeRecord* o, f32 v)
 {
-    o->f40 = v;
+    o->innerDistance = v;
     UpdateRangeRecordBounds(o);
     InvalidateRangeRecordPacket(o);
 }
 
 void StoreRangeRecordOuter(RangeRecord* o, f32 v)
 {
-    o->f44 = v;
+    o->outerDistance = v;
     UpdateRangeRecordBounds(o);
     InvalidateRangeRecordPacket(o);
 }
 
 void ScaleRangeRecordByAngle(RangeRecord* o, f32 s) {
     f32 t = Tangent(s * 0.00872664712f);
-    o->f04 = t * o->f40;
-    o->f08 = t * o->f44;
+    o->nearRange = t * o->innerDistance;
+    o->farRange = t * o->outerDistance;
     InvalidateRangeRecordPacket(o);
 }
 
@@ -261,10 +261,10 @@ void UpdateRangeRecord(RangeRecord* self, f32 dt)
     s32 count;
     Collider** list;
     PushBackMemoryMark();
-    GatherCollidersInSphere(g_currentWorld, 0, self->f60, &self->v50, (s32 (*)(void*, Collider*))IsRangeRecordBodyCandidate, 0, &count, &list);
+    GatherCollidersInSphere(g_currentWorld, 0, self->halfLength, &self->v50, (s32 (*)(void*, Collider*))IsRangeRecordBodyCandidate, 0, &count, &list);
     if (count != 0) {
-        *(Vu0::Vec*)&a = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->f40));
-        *(Vu0::Vec*)&b = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->f44));
+        *(Vu0::Vec*)&a = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->innerDistance));
+        *(Vu0::Vec*)&b = Vu0::MulAddX(Vu0::Vec::Of(self->v10), Vu0::Vec::Of(self->v20), Vu0::Vec::ScalarAt(self->outerDistance));
     }
     MeshHit hit;
     for (s32 i = 0; i < count; i++) {
@@ -355,27 +355,27 @@ void BuildRangeRecordPacket(RangeRecord* self)
             SubmitMeshQueueEntry((FrameTarget*)dst);
             WriteVifMscal(&pw, D_000003B0);
             WriteVifFlushE(&pw);
-            DetachPacketBuffer(&pw, (u32*)&self->fC0, 0);
+            DetachPacketBuffer(&pw, (u32*)&self->packetValid, 0);
             axis = self->v20;
             BuildBasisFromXAndZHint(&axis, &self->v30, &basis);
-            if (AreFloatsNearlyEqual(self->f04, self->f08, 0.0001f) != 0) {
+            if (AreFloatsNearlyEqual(self->nearRange, self->farRange, 0.0001f) != 0) {
                 pos = self->v10;
                 InitIdentityMatrix((Mat4*)&proj);
                 f32 half = 0.5f;
-                f32 q = half / self->f04;
+                f32 q = half / self->nearRange;
                 proj.m[0][0] = q;
                 proj.m[1][1] = q;
                 proj.m[3][0] = half;
                 proj.m[3][1] = half;
                 p->nearZ = -3.40282347e+38f;
                 p->farZ = 3.40282347e+38f;
-                p->clipZ = self->f40 - D_002744F0;
+                p->clipZ = self->innerDistance - D_002744F0;
             } else {
-                f32 k = (self->f08 * self->f40 - self->f04 * self->f44) / (self->f08 - self->f04);
-                f32 lo = self->f40 - k;
+                f32 k = (self->farRange * self->innerDistance - self->nearRange * self->outerDistance) / (self->farRange - self->nearRange);
+                f32 lo = self->innerDistance - k;
                 Vu0::Set(pos, Vu0::MulAddX(Vu0::Q(self->v10), Vu0::Q(axis), Vu0::Scalar(k)));
-                f32 hi = self->f44 - k;
-                BuildProjectionMatrix((Mat4*)&proj, 0.5f / (self->f04 / lo), 0.5f / (self->f04 / lo), 0.5f, 0.5f, lo, hi);
+                f32 hi = self->outerDistance - k;
+                BuildProjectionMatrix((Mat4*)&proj, 0.5f / (self->nearRange / lo), 0.5f / (self->nearRange / lo), 0.5f, 0.5f, lo, hi);
                 if (lo < hi) {
                     p->nearZ = lo;
                     p->farZ = hi;
@@ -411,15 +411,15 @@ void QueueRangeRecordPacket(RangeRecord* o)
         a2 = 1;
     skip:
         if (a2 != 0) {
-            if (o->fC0 == 0) {
+            if (o->packetValid == 0) {
                 BuildRangeRecordPacket(o);
-                if (o->fC0 == 0) {
+                if (o->packetValid == 0) {
                     goto done;
                 }
             }
             PacketWriter* g = &g_vifPacketWriter;
             u64 hi = (u64)(u32)((u8*)o + 0xD0) << 32;
-            u64 v = (u64)(s64)(o->fC0 | 0x40000000) | hi;
+            u64 v = (u64)(s64)(o->packetValid | 0x40000000) | hi;
             *(u64*)g->cur = v;
             g->cur = g->cur + 0x10;
         }

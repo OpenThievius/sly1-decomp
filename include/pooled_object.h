@@ -21,11 +21,11 @@ struct PooledObject : Collider {
         f32 holdSpeed;               // 0x558: held, the speed it follows its holder at (func_0014F270)
     };
     u8 pad55C[0x560 - 0x55C];
-    f32 f560;               // 0x560: handed to SendPointEventToWorldListener when it lands (func_0014F270)
-    f32 f564;               // 0x564: handed to func_00126D60 when the state becomes 5
+    f32 landEventValue;     // 0x560: handed to SendPointEventToWorldListener when it lands (func_0014F270)
+    f32 fadeOutTime;        // 0x564: handed to func_00126D60 when the state becomes 5
     f32 delay;              // 0x568: slot 17 waits this long in state 4
     Keep46 keep56C;         // 0x56C: kept by slot 9
-    void* f574;             // 0x574: not read here
+    void* watchedAnimation; // 0x574: not read here
     void* watched;        // 0x578: the object whose message (kind 6) clears it (slot 13)
     union {
         s32 f57C;           // 0x57C: zeroed when the state leaves 2

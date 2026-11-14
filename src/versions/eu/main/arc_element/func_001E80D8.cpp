@@ -24,13 +24,13 @@ void DrawArcOutlinePacket(ArcDrawRequest_eu_1E80D8* request)
         return;
     }
     if (D_00270458 != 4) {
-        if (AreFloatsNearlyEqual(g_camera->f1C4, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
-            f32 zoom = g_camera->f1C4;
-            f32 f1C8 = g_camera->f1C8;
+        if (AreFloatsNearlyEqual(g_camera->zoom, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
+            f32 zoom = g_camera->zoom;
+            f32 f1C8 = g_camera->zoomGoal;
             SnapCameraZoom(g_camera, *(f32*)((u8*)self->current + 0x2D4));
             WriteCameraMatricesPacket(g_camera);
             SnapCameraZoom(g_camera, zoom);
-            g_camera->f1C8 = f1C8;
+            g_camera->zoomGoal = f1C8;
         }
     }
     PushBackMemoryMark();

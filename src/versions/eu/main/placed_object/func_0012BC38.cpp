@@ -25,10 +25,10 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             merged = 0;
             t.ids[0] = ReadBufferedS16((BufferedStream*)r);
             t.target = ReadBufferedS16((BufferedStream*)r);
-            t.f14 = ReadBufferedS32((BufferedStream*)r);
-            t.f18 = ReadBufferedS32((BufferedStream*)r);
-            t.f24 = ReadBufferedFloat((BufferedStream*)r);
-            t.f1C = ReadBufferedFloat((BufferedStream*)r);
+            t.nearRange = ReadBufferedS32((BufferedStream*)r);
+            t.farRange = ReadBufferedS32((BufferedStream*)r);
+            t.baseVolume = ReadBufferedFloat((BufferedStream*)r);
+            t.pitch = ReadBufferedFloat((BufferedStream*)r);
             t.f20 = ReadBufferedFloat((BufferedStream*)r);
             t.count = 1;
             t.cur = 0;
@@ -99,8 +99,8 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             break;
         case 28:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
-            ((EventObjectPair*)e->a8.i)->f0 = ReadBufferedS16((BufferedStream*)r);
-            ((EventObjectPair*)e->a8.i)->f4 = ReadBufferedS16((BufferedStream*)r);
+            ((EventObjectPair*)e->a8.i)->animationId = ReadBufferedS16((BufferedStream*)r);
+            ((EventObjectPair*)e->a8.i)->targetId = ReadBufferedS16((BufferedStream*)r);
             F32(((EventObjectPair*)e->a8.i)->f8) = ReadBufferedFloat((BufferedStream*)r);
             ((EventObjectPair*)e->a8.i)->fC = ReadBufferedFloat((BufferedStream*)r);
             break;
@@ -130,8 +130,8 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             break;
         case 48:
             e->a8.i = (s32)AllocateZeroedFrontMemory(0x10);
-            ((EventObjectPair*)e->a8.i)->f0 = ReadBufferedS16((BufferedStream*)r);
-            ((EventObjectPair*)e->a8.i)->f4 = ReadBufferedS16((BufferedStream*)r);
+            ((EventObjectPair*)e->a8.i)->animationId = ReadBufferedS16((BufferedStream*)r);
+            ((EventObjectPair*)e->a8.i)->targetId = ReadBufferedS16((BufferedStream*)r);
             ((EventObjectPair*)e->a8.i)->f8 = ReadBufferedS16((BufferedStream*)r);
             ((EventObjectPair*)e->a8.i)->fC = ReadBufferedFloat((BufferedStream*)r);
             break;

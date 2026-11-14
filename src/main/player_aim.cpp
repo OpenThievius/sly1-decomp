@@ -182,7 +182,7 @@ extern s32 D_00274C14;
 
 void SetPlayerAimMode(Player* self, s32 state)
 {
-    s32 old = self->f223C;
+    s32 old = self->aimMode;
     if (old == state) {
         return;
     }
@@ -195,13 +195,13 @@ void SetPlayerAimMode(Player* self, s32 state)
         hold->vt[7](hold);
     }
     s32 id;
-    self->f2254 &= ~2;
-    switch (self->f223C) {
+    self->pendingFlags &= ~2;
+    switch (self->aimMode) {
     case 1:
-        id = ((AimSoundSource*)self->f2204)->fAC;
+        id = ((AimSoundSource*)self->boundObject)->fAC;
         goto play;
     case 2:
-        id = ((AimSoundPoint*)self->f2208)->f54;
+        id = ((AimSoundPoint*)self->aimCurve)->f54;
     play:
         StartSoundEffect(id, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     case 0:
@@ -212,7 +212,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 8:
     case 9:
         if (self->f2220 == 0) {
-            TeleportStateWalker((StateWalker*)self->f2234, 0x146);
+            TeleportStateWalker((StateWalker*)self->stateWalker, 0x146);
         }
         break;
     case -1:
@@ -225,9 +225,9 @@ void SetPlayerAimMode(Player* self, s32 state)
     s32 sound = -1;
     switch (state) {
     case -1:
-        self->f2200 = 0;
-        self->f2204 = 0;
-        self->f2208 = 0;
+        self->aimTarget = 0;
+        self->boundObject = 0;
+        self->aimCurve = 0;
         break;
     case 1:
         self->f4B8 = 0;
@@ -237,27 +237,27 @@ void SetPlayerAimMode(Player* self, s32 state)
         break;
     case 10:
         self->f4B8 = 0;
-        anim = self->f1018;
+        anim = self->aimAnim10;
         break;
     case 11:
         self->f4B8 = 0;
-        anim = self->f101C;
+        anim = self->aimAnim11;
         break;
     case 0: {
-        BlendAnimationView* g = ((AimTarget*)self->f21C4)->f3E4;
+        BlendAnimationView* g = ((AimTarget*)self->aimGrid)->f3E4;
         anim = g;
         sound = 13;
         speed = 0.0f;
         start = g->pC0->p8->f8;
         self->f4B8 = 0;
-        self->f2210 = 0;
-        self->f2214 = 0;
-        self->f2424 = g_gameClock.time + 0.1f;
+        self->previousBoundObject = 0;
+        self->previousAimCurve = 0;
+        self->aimEndTime = g_gameClock.time + 0.1f;
         break;
     }
     case 3: {
         Vec02 v;
-        self->f25EC = 0;
+        self->foundNodeCount = 0;
         self->f21C8 = -1.0f;
         TransformPointBetweenFrames(0, self, (Vec02*)((u8*)self->f23D4 + 0x140), &v);
         Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
@@ -296,71 +296,71 @@ void SetPlayerAimMode(Player* self, s32 state)
     }
     case 4:
     aim4:
-        self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f2540, self->f2558);
+        self->foundNodeCount = 0;
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend4, self->aimAnim4);
         sound = 11;
         delay = D_00274B90;
-        anim = self->f2558;
-        self->f2424 = g_gameClock.time + D_00274B94;
+        anim = self->aimAnim4;
+        self->aimEndTime = g_gameClock.time + D_00274B94;
         break;
     case 5:
     aim5:
-        self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f255C, self->f2574);
+        self->foundNodeCount = 0;
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend5, self->aimAnim5);
         sound = 11;
         delay = D_00274B90;
-        anim = self->f2574;
-        self->f2424 = g_gameClock.time + D_00274B98;
+        anim = self->aimAnim5;
+        self->aimEndTime = g_gameClock.time + D_00274B98;
         break;
     case 6:
     aim6:
-        self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f2578, (void*)self->f2590);
+        self->foundNodeCount = 0;
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend6, (void*)self->aimAnim6);
         sound = 11;
         delay = D_00274B90;
-        anim = (void*)self->f2590;
-        if (FindStateEntryIndex((StateGraph*)self->f1188, 0x14F) >= 0) {
-            TeleportStateWalker((StateWalker*)self->f2234, 0x14F);
+        anim = (void*)self->aimAnim6;
+        if (FindStateEntryIndex((StateGraph*)self->stateGraph, 0x14F) >= 0) {
+            TeleportStateWalker((StateWalker*)self->stateWalker, 0x14F);
         }
-        self->f2424 = g_gameClock.time + D_00274B94;
+        self->aimEndTime = g_gameClock.time + D_00274B94;
         break;
     case 7:
     aim7:
-        self->f25EC = 0;
-        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->f2594, (void*)self->f25AC);
+        self->foundNodeCount = 0;
+        SetPlayerClass75AheadBlend(self, (TwoBlendWeights*)self->aimBlend7, (void*)self->aimAnim7);
         sound = 11;
         delay = D_00274B90;
-        anim = (void*)self->f25AC;
-        if (FindStateEntryIndex((StateGraph*)self->f1188, 0x14F) >= 0) {
-            TeleportStateWalker((StateWalker*)self->f2234, 0x14F);
+        anim = (void*)self->aimAnim7;
+        if (FindStateEntryIndex((StateGraph*)self->stateGraph, 0x14F) >= 0) {
+            TeleportStateWalker((StateWalker*)self->stateWalker, 0x14F);
         }
-        self->f2424 = g_gameClock.time + D_00274B98;
+        self->aimEndTime = g_gameClock.time + D_00274B98;
         break;
     case 8:
-        anim = self->f25B0;
+        anim = self->aimAnim8;
         break;
     case 9:
-        anim = self->f25B4;
+        anim = self->aimAnim9;
         break;
     }
     if (chained != 0) {
-        f32 s = ((AimPlayer*)self->f2244)->speed;
-        start = ((AimPlayer*)self->f2244)->time;
+        f32 s = ((AimPlayer*)self->aimAnimPlayer)->speed;
+        start = ((AimPlayer*)self->aimAnimPlayer)->time;
         if (s == 0.0f) {
             if (start == 0.0f) {
                 speed = -1.0f;
-            } else if (start == ((AimPlayer*)self->f2244)->anim->f34) {
+            } else if (start == ((AimPlayer*)self->aimAnimPlayer)->anim->f34) {
                 speed = 1.0f;
             }
         } else {
             speed = s;
         }
         sound = -1;
-        speed /= ((AimPlayer*)self->f2244)->rate;
+        speed /= ((AimPlayer*)self->aimAnimPlayer)->rate;
     } else {
         self->f2248 = 0;
     }
-    s32 wasPair = self->f223C == 11 || self->f223C == 2;
+    s32 wasPair = self->aimMode == 11 || self->aimMode == 2;
     s32 isPair = state == 11 || state == 2;
     if (wasPair != isPair) {
         if (state == 11 || state == 2) {
@@ -379,12 +379,12 @@ void SetPlayerAimMode(Player* self, s32 state)
             a->vt[7](a);
         }
     }
-    self->f223C = state;
-    self->f2240 = g_gameClock.time;
-    self->f21CC = 0;
-    ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->f2244, start, speed);
+    self->aimMode = state;
+    self->aimStartTime = g_gameClock.time;
+    self->boundsPointCount = 0;
+    ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->aimAnimPlayer, start, speed);
     if (delay != 0.0f) {
-        AimPlayerItem* it = ((AimPlayer*)self->f2244)->items;
+        AimPlayerItem* it = ((AimPlayer*)self->aimAnimPlayer)->items;
         if (it != 0) {
             do {
                 if (it->state10 == 3) {
@@ -411,25 +411,25 @@ void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, 
 
 void UpdatePlayerAimTarget(Player* s)
 {
-    if (s->f2200 != 0 && IsObjectAttached((BaseObject*)s->f2200) == 0) {
-        s32 v = s->f223C;
-        s->f2200 = 0;
-        s->f2204 = 0;
+    if (s->aimTarget != 0 && IsObjectAttached((BaseObject*)s->aimTarget) == 0) {
+        s32 v = s->aimMode;
+        s->aimTarget = 0;
+        s->boundObject = 0;
         if (v != 0) {
             return;
         }
         SetPlayerAimMode(s, -1);
     }
-    if (s->f223C != 0) {
+    if (s->aimMode != 0) {
         return;
     }
-    void* p = s->f2200;
+    void* p = s->aimTarget;
     if (p != 0) {
-        TrackAimTargetObject(s, s->f21C4, p);
+        TrackAimTargetObject(s, s->aimGrid, p);
         return;
     }
-    if (s->f2208 != 0) {
-        TrackAimTargetPoint(s, s->f21C4, (PathCurveObject*)s->f2208, &s->f220C);
+    if (s->aimCurve != 0) {
+        TrackAimTargetPoint(s, s->aimGrid, (PathCurveObject*)s->aimCurve, &s->aimCurvePos);
     }
 }
 
@@ -447,8 +447,8 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
         SetPlayerState(self, 2, 2);
         break;
     case 6:
-        if (self->f239C < 6) {
-            if (self->f239C >= 4) break;
+        if (self->targetMode < 6) {
+            if (self->targetMode >= 4) break;
         }
         flag = 0;
         break;
@@ -464,8 +464,8 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
         flag = 0;
         break;
     case 0:
-        if (self->f2590 != 0 && self->f25AC != 0) {
-            switch (self->f223C) {
+        if (self->aimAnim6 != 0 && self->aimAnim7 != 0) {
+            switch (self->aimMode) {
             case 4:
                 SetPlayerAimMode(self, 6);
                 break;
@@ -479,7 +479,7 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
     if (held != 0)
         self->f21C8 = g_gameTime[0];
 tail:
-    s32 st = self->f223C;
+    s32 st = self->aimMode;
     if (st == -1) {
         if (flag != 0) {
             if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
@@ -596,9 +596,9 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
     out->a = 1.0f - t;
     out->b = t;
     SetBlendItemWeights((BlendAnimationView*)ctx, 0xC, 2, out);
-    s->f2204 = 0;
-    s->f2200 = fr.found;
-    s->f2208 = 0;
+    s->boundObject = 0;
+    s->aimTarget = fr.found;
+    s->aimCurve = 0;
     if (fr.found != 0 && s->f2220 == 0) {
         s->f638 = ArctangentOfRatio(fr.dir[1], fr.dir[0]);
         TurnColliderTowardHeading(s);
@@ -609,9 +609,9 @@ void TurnPlayerToClass75AheadMask8(Player* self)
 {
     NearestAhead t;
     FindNearestClass75Ahead(self, 8, D_00274BF0, &t.found, t.dir, 0.25f, 1.0f);
-    self->f2204 = 0;
-    self->f2200 = t.found;
-    self->f2208 = 0;
+    self->boundObject = 0;
+    self->aimTarget = t.found;
+    self->aimCurve = 0;
     if (t.found != 0) {
         self->f638 = ArctangentOfRatio(t.dir[1], t.dir[0]);
         TurnColliderTowardHeading(self);
@@ -622,9 +622,9 @@ void TurnPlayerToClass75AheadMask4(Player* self)
 {
     NearestAhead t;
     FindNearestClass75Ahead(self, 4, D_00274C00, &t.found, t.dir, 0.25f, 3.15f);
-    self->f2204 = 0;
-    self->f2200 = t.found;
-    self->f2208 = 0;
+    self->boundObject = 0;
+    self->aimTarget = t.found;
+    self->aimCurve = 0;
     if (t.found != 0) {
         self->f638 = ArctangentOfRatio(t.dir[1], t.dir[0]);
         TurnColliderTowardHeading(self);

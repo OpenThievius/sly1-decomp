@@ -56,38 +56,38 @@ struct ValueCameraController : CameraController {
 struct TargetCameraController : CameraController {
     union {
         s32 f0C;            // 0x0C: 0
-        f32 g0C;            // 0x0C as a float: the yaw speed (func_00149760)
+        f32 yawSpeed;       // 0x0C as a float: the yaw speed (func_00149760)
     };
     f32 f10;                // 0x10: D_00261BF0
     union {
         s32 f14;            // 0x14
-        f32 g14;            // 0x14 as a float: the pitch speed (func_00149760)
+        f32 pitchSpeed;     // 0x14 as a float: the pitch speed (func_00149760)
     };
     union {
         s32 f18;            // 0x18
-        f32 g18;            // 0x18 as a float: func_00151300 compares it with the typed caption's
+        f32 zoomFraction;   // 0x18 as a float: func_00151300 compares it with the typed caption's
                             // value, func_00132500 scales text by it (the camera's +0x478)
     };
     union {
         s32 f1C;            // 0x1C
-        f32 g1C;            // 0x1C as a float: g18's speed (func_00149760)
+        f32 zoomSpeed;      // 0x1C as a float: g18's speed (func_00149760)
     };
     f32 f20;                // 0x20: 10.0, the divisor func_001496C0 takes the rate by
-    f32 f24;                // 0x24: the camera's f1C8 divided by f20
-    f32 f28;                // 0x28: the camera's f1C8; func_0014A7B8 gives it back
-    f32 f2C;                // 0x2C: the camera's f1E4; func_0014A7B8 gives it back
+    f32 zoomMin;            // 0x24: the camera's f1C8 divided by f20
+    f32 zoomMax;            // 0x28: the camera's f1C8; func_0014A7B8 gives it back
+    f32 savedNearDistance;  // 0x2C: the camera's f1E4; func_0014A7B8 gives it back
     s32 items[4];           // 0x30: the stack of numbers
     s32 count;              // 0x40: how many
-    s32 f44;                // 0x44: set while p48's voice is paused (func_00149760)
-    void* p48;              // 0x48: func_001BF788 (n = 0) in func_0014A7B8
+    s32 soundPaused;        // 0x44: set while p48's voice is paused (func_00149760)
+    void* zoomSound;        // 0x48: func_001BF788 (n = 0) in func_0014A7B8
     void* p4C;              // 0x4C: func_001BF788 (n = 500) in func_0014A7B8
     union {
         s32 f50;            // 0x50
-        u8* obj50;          // 0x50: an object kept in view, its position at +0x140 (func_00149760)
+        u8* keptObject;     // 0x50: an object kept in view, its position at +0x140 (func_00149760)
     };
     f32 f54;                // 0x54: 0.5
-    f32 f58;                // 0x58: -1.0
-    void* f5C;              // 0x5C: the object whose place func_001493C8 reads, or 0
+    f32 sizeOverride;       // 0x58: -1.0
+    void* anchorObject;     // 0x5C: the object whose place func_001493C8 reads, or 0
 };
 
 // A 3 by 4 block of the identity (D_002483D0) the controller keeps.

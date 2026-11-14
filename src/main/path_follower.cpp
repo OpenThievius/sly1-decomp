@@ -256,14 +256,14 @@ struct RingClamp {
 
 void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
 {
-    s32 state = self->f2228;
+    s32 state = self->subState;
     if (state >= 0x25 && (state < 0x27 || (state == 0x37 && (MaskWorldBitsBySave() & 0x400) != 0))) {
         DeferredRequest f;
         (void)FillMemory(&f, 0, 0x80);
         f.f04 = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(a->v40)), Vu0::Q(a->v80)));
         f.group = 0xD;
         f.arg = self;
-        switch (self->f2228) {
+        switch (self->subState) {
         case 0x37:
             f.callback = (void*)DrawPlayerMarkerRing3;
             break;
@@ -280,14 +280,14 @@ void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
         Rgba4 c;
         u8 from[4];
         *(u32*)from = 0x800000A0;
-        if (self->f26C4 != 0) {
+        if (self->pulseActive != 0) {
             f32 t;
             if (self->f2220 != 4) {
-                t = (g_gameClock[1] - self->f26CC) / self->f26D0;
+                t = (g_gameClock[1] - self->pulseFadeStart) / self->pulseFadeDuration;
             } else {
                 t = 0.0f;
             }
-            f32 s = Cosine((g_gameClock[1] - self->f26C8) * 10.0f);
+            f32 s = Cosine((g_gameClock[1] - self->pulseStartTime) * 10.0f);
             f32 p = D_00275140[0] + t * (D_00275140[1] + t * D_00275140[2]);
             f32 x = RingClamp::Of(p, g_unitRange.lo, g_unitRange.hi);
             f32 q = D_00275150[0] + s * (D_00275150[1] + s * D_00275150[2]);
@@ -308,9 +308,9 @@ void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
 s32 GetPlayerRequestPhase(Player* self)
 {
     if (self->f2220 != 4) {
-        return self->f26C4 != 0;
+        return self->pulseActive != 0;
     }
-    if (self->f2228 < 45) {
+    if (self->subState < 45) {
         return 1;
     }
     return 2;
@@ -325,10 +325,10 @@ void FinishPlayerRequest(Player* self)
         FinishSwitchedCollider(self);
         self->f2730 = 0;
     }
-    if (self->f26B4.fn != 0) {
-        s32 fn = self->f26B4.fn;
-        self->f26B4.fn = 0;
-        ((void (*)(s32, Player*))fn)(self->f26B4.data, self);
+    if (self->lastMessage.fn != 0) {
+        s32 fn = self->lastMessage.fn;
+        self->lastMessage.fn = 0;
+        ((void (*)(s32, Player*))fn)(self->lastMessage.data, self);
     } else {
         Vec02 v = self->v150;
         v.z = D_00275160 >? v.z;
@@ -336,7 +336,7 @@ void FinishPlayerRequest(Player* self)
         d->m20(self, &v);
         SetPlayerState(self, 2, 6);
     }
-    self->f226C = 0.0f;
+    self->jumpSpeed = 0.0f;
     self->f2498 = 0;
 }
 
@@ -346,7 +346,7 @@ struct HitMessage {
     Vec02 v20;              // 0x20
     f32 f30;                // 0x30
     u8 pad34[0x38 - 0x34];
-    Collider* f38;          // 0x38
+    Collider* source;       // 0x38
     u8 pad3C[0x50 - 0x3C];
 };
 
@@ -368,7 +368,7 @@ void NotifyPlayerGroundObject(Player* self)
         Vec02 moved;
         p = self->v140;
         p.z = p.z + D_0027516C;
-        if (self->f2228 == 0x27 || self->f2228 == 0x2F) {
+        if (self->subState == 0x27 || self->subState == 0x2F) {
             p.z = p.z - 10.0f;
         }
         if (self->f2438->f278 != 0) {
@@ -381,7 +381,7 @@ void NotifyPlayerGroundObject(Player* self)
     } else {
         i = 0;
     }
-    if (i != 0 && (self->v150.z < 0.0f || !(self->f2220 == 2 || self->f2228 == 0x2C || self->f2228 == 0x2B))) {
+    if (i != 0 && (self->v150.z < 0.0f || !(self->f2220 == 2 || self->subState == 0x2C || self->subState == 0x2B))) {
         OwnerMessage msg;
         InitOwnerMessage(&msg, 3, self->f2438);
         if (((MessageHandlerFn)self->f2438->desc03()->m47)(self->f2438, 0, &msg) != 0) {
@@ -394,7 +394,7 @@ void NotifyPlayerGroundObject(Player* self)
     }
     f32 fresh = 0.05f;
     for (i = 0; i < 8; i++) {
-        HitStamp* rec = &self->f26D8[i];
+        HitStamp* rec = &self->hitStamps[i];
         Collider* obj = rec->obj;
         if (obj == 0) {
             continue;
@@ -434,7 +434,7 @@ void NotifyPlayerGroundObject(Player* self)
                 u8* e = *(u8**)((u8*)o + 0x90);
                 if (*(s32*)(e + 0x120) == 1 && *(s32*)(e + 0x1B0) == 2) {
                     m.kind = 0x24;
-                    m.f38 = self->f2438;
+                    m.source = self->f2438;
                 }
                 ((HitFn*)o->desc)[31](o, &m);
                 rec->time = g_gameClock[1];
@@ -478,7 +478,7 @@ void AddColliderForce(void* a, void* b);
 
 void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
 {
-    switch (self->f2228) {
+    switch (self->subState) {
     case 6:
     case 0x2B:
         if (self->v150.z < 0.0f) {
@@ -497,7 +497,7 @@ void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
         if (ProbeColliderBelowPoint(self, other, &point) == 0) {
             return;
         }
-        Vu0::Q(local) = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
+        Vu0::Q(local) = Vu0::Rotate(self->headingMatrix, Vu0::Q(self->headingVelocity));
         GetAttachedSetPointMotion((AttachedSet*)other, &point, (Quad16*)&q2, (Quad16*)&q3);
         Vu0::Q(k) = Vu0::FromFloatAt(D_00275170[0]);
         Vu0::Set(force, Vu0::MulX(Vu0::Sub(Vu0::Add(Vu0::Q(self->v150), Vu0::Q(local)), Vu0::Q(q2)), Vu0::Q(k)));
@@ -529,8 +529,8 @@ void SwapInPlayerStandIn(Player* self)
         obj->desc->m02(obj);
         ((VFnB)((void**)obj->desc)[25])(obj, 0);
         ((VFnB)((void**)obj->desc)[35])(obj, s0);
-        obj->f690 = g_gameClock[1];
-        obj->f694 = 1;
+        obj->startTime = g_gameClock[1];
+        obj->running = 1;
         if (s0 != self->f1504) {
             s0->desc->m03(s0);
         }
@@ -571,19 +571,19 @@ void StepStandIn(StandIn* self, f32 t)
     Vec02 q50;
     Vec02 q60;
     StepCollider(self, t);
-    f32 since = g_gameClock[1] - self->f690;
+    f32 since = g_gameClock[1] - self->startTime;
     f32 age = g_unitRange.Limit(D_002751C0[0] + since * (D_002751C0[1] + since * D_002751C0[2]));
     RotateMatrixUpright(&self->rot, 0, &upright);
     StoreScaledQuadword(&q50, age, (u8*)D_00275190);
     StoreScaledQuadword(&q60, age, (u8*)D_002751A0);
-    if (self->f694 != 0) {
+    if (self->running != 0) {
         Vu0::Q(spin) = Vu0::MulX(Vu0::Q(self->rot.r[2]), Vu0::ScalarAt(D_00275188));
     } else {
         spin = D_00248D30;
         q50 = *(Vec02*)&D_00275C40;
     }
     SteerColliderTowardRotation(self, &upright, (f32*)&q50, &spin, (f32*)&q60, t);
-    if (self->f694 != 0) {
+    if (self->running != 0) {
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(self->rot.r[0]), Vu0::ScalarAt(D_0027518C));
     } else {
         push = D_00248D30;
@@ -595,14 +595,14 @@ void StepStandIn(StandIn* self, f32 t)
 void StopStandIn(StandIn* self, ContactPair* pair, s32 kind)
 {
     HandleChildGroupObjectContact(self, pair, kind);
-    self->f694 = 0;
+    self->running = 0;
 }
 
 void HandleStandInNotification(StandIn* self, s32 kind, ObjectMessage* ref)
 {
     HandleChildGroupNotification(self, kind, ref);
     if (kind == 10 && ref->target == self) {
-        ((StandIn*)ref->target)->f694 = 0;
+        ((StandIn*)ref->target)->running = 0;
     }
 }
 
@@ -702,14 +702,14 @@ void FlushOutputBuffer(OutputBuffer* self)
 void InitPathFollower(PathFollower* self)
 {
     InitSwitchedCollider(self);
-    self->f614 = 50.0f;
-    self->f610 = 50.0f;
-    self->f618 = 3000.0f;
-    self->f61C = 1300.0f;
-    self->f868 = 2.0f;
-    self->fB04 = 3;
-    (*(Quad16*)&self->v620) = *(Quad16*)D_00275290;
-    CopyMemory(self->f630, D_00275250, 0x40);
+    self->rearWheelRadius = 50.0f;
+    self->frontWheelRadius = 50.0f;
+    self->maxSpeed = 3000.0f;
+    self->sideLimit = 1300.0f;
+    self->grip = 2.0f;
+    self->lapCount = 3;
+    (*(Quad16*)&self->paceBlendCurve) = *(Quad16*)D_00275290;
+    CopyMemory(self->blendEnds, D_00275250, 0x40);
     ResetPathFollower(self);
 }
 
@@ -721,34 +721,34 @@ void StartPathFollower(PathFollower* self)
     s32 id2;
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x14, D_002752A0);
-    self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    if (self->fB44 != 0) {
-        StateWalker* v = CreateStateWalker((StateGraph*)self->fB44, self, -1, 0);
+    self->targetHeading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+    if (self->walkerGraph != 0) {
+        StateWalker* v = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
         self->fB48 = v;
-        SetStateWalkerTarget(v, self->fB30 == 1 ? 0x484 : 0x384);
+        SetStateWalkerTarget(v, self->kind == 1 ? 0x484 : 0x384);
     }
-    switch (g_currentWorld->f1D70) {
+    switch (g_currentWorld->soundBank) {
     case 3:
-        id0 = self->f550 ? 0x1D2 : 0x1AD;
+        id0 = self->enabled ? 0x1D2 : 0x1AD;
         id1 = 0x1BB;
         id2 = 0x1AF;
         goto spawn;
     case 5:
-        id0 = self->f550 ? 0x2A6 : 0x280;
+        id0 = self->enabled ? 0x2A6 : 0x280;
         id1 = 0x27F;
         id2 = 0x27D;
         goto spawn;
     case 6:
-        id0 = self->f550 ? 0x2DE : 0x2DC;
+        id0 = self->enabled ? 0x2DE : 0x2DC;
         id1 = 0x2DB;
         id2 = 0x2DD;
     spawn:
-        StartSoundEffect(id0, (PlayingSound**)self->fB80, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        StartSoundEffect(id1, (PlayingSound**)self->fB84, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        StartSoundEffect(id2, (PlayingSound**)self->fB7C, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id0, (PlayingSound**)self->engineSoundB, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id1, (PlayingSound**)self->engineSoundA, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id2, (PlayingSound**)self->slideSound, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
         {
             f32 r = RandomFloatInRange(-0.1f, 0.1f);
-            self->fB8C = self->fB90 = self->fB94 = self->fB98 = r;
+            self->slidePitchOffset = self->engineBPitchOffset = self->engineAPitchOffset = self->fB98 = r;
         }
         break;
     default:
@@ -758,11 +758,11 @@ void StartPathFollower(PathFollower* self)
         void* c = FindFirstObjectById(g_currentWorld, 0x104, 7, self);
         if (c != 0) {
             self->f594 = 200.0f;
-            self->fB78 = c;
+            self->partner = c;
             self->f598 = c;
         }
     }
-    if (self->fB30 == 1) {
+    if (self->kind == 1) {
         s32 n = GatherObjectsByMode(self->world, 0x105, 0x426, 0, 0x10, buf);
         for (s32 i = 0; i < n; i++) {
             buf[i]->desc->m17(buf[i], self);
@@ -776,7 +776,7 @@ void StartPathFollower(PathFollower* self)
     }
     for (s32 k = 0; k < 4; k++) {
         Slot19* s = &self->f6B0[k];
-        s->v10 = s->obj->pos;
+        s->placedPos = s->obj->pos;
     }
     ResetPathFollower(self);
 }
@@ -844,7 +844,7 @@ static inline f32 NormalizeInto(Vec02& out, Vec02 v)
 void StepPathFollower(PathFollower* self, f32 dt)
 {
     StepCollider(self, dt);
-    if (g_gameClock[1] - self->f850 > D_00275390 && g_gameClock[1] - self->f86C > D_00275394) {
+    if (g_gameClock[1] - self->uprightTime > D_00275390 && g_gameClock[1] - self->pushedTime > D_00275394) {
         Mat02 upright;
         RotateMatrixUpright(&self->rot, 0, &upright);
         SteerColliderTowardRotation(self, &upright, (f32*)&D_002753A0, 0, 0, dt);
@@ -854,7 +854,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
     Slot19* s;
     for (i = 0; i < 4; i++) {
         s = &self->f6B0[i];
-        if (s->f0C != self->f6A0) {
+        if (s->contactStamp != self->contactStamp) {
             continue;
         }
         Vec02 a;
@@ -867,19 +867,19 @@ void StepPathFollower(PathFollower* self, f32 dt)
         Vec02 spin;
         s32 front = (s32)i < 2;
         a = *(Vec02*)((u8*)s->obj8 + 0x40);
-        a.z -= front ? self->f610 : self->f614;
+        a.z -= front ? self->frontWheelRadius : self->rearWheelRadius;
         TransformPointBetweenFrames(self, 0, &a, &a);
         b = s->obj->v190;
-        b.z -= front ? self->f610 : self->f614;
+        b.z -= front ? self->frontWheelRadius : self->rearWheelRadius;
         TransformPointBetweenFrames(self, 0, &b, &b);
         Vu0::Q(dir) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
         f32 len = NormalizeInto(dir, dir);
-        ComputeObjectMotionInFrame(self, 0, &s->v20, &motion, 0, 0, 0);
-        u128 axis = Vu0::Q(s->v30);
+        ComputeObjectMotionInFrame(self, 0, &s->contactPoint, &motion, 0, 0, 0);
+        u128 axis = Vu0::Q(s->contactDirection);
         u128 side = Vu0::Sub(Vu0::Q(motion), Vu0::MulX(axis, Vu0::Dot(Vu0::Q(motion), axis)));
         f32 slip = Vu0::ToFloatMoved(Vu0::Length(side));
-        s->f5C += ((ValueRange*)D_002753C0)->Clamp(((QuadraticCurve*)D_002753B0)->Eval(slip)) * dt;
-        f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v20), Vu0::Q(b)), Vu0::Q(dir))) / len;
+        s->secondEmitterOwed += ((ValueRange*)D_002753C0)->Clamp(((QuadraticCurve*)D_002753B0)->Eval(slip)) * dt;
+        f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(s->contactPoint), Vu0::Q(b)), Vu0::Q(dir))) / len;
         f32 one = 1.0f;
         f32 t;
         if (along < 0.0f) {
@@ -892,9 +892,9 @@ void StepPathFollower(PathFollower* self, f32 dt)
         // The push's two curves are indexed in place: each address is then formed right before
         // its loads, a life of 3 that loop.c's first pass leaves and its second moves, after the
         // copy of &spin (docs/toolchain/loops.md, "Three invariants ranked by their place").
-        f32 push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v40), Vu0::Q(motion)), Vu0::Q(dir)))
+        f32 push = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(s->contactVelocity), Vu0::Q(motion)), Vu0::Q(dir)))
                        * (D_002753D0[0] + t * (D_002753D0[1] + t * D_002753D0[2])) * D_002753C8
-                 + Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(s->v20), Vu0::Q(b)), Vu0::Q(dir)))
+                 + Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(s->contactPoint), Vu0::Q(b)), Vu0::Q(dir)))
                        * (D_002753E0[0] + t * (D_002753E0[1] + t * D_002753E0[2])) * D_002753CC;
         if (push < 0.0f) {
             continue;
@@ -902,7 +902,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
         f32 mass = self->mass;
         push *= mass;
         Vu0::Q(force) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(push));
-        Vu0::Q(torque) = Vu0::Cross(Vu0::Sub(Vu0::Q(s->v20), Vu0::Q(self->v140)), Vu0::Q(force));
+        Vu0::Q(torque) = Vu0::Cross(Vu0::Sub(Vu0::Q(s->contactPoint), Vu0::Q(self->v140)), Vu0::Q(force));
         *(u128*)&accel = Vu0::DivX(Vu0::Q(force), Vu0::Scalar(mass));
         ApplyColliderInverseInertia(self, &torque, &spin);
         AddColliderForce(self, &accel);
@@ -910,7 +910,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
         sum += Vu0::ToFloat(Vu0::Dot(Vu0::Q(force), Vu0::Q(self->rot.r[2])));
     }
     if (sum == 0.0f) {
-        f32 t = (g_gameClock[1] - self->f86C) / D_00275394;
+        f32 t = (g_gameClock[1] - self->pushedTime) / D_00275394;
         f32 k = g_unitRange.Clamp(((QuadraticCurve*)D_002753F0)->Eval(t));
         u8* p = (u8*)D_00275400;
         Quadword q;
@@ -929,13 +929,13 @@ void StepPathFollower(PathFollower* self, f32 dt)
     } else if (one < drive) {
         drive = one;
     }
-    self->fB9C = drive;
-    f32 grip = self->fAFC != 0 ? self->fAFC->f18 : self->f868;
-    f32 lap = (g_gameClock[1] - self->f854) / D_002751D8;
+    self->drive = drive;
+    f32 grip = self->activeZone != 0 ? self->activeZone->f18 : self->grip;
+    f32 lap = (g_gameClock[1] - self->lapTime) / D_002751D8;
     f32 limit = D_00275414 <? grip * sum / self->mass;
     f32 w = ((ValueRange*)D_00275210)->Clamp(((QuadraticCurve*)D_00275200)->Eval(lap));
-    if (1.0f < self->f85C) {
-        w *= self->f85C * self->f85C;
+    if (1.0f < self->pace) {
+        w *= self->pace * self->pace;
     }
     limit *= w;
     Vec02 vel;
@@ -943,7 +943,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
     Vec02 local;
     Vu0::Q(local) = Vu0::RotateTransposed(self->rot, Vu0::Q(vel));
     f32 span = self->f6B0[0].obj->v190.x - self->f6B0[2].obj->v190.x;
-    f32 rate = self->f698 / self->f618;
+    f32 rate = self->targetSpeed / self->maxSpeed;
     f32 r;
     if (rate < 0.0f) {
         r = 0.0f;
@@ -952,9 +952,9 @@ void StepPathFollower(PathFollower* self, f32 dt)
     } else {
         r = rate;
     }
-    r *= g_unitRange.Clamp(((QuadraticCurve*)D_00275420)->Eval(local.x / self->f618));
-    f32 yaw = (local.x <? D_0027541C) * self->f69C;
-    f32 r2 = r * self->f69C;
+    r *= g_unitRange.Clamp(((QuadraticCurve*)D_00275420)->Eval(local.x / self->maxSpeed));
+    f32 yaw = (local.x <? D_0027541C) * self->steerAngle;
+    f32 r2 = r * self->steerAngle;
     Vec02 spinL;
     Vu0::Q(spinL) = Vu0::RotateTransposed(self->rot, Vu0::Q(self->v160));
     f32 inertia = self->mass * __builtin_fabsf(self->f6B0[0].obj->v190.x) / self->inertia.r[2].z;
@@ -967,19 +967,19 @@ void StepPathFollower(PathFollower* self, f32 dt)
     Vu0::Q(torque2) = Vu0::Rotate(self->rot, Vu0::Q(c));
     limit -= __builtin_fabsf(inertia);
     AddColliderTorque(self, &torque2);
-    f32 lean = ((ValueRange*)D_002751F0)->Clamp(((QuadraticCurve*)D_002751E0)->Eval(lap)) * self->f85C;
-    f32 tilt = (D_002751F0[1] <? lean) / self->f85C;
+    f32 lean = ((ValueRange*)D_002751F0)->Clamp(((QuadraticCurve*)D_002751E0)->Eval(lap)) * self->pace;
+    f32 tilt = (D_002751F0[1] <? lean) / self->pace;
     Vec02 heading;
-    ComputePolarOffset((Vec3*)&heading, self->f694, 1.0f, 0.0f);
+    ComputePolarOffset((Vec3*)&heading, self->targetHeading, 1.0f, 0.0f);
     f32 h = ((ValueRange*)D_00275440)->Limit(((QuadraticCurve*)D_00275430)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(heading), Vu0::Q(self->rot.r[0])))));
     Vec02 want;
     Mat02 roll;
     BuildAxisAngleMatrix(&g_unitZVector, &roll, (spinL.z + c.z * (dt * 0.5f)) * dt);
     f32 speed;
     if (1.0f < tilt) {
-        speed = tilt * self->f618;
+        speed = tilt * self->maxSpeed;
     } else {
-        speed = tilt * h * self->f698;
+        speed = tilt * h * self->targetSpeed;
     }
     Vu0::Q(want) = Vu0::FromFloats(speed, 0.0f, 0.0f);
     Vu0::Q(want) = Vu0::RotateUntied(roll, Vu0::Q(want));
@@ -990,13 +990,13 @@ void StepPathFollower(PathFollower* self, f32 dt)
     Vu0::Q(delta) = Vu0::DivX(Vu0::Sub(Vu0::Vec::Of(want), Vu0::Vec::Of(local)), Vu0::Vec::ScalarInGpr(dt)).q;
     delta.z = 0.0f;
     ClampVectorLength(&delta, &clamped, limit >? maxAccel);
-    if (self->f698 != 0.0f && self->fB30 == 0) {
+    if (self->targetSpeed != 0.0f && self->kind == 0) {
         f32 out;
-        if (local.x < self->f698) {
-            ApproachValueWithRamp(local.x, self->f698, dt, (RampProfile*)D_00275448, &out);
+        if (local.x < self->targetSpeed) {
+            ApproachValueWithRamp(local.x, self->targetSpeed, dt, (RampProfile*)D_00275448, &out);
             clamped.x = (out >? maxAccel) <? clamped.x;
         } else {
-            ApproachValueWithRamp(local.x, self->f698, dt, (RampProfile*)D_00275458, &out);
+            ApproachValueWithRamp(local.x, self->targetSpeed, dt, (RampProfile*)D_00275458, &out);
             clamped.x = out >? clamped.x;
         }
     }
@@ -1004,9 +1004,9 @@ void StepPathFollower(PathFollower* self, f32 dt)
     AddColliderForce(self, &world);
     for (i = 0; i < 4; i++) {
         s = &self->f6B0[i];
-        if (s->f0C == self->f6A0) {
+        if (s->contactStamp == self->contactStamp) {
             f32 p = ((ValueRange*)D_00275480)->Limit(((QuadraticCurve*)D_00275470)->Eval(Vu0::ToFloat(Vu0::Length(Vu0::Q(delta))) * dt));
-            s->f58 += p * g_gameClock[2];
+            s->firstEmitterOwed += p * g_gameClock[2];
         }
     }
     Vec02 tq3;
@@ -1050,10 +1050,10 @@ f32 FindNearestValueOutsideSpans(s32 count, ValueRange* spans, f32 x)
 void UpdatePathFollowerPace(PathFollower* self)
 {
     if (self != GetActiveSwitchedCollider()) {
-        self->f85C = ApproachValueWithRamp((RampProfile*)D_00275490, 0, self->f85C, self->f860, g_gameClock[2]);
-        if (!(g_gameClock[1] < self->f864)) {
+        self->pace = ApproachValueWithRamp((RampProfile*)D_00275490, 0, self->pace, self->paceTarget, g_gameClock[2]);
+        if (!(g_gameClock[1] < self->paceChangeTime)) {
             f32 one = 1.0f;  // hoisted: retail holds 1.0f in $f3 before the multiply
-            s32 idx = 3 * (self->fB00 - 1) + self->fAF8->index;
+            s32 idx = 3 * (self->fB00 - 1) + self->currentMarker->index;
             f32 t = (f32)idx * 0.1f;
             f32 w;
             if (t < 0.0f) {
@@ -1063,19 +1063,19 @@ void UpdatePathFollowerPace(PathFollower* self)
             } else {
                 w = t;
             }
-            f32 val = ((QuadraticCurve*)&self->f670)->Eval(w);
-            f32 lo = self->f680;
-            f32 hi = self->f684;
+            f32 val = ((QuadraticCurve*)&self->paceCurveA)->Eval(w);
+            f32 lo = self->paceMin;
+            f32 hi = self->paceMax;
             if (val < lo) {
                 val = lo;
             } else if (hi < val) {
                 val = hi;
             }
-            self->f860 = val;
+            self->paceTarget = val;
             f32 r = RandomFloatInRange(-0.05f, 0.05f);
-            self->f860 = self->f860 + r;
+            self->paceTarget = self->paceTarget + r;
             f32 r2 = RandomFloatInRange(D_002754A0[0], D_002754A0[1]);
-            self->f864 = g_gameClock[1] + r2;
+            self->paceChangeTime = g_gameClock[1] + r2;
         }
     }
 }
@@ -1095,10 +1095,10 @@ s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
     s32 d = self->fB00 - other->fB00;
     if (d > 0) return 1;
     if (d < 0) return 0;
-    d = self->fAF8->index - other->fAF8->index;
+    d = self->currentMarker->index - other->currentMarker->index;
     if (d > 0) return 1;
     if (d < 0) return 0;
-    f32 r = GetWrappedDifference(self->f834, self->f83C, other->f83C);
+    f32 r = GetWrappedDifference(self->pathLength, self->pathDistance, other->pathDistance);
     return 0.0f < r;
 }
 
@@ -1131,41 +1131,41 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
             continue;
         }
         count++;
-        f32 d = WrapModulo(o->f83C - self->f83C, o->f834);
+        f32 d = WrapModulo(o->pathDistance - self->pathDistance, o->pathLength);
         f32 r = ((ValueRange*)D_002754C0)->Limit(((QuadraticCurve*)D_002754B0)->Eval(d));
         if (r <= 0.0f) {
             continue;
         }
         ValueRange* s = &spans[k++];
-        s->lo = o->f840 - r;
-        s->hi = o->f840 + r;
+        s->lo = o->sideOffset - r;
+        s->hi = o->sideOffset + r;
     }
     *nearby = count;
     ValueRange* s = &spans[k++];
     s->lo = -1e6f;
-    s->hi = -self->f61C;
+    s->hi = -self->sideLimit;
     s = &spans[k++];
-    s->lo = self->f61C;
+    s->lo = self->sideLimit;
     s->hi = 1e6f;
     PathCurve* c = self->f830->curve;
-    c->vt->m06(c, self->f83C + D_002751D0);
+    c->vt->m06(c, self->pathDistance + D_002751D0);
     c = self->f830->curve;
     if (c->vt->m02) {
-        ((void (*)(PathCurve*, f32, Vec02*, Vec02*))c->vt->m02)(c, self->f83C + D_002751D0, &pos, &tangent);
+        ((void (*)(PathCurve*, f32, Vec02*, Vec02*))c->vt->m02)(c, self->pathDistance + D_002751D0, &pos, &tangent);
     }
     u128 side = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
     Vu0::Q(dir) = Vu0::DivX(side, Vu0::Length(side));
     Vu0::Q(lo) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(dir), Vu0::ScalarAt(D_002754C8.lo));
     Vu0::Q(hi) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(dir), Vu0::ScalarAt(D_002754C8.hi));
-    FindPathCurveNearestTime(self->f848->curve, &lo, &hi, &out, 0, &self->f84C, 0, self->f84C);
+    FindPathCurveNearestTime(self->sidePath->curve, &lo, &hi, &out, 0, &self->sidePathTime, 0, self->sidePathTime);
     f32 ahead = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(out), Vu0::Q(pos)), Vu0::Q(dir)));
-    f32 want = ApproachValueWithRamp((RampProfile*)D_002754D0, 0, self->f844, ahead, g_gameClock[2]);
+    f32 want = ApproachValueWithRamp((RampProfile*)D_002754D0, 0, self->sideTarget, ahead, g_gameClock[2]);
     f32 best = FindNearestValueOutsideSpans(k, spans, want);
     if (!IsInsideRange(&D_002754C8, best)) {
         best = want;
     } else {
         if (k > 0) {
-            f32 cur = self->f840;
+            f32 cur = self->sideOffset;
             ValueRange* s = spans;
             s32 j = k;
             do {
@@ -1179,7 +1179,7 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
             } while (j != 0);
         }
     }
-    self->f844 = best;
+    self->sideTarget = best;
 }
 
 f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
@@ -1194,31 +1194,31 @@ void ComputePathFollowerHeadingTarget(PathFollower* self)
     if (self->f830 != 0) {
         PathCurve* o = self->f830->curve;
         if (o->vt->m02 != 0) {
-            ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, self->f83C + D_002751D0, &pos, &tangent);
+            ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, self->pathDistance + D_002751D0, &pos, &tangent);
         }
         u128 base = Vu0::Q(pos);
         u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
-        u128 k = Vu0::FromFloatAt(self->f844);
+        u128 k = Vu0::FromFloatAt(self->sideTarget);
         Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
         Vu0::Set(ahead, k);
         u128 p2 = Vu0::MulAddX(base, Vu0::Q(side), k);
         Vu0::Q(w) = Vu0::Sub(p2, Vu0::Q(*(Vec02*)((u8*)self + 0x100)));
         Vu0::Q(pos) = p2;
-        self->f694 = ArctangentOfRatio(w.y, w.x);
+        self->targetHeading = ArctangentOfRatio(w.y, w.x);
         o = self->f830->curve;
         if (o->vt->m02 != 0) {
-            ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, self->f83C + D_002751D0 + D_002754DC, 0, &ahead);
+            ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, self->pathDistance + D_002751D0 + D_002754DC, 0, &ahead);
         }
         f32 turn = ComputeAngleBetweenVectors(&tangent, &ahead, 0);
-        self->f698 = self->f85C * self->f618;
+        self->targetSpeed = self->pace * self->maxSpeed;
         u8* limit = *(u8**)((u8*)self + 0xAFC);
         if (limit != 0) {
-            self->f698 = *(f32*)(limit + 0x1C) <? self->f698;
+            self->targetSpeed = *(f32*)(limit + 0x1C) <? self->targetSpeed;
         }
         if (0.0f < turn) {
-            f32 v = Fpu::Sqrt(D_002754E0[0] * (D_002754DC / turn) * self->f868 * -*(f32*)((u8*)self + 0x358));
-            if (v < self->f698) {
-                self->f698 = v;
+            f32 v = Fpu::Sqrt(D_002754E0[0] * (D_002754DC / turn) * self->grip * -*(f32*)((u8*)self + 0x358));
+            if (v < self->targetSpeed) {
+                self->targetSpeed = v;
             }
         }
     }
@@ -1227,15 +1227,15 @@ void ComputePathFollowerHeadingTarget(PathFollower* self)
 void SteerPathFollower(PathFollower* self)
 {
     f32 a = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    f32 b = WrapAngle(self->f694 - a);
+    f32 b = WrapAngle(self->targetHeading - a);
     f32 c = ClampToMagnitude(D_002754F8 * b, D_002754F4);
-    self->f69C = ApproachAngleWithRamp((u8*)D_002754E8, 0, self->f69C, c, g_frameDt);
+    self->steerAngle = ApproachAngleWithRamp((u8*)D_002754E8, 0, self->steerAngle, c, g_frameDt);
     for (u32 i = 0; i < 4; i++) {
         Slot19* s = &self->f6B0[i];
         if ((s32)i < 2) {
-            s->f50 = self->f698 / self->f610;
+            s->turnRate = self->targetSpeed / self->frontWheelRadius;
         } else {
-            s->f50 = self->f698 / self->f614;
+            s->turnRate = self->targetSpeed / self->rearWheelRadius;
         }
 
     }

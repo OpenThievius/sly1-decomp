@@ -125,13 +125,13 @@ s32 ParseFormatSpec(u8* at, FormatSpec* spec, s32** va)
                     if (g_charClassFlags[*p] & 1) {
                         a = 4;
                     }
-                    spec->f24 = a;
+                    spec->vectorCount = a;
                     d = *p;
                     l = (g_charClassFlags[d] & 1) ? d + 0x20 : d;
                     if (l ^ 0x76) {
                         r = a;
                     }
-                    spec->f28 = r;
+                    spec->matrixRows = r;
                     adv = 1;
                     break;
                 }

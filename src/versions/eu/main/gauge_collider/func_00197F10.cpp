@@ -6,13 +6,13 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
     HandleSwitchedColliderNotification(self, kind, rec);
     switch (kind) {
     case 0xB:
-        self->f644 = 0;
+        self->noticeValue = 0;
         return;
     case 0xA:
-        self->f644 = *(s32*)rec;
+        self->noticeValue = *(s32*)rec;
         return;
     case 0x14:
-        if (rec != self->f6B8) {
+        if (rec != self->phaseWalker) {
             return;
         }
         GetStateWalkerCurrentKey((StateWalker*)rec, &code);
@@ -23,7 +23,7 @@ void HandleGaugeColliderNotification(GaugeCollider* self, s32 kind, void* rec)
             *(void**)(tbl + 0x574) = (u8*)self + 0x680;
             *(void**)(tbl + 0x578) = (u8*)self + 0x684;
             SetWorldActiveFollower(self->world, self);
-            StartTimer(&g_timerElement, self->f688);
+            StartTimer(&g_timerElement, self->timeLimit);
             SetTimerLimit(&g_timerElement, 0.0f, (T217D_510_Fn)EndGaugeColliderTimer);
             StartTimerCounting(&g_timerElement);
         } else {

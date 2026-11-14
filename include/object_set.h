@@ -13,7 +13,7 @@
 #include "collider.h"
 
 struct ObjectSet : Collider {
-    f32 f550;               // 0x550: added to the active collider's reach (func_00198BD8)
+    f32 reachBonus;         // 0x550: added to the active collider's reach (func_00198BD8)
     s32 f554;               // 0x554: slot 0 (func_00198980) sets 1; func_00198E98 (slot 72) tests it
     s32 f558;               // 0x558: func_00198B28 (slot 16) sets 1 when a kept object answers
     s32 n55C;               // 0x55C: how many ids follow; func_00198ED8 appends at keys560[n55C++]
@@ -31,20 +31,20 @@ struct ObjectSet : Collider {
 typedef char check_ObjectSet[sizeof(ObjectSet) == 0x5A0 ? 1 : -1];
 
 struct FlaggedObjectSet : ObjectSet {
-    s32 f5A0;               // 0x5A0: slot 0 (func_00199070) stores a table entry; the others pass it as an index
+    s32 flagIndex;          // 0x5A0: slot 0 (func_00199070) stores a table entry; the others pass it as an index
     u8 pad5A4[0x5B0 - 0x5A4];
 };
 
 typedef char check_FlaggedObjectSet[sizeof(FlaggedObjectSet) == 0x5B0 ? 1 : -1];
 
 struct NumberedItem : ObjectSet {
-    s32 f5A0;               // 0x5A0: an index into the world's bit table (func_00199C10, func_00199500, func_00199850)
-    f32 f5A4;               // 0x5A4: func_00199500 (slot 16)
-    f32 f5A8;               // 0x5A8
+    s32 itemNumber;         // 0x5A0: an index into the world's bit table (func_00199C10, func_00199500, func_00199850)
+    f32 cycleTime;          // 0x5A4: func_00199500 (slot 16)
+    f32 halfCycle;          // 0x5A8: half the length of the cycle
     s32 n5AC;               // 0x5AC: func_00199428 (slot 10) counts the objects it finds ...
-    void* f5B0;             // 0x5B0: ... in this 0x80-byte array
-    f32 f5B4;               // 0x5B4: func_00199500
-    f32 f5B8;               // 0x5B8
+    void* keyframes;        // 0x5B0: ... in this 0x80-byte array
+    f32 spinSpeed;          // 0x5B4: func_00199500
+    f32 spinAngle;          // 0x5B8: the angle round the z axis
     u8* f5BC;               // 0x5BC: the object func_001999D0 (slot 73) was made for
 };
 

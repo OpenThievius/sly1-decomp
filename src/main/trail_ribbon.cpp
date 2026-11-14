@@ -15,20 +15,20 @@ struct Vec02;
 
 
 // A point of the ring: the time it was added, its alpha, and the ribbon's two edges.
-struct TrailPoint { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
+struct TrailPoint { f32 time; f32 alpha; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
 // The ring of up to 0x40 points a trail keeps: the placed object it follows (its 0x2A8 is read),
 // the oldest live one at +0x08, the next free at +0x0C (ResetTrailRing empties it), an alpha
 // curve over age at +0x50.
 struct TrailRing {
-    PlacedObject* f0;
-    u8* f4;                 // the batch mode SetVertexBatchMode takes
-    s32 f8;
-    s32 fC;
-    f32 f10;
-    f32 f14;                // 0x14: when above 0, the two edges are pushed apart along the camera's 0xA0
-    s32 f18;                // 0x18: the edges in use (1 or 2)
+    PlacedObject* target;
+    u8* batchMode;          // the batch mode SetVertexBatchMode takes
+    s32 oldest;
+    s32 next;
+    f32 edgeAlphaScale;
+    f32 edgeSpread;         // 0x14: when above 0, the two edges are pushed apart along the camera's 0xA0
+    s32 edgeCount;          // 0x18: the edges in use (1 or 2)
     u8 pad1C[4];
-    Vec02 f20[2];           // 0x20: the edges' offsets in the object's frame
+    Vec02 edgeOffsets[2];   // 0x20: the edges' offsets in the object's frame
     TimePolynomial poly40;  // 0x40: a new point's alpha over the trail's speed
     u8 pad4C[4];
     TimePolynomial poly;
@@ -40,9 +40,9 @@ struct TrailRing {
 // The object that draws a trail: an alpha scale at +0x50 and its ring at +0x60.
 struct TrailOwner {
     u8 pad0[0x50];
-    f32 f50;
+    f32 alphaScale;
     u8 pad54[0xC];
-    TrailRing* f60;
+    TrailRing* ring;
 };
 
 void* InitVertexBatch(VertexBatch* b);
@@ -66,8 +66,8 @@ void DrawTrailRibbon(TrailOwner* self);
 
 void ResetTrailRing(TrailRing* o)
 {
-    o->fC = 0;
-    o->f8 = 0;
+    o->next = 0;
+    o->oldest = 0;
 }
 
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
@@ -88,30 +88,30 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
     s32 i;
     f32 speed;
     f32 alpha;
-    if (self->f4 == 0 || self->f0 == 0 || dt == 0.0f)
+    if (self->batchMode == 0 || self->target == 0 || dt == 0.0f)
         return;
     if (pos == 0)
-        pos = &self->f0->v140;
+        pos = &self->target->v140;
     if (mat == 0)
-        mat = &self->f0->m110;
-    for (i = 0; i < self->f18; i++) {
-        Vu0::Q(pts[i]) = Vu0::Rotate(*mat, Vu0::Q(self->f20[i]));
+        mat = &self->target->m110;
+    for (i = 0; i < self->edgeCount; i++) {
+        Vu0::Q(pts[i]) = Vu0::Rotate(*mat, Vu0::Q(self->edgeOffsets[i]));
         Vu0::Q(pts[i]) = Vu0::Add(Vu0::Q(*pos), Vu0::Q(pts[i]));
-        ComputeObjectMotionInFrame(self->f0, self->f0->root, &pts[i], &motion[i], 0, 0, 0);
+        ComputeObjectMotionInFrame(self->target, self->target->root, &pts[i], &motion[i], 0, 0, 0);
     }
-    if (self->f18 == 1) {
+    if (self->edgeCount == 1) {
         f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(motion[0])));
         pts[1] = pts[0];
         speed = len;
-        if (self->f14 == 0.0f)
+        if (self->edgeSpread == 0.0f)
             speed = 0.0f;
     } else {
         speed = MaxF(Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(motion[0]))), Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(motion[1]))));
     }
     if (scale != 0.0f) {
         f32 m = 0.0f;
-        for (i = 0; i < self->f18; i++)
-            m = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->f20[i]))) >? m;
+        for (i = 0; i < self->edgeCount; i++)
+            m = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->edgeOffsets[i]))) >? m;
         speed += scale * m;
     }
     if (flag == 0)
@@ -119,13 +119,13 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
     else
         alpha = 0.0f;
     if (alpha == 0.0f) {
-        if (self->f8 == self->fC)
+        if (self->oldest == self->next)
             goto done;
-        if (self->elems[(self->fC + 0x3F) & 0x3F].f4 == 0.0f)
+        if (self->elems[(self->next + 0x3F) & 0x3F].alpha == 0.0f)
             goto done;
     }
-    if (0.0f < self->f14) {
-        f32 f = self->f14;
+    if (0.0f < self->edgeSpread) {
+        f32 f = self->edgeSpread;
         Vu0::Q(pts[0]) = Vu0::MulAddX(Vu0::Q(pts[0]), Vu0::Q(g_camera->fA0), Vu0::Scalar(f));
         Vu0::Q(pts[1]) = Vu0::MulAddX(Vu0::Q(pts[1]), Vu0::Q(g_camera->fA0), Vu0::Scalar(-f));
     }
@@ -135,7 +135,7 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
         f32 angle;
         MultiplyMatrices3x3(&self->mC70, mat, &step);
         MatrixToAxisAngle(&step, &angle, &axis);
-        if (0.2f < __builtin_fabsf(angle) && self->f8 != self->fC) {
+        if (0.2f < __builtin_fabsf(angle) && self->oldest != self->next) {
             s32 n = (s32)(__builtin_fabsf(angle) * 5.0f) + 1;
             f32 fn;
             s32 k;
@@ -159,33 +159,33 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
                 frame.rot = b;
                 cur = a;
                 Vu0::Q(frame.pos) = Vu0::Add(Vu0::Q(frame.pos), Vu0::Q(dp));
-                for (i = 0; i < self->f18; i++) {
-                    Vu0::Q(pts[i]) = Vu0::Rotate(cur, Vu0::Q(self->f20[i]));
+                for (i = 0; i < self->edgeCount; i++) {
+                    Vu0::Q(pts[i]) = Vu0::Rotate(cur, Vu0::Q(self->edgeOffsets[i]));
                     Vu0::Q(pts[i]) = Vu0::Add(Vu0::Q(frame.pos), Vu0::Q(pts[i]));
                 }
-                e = &self->elems[self->fC];
-                e->f0 = g_gameClock.time;
-                e->f4 = alpha;
+                e = &self->elems[self->next];
+                e->time = g_gameClock.time;
+                e->alpha = alpha;
                 Vu0::Q(e->v10) = Vu0::Q(pts[0]);
                 Vu0::Q(e->v20) = Vu0::Q(pts[1]);
-                if ((u32)++self->fC >= 0x40)
-                    self->fC = 0;
-                if (self->fC == self->f8) {
-                    if ((u32)++self->f8 >= 0x40)
-                        self->f8 = 0;
+                if ((u32)++self->next >= 0x40)
+                    self->next = 0;
+                if (self->next == self->oldest) {
+                    if ((u32)++self->oldest >= 0x40)
+                        self->oldest = 0;
                 }
             }
         } else {
-            e = &self->elems[self->fC];
-            e->f0 = g_gameClock.time;
-            e->f4 = alpha;
+            e = &self->elems[self->next];
+            e->time = g_gameClock.time;
+            e->alpha = alpha;
             Vu0::Q(e->v10) = Vu0::Q(pts[0]);
             Vu0::Q(e->v20) = Vu0::Q(pts[1]);
-            if ((u32)++self->fC >= 0x40)
-                self->fC = 0;
-            if (self->fC == self->f8) {
-                if ((u32)++self->f8 >= 0x40)
-                    self->f8 = 0;
+            if ((u32)++self->next >= 0x40)
+                self->next = 0;
+            if (self->next == self->oldest) {
+                if ((u32)++self->oldest >= 0x40)
+                    self->oldest = 0;
             }
         }
     }
@@ -201,7 +201,7 @@ void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
 {
     DeferredRequest req;
     Vec02 diff;
-    s32 count = self->fC - self->f8;
+    s32 count = self->next - self->oldest;
     if (count < 0) {
         count += 0x40;
     }
@@ -209,7 +209,7 @@ void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
         FillMemory(&req, 0, sizeof(DeferredRequest));
         req.callback = (void*)DrawTrailRibbon;
         req.group = 0xD;
-        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->f0->v140), Vu0::Q(*(Vec02*)(cam + 0x40)));
+        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->target->v140), Vu0::Q(*(Vec02*)(cam + 0x40)));
         req.f04 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(*(Vec02*)(cam + 0x80))));
         *(f32*)&req.block.q[4] = 1.0f;
         req.arg = self;
@@ -222,7 +222,7 @@ void DrawTrailRibbon(TrailOwner* self)
     VertexBatch b;
     Rgba4 c;
     Rgba4 c2;
-    TrailRing* r = self->f60;
+    TrailRing* r = self->ring;
     s32 none = -1;
     s32 best = none;
     u32 size = sizeof(TrailPoint);
@@ -232,17 +232,17 @@ void DrawTrailRibbon(TrailOwner* self)
     BeginDmaTag(&g_vifPacketWriter);
     b.f98 = 0;
     SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
-    SetVertexBatchMode(&b, r->f4);
-    SelectVertexBatchLights(&b, ((u8*)&D_00248D30), r->f0->f2A8);
-    idx = r->f8;
-    if (idx != r->fC) {
+    SetVertexBatchMode(&b, r->batchMode);
+    SelectVertexBatchLights(&b, ((u8*)&D_00248D30), r->target->boundRadius);
+    idx = r->oldest;
+    if (idx != r->next) {
         do {
             f32 zero = 0.0f;
             f32 full = 255.0f;
             TrailPoint* e = (TrailPoint*)((u8*)r->elems + idx * size);
-            f32 t = g_gameClock.time - e->f0;
+            f32 t = g_gameClock.time - e->time;
             f32 v = g_unitRange.Clamp(r->poly.Eval(t));
-            f32 w = self->f50 * e->f4 * v;
+            f32 w = self->alphaScale * e->alpha * v;
             if (zero < w) {
                 w = w * full;
                 if (best <= none)
@@ -257,7 +257,7 @@ void DrawTrailRibbon(TrailOwner* self)
             SetVertexColor(&b, &c2);
             SetVertexPosition(&b, (Vec3*)e->v10);
             AddVertex(&b, 0);
-            c.a = (s32)((f32)c.a * r->f10);
+            c.a = (s32)((f32)c.a * r->edgeAlphaScale);
             SetVertexTexCoord(&b, (U64P*)g_trailZeroTexCoord);
             c2 = c;
             SetVertexColor(&b, &c2);
@@ -265,12 +265,12 @@ void DrawTrailRibbon(TrailOwner* self)
             AddVertex(&b, 0);
             if (idx >= 0x40)
                 idx = 0;
-        } while (idx != r->fC);
+        } while (idx != r->next);
     }
     if (best >= 0)
-        r->f8 = best;
+        r->oldest = best;
     else
-        r->f8 = r->fC;
+        r->oldest = r->next;
     FlushVertexBatch(&b);
     CloseDmaTag(&g_vifPacketWriter);
     DestroyVertexBatch(&b, 2);

@@ -94,7 +94,7 @@ struct Class75_1CDFB8 : BaseObject {
     u8 pad84[0x88 - 0x84];
     u32 flags88;                    // 0x88
 };
-struct C17_1CDFB8 { u8 pad0[0x618]; void* f618; u8 pad61C[0x760 - 0x61C]; s32 f760; };
+struct C17_1CDFB8 { u8 pad0[0x618]; void* f618; u8 pad61C[0x760 - 0x61C]; s32 worldBits; };
 struct World_1CDFB8 { u8 pad0[0x1CE4]; C17_1CDFB8* f1CE4; u8 pad1CE8[0x2300 - 0x1CE8]; s32 count2300; };
 struct Chooser_1CDFB8 {
     u8 pad0[0x14];
@@ -103,16 +103,16 @@ struct Chooser_1CDFB8 {
     Vec02 pos;                      // 0x140
     u8 pad150[0x2200 - 0x150];
     void* f2200;                    // 0x2200
-    void* f2204;                    // 0x2204
-    void* f2208;                    // 0x2208
-    f32 f220C;                      // 0x220C
-    void* f2210;                    // 0x2210
+    void* aimObject;                // 0x2204
+    void* aimVector;                // 0x2208
+    f32 aimVectorPlace;             // 0x220C
+    void* lastAimObject;            // 0x2210
     u8 pad2214[0x23A0 - 0x2214];
-    void* f23A0;                    // 0x23A0
-    f32 f23A4;                      // 0x23A4
-    void* f23A8;                    // 0x23A8
+    void* targetCurve;              // 0x23A0
+    f32 targetCurvePlace;           // 0x23A4
+    void* targetPoint;              // 0x23A8
     u8 pad23AC[0x23B0 - 0x23AC];
-    void* f23B0;                    // 0x23B0
+    void* heldObject;               // 0x23B0
     u8 pad23B4[0x23CC - 0x23B4];
     void* f23CC;                    // 0x23CC
 };
@@ -178,7 +178,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
         }
     }
     for (Class75_1CDFB8* o = (Class75_1CDFB8*)g_class75List.head; o != 0; o = o->next) {
-        if (o != self->f2210 && (o->flags88 & 1) && (target == 0 || o == target) && IsObjectOfKind(o, 0x76) != 0) {
+        if (o != self->lastAimObject && (o->flags88 & 1) && (target == 0 || o == target) && IsObjectOfKind(o, 0x76) != 0) {
             GetObjectWorldPosition(o, &a);
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(self->pos)))) - D_00274E08;
             if (d < (best <? 0.0f) || o == target) {
@@ -207,7 +207,7 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     World_1CDFB8* w = self->world;
     s32 n = g_currentEntry->count64;
     C17_1CDFB8* c = w->f1CE4;
-    if (c != 0 && n >= w->count2300 && CompletesWorldBits(c->f760) == 0) {
+    if (c != 0 && n >= w->count2300 && CompletesWorldBits(c->worldBits) == 0) {
         GetObjectWorldPosition((BaseObject*)self->world->f1CE4->f618, &a);
         dist = Vu0::Distance(a, self->pos);
         if (dist < D_00274E18 || self->world->f1CE4 == target) {
@@ -220,32 +220,32 @@ s32 ChooseNearbyPlayerTarget(Chooser_1CDFB8* self, void* target, s32* out)
     case 0:
         *out = curve->mode40;
         r = 0x15;
-        self->f23A0 = curve;
-        self->f23A4 = curveU;
+        self->targetCurve = curve;
+        self->targetCurvePlace = curveU;
         break;
     case 1:
         *out = point->mode58;
         r = 0x15;
-        self->f23A8 = point;
+        self->targetPoint = point;
         break;
     case 2:
         *out = 1;
         r = 0x15;
-        self->f23B0 = part;
+        self->heldObject = part;
         break;
     case 6:
-        self->f2204 = obj;
+        self->aimObject = obj;
         self->f2200 = obj;
-        self->f2208 = 0;
+        self->aimVector = 0;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
         *out = 6;
         r = 0x10;
         break;
     case 7:
-        self->f2208 = vector;
-        self->f220C = vectorU;
-        self->f2204 = 0;
+        self->aimVector = vector;
+        self->aimVectorPlace = vectorU;
+        self->aimObject = 0;
         self->f2200 = 0;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
@@ -286,12 +286,12 @@ void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec
     Vec02 weight;
     f32 t;
     ComputeObjectMotionInFrame((PlacedObject*)obj, 0, start, &vel, 0, 0, 0);
-    if (SolveArrivalTimeAtHeight(self, (Vec02*)self->f6D4, point, start, &vel, &t) == 0) {
+    if (SolveArrivalTimeAtHeight(self, (Vec02*)self->probeVertex, point, start, &vel, &t) == 0) {
         f32 dz = point->z - vel.z;
         f32 g = self->gravity.z;
         f32 fall = -dz / g;
         f32 tt = fall >? 0.0f;
-        f32 h = ((Vec02*)self->f6D4)->z - start->z + (g * (tt * 0.5f) * tt + dz * tt);
+        f32 h = ((Vec02*)self->probeVertex)->z - start->z + (g * (tt * 0.5f) * tt + dz * tt);
         if (outTime != 0) {
             *outTime = tt;
         }
@@ -309,9 +309,9 @@ void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec
         *outTime = t;
     }
     if (outCost != 0) {
-        EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, (const Vec02*)self->f6D4, point, &reach, &vel, 0, 0, &seg1);
+        EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, (const Vec02*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
         f32 a = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg1), Vu0::Q(seg1))));
-        EvaluateHermiteVectorSegment(t, t, 1.0f, (const Vec02*)self->f6D4, point, &reach, &vel, 0, 0, &seg2);
+        EvaluateHermiteVectorSegment(t, t, 1.0f, (const Vec02*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
         f32 b = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg2), Vu0::Q(seg2))));
         *outCost = ((a + b) * (t * 0.5f)) <? 1000000.0f;
     }
@@ -331,9 +331,9 @@ struct PathShape {
 
 struct PathTarget {
     u8 pad0[0x18];
-    s32 f18;
+    s32 frame;
     u8 pad1C[0x34 - 0x1C];
-    PathShape* f34;
+    PathShape* shape;
 };
 
 typedef f32 (*ShapeScalarFn)(void* self, f32 t);
@@ -366,21 +366,21 @@ void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* out
     Vec02 f;
     f32 lo;
     f32 hi;
-    PathShape* shape = node->f34;
+    PathShape* shape = node->shape;
     if (shape->vtbl[1] != 0) {
         shape->vtbl[1](shape, &a, (s32)&b);
     }
-    TransformPointBetweenFrames((PlacedObject*)node->f18, 0, &a, &c);
-    TransformDirectionBetweenFrames((PlacedObject*)node->f18, 0, &b, &d);
-    ComputePolarOffset((Vec3*)&e, self->f630, Vu0::ToFloat(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xE90)))) * self->f634, 0.0f);
+    TransformPointBetweenFrames((PlacedObject*)node->frame, 0, &a, &c);
+    TransformDirectionBetweenFrames((PlacedObject*)node->frame, 0, &b, &d);
+    ComputePolarOffset((Vec3*)&e, self->stickHeading, Vu0::ToFloat(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xE90)))) * self->stickLevel, 0.0f);
     f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(e), Vu0::Q(d)));
-    PathShape* s2 = node->f34;
+    PathShape* s2 = node->shape;
     f32 value = ((ShapeScalarFn)s2->vtbl[5])(s2, t);
     f.y = -*(f32*)((u8*)self + 0xE40);
     f.x = -*(f32*)((u8*)self + 0xE90);
     f.z = D_00274E1C;
     ApproachValueWithRamp(value, D_00274E04, g_gameClock.dt, (RampProfile*)&f, &lo);
-    PathShape* s3 = node->f34;
+    PathShape* s3 = node->shape;
     ApproachValueWithRamp(value, ((ShapeLimitFn)s3->vtbl[8])(s3) - D_00274E04, g_gameClock.dt, (RampProfile*)&f, &hi);
     *outA = c;
     f32 clamped = ClampBetween(along, lo, hi);
@@ -533,13 +533,13 @@ f32 ScoreTargetPathNearest(PathScoreContext* self)
 {
     PathScoreFrame l;
     PathTarget* n = self->node;
-    PathShape* o = n->f34;
+    PathShape* o = n->shape;
     if (o->vtbl[2] != 0) {
         o->vtbl[2](o, &l.a, 0);
     }
     f32 q = 0.25f;
     l.b[0] = self->f0;
-    l.b[1] = n->f18;
+    l.b[1] = n->frame;
     l.c = l.a;
     
     FindLocalMinimum((MinimumFn)ScoreTargetPathAt, l.b, 0.5f, q, q, 3.0f, 0, &l.out);
@@ -681,24 +681,24 @@ struct Chooser {
     void* f6D4;             // 0x6D4
     u8 pad6D8[0x2200 - 0x6D8];
     void* f2200;            // 0x2200
-    void* f2204;            // 0x2204
-    void* f2208;            // 0x2208
-    f32 f220C;              // 0x220C
-    void* f2210;            // 0x2210
+    void* aimObject;        // 0x2204
+    void* aimVector;        // 0x2208
+    f32 aimVectorPlace;     // 0x220C
+    void* lastAimObject;    // 0x2210
     u8 pad2214[0x2228 - 0x2214];
-    s32 f2228;              // 0x2228
+    s32 subState;           // 0x2228
     u8 pad222C[0x23A0 - 0x222C];
-    void* f23A0;            // 0x23A0
-    f32 f23A4;              // 0x23A4
-    void* f23A8;            // 0x23A8
-    f32 f23AC;              // 0x23AC
+    void* targetCurve;      // 0x23A0
+    f32 targetCurvePlace;   // 0x23A4
+    void* targetPoint;      // 0x23A8
+    f32 targetPointPlace;   // 0x23AC
     u8 pad23B0[0x23B8 - 0x23B0];
-    void* f23B8;            // 0x23B8
-    void* f23BC;            // 0x23BC
-    f32 f23C0;              // 0x23C0
+    void* targetObject;     // 0x23B8
+    void* targetPath;       // 0x23BC
+    f32 targetPathPlace;    // 0x23C0
     f32 f23C4;              // 0x23C4
     u8 pad23C8[0x2514 - 0x23C8];
-    TargetRecord* f2514;    // 0x2514
+    TargetRecord* aimRecord; // 0x2514
 };
 // What a cost search hands its scorer: the player, the target, and the point at +0x10.
 struct CostContext { Chooser* self; void* target; u8 pad08[8]; Vec02 v; };
@@ -853,7 +853,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (keep != 0) {
                 continue;
             }
-            if (o == self->f2210) {
+            if (o == self->lastAimObject) {
                 continue;
             }
             if ((o->flags88 & 1) == 0) {
@@ -1046,42 +1046,42 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestCurveT = tCurveBest;
     }
     if (g_codeChecksumFailed != 0 && g_gameClock.time > RandomFloatInRange(30.0f, 120.0f)) {
-        return self->f2228;
+        return self->subState;
     }
     s32 state;
     switch (kind) {
     case 3:
-        self->f23B8 = bestObject;
+        self->targetObject = bestObject;
         state = 0xA;
         break;
     case 4:
-        self->f23BC = bestPath;
-        self->f23C0 = bestPathT;
+        self->targetPath = bestPath;
+        self->targetPathPlace = bestPathT;
         self->f23C4 = bestPath->shape->desc->m5(bestPath->shape, bestPathT);
         state = 0xB;
         break;
     case 1:
-        self->f23A8 = bestPoint;
-        self->f23AC = bestPointT;
+        self->targetPoint = bestPoint;
+        self->targetPointPlace = bestPointT;
         state = 0xD;
         break;
     case 0:
-        self->f23A0 = bestCurve;
-        self->f23A4 = bestCurveT;
+        self->targetCurve = bestCurve;
+        self->targetCurvePlace = bestCurveT;
         state = 0xC;
         break;
     case 6:
-        self->f2208 = 0;
-        self->f2204 = bestClass75;
+        self->aimVector = 0;
+        self->aimObject = bestClass75;
         self->f2200 = bestClass75;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
         state = 0xE;
         break;
     case 7:
-        self->f2208 = bestVector;
-        self->f220C = bestVectorT;
-        self->f2204 = 0;
+        self->aimVector = bestVector;
+        self->aimVectorPlace = bestVectorT;
+        self->aimObject = 0;
         self->f2200 = 0;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
@@ -1089,14 +1089,14 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         break;
     default:
         StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
-        state = self->f2228;
+        state = self->subState;
         break;
     }
-    TargetRecord* r = self->f2514;
+    TargetRecord* r = self->aimRecord;
     r->time = g_gameClock.time + bestT;
-    self->f2514->a = best0;
-    self->f2514->a.z += 75.0f;
-    self->f2514->b = best1;
+    self->aimRecord->a = best0;
+    self->aimRecord->a.z += 75.0f;
+    self->aimRecord->b = best1;
     return state;
 }
 
@@ -1198,24 +1198,24 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
     f32 hi;
     f32 end;
     s32 mode = self->f2220;
-    s32 sub = self->f2228;
-    switch (self->f239C) {
+    s32 sub = self->subState;
+    switch (self->targetMode) {
     case 0:
     case 1: {
-        if (self->f23A0 != 0) {
-            FindTargetCurveLengthNearCollider((TargetCurve*)self->f23A0, &self->f23A4, &a, &heading);
-        } else if (self->f23A8 != 0) {
-            PlaceTargetPointNearCollider((TargetPoint*)self->f23A8, &a, &heading);
+        if (self->targetCurve != 0) {
+            FindTargetCurveLengthNearCollider((TargetCurve*)self->targetCurve, &self->targetCurvePos, &a, &heading);
+        } else if (self->targetPoint != 0) {
+            PlaceTargetPointNearCollider((TargetPoint*)self->targetPoint, &a, &heading);
         } else {
             FindRingPointTowardCollider((PlacedObject*)self->heldObject, &a, &heading);
         }
         f32 speed;
-        if (self->f239C == 0) {
+        if (self->targetMode == 0) {
             speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xAB0)))) *
-                    ((PhasePlayer*)self->watched2230)->speed;
+                    ((PhasePlayer*)self->stateAnimPlayer)->speed;
         } else {
             speed = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*(Vec02*)((u8*)self + 0xB80)))) *
-                    ((PhasePlayer*)self->watched2230)->speed;
+                    ((PhasePlayer*)self->stateAnimPlayer)->speed;
         }
         a.z = self->pos.z;
         b.x = speed;
@@ -1223,27 +1223,27 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         b.z = D_00274E48;
         ApproachPointWithRamp(Vu0::Q(self->pos), Vu0::Q(a), g_gameClock.dt, (RampProfile*)&b, &c);
         f32 turn;
-        if (self->f239C == 0) {
+        if (self->targetMode == 0) {
             turn = heading + 1.57079637f;
         } else {
             turn = heading - 1.57079637f;
         }
         ComputePolarOffset((Vec3*)&d, turn, 1.0f, 0.0f);
-        ComputePolarOffset((Vec3*)&e, self->f630, 1.0f, 0.0f);
+        ComputePolarOffset((Vec3*)&e, self->stickHeading, 1.0f, 0.0f);
         f32 cosine = D_00274E50 * Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(e)));
         f32 side;
         side = ClampBetween(cosine, -1.0f, 1.0f);
-        side = side * self->f634;
+        side = side * self->stickLevel;
         if (__builtin_fabsf(side) < 0.2f) {
             side = 0.0f;
         }
         f32 v = side * speed;
         v = Fpu::Sqrt(speed * speed - Vu0::ToFloat(Vu0::Dot(Vu0::Q(c), Vu0::Q(c)))) <? v;
         f32 t;
-        if (self->f23A0 != 0 && ((TargetFrameRecord*)self->f23A0)->mover->wraps == 0) {
-            ApproachValueWithRamp(self->f23A4, 30.0f, g_gameClock.dt, (RampProfile*)&b, &lo);
-            TargetMover* m = ((TargetFrameRecord*)self->f23A0)->mover;
-            ApproachValueWithRamp(self->f23A4, m->low[m->count - 1] - 30.0f, g_gameClock.dt, (RampProfile*)&b, &hi);
+        if (self->targetCurve != 0 && ((TargetFrameRecord*)self->targetCurve)->mover->wraps == 0) {
+            ApproachValueWithRamp(self->targetCurvePos, 30.0f, g_gameClock.dt, (RampProfile*)&b, &lo);
+            TargetMover* m = ((TargetFrameRecord*)self->targetCurve)->mover;
+            ApproachValueWithRamp(self->targetCurvePos, m->low[m->count - 1] - 30.0f, g_gameClock.dt, (RampProfile*)&b, &hi);
             t = ClampBetween(v, lo, hi);
         } else {
             t = v;
@@ -1251,36 +1251,36 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         Vu0::Vec s = Vu0::Vec::FromFloat(t);
         Vu0::Q(f) = Vu0::MulX(Vu0::Q(d), s.q);
         u128 vel = Vu0::Q(c);
-        u128 local = Vu0::RotateTransposed(self->m660, Vu0::Add(vel, Vu0::Q(f)));
+        u128 local = Vu0::RotateTransposed(self->headingMatrix, Vu0::Add(vel, Vu0::Q(f)));
         *(Vu0::Vec*)&k = s;
         Vu0::Vec n = Vu0::Vec::FromFloat(-1.0f);
         u128 drive = Vu0::MulX(local, n.q);
         *(Vu0::Vec*)&k = n;
-        *(Vu0::Vec*)&self->v640 = *(Vu0::Vec*)&drive;
+        *(Vu0::Vec*)&self->headingVelocity = *(Vu0::Vec*)&drive;
         if (D_00274E4C < Vu0::ToFloat(Vu0::Length(drive))) {
             sub = 0x11;
-            if (self->f239C == 0) {
+            if (self->targetMode == 0) {
                 if (45.0f < Vu0::ToFloat(Vu0::Length(vel))) {
                     SetPlayerOnOffPhase(self, 0);
-                } else if (20.0f < self->v640.y) {
+                } else if (20.0f < self->headingVelocity.y) {
                     SetPlayerOnOffPhase(self, 2);
-                } else if (self->v640.y < -20.0f) {
+                } else if (self->headingVelocity.y < -20.0f) {
                     SetPlayerOnOffPhase(self, 1);
                 }
             }
         } else {
             sub = 0x10;
-            if (v < -D_00274E4C && (((TargetFrameRecord*)self->f23A0)->sides & 1)) {
-                sub = self->f239C == 0 ? 0x13 : 0x12;
-            } else if (D_00274E4C < v && (((TargetFrameRecord*)self->f23A0)->sides & 2)) {
-                sub = self->f239C == 0 ? 0x12 : 0x13;
+            if (v < -D_00274E4C && (((TargetFrameRecord*)self->targetCurve)->sides & 1)) {
+                sub = self->targetMode == 0 ? 0x13 : 0x12;
+            } else if (D_00274E4C < v && (((TargetFrameRecord*)self->targetCurve)->sides & 2)) {
+                sub = self->targetMode == 0 ? 0x12 : 0x13;
             }
-            if (self->f239C == 0) {
+            if (self->targetMode == 0) {
                 SetPlayerOnOffPhase(self, 3);
             }
         }
         self->f638 = heading;
-        if (self->f2228 == 0x15) {
+        if (self->subState == 0x15) {
             f32 off = __builtin_fabsf(WrapAngle(ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x) - self->f638));
             if (D_00274E54 < off) {
                 sub = 0x15;
@@ -1289,46 +1289,46 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         break;
     }
     case 2:
-        if (self->f2228 == 0x10 || self->f2228 == 0x14) {
-            if (0.0f < self->f634) {
+        if (self->subState == 0x10 || self->subState == 0x14) {
+            if (0.0f < self->stickLevel) {
                 sub = 0x14;
-                SetPlayerBlendWeights(self->f630, self->f634, self, (TurnBlendRecords*)((u8*)self + 0xC40), *(BlendAnimationView**)((u8*)self + 0xE20));
+                SetPlayerBlendWeights(self->stickHeading, self->stickLevel, self, (TurnBlendRecords*)((u8*)self + 0xC40), *(BlendAnimationView**)((u8*)self + 0xE20));
             } else {
-                Vu0::Q(self->v640) = Vu0::Zero();
+                Vu0::Q(self->headingVelocity) = Vu0::Zero();
                 sub = 0x10;
             }
         }
         break;
     case 3:
         if (MaskWorldBitsBySave() & 0x2000) {
-            if (0.0f < self->f634) {
+            if (0.0f < self->stickLevel) {
                 sub = 0x14;
-                SetPlayerBlendWeights(self->f630, self->f634 * D_00274E58, self, (TurnBlendRecords*)((u8*)self + 0x720), self->f900);
+                SetPlayerBlendWeights(self->stickHeading, self->stickLevel * D_00274E58, self, (TurnBlendRecords*)((u8*)self + 0x720), self->sixWayBlend);
             } else {
-                Vu0::Q(self->v640) = Vu0::Zero();
+                Vu0::Q(self->headingVelocity) = Vu0::Zero();
                 sub = 0x10;
             }
         } else {
-            Vu0::Q(self->v640) = Vu0::Zero();
+            Vu0::Q(self->headingVelocity) = Vu0::Zero();
             sub = 0x10;
         }
         break;
     case 5:
-        self->f638 = self->f630;
-        Vu0::Q(self->v640) = Vu0::Zero();
+        self->f638 = self->stickHeading;
+        Vu0::Q(self->headingVelocity) = Vu0::Zero();
         break;
     case 4: {
-        TargetFrameRecord* rec = (TargetFrameRecord*)self->f23BC;
+        TargetFrameRecord* rec = (TargetFrameRecord*)self->targetTrack;
         void* frame = rec->frame;
         TargetMover* m = rec->mover;
-        TransformPointBetweenFrames(0, (PlacedObject*)frame, (Vec02*)self->f6D4, &a);
+        TransformPointBetweenFrames(0, (PlacedObject*)frame, (Vec02*)self->probeVertex, &a);
         if (m->vt->track != 0) {
-            m->vt->track(m, self->f23C0, &a, 0, &b, &c, &self->f23C0, &self->f23C4);
+            m->vt->track(m, self->trackPos, &a, 0, &b, &c, &self->trackPos, &self->f23C4);
         }
         TransformPointBetweenFrames((PlacedObject*)frame, 0, &b, &d);
         TransformDirectionBetweenFrames((PlacedObject*)frame, 0, &c, &e);
         if (rec->active != 0 && m->wraps == 0) {
-            if (self->f23C0 <= 0.0f || m->ends[m->count - 1] <= self->f23C0) {
+            if (self->trackPos <= 0.0f || m->ends[m->count - 1] <= self->trackPos) {
                 mode = 2;
                 sub = 2;
                 break;
@@ -1337,12 +1337,12 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         e.z = 0.0f;
         *(Vu0::Vec*)&e = NormalizeOrElse(Vu0::Vec::Of(e), Vu0::Vec::Of(g_unitXVector));
         f32 angle = ArctangentOfRatio(e.y, e.x);
-        ComputePolarOffset((Vec3*)&h, self->f630, 1.0f, 0.0f);
+        ComputePolarOffset((Vec3*)&h, self->stickHeading, 1.0f, 0.0f);
         if (rec->facing == 0) {
             f = e;
         } else {
             void* frame2 = rec->facing->frame;
-            TransformPointBetweenFrames(0, (PlacedObject*)frame2, (Vec02*)self->f6D4, &i);
+            TransformPointBetweenFrames(0, (PlacedObject*)frame2, (Vec02*)self->probeVertex, &i);
             TargetMover* m2 = rec->facing->mover;
             if (m2->vt->nearest != 0) {
                 m2->vt->nearest(m2, &i, 0, 0, &j, 0, 0);
@@ -1352,37 +1352,37 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         f.z = 0.0f;
         *(Vu0::Vec*)&f = NormalizeOrElse(Vu0::Vec::Of(f), Vu0::Vec::Of(g_unitXVector));
         f32 along = Vu0::ToFloat(Vu0::Dot(Vu0::Q(h), Vu0::Q(f)));
-        switch (self->f241C) {
+        switch (self->pathStickSide) {
         case 0:
-            if (self->f634 < 0.25f) {
-                self->f241C = -1;
+            if (self->stickLevel < 0.25f) {
+                self->pathStickSide = -1;
             } else if (along < -0.7f) {
-                self->f241C = 1;
+                self->pathStickSide = 1;
             }
             break;
         case 1:
-            if (self->f634 < 0.25f) {
-                self->f241C = -1;
+            if (self->stickLevel < 0.25f) {
+                self->pathStickSide = -1;
             } else if (0.7f < along) {
-                self->f241C = 0;
+                self->pathStickSide = 0;
             }
             break;
         case -1:
-            if (0.35f < pad->f48) {
+            if (0.35f < pad->stickMagnitude) {
                 if (0.0f <= along) {
-                    self->f241C = 0;
+                    self->pathStickSide = 0;
                 } else {
-                    self->f241C = 1;
+                    self->pathStickSide = 1;
                 }
             }
             break;
         }
-        switch (self->f241C) {
+        switch (self->pathStickSide) {
         case 0:
-            self->f23C8 = 0;
+            self->trackReversed = 0;
             break;
         case 1:
-            self->f23C8 = 1;
+            self->trackReversed = 1;
             break;
         }
         if (rec->active != 0) {
@@ -1393,23 +1393,23 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
             i.z = D_00274E5C;
             if (m->wraps != 0) {
                 end = i.x;
-            } else if (self->f23C8 != 0) {
+            } else if (self->trackReversed != 0) {
                 ApproachValueWithRamp(self->f23C4, D_00274E04, g_frameDt, (RampProfile*)&i, &end);
                 end = -end;
             } else {
                 ApproachValueWithRamp(self->f23C4, m->vt->limit(m) - D_00274E04, g_frameDt, (RampProfile*)&i, &end);
             }
             f32 r = (end - i.y) / (i.x - i.y);
-            along = ClampBetween(self->f634, 0.0f, r);
+            along = ClampBetween(self->stickLevel, 0.0f, r);
         }
-        if (self->f23C8 != 0) {
+        if (self->trackReversed != 0) {
             angle = WrapAngle(angle + 3.14159274f);
         }
         if (0.0f < along) {
             sub = 0x14;
             SetPlayerBlendWeights(angle, along, self, (TurnBlendRecords*)((u8*)self + 0xE30), *(BlendAnimationView**)((u8*)self + 0x1010));
         } else {
-            Vu0::Q(self->v640) = Vu0::Zero();
+            Vu0::Q(self->headingVelocity) = Vu0::Zero();
             self->f638 = angle;
             sub = 0x10;
         }
@@ -1418,13 +1418,13 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
     case 6:
         AimPlayerAtTarget(self);
     default:
-        Vu0::Q(self->v640) = Vu0::Zero();
+        Vu0::Q(self->headingVelocity) = Vu0::Zero();
         break;
     }
     SetPlayerState(self, mode, sub);
 }
 
-struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; f32 f23C0; f32 angle; s32 flip; };
+struct TargetPlayerView { u8 pad0[0x23BC]; TargetFrameRecord* record; f32 targetPathPlace; f32 angle; s32 flip; };
 struct TargetProbe { u8 pad0[4]; s32 active; f32 radius; u8 pad0C[4]; Vec02 point; Vec02 end; };
 
 f32 WrapModulo(f32 x, f32 y);
@@ -1474,12 +1474,12 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
 
 void UpdatePlayerTargetPhase(Player* self)
 {
-    switch (self->f2228) {
+    switch (self->subState) {
     case 0x11: {
         void* slots;
         BlendAnimationView* n;
         void* sounds;
-        switch (self->f239C) {
+        switch (self->targetMode) {
         case 0:
             slots = (u8*)self + 0xA20;
             n = *(BlendAnimationView**)((u8*)self + 0xB20);
@@ -1492,15 +1492,15 @@ void UpdatePlayerTargetPhase(Player* self)
             break;
         case 3:
             slots = (u8*)self + 0x910;
-            n = self->fA10;
+            n = self->eightWayBlend;
             sounds = (u8*)self + 0x2450;
             break;
         }
         UpdateEightEntryBlendWeights(self, (BlendSlot*)slots, n);
-        PhasePlayer* ph = (PhasePlayer*)self->watched2230;
+        PhasePlayer* ph = (PhasePlayer*)self->stateAnimPlayer;
         f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
-        if (self->f2674 == (s32)self->f2678) {
-            s32 m = self->f2684;
+        if (self->forcedOnOffObject == (s32)self->ownOnOffObject) {
+            s32 m = self->onOffPhase;
             if (m < 3) {
                 if (m > 0) {
                     if (m == 1) *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA40); else *(f32*)&self->f26A0 >?= *(f32*)((u8*)self + 0xA20);
@@ -1511,31 +1511,31 @@ void UpdatePlayerTargetPhase(Player* self)
         break;
     }
     case 0x14: {
-        switch (self->f239C) {
+        switch (self->targetMode) {
         case 4:
-            UpdateSixEntryBlendWeights(self, (u8*)self + 0xE30, *(BlendAnimationView**)((u8*)self + 0x1010), self->watched2230);
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0xE30, *(BlendAnimationView**)((u8*)self + 0x1010), self->stateAnimPlayer);
             break;
         case 2:
-            UpdateSixEntryBlendWeights(self, (u8*)self + 0xC40, *(BlendAnimationView**)((u8*)self + 0xE20), self->watched2230);
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0xC40, *(BlendAnimationView**)((u8*)self + 0xE20), self->stateAnimPlayer);
             break;
         case 3:
-            UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->f900, self->watched2230);
+            UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->sixWayBlend, self->stateAnimPlayer);
             break;
         }
-        PhasePlayer* ph = (PhasePlayer*)self->watched2230;
+        PhasePlayer* ph = (PhasePlayer*)self->stateAnimPlayer;
         f32 t = WrapModulo((ph->time + D_00274B64 * ph->speed) / ph->clip->length, 1.0f);
         PlayPhaseCrossingSound(self, (f32*)((u8*)self + 0x2440), t);
         break;
     }
     case 0x10:
-        if (self->f239C == 4) {
+        if (self->targetMode == 4) {
             f32 k = 5.0f;
             u8* p1 = (u8*)self + 0x1190;
-            MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->f250C, k, p1);
+            MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
             u8* p2 = (u8*)self + 0x1290;
-            MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->f2510, k, p2);
-            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->f250C);
-            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->f2510);
+            MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
+            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->footPartA);
+            CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->footPartB);
         }
         break;
     }
@@ -1564,16 +1564,16 @@ void PinPlayerToTarget(Player* self)
     Vec02 k;
     ContactPlayerView* p = (ContactPlayerView*)self;
     s32 code;
-    switch (self->f239C) {
+    switch (self->targetMode) {
     case 5:
         ConvertPositionToWorld((BaseObject*)p->anchor, &pos);
-        AddPlayerObjectContacts(self, 0x23, p->anchor, &pos, 0, (Vec02*)self->f6D4);
+        AddPlayerObjectContacts(self, 0x23, p->anchor, &pos, 0, (Vec02*)self->probeVertex);
         break;
     case 4: {
         TargetFrameRecord* rec = p->record;
         void* frame = rec->frame;
         TargetMover* m = rec->mover;
-        TransformPointBetweenFrames(0, (PlacedObject*)frame, (Vec02*)self->f6D4, &pos);
+        TransformPointBetweenFrames(0, (PlacedObject*)frame, (Vec02*)self->probeVertex, &pos);
         if (m->vt->track != 0) {
             m->vt->track(m, p->angle, &pos, 0, &local, &dir0, &p->angle, &p->limit);
         }
@@ -1582,7 +1582,7 @@ void PinPlayerToTarget(Player* self)
         code = 0x22;
         if (p->record->active == 0 && m->wraps == 0) {
             f32 along = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(self->v150), Vu0::Q(dir)));
-            f32 side = -Vu0::ToFloat(Vu0::Dot(Vu0::Rotate(self->rot, Vu0::Q(self->v640)), Vu0::Q(dir)));
+            f32 side = -Vu0::ToFloat(Vu0::Dot(Vu0::Rotate(self->rot, Vu0::Q(self->headingVelocity)), Vu0::Q(dir)));
             if (along < -2.0f || side < 2.0f) {
                 f32 lim = m->low[0] + D_00274E04;
                 if (p->limit < lim) {
@@ -1609,7 +1609,7 @@ void PinPlayerToTarget(Player* self)
             }
         }
     call:
-        AddPlayerObjectContacts(self, code, (BaseObject*)p->record, &world, &dir, (Vec02*)self->f6D4);
+        AddPlayerObjectContacts(self, code, (BaseObject*)p->record, &world, &dir, (Vec02*)self->probeVertex);
         break;
     }
     }
@@ -1619,11 +1619,11 @@ void FreePooledContactChain(World* world, Contact03* head);
 
 void SetPlayerOnOffPhase(Player* self, s32 n)
 {
-    if (n == self->f2684) {
+    if (n == self->onOffPhase) {
         return;
     }
-    self->f2684 = n;
-    self->f2688 = g_gameClock.time;
+    self->onOffPhase = n;
+    self->onOffPhaseTime = g_gameClock.time;
     self->f26A0 = 0;
     if (n <= 0) {
         return;
@@ -1635,8 +1635,8 @@ void SetPlayerOnOffPhase(Player* self, s32 n)
         return;
     }
     {
-        s32 v = self->f2674;
-        if (v == (s32)self->f2678) {
+        s32 v = self->forcedOnOffObject;
+        if (v == (s32)self->ownOnOffObject) {
             self->f268C = 2;
         } else {
             self->f268C = 0;
@@ -1648,7 +1648,7 @@ void SetOnOffObjectForcedState(void* selfv, s32 value);
 
 void ResetPlayerOnOffObject(Player* self)
 {
-    OnOffObject* o = self->f2678;
+    OnOffObject* o = self->ownOnOffObject;
     o->i414 = 5;
     o->f2D4 = 0;
     o->f2DC = 0;
@@ -1677,12 +1677,12 @@ void StepPlayerAlongTarget(Player* self)
     Vec02 force;
     Vec02 k;
     f32 bounds[2];
-    if (self->f239C == 4) {
+    if (self->targetMode == 4) {
         TargetFrameRecord* rec = ((TargetPlayerView*)self)->record;
         if (rec->active != 0) {
             TargetMover* m = rec->mover;
             if (m->vt->placeAt != 0) {
-                m->vt->placeAt(m, ((TargetPlayerView*)self)->f23C0, 0, &dir);
+                m->vt->placeAt(m, ((TargetPlayerView*)self)->targetPathPlace, 0, &dir);
             }
             TransformDirectionBetweenFrames((PlacedObject*)rec->frame, 0, &dir, &dir);
             f32 down = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(dir), Vu0::Q(self->gravity)));

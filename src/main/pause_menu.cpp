@@ -156,7 +156,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 // The glyph mark FindSubstring finds in a page title: the glyph is its third byte.
 struct GlyphMark {
     u8 pad0[2];
-    u8 f2;
+    u8 glyph;
 };
 
 extern f32 g_elapsedTime;
@@ -164,7 +164,7 @@ extern CardSlot* D_0026998C;
 extern s32 D_00264A4C;
 extern f32 D_0026A22C;
 // The speeds the screen-position page moves the screen at (x is D_0026A22C).
-struct ScreenAdjustRate { f32 f0; f32 f4; };
+struct ScreenAdjustRate { f32 verticalRate; f32 f4; };
 extern ScreenAdjustRate D_0026A230;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
@@ -559,8 +559,8 @@ char* GetMenuChoiceLabel(s32 index)
 void FormatGameSummary(GameProgress* self, char* dst)
 {
     s32 a = ComputeCompletionPercent(self);
-    s32 b = GetEntryName((self->f19D8 << 8) | self->f19DC);
-    s32 v = (s32)(self->fC * (1.0f / 60.0f));
+    s32 b = GetEntryName((self->levelIndex << 8) | self->entryIndex);
+    s32 v = (s32)(self->totalTime * (1.0f / 60.0f));
     s32 t = v > 0 ? v : 1;
     FormatToString(dst, "%d%% - %s - %d:%02d", a, b, t / 60, t % 60);
 }
@@ -609,7 +609,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
                 show = 1;
                 break;
             case 18: {
-                s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+                s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
                 if (key != 0x204 && key != 0x407) {
                     show = 0;
                     break;
@@ -629,7 +629,7 @@ void BuildPauseMenuPage(T217D_6D0* self)
                 show = D_0026EC58 == 2;
                 break;
             case 20: {
-                s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+                s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
                 show = 0;
                 if (key == 0x304 || key == 0x307 || key == 0x502) {
                     show = 1;
@@ -637,10 +637,10 @@ void BuildPauseMenuPage(T217D_6D0* self)
                 break;
             }
             case 21:
-                if (g_saveData->f19D8 == 0) {
+                if (g_saveData->levelIndex == 0) {
                     show = 0;
-                } else if (g_saveData->f19D8 == 5 || g_saveData->f19DC == 1 ||
-                           (g_saveData->f19DC == 0 && (*(s32*)(g_currentLevelRecord->bits74 + 4) & 1) == 0)) {
+                } else if (g_saveData->levelIndex == 5 || g_saveData->entryIndex == 1 ||
+                           (g_saveData->entryIndex == 0 && (*(s32*)(g_currentLevelRecord->bits74 + 4) & 1) == 0)) {
                     item = 0x16;
                 }
                 break;
@@ -690,31 +690,31 @@ void BuildPauseMenuPage(T217D_6D0* self)
         case 15:
         {
             char** l = cl->labels;
-            CopyString(dst, *((g_saveData->f19EC & 0x80) ? l + 1 : l));
+            CopyString(dst, *((g_saveData->optionFlags & 0x80) ? l + 1 : l));
             break;
         }
         case 16:
         {
             char** l = cl->labels;
-            CopyString(dst, *((g_saveData->f19EC & 0x40) ? l + 1 : l));
+            CopyString(dst, *((g_saveData->optionFlags & 0x40) ? l + 1 : l));
             break;
         }
         case 24:
         {
             char** l = cl->labels;
-            CopyString(dst, *((g_saveData->f19EC & 0x200) ? l + 1 : l));
+            CopyString(dst, *((g_saveData->optionFlags & 0x200) ? l + 1 : l));
             break;
         }
         case 25:
         {
             char** l = cl->labels;
-            CopyString(dst, *((g_saveData->f19EC & 0x400) ? l + 1 : l));
+            CopyString(dst, *((g_saveData->optionFlags & 0x400) ? l + 1 : l));
             break;
         }
         case 26:
         {
             char** l = cl->labels;
-            CopyString(dst, *((g_saveData->f19EC & 0x800) ? l + 1 : l));
+            CopyString(dst, *((g_saveData->optionFlags & 0x800) ? l + 1 : l));
             break;
         }
         case 10:
@@ -877,7 +877,7 @@ void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b)
 void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
     if (self->open == mode) return;
     if (mode != 0) {
-        s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+        s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             PauseStagedBankVoice();
             SetElementStackState((ElementStack*)g_elementStack, 5);
@@ -896,7 +896,7 @@ void SetPauseMenuOpen(T217D_6D0* self, s32 mode) {
         SetPadSelectFlags((PadSelectBits)1);
         ResetPadStepRepeat(&g_padRecord);
     } else {
-        s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+        s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             ResumeStagedBankVoice();
             SetElementStackState((ElementStack*)g_elementStack, 3);
@@ -918,7 +918,7 @@ void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2)
 {
     SetPauseMenuLayerPage(a0, 0, -1);
     GameProgress* g = g_saveData;
-    s32 key = (g->f19D8 << 8) | g->f19DC;
+    s32 key = (g->levelIndex << 8) | g->entryIndex;
     if (key == 0x106) {
         if (a1 != 0) {
             FadeRequest r;
@@ -967,7 +967,7 @@ void UpdatePauseMenu(T217D_6D0* self)
     PadRecord* pad;
 
     on = 0;
-    switch ((g->f19D8 << 8) | g->f19DC) {
+    switch ((g->levelIndex << 8) | g->entryIndex) {
     case 0x106:
     case 0x204:
     case 0x304:
@@ -1066,7 +1066,7 @@ void UpdatePauseMenu(T217D_6D0* self)
             return;
         }
         D_0026A700 = ClampFloat::Of(D_0026A700 + dx * D_0026A22C, 424.0f, 848.0f);
-        v = ClampFloat::Of(D_0026A704 + dy * D_0026A230.f0, 10.0f, 90.0f);
+        v = ClampFloat::Of(D_0026A704 + dy * D_0026A230.verticalRate, 10.0f, 90.0f);
         D_0026A704 = v;
         {
             DisplayRegs* gs = &D_00262490;
@@ -1132,7 +1132,7 @@ void UpdatePauseMenu(T217D_6D0* self)
         }
         it = FindSubstring(row->title, "&2");
         if (it != 0) {
-            it->f2 = GetCyclingGlyph();
+            it->glyph = GetCyclingGlyph();
         }
         break;
     }

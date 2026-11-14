@@ -14,12 +14,12 @@
 struct BufferedStream;
 
 struct StateWalkerGroup : PlacedObject {
-    s32 mask2D0;            // 0x2D0: tested against the global's flags (0x448) to choose 0x22F or 0x22E
-    void* f2D4;             // 0x2D4: what the handle at 0x2D8 is made from
-    void* f2D8;             // 0x2D8: the object's own handle
-    s32 count2DC;           // 0x2DC: ids in the list below
+    s32 flagMask;           // 0x2D0: tested against the global's flags (0x448) to choose 0x22F or 0x22E
+    void* graph;            // 0x2D4: what the handle at 0x2D8 is made from
+    void* walker;           // 0x2D8: the object's own handle
+    s32 idCount;            // 0x2DC: ids in the list below
     s32 ids2E0[8];          // 0x2E0: ids of the objects to collect
-    s32 count300;           // 0x300: objects collected
+    s32 objectCount;        // 0x300: objects collected
     void* objs304[8];       // 0x304: the objects (found by kind 0x5C, then by id)
     u8 pad324[0x330 - 0x324];
 };

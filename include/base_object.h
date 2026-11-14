@@ -86,7 +86,7 @@ struct ClassHead {
 
 struct BaseObject {
     const Desc01* desc;     // 0x00
-    void* f04;              // 0x04: a 4-byte block func_0011BF30 makes (func_00130110); copied through func_0011BEE0 by slot 9
+    void* keyedList;        // 0x04: a 4-byte block func_0011BF30 makes (func_00130110); copied through func_0011BEE0 by slot 9
     s32 id;                 // 0x08: the object's id (func_001833F0)
     u32 f0C;                // 0x0C: class 0x02's slot 45 tests it of the other object (func_0012B2E8)
     u8 pad10[0x14 - 0x10];
@@ -96,7 +96,7 @@ struct BaseObject {
     BaseObject* prev;              // 0x20
     BaseObject* nextById;          // 0x24: the next in its bucket of World::f1884 (func_0015A4F0 walks them)
     Callback01* callbacks;  // 0x28: slot 14 calls each
-    void* f2C;              // 0x2C: looked up by func_001837E0, copied through func_0011A5B0
+    void* scriptScope;      // 0x2C: looked up by func_001837E0, copied through func_0011A5B0
     Alias01* alias;         // 0x30
 };
 

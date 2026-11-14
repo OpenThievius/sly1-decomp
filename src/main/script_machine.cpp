@@ -33,21 +33,21 @@ struct BaseObject;
 // A pooled entry the collector marks: a scope (a count and that many values from 0x04, its
 // chain of keyed values at 0x14) or a value node (a tag, a payload, the next node at 0x08).
 struct MarkEntry {
-    s32 f0;                 // 0x00
-    MarkEntry* f4;          // 0x04
-    MarkEntry* f8;          // 0x08
-    MarkEntry* fC;          // 0x0C
+    s32 tag;                // 0x00
+    MarkEntry* payload;     // 0x04
+    MarkEntry* next;        // 0x08
+    MarkEntry* nextKeyed;   // 0x0C
     MarkEntry* f10;         // 0x10
-    MarkEntry* f14;         // 0x14
+    MarkEntry* keyedChain;  // 0x14
 };
 
 // A tag 0x1F payload as the collector reads it: a scope, a chain of nodes and a third entry.
 struct MarkRecord {
-    MarkEntry* f0;          // 0x00
-    MarkEntry* f4;          // 0x04
+    MarkEntry* scope;       // 0x00
+    MarkEntry* nodes;       // 0x04
     s32 f8;                 // 0x08
     s32 fC;                 // 0x0C
-    MarkEntry* f10;         // 0x10
+    MarkEntry* thirdEntry;  // 0x10
 };
 
 // D_00259F38: the collector's roots and its three mark stacks. Each is a count followed by its
@@ -2826,12 +2826,12 @@ ScriptValue* ScheduleScriptCall(ScriptValue* ret, s32 count, ScriptValue* args, 
             } while (n);
         }
     }
-    LookupScriptVariable((ScriptScope*)g_currentWorld->f2C, g_currentWorld->f1EF8, 0, &r);
+    LookupScriptVariable((ScriptScope*)g_currentWorld->scriptScope, g_currentWorld->scopeVariableId, 0, &r);
     if (r.tag == 0x1E) {
         a->next = r.node;
     }
     SetScriptValueChain(&r, a);
-    AssignScriptVariable(&t, (ScriptScope*)g_currentWorld->f2C, g_currentWorld->f1EF8, &r);
+    AssignScriptVariable(&t, (ScriptScope*)g_currentWorld->scriptScope, g_currentWorld->scopeVariableId, &r);
     DestroyScriptValue(&t, 2);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&r, 2);
@@ -3229,9 +3229,9 @@ ScriptValue* GetScriptPointAheadOfCamera(ScriptValue* ret, s32 count, ScriptValu
     InitScriptValue(&obj);
     f32* p = AcquireVectorAPayload();
     Camera* c = g_camera;
-    Vu0::Q(k) = Vu0::FromFloatAt(c->f1E4);
+    Vu0::Q(k) = Vu0::FromFloatAt(c->nearDistance);
     Vu0::Q(t) = Vu0::MulX(Vu0::Q(c->f80), Vu0::Q(k));
-    Vu0::Q(*(Vec02*)p) = Vu0::Add(Vu0::Q(c->f40), Vu0::Q(t));
+    Vu0::Q(*(Vec02*)p) = Vu0::Add(Vu0::Q(c->position), Vu0::Q(t));
     SetScriptValueVectorA(&obj, p);
     CopyConstructScriptValue(ret, &obj);
     DestroyScriptValue(&obj, 2);
@@ -4217,36 +4217,36 @@ void DrainMarkStacks(MarkStacks* self)
     for (;;) {
         group = PopMarkObject(self);
         if (group) {
-            MarkEntry* link = group->f14;
+            MarkEntry* link = group->keyedChain;
             if (link) {
                 do {
                     MarkPoolEntryUsed(link);
-                    MarkEntry* ev = (MarkEntry*)&link->f4;
-                    switch (ev->f0) {
+                    MarkEntry* ev = (MarkEntry*)&link->payload;
+                    switch (ev->tag) {
                     case 0x1E:
-                        obj = ev->f4;
+                        obj = ev->payload;
                         if (IsPoolEntryUnmarked(obj)) {
                             MarkPoolEntryUsed(obj);
                             PushMarkChain(self, obj);
                         }
                         break;
                     case 0x1F:
-                        other = ev->f4;
+                        other = ev->payload;
                         if (IsPoolEntryUnmarked(other)) {
                             MarkPoolEntryUsed(other);
                             PushMarkRecord(self, (MarkRecord*)other);
                         }
                         break;
                     case 0x21:
-                        MarkPoolEntryUsed(ev->f4);
+                        MarkPoolEntryUsed(ev->payload);
                         break;
                     }
-                    link = link->fC;
+                    link = link->nextKeyed;
                 } while (link);
             }
-            if (group->f0 > 0) {
+            if (group->tag > 0) {
                 s32 i = 0;
-                MarkEntry** p = &group->f4;
+                MarkEntry** p = &group->payload;
                 do {
                     obj = *p;
                     if (IsPoolEntryUnmarked(obj)) {
@@ -4255,25 +4255,25 @@ void DrainMarkStacks(MarkStacks* self)
                     }
                     i++;
                     p++;
-                } while (i < group->f0);
+                } while (i < group->tag);
             }
             continue;
         }
         MarkRecord* b = PopMarkRecord(self);
         if (b) {
-            obj = b->f4;
+            obj = b->nodes;
             if (obj) {
                 do {
                     MarkPoolEntryUsed(obj);
-                    obj = obj->f8;
+                    obj = obj->next;
                 } while (obj);
             }
-            obj = b->f10;
+            obj = b->thirdEntry;
             if (IsPoolEntryUnmarked(obj)) {
                 MarkPoolEntryUsed(obj);
                 PushMarkChain(self, obj);
             }
-            group = b->f0;
+            group = b->scope;
             if (IsPoolEntryUnmarked(group)) {
                 MarkPoolEntryUsed(group);
                 PushMarkObject(self, group);
@@ -4283,26 +4283,26 @@ void DrainMarkStacks(MarkStacks* self)
         obj = PopMarkChain(self);
         if (!obj)
             return;
-        switch (obj->f0) {
+        switch (obj->tag) {
         case 0x1E:
-            other = obj->f4;
+            other = obj->payload;
             if (IsPoolEntryUnmarked(other)) {
                 MarkPoolEntryUsed(other);
                 PushMarkChain(self, other);
             }
             break;
         case 0x1F:
-            other = obj->f4;
+            other = obj->payload;
             if (IsPoolEntryUnmarked(other)) {
                 MarkPoolEntryUsed(other);
                 PushMarkRecord(self, (MarkRecord*)other);
             }
             break;
         case 0x21:
-            MarkPoolEntryUsed(obj->f4);
+            MarkPoolEntryUsed(obj->payload);
             break;
         }
-        obj = obj->f8;
+        obj = obj->next;
         if (obj) {
             if (IsPoolEntryUnmarked(obj)) {
                 MarkPoolEntryUsed(obj);
@@ -4359,7 +4359,7 @@ void CollectScriptPools(MarkStacks* w) {
             n = n->next;
         }
     }
-    for (QueuedCall* it = (QueuedCall*)g_currentWorld->f1EC8; it; it = it->next) {
+    for (QueuedCall* it = (QueuedCall*)g_currentWorld->queuedCallHead; it; it = it->next) {
         if ((void*)it->fn == (void*)RunScriptEventHandler) {
             MarkEntry* e = (MarkEntry*)it->p0C;
             if (e && IsPoolEntryUnmarked(e)) {

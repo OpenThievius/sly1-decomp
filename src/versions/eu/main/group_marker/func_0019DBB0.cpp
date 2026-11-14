@@ -17,11 +17,11 @@ void PrepareUnzoomedGroup(void)
 
     {
         Camera* o = g_camera;
-        f32 keep20 = o->f1C4;
-        f32 keep21 = o->f1C8;
+        f32 keep20 = o->zoom;
+        f32 keep21 = o->zoomGoal;
         SnapCameraZoom(o, 0.975f);
         WriteCameraMatricesPacket(g_camera);
         SnapCameraZoom(g_camera, keep20);
-        g_camera->f1C8 = keep21;
+        g_camera->zoomGoal = keep21;
     }
 }

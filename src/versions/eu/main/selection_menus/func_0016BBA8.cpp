@@ -6,7 +6,7 @@ void HandleGridSelectorInput(Ctx_eu_16BBA8* ctx, PadRecord* o)
     s32 s1;
     s32 r2;
 
-    if ((o->flags & 0x9B0) != 0 || (o->f14 == 1 && 5.0f <= g_gameTime[0])) {
+    if ((o->flags & 0x9B0) != 0 || (o->connectionMode == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(o, 0x9B0);
         PopStackElement((ElementStack*)g_elementStack);
         return;
@@ -25,8 +25,8 @@ void HandleGridSelectorInput(Ctx_eu_16BBA8* ctx, PadRecord* o)
     if (s1 == 0 && r2 == 0) {
         return;
     }
-    o->f30 = g_gameClock[4] + o->f34;
-    o->f38 = g_gameClock[4] + o->f3C;
+    o->nextStepTimeX = g_gameClock[4] + o->stepDelayX;
+    o->nextStepTimeY = g_gameClock[4] + o->stepDelayY;
 
     {
         s32 n = ctx->f570;

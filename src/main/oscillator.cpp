@@ -109,12 +109,12 @@ void* GetOscillatorCurrentEntry(Oscillator* obj, s32 value, s32 flag);
 
 
 struct OscillatorAxisEntry {
-    s32 f0;
-    s32 f4;
+    s32 kind;
+    s32 frame;
     u8 pad8[0x8];
     Quad16 q10;
     u8 pad20[0x40];
-    s32 f60;
+    s32 row;
 };
 
 void InitObject(BaseObject* self);
@@ -128,9 +128,9 @@ struct OscillatorPlaneEntry {
     Quad16 q10;
     Quad16 q20;
     u8 pad1[0x08];
-    f32 f38;
+    f32 secondBlendScale;
     u8 pad2[0x4C];
-    f32 f88;
+    f32 firstBlendScale;
 };
 
 void CopyObjectData(BaseObject* self, BaseObject* src);
@@ -209,7 +209,7 @@ void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 
 // The offer func_001F57E0 fills: the tracker's word, the tracker, and the launch to call.
-struct TrackedNodeOffer { s32 f0; s32 f4; Rec36* f8; void* fC; };
+struct TrackedNodeOffer { s32 f0; s32 f4; Rec36* tracker; void* launch; };
 
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
@@ -220,7 +220,7 @@ extern u8 D_00247AD0[];
 // The word at 0x78 of the current level's record (G27C230): bit 0 picks the level's own fade.
 struct LevelRecordWord78 {
     u8 pad00[0x78];
-    s32 f78;
+    s32 flags;
 };
 
 // What StartObjectFade (func_001F0428) fades: the entry LookupEntryById gives for a level.
@@ -242,7 +242,7 @@ struct TargetLaunchFrame {
     s32 b[4];           // 0x20
     s32 c[4];           // 0x30
     u8 pad40[0x20];
-    f32 f60;            // 0x60
+    f32 distance;       // 0x60: the distance of the best target candidate
 };
 
 
@@ -308,8 +308,8 @@ struct AddGathererContact {
                 Slot36* s = &self->slots[c];
                 self->count = c + 1;
                 s->obj = (Collider*)p;
-                s->q10 = *a;
-                s->q20 = *b;
+                s->point = *a;
+                s->normal = *b;
             }
         }
     }
@@ -365,9 +365,9 @@ struct OscPart {
     struct OscMesh* mesh;   // 0x04
     u8 pad08[0x20 - 0x08];
     s32 mode;               // 0x20
-    f32 f24;                // 0x24
+    f32 endDistance;        // 0x24: the distance at which the vertex weight is endWeight
     f32 f28;                // 0x28
-    f32 f2C;                // 0x2C
+    f32 startDistance;      // 0x2C: the distance at which the vertex weight is startWeight
     f32 f30;                // 0x30
     u8 pad34[0x40 - 0x34];
     Vec02 m40[4];           // 0x40
@@ -381,7 +381,7 @@ struct OscVertexRange { u16 start; u16 end; u8 pad04[0x10 - 0x04]; u16 stride; }
 struct OscOut { f32 f[4]; };
 struct OscVertexData { Vec02* verts; u8 pad04[0x24 - 0x04]; OscOut* outs[1]; };
 struct OscBlock { u8 pad00[0x1C]; OscVertexRange* range; OscVertexData* data; u8 pad24[0x50 - 0x24]; };
-struct OscMesh { u8 pad00[0x58]; s32 blockCount; OscBlock* blocks; u8 pad60[0x68 - 0x60]; void* f68; };
+struct OscMesh { u8 pad00[0x58]; s32 blockCount; OscBlock* blocks; u8 pad60[0x68 - 0x60]; void* matrix; };
 // An oscillator entry as func_001F2840 reads it (0xD0 bytes from +0x50).
 struct OscEntry { s32 mode; s32 out; u8 pad08[0x10 - 0x08]; Vec02 axis; u8 pad20[0x60 - 0x20]; s32 index; f32 rate; u8 pad68[0xD0 - 0x68]; };
 struct Mat4R { Vec02 r[4]; };
@@ -412,18 +412,18 @@ void RefreshOscillatorFrames(Oscillator* self)
             m = *(Mat4R*)part->m40;
             range.lo = MinB(part->f28, part->f30);
             range.hi = MaxB(part->f28, part->f30);
-            poly.y = (part->f28 - part->f30) / (part->f24 - part->f2C);
-            poly.x = part->f28 - poly.y * part->f24;
+            poly.y = (part->f28 - part->f30) / (part->endDistance - part->startDistance);
+            poly.x = part->f28 - poly.y * part->endDistance;
             poly.z = 0.0f;
             switch (part->mode) {
             case 4:
-                dir = Vu0::MulX(Vu0::Q(g_unitXVector), Vu0::Scalar((part->f24 + part->f2C) * 0.5f));
+                dir = Vu0::MulX(Vu0::Q(g_unitXVector), Vu0::Scalar((part->endDistance + part->startDistance) * 0.5f));
                 break;
             case 5:
-                dir = Vu0::MulX(Vu0::Q(g_unitYVector), Vu0::Scalar((part->f24 + part->f2C) * 0.5f));
+                dir = Vu0::MulX(Vu0::Q(g_unitYVector), Vu0::Scalar((part->endDistance + part->startDistance) * 0.5f));
                 break;
             case 6:
-                dir = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar((part->f24 + part->f2C) * 0.5f));
+                dir = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar((part->endDistance + part->startDistance) * 0.5f));
                 break;
             default:
                 dir = Vu0::Q(D_00248D30);
@@ -432,8 +432,8 @@ void RefreshOscillatorFrames(Oscillator* self)
             Mat4R inv;
             InvertMatrix4x4(&m, &inv);
             dir = Vu0::TransformRows(Vu0::Q(inv.r[0]), Vu0::Q(inv.r[1]), Vu0::Q(inv.r[2]), Vu0::Q(inv.r[3]), dir, 1.0f);
-            if (mesh->f68 != 0) {
-                m = MultiplyMatrices(*(Mat4R*)part->m40, *(Mat4R*)mesh->f68);
+            if (mesh->matrix != 0) {
+                m = MultiplyMatrices(*(Mat4R*)part->m40, *(Mat4R*)mesh->matrix);
             }
         }
         for (s32 i = 0; i < mesh->blockCount; i++) {
@@ -488,8 +488,8 @@ void RefreshOscillatorFrames(Oscillator* self)
             }
             Mat4R mat;
             BuildMatrixFromRotationAndTranslation(&obj->v140, &obj->m110, (Mat4A*)&mat);
-            if (mesh->f68 != 0) {
-                mat = MultiplyMatrices(mat, *(Mat4R*)mesh->f68);
+            if (mesh->matrix != 0) {
+                mat = MultiplyMatrices(mat, *(Mat4R*)mesh->matrix);
             }
             u128 pivot = Vu0::Add(Vu0::Q(obj->v140), Vu0::RotateUntied(obj->m110, dir));
             for (s32 j = 0; j < self->entryCount; j++) {
@@ -538,8 +538,8 @@ struct OscillatorSweepEntry {
     Vec02 v40;              // 0x40
     u8 pad50[0x64 - 0x50];
     f32 scale;              // 0x64
-    f32 f68;                // 0x68
-    f32 f6C;                // 0x6C
+    f32 frequency;          // 0x68: how fast the phase advances with the game clock
+    f32 phaseOffset;        // 0x6C: the phase added to the clock term
     u8 pad70[0xD0 - 0x70];
 };
 
@@ -570,7 +570,7 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02*
         if (period < time) {
             continue;
         }
-        f32 phase = Vu0::ToFloatMoved(Vu0::Dot(base, Vu0::Vec::Of(e->v10))) * scale + g_gameClock.time * e->f68 + e->f6C;
+        f32 phase = Vu0::ToFloatMoved(Vu0::Dot(base, Vu0::Vec::Of(e->v10))) * scale + g_gameClock.time * e->frequency + e->phaseOffset;
         f32 sn, cs;
         ComputeSinCos(&sn, &cs, phase * 6.2831855f);
         u128 c = Vu0::FromFloatAt(cs);
@@ -680,8 +680,8 @@ struct OscillatorEntry {
     Vec02 v50;              // 0x50
     s32 row;                // 0x60: kind 0: the first of the two rows it writes
     f32 scale;              // 0x64
-    f32 f68;                // 0x68
-    f32 f6C;                // 0x6C
+    f32 frequency;          // 0x68: how fast the phase advances with the game clock
+    f32 phaseOffset;        // 0x6C: the phase added to the clock term
     u8 pad70[0x80 - 0x70];
     u8 blend80[0xD0 - 0x80]; // 0x80: kind 1: a NoiseBlend (the first angle)
 };
@@ -702,7 +702,7 @@ void EvaluateOscillator(Oscillator* self)
         OscillatorFrame* fb = &self->framesB[e->frame];
         switch (e->kind) {
         case 0: {
-            f32 phase = g_gameClock.time * e->f68 + e->f6C;
+            f32 phase = g_gameClock.time * e->frequency + e->phaseOffset;
             f32 sn, cs;
             ComputeSinCos(&sn, &cs, phase * 6.2831855f);
             u128 c = Vu0::FromFloatAt(cs);
@@ -763,19 +763,19 @@ void AddOscillatorXEntry(Oscillator* o)
     off = n * 0xD0;
     off += 0x50;
     node = (OscillatorAxisEntry*)((u8*)o + off);
-    node->f0 = 0;
+    node->kind = 0;
     node->q10 = *(Quad16*)&g_unitXVector;
     if (o->pendingId >= 0) {
-        node->f4 = o->pendingId;
+        node->frame = o->pendingId;
         o->pendingId = -1;
-        node->f60 = 2;
+        node->row = 2;
     } else {
         s32 v = o->nextId;
-        node->f4 = v;
+        node->frame = v;
         v++;
         o->nextId = v;
-        o->pendingId = node->f4;
-        node->f60 = 0;
+        o->pendingId = node->frame;
+        node->row = 0;
     }
 }
 
@@ -791,8 +791,8 @@ void AddOscillatorYZEntry(Oscillator* self)
     e->a = 1;
     e->q10 = *(Quad16*)&g_unitYVector;
     e->q20 = *(Quad16*)&g_unitZVector;
-    e->f38 = 0.5f;
-    e->f88 = 0.5f;
+    e->secondBlendScale = 0.5f;
+    e->firstBlendScale = 0.5f;
     self->nextId = self->nextId + 1;
 }
 
@@ -1091,7 +1091,7 @@ ObjectSubGroup* FindActiveObjectSubGroup(void)
     n = (lim < n) ? cap : n;
     for (s32 i = 0; i < n; i++) {
         ObjectSubGroup* o = (ObjectSubGroup*)arr[i];
-        if (o->f2D0 != 0) {
+        if (o->selected != 0) {
             found = o;
             break;
         }
@@ -1106,21 +1106,21 @@ void BeginLevelExit(s32 flag, s32 n)
     ObjectSubGroup* v;
     LevelFadeEntry* k;
     FadeRequest args;
-    if (ctx->f19D8 == 5) {
+    if (ctx->levelIndex == 5) {
         goto lm1;
     }
-    if (ctx->f19DC != 0) {
+    if (ctx->entryIndex != 0) {
         goto l4490;
     }
     o = (LevelRecordWord78*)g_currentLevelRecord;
-    if ((o->f78 & 1) != 0) {
+    if ((o->flags & 1) != 0) {
         goto l4470;
     }
 lm1:
     StartObjectFade((IdentityKey*)D_00247AD0, -1, n);
     return;
 l4470:
-    k = LookupEntryById((ctx->f19D8 << 8) | 1);
+    k = LookupEntryById((ctx->levelIndex << 8) | 1);
     StartObjectFade((IdentityKey*)k, 0x1BD, n);
     return;
 l4490:
@@ -1152,8 +1152,8 @@ void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
     if (f != 0) {
         f(self);
     }
-    self->f2E4 = 0;
-    ReadMeshTables(s3, &self->f2EC, &self->f2F0, &self->f2F4, &self->f2F8);
+    self->state = 0;
+    ReadMeshTables(s3, &self->f2EC, &self->f2F0, &self->f2F4, &self->faceTree);
     s32 i = 0;
     ReadPropertyRecords(self, s3);
     s32 n = ReadBufferedS16((BufferedStream*)s3);
@@ -1196,17 +1196,17 @@ void StartObjectSubGroup(ObjectSubGroup* self)
 
 void SetObjectSubGroupState(ObjectSubGroup* self, s32 state)
 {
-    if (state != self->f2E4) {
-        if (self->f2E4 == 4 && state != 5)
+    if (state != self->state) {
+        if (self->state == 4 && state != 5)
             D_0026F138.vt->m15(&D_0026F138);
         if (state == 5) {
             self->flags = (self->flags & ~0x30000000000ULL) | 0x10000000000ULL;
             AcquirePadSelectFlag(self->world);
-            self->f2E4 = state;
+            self->state = state;
         } else {
-            self->f2E4 = state;
+            self->state = state;
         }
-        self->f2E8 = g_gameTime;
+        self->stateStartTime = g_gameTime;
     }
 }
 
@@ -1221,7 +1221,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
     key = (BaseObject*)GetActiveSwitchedCollider();
     if (g_timerCaption.state == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
-            || (g_saveData->f19DC == 0 && (u8)GetEntryIdByKey(self->f2FC) == 1))) {
+            || (g_saveData->entryIndex == 0 && (u8)GetEntryIdByKey(self->levelEntry) == 1))) {
         FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);
         goto tail;
@@ -1229,8 +1229,8 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
     if (g_timerCaption.state >= 2) {
         SetBestTimeState(&g_timerCaption, 4);
     }
-    if (self->f2D8 != 0) {
-        BeginLevelExit(1, self->f318);
+    if (self->exitsLevel != 0) {
+        BeginLevelExit(1, self->exitTarget);
         SetObjectSubGroupState(self, 0);
         return;
     }
@@ -1248,12 +1248,12 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
         found = next;
     }
     if (found == 0) {
-        if (self->f324 > 0.0f) {
-            self->f31C = ((f32*)&g_gameTime)[0] + self->f324;
+        if (self->fadeDelay > 0.0f) {
+            self->fadeTime = ((f32*)&g_gameTime)[0] + self->fadeDelay;
         } else if (self->count > 0) {
-            self->f31C = ((f32*)&g_gameTime)[0] + ((Animation*)self->items[0])->length;
+            self->fadeTime = ((f32*)&g_gameTime)[0] + ((Animation*)self->items[0])->length;
         } else {
-            self->f31C = ((f32*)&g_gameTime)[0];
+            self->fadeTime = ((f32*)&g_gameTime)[0];
         }
     }
 tail:
@@ -1266,7 +1266,7 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
     s32 ok = 0;
     m.kind = 1;
     switch (self->f304) {
-    case 0: ok = GetLevelEntryWord(GetEntryIdByKey(self->f2FC)) >> 1; goto fin;
+    case 0: ok = GetLevelEntryWord(GetEntryIdByKey(self->levelEntry)) >> 1; goto fin;
     case 1: ok = g_currentEntry->flags >> 1;
     fin: ok &= 1;
     }
@@ -1274,12 +1274,12 @@ void StartObjectSubGroupFade(ObjectSubGroup* self)
         m.text = (u8*)self->f308;
         m.f08 = self->f30C;
     } else {
-        m.text = (u8*)self->f2FC;
+        m.text = (u8*)self->levelEntry;
         m.f08 = self->f300;
     }
     m.f0C = -1;
     m.flags = 0;
-    StartScreenFade(&g_screenFade, &m, self->f318);
+    StartScreenFade(&g_screenFade, &m, self->exitTarget);
 }
 
 extern s32 D_0026FA64;
@@ -1302,14 +1302,14 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
     Vec02 local;
     Vec02 radius;
     UpdatePlacedObject(self, dt);
-    switch (self->f2E4) {
+    switch (self->state) {
     case 5: {
-        f32 t = self->f31C;
+        f32 t = self->fadeTime;
         f32 zero = 0.0f;
         if (zero < t) {
             if (t < g_gameClock.time) {
                 StartObjectSubGroupFade(self);
-                self->f31C = zero;
+                self->fadeTime = zero;
             }
         }
         return;
@@ -1321,7 +1321,7 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
                 D_0026F138.vt->m15(&D_0026F138);
             } else {
                 SetScreenElementHoldTime(&D_0026F138, 0.0f);
-                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->f2FC));
+                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->levelEntry));
                 D_0026F138.announce = 0;
                 D_0026F138.vt->m14(&D_0026F138);
             }
@@ -1338,21 +1338,21 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
         return;
     }
     TransformPointBetweenFrames(0, self, &player->v140, &local);
-    s32 inside = IsPointInsideFaceTree((TreeNode03*)self->f2F8, (FacePoint*)&local);
+    s32 inside = IsPointInsideFaceTree((TreeNode03*)self->faceTree, (FacePoint*)&local);
     s32 near = 0;
-    if (inside == 0 && self->f2DC != 0 && __builtin_fabsf(local.z) < 300.0f) {
+    if (inside == 0 && self->nearCheck != 0 && __builtin_fabsf(local.z) < 300.0f) {
         if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(local), Vu0::Q(local)))) <= 1000.0f) {
             near = 1;
         }
     }
-    switch (self->f2E4) {
+    switch (self->state) {
     case 3:
         if (inside != 0) {
             StartObjectSubGroupFinish(self);
         } else if (near != 0) {
             if (D_0026F388 == 0) {
                 Camera* c = g_camera;
-                u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->f40));
+                u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->position));
                 u128 ones = Vu0::Ones();
                 Vu0::Q(radius) = Vu0::FromFloat(100.0f);
                 if ((Vu0::PlaneSigns(Vu0::Q(c->planes[0]), Vu0::Q(c->planes[1]), Vu0::Q(c->planes[2]), d, ones, Vu0::Q(radius)) ^ 0xF0) == 0) {
@@ -1371,7 +1371,7 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
     case 1:
         if (inside != 0) {
             SetObjectSubGroupState(self, 0);
-        } else if (self->f320 < g_gameClock.time - self->f2E8) {
+        } else if (self->nearWaitTime < g_gameClock.time - self->stateStartTime) {
             SetObjectSubGroupState(self, 3);
         }
         break;
@@ -1410,7 +1410,7 @@ void InitContactTracker(ContactTracker* self)
 {
     InitCollider(self);
     InitTrackedNodes(&self->rec, self);
-    self->f4E0 = 1;
+    self->partMode = 1;
     self->flags538 = (self->flags538 & ~0xF000000000ULL) | 0x2000000000ULL;
 }
 
@@ -1430,7 +1430,7 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
                 ContactEnd03* far = &it->end[1 - side];
                 Collider* o = far->part;
                 if (IsObjectOfKind(o, 0x41)) {
-                    p = (ObjectGatherer*)o; AddGathererContact::Of(self, p, &far->v10, &it->v80);
+                    p = (ObjectGatherer*)o; AddGathererContact::Of(self, p, &far->v10, &it->normal);
                 }
             }
         }
@@ -1498,7 +1498,7 @@ void UpdateC37(C37* self, f32 dt)
     if (target == 0) {
         return;
     }
-    if (self->f4E0 != 1 && self->f4E0 != 4) {
+    if (self->partMode != 1 && self->partMode != 4) {
         return;
     }
     if ((*(TargetHitFn*)((u8*)target->desc + 0x13C))(target, self->rec.f04) != 0) {
@@ -1609,7 +1609,7 @@ void FillTrackedNodes(Rec36* self)
 void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
 {
     TargetLaunchFrame f;
-    ChooseBestTargetCandidate(self, ctx->s94, (BaseObject**)((u8*)ctx + 0x98), (TargetHit*)f.a, &f.f60);
+    ChooseBestTargetCandidate(self, ctx->s94, (BaseObject**)((u8*)ctx + 0x98), (TargetHit*)f.a, &f.distance);
     if (ctx->cnt != 0) {
         ComputeTargetArc(self, (TargetArcSource*)f.a, 0.0f, 0, (Vec02*)f.b, 0);
         self->desc02()->m1D(self, (Vec02*)f.b);
@@ -1619,7 +1619,7 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
         self->desc02()->m1E(self, (Mat02*)f.c);
         SetPlayerState(self, 2, 2);
     } else {
-        LaunchPlayerAtTarget(self, (TargetHit*)f.a, f.f60);
+        LaunchPlayerAtTarget(self, (TargetHit*)f.a, f.distance);
     }
 }
 
@@ -1627,9 +1627,9 @@ void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out)
 {
     GetActiveSwitchedCollider();
     s32 v = self->f04;
-    out->f8 = self;
+    out->tracker = self;
     out->f0 = v;
-    out->fC = (void*)LaunchPlayerAtTrackedNode;
+    out->launch = (void*)LaunchPlayerAtTrackedNode;
     TriggerScriptEvent(self->owner, 2, 0, 0);
 }
 

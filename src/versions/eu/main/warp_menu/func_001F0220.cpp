@@ -90,7 +90,7 @@ L038C:
             }
         }
         if (D_eu_00274868.f570 != 0) {
-            ((WarpPage*)D_eu_00274868.f570)->f2E0 = 3;
+            ((WarpPage*)D_eu_00274868.f570)->openKind = 3;
             SetWarpPageMode((WarpPage*)D_eu_00274868.f570, 4);
             self->mode = mode;
             goto L0404;

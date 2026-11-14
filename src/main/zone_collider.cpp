@@ -36,17 +36,17 @@ void InitMaskedCollider(MaskedCollider* self)
 {
     MaskedCollider* o = self;
     InitCollider(self);
-    o->f628 = 0.8f;
-    o->f62C = 1.2f;
+    o->scaleMin = 0.8f;
+    o->scaleMax = 1.2f;
     o->f68C = 1;
     o->f624 = 1.0f;
-    o->f2B4 = 16;
+    o->tintByte4 = 16;
     o->tint[3] = 16;
     o->tint[2] = 16;
     o->tint[1] = 16;
     o->tint[0] = 16;
     o->id688 = TakeFlagTableIndex((FlagTable*)g_flagTable);
-    o->f614 = -1;
+    o->receiverKey = -1;
 }
 
 void LoadCollider(Collider* self, BufferedStream* in);
@@ -56,12 +56,12 @@ void ResolveAndStartObject(BaseObject* self);
 void LoadMaskedCollider(MaskedCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
-    if (self->f614 == -1) {
-        FindOrBuildMemberGroup((void**)&self->f618, self);
+    if (self->receiverKey == -1) {
+        FindOrBuildMemberGroup((void**)&self->receiver, self);
         return;
     }
-    BaseObject* v = (BaseObject*)FindFirstObjectById(self->world, 0x101, self->f614, self);
-    self->f618 = v;
+    BaseObject* v = (BaseObject*)FindFirstObjectById(self->world, 0x101, self->receiverKey, self);
+    self->receiver = v;
     if (v != 0) {
         ResolveAndStartObject(v);
     }
@@ -75,8 +75,8 @@ void CopyMaskedCollider(MaskedCollider* self, MaskedCollider* other)
     s32 saved = self->id688;
     CopyCollider(self, other);
     self->id688 = saved;
-    if (other->f6B4)
-        self->f6B4 = CopyToFrontMemory(0x24, other->f6B4);
+    if (other->soundParams)
+        self->soundParams = CopyToFrontMemory(0x24, other->soundParams);
 }
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -206,7 +206,7 @@ void* GetActiveSwitchedCollider(void);
 struct ContactEvent_0013D0B0 {
     PlacedObject* obj;      // 0x00
     u8 pad04[4];
-    f32 f08;                // 0x08
+    f32 strength;           // 0x08
     u32 flags;              // 0x0C
     u32 flags10;            // 0x10
     u8 pad14[0x20 - 0x14];
@@ -257,7 +257,7 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
         Vu0::Q(k) = Vu0::FromFloatAt(self->f624);
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(ev->v30), Vu0::Q(k));
         SetColliderAnchors(self, 0, 0, 0, 0);
-        ApplyColliderImpulseEvent(self, ev->f08, &ev->v20, &push);
+        ApplyColliderImpulseEvent(self, ev->strength, &ev->v20, &push);
     }
     if ((ev->flags & 0x10) == 0) {
         return 1;
@@ -296,9 +296,9 @@ extern u8 D_00248D30[];
 // The sound a released zone plays (the block at 0x6B4, func_0013DAF0).
 struct ZoneSound {
     s32 sound;              // 0x00
-    f32 f4;                 // 0x04
-    f32 f8;                 // 0x08
-    f32 fC;                 // 0x0C
+    f32 farRange;           // 0x04
+    f32 nearRange;          // 0x08
+    f32 volume;             // 0x0C
 };
 
 // Slot 72: the zone lets go, once. Each queued object it found is put back into the world
@@ -339,7 +339,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 f32 z = RandomFloatInRange(-self->spread, self->spread);
                 u128 push = Vu0::FromFloats(x, y, z);
                 Vu0::Set(v, push);
-                f32 s = RandomFloatInRange(self->f628, self->f62C);
+                f32 s = RandomFloatInRange(self->scaleMin, self->scaleMax);
                 Vu0::Set(v, Vu0::MulAddX(push, Vu0::Q(node->pos), Vu0::Scalar(s)));
                 node->desc02()->m20(node, &v);
                 x = RandomFloatInRange(-self->spin, self->spin);
@@ -391,10 +391,10 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 radius = MaxF(self->f2A4, self->radius3CC);
                 break;
             case 1:
-                radius = MaxF(self->f2A8, self->radius3D0);
+                radius = MaxF(self->boundRadius, self->radius3D0);
                 break;
             }
-            other = self->f618;
+            other = self->receiver;
             if (other != 0) {
                 release.kind = 9;
                 release.owner = self;
@@ -406,9 +406,9 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
             }
             TransformPointBetweenFrames(self, 0, &self->point6A0, &point);
             ScatterObjectsAtPoint((ScatterController*)g_scatterController, &point, self->f698, self->scatter6B0);
-            ZoneSound* sound = (ZoneSound*)self->f6B4;
+            ZoneSound* sound = (ZoneSound*)self->soundParams;
             if (sound != 0) {
-                StartSoundEffect(sound->sound, 0, 0, &self->v140, sound->f4, sound->f8, sound->fC, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(sound->sound, 0, 0, &self->v140, sound->farRange, sound->nearRange, sound->volume, 0.0f, 0.0f, 0, 0);
             } else {
                 StartSoundEffect(0x2A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
@@ -524,8 +524,8 @@ void AddMaskedColliderListEntry(MaskedCollider* obj, s32 value) { if ((u32)obj->
 
 void* GetMaskedColliderSoundParams(MaskedCollider* self)
 {
-    if (!self->f6B4) InitSoundParams((SoundRecord**)&self->f6B4);
-    return self->f6B4;
+    if (!self->soundParams) InitSoundParams((SoundRecord**)&self->soundParams);
+    return self->soundParams;
 }
 
 void* GetActiveSwitchedCollider(void);
@@ -695,7 +695,7 @@ void UpdateLatchedSwitchCollider(LatchedSwitchCollider* self, f32 dt)
             self->sel6D4 = 0;
             return;
         }
-        InitOwnerMessage((OwnerMessage*)local, self->f6D0, self);
+        InitOwnerMessage((OwnerMessage*)local, self->ownerMessageMode, self);
         SwitchedCollider* p = self->sel6D4;
         p->desc05()->m4C(p, local);
         self->sel6D4 = 0;
@@ -981,7 +981,7 @@ s32 TakeFlagTableIndex(FlagTable* p);
 void InitZoneRecord(Zone28* s)
 {
     s->id120 = TakeFlagTableIndex((FlagTable*)g_flagTable);
-    s->f140 = -1;
+    s->sequenceId = -1;
 }
 
 
@@ -1048,7 +1048,7 @@ void StartZoneRecord(Zone28* self)
         ResolveZoneObjects(target, p, self->owner);
         p++;
     } while (--n >= 0);
-    if (self->f11C != 0) {
+    if (self->persistent != 0) {
         if (TestFlagTableBit((FlagTable*)g_flagTable, self->id120)) {
             AppendQueuedCall((World*)target, (void*)DeferZoneRecordActivation, self, 0, 0);
         }
@@ -1207,27 +1207,27 @@ void RunZoneRecordEntries(Zone28* self, s32 mode, s32 p, s32 q)
                 other = 0;
             }
             if (p != 0 && obj->flag44 == 0) {
-                f32 t = self->f118;
+                f32 t = self->seekTime;
                 dir = 0;
                 if (t >= 0.0f) {
                     dir = 2;
                 }
                 FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, dir, 0, 0.0f, t);
-            } else if (self->f138 != 0) {
-                f32 t = self->f118;
+            } else if (self->reversed != 0) {
+                f32 t = self->seekTime;
                 dir = 0;
                 if (t < 0.0f) {
                     dir = 2;
                 }
                 FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, dir, 0, 0.0f, t);
             } else {
-                FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, 1, 0, 0.0f, self->f118);
+                FindOrCreateSeekedAnimationPlayer(obj, (BaseObject*)other, 1, 0, 0.0f, self->seekTime);
             }
         }
     }
     SetGatheredWalkerTargets(self->owner->world, self->count148, (ZoneTargetEntry*)self->table14C, self->owner, mode == 0);
-    if (self->f140 != -1 && q == 0) {
-        void* t = FindFirstObjectByIdMode4(self->owner->world, self->f140, self->owner);
+    if (self->sequenceId != -1 && q == 0) {
+        void* t = FindFirstObjectByIdMode4(self->owner->world, self->sequenceId, self->owner);
         if (mode != 0) {
             if (mode == 1) {
                 ResetStepSequence((StepSequence*)t);
@@ -1255,16 +1255,16 @@ void ActivateZoneRecord(Zone28* self, s32 p, s32 q)
     } else {
         TriggerScriptEvent(self->owner, 2, 0, 0);
     }
-    if (self->f134 == 0) {
+    if (self->silent == 0) {
         if (q == 0) {
             StartSoundEffect(kind_13EF50_2, 0, self->owner, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
     }
     RunZoneRecordEntries(self, 0, p, q);
-    if (self->f13C == 0) {
+    if (self->staysActive == 0) {
         SetZoneMode(self, 2);
     }
-    if (self->f11C != 0) {
+    if (self->persistent != 0) {
         SetFlagTableBit((FlagTable*)g_flagTable, self->id120);
     }
     self->owner->desc->m0E(self->owner, 0xC, self);
@@ -1304,7 +1304,7 @@ void* MoveMemory(void* end, void* begin, s32 bytes);
 
 void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 {
-    s32 n = self->f7B4;
+    s32 n = self->quadCount;
     s32 idx;
     if (MatchesObjectId((BaseObject*)a1, 0x200)) {
         idx = 0;
@@ -1317,7 +1317,7 @@ void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
         idx = n;
     }
     self->quads[idx] = *q;
-    self->f7B4++;
+    self->quadCount++;
 }
 
 // The 0x30-byte entry copied as three quadwords.
@@ -1404,7 +1404,7 @@ void StartTriggerZone(TriggerZone* self)
                 node->desc->m03(node);
             }
             if (IsObjectOfKind(node, 0x76)) {
-                self->id880 = (s32)node;
+                self->markerNode = (s32)node;
             }
             void* next = *(void**)frame.cursor;
             frame.cursor = (void*)((s32)next + frame.next_off);
@@ -1414,12 +1414,12 @@ void StartTriggerZone(TriggerZone* self)
     switch (state) {
     case 0: {
         s32 i;
-        for (i = 0; i < self->f7B4; i++) {
+        for (i = 0; i < self->quadCount; i++) {
             Vu0::Q(v) = Vu0::Sub(Vu0::Q(self->quads[i]), Vu0::Q(self->pos));
             ConstrainColliderVector(self, &self->v440, &v, &v, 0);
             Vu0::Q(self->quads[i]) = Vu0::Add(Vu0::Q(self->pos), Vu0::Q(v));
         }
-        u128 d = Vu0::Sub(Vu0::Q(self->quads[self->f7B4 - 1]), Vu0::Q(self->quads[0]));
+        u128 d = Vu0::Sub(Vu0::Q(self->quads[self->quadCount - 1]), Vu0::Q(self->quads[0]));
         Vu0::Q(self->v860) = d;
         Vu0::Q(self->v860) = Vu0::DivX(d, Vu0::Length(d));
         Vu0::Q(self->v870) = Vu0::MulX(Vu0::Q(self->v860), Vu0::Scalar(-1.0f));
@@ -1588,10 +1588,10 @@ void StepTriggerZone(TriggerZone* self, f32 t)
     StepCollider(self, t);
     switch (self->state) {
     case 0:
-        if (self->f7B4 != 0) {
+        if (self->quadCount != 0) {
             u8* p = (u8*)self + 0x7C0;
             if (self->zone.mode != 4) {
-                p += self->f7B0 << 4;
+                p += self->chosenIndex << 4;
             }
             SteerColliderTowardPosition(self, (Vec02*)p, (f32*)self->p20C, (Vec02*)D_00248D30, (f32*)self->p210, t);
         }
@@ -1600,7 +1600,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
         if (self->count7E0 != 0) {
             u8* p = (u8*)self + 0x7F0;
             if (self->zone.mode != 4) {
-                p += self->f7B0 * 0x30;
+                p += self->chosenIndex * 0x30;
             }
             SteerColliderTowardRotation(self, (Mat02*)p, (f32*)self->p214, (Vec02*)D_00248D30, (f32*)self->p218, t);
         }
@@ -1624,7 +1624,7 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     f32 gb;
     s32 i;
 
-    if (self->f7B4 == 0 && self->count7E0 == 0) {
+    if (self->quadCount == 0 && self->count7E0 == 0) {
         return;
     }
     if (self->contacts4B4 != 0) {
@@ -1632,7 +1632,7 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
         self->contacts4B4 = 0;
     }
     for (i = 0; i < 2; i++) {
-        if (i < self->f7B4) {
+        if (i < self->quadCount) {
             TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x7C0 + i * 16), &v[i]);
         }
         TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x860 + i * 16), &w[i]);
@@ -1654,12 +1654,12 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     f32 x = fa - ga;
     if (x < -1e-4f) {
         Contact03* c = (Contact03*)CreatePooledContact(x, self, 0, where, &w[0], 10, 0, 0, &self->contacts4B4);
-        c->f98 = 0.0f;
+        c->bounce = 0.0f;
     } else {
         x = fb - gb;
         if (x < -1e-4f) {
             Contact03* c = (Contact03*)CreatePooledContact(x, self, 0, where, &w[1], 10, 0, 0, &self->contacts4B4);
-            c->f98 = 0.0f;
+            c->bounce = 0.0f;
         }
     }
 }
@@ -1682,7 +1682,7 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
         u8* g = g_player;
         f32 t;
         if (g) {
-            if (*(s32*)(g + 0x2220) == 3 && *(s32*)(g + 0x2204) == self->id880) self->zone.stamp = g_gameTime;
+            if (*(s32*)(g + 0x2220) == 3 && *(s32*)(g + 0x2204) == self->markerNode) self->zone.stamp = g_gameTime;
         }
         t = self->zone.duration;
         if (0.0f <= t) {
@@ -1715,7 +1715,7 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
             u8* g = g_player;
             r = 0;
             if (g) {
-                if (*(s32*)(g + 0x2220) == 3) r = *(s32*)(g + 0x2204) == self->id880;
+                if (*(s32*)(g + 0x2220) == 3) r = *(s32*)(g + 0x2204) == self->markerNode;
             }
             break;
         }
@@ -1751,9 +1751,9 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
                 if (s0 == 0 && mode == 1) r = 0;
                 else if (s0 == 1 && !mode) r = 1;
             }
-            if (self->f7B0 != s0) {
+            if (self->chosenIndex != s0) {
                 ClearRootTries(self);
-                self->f7B0 = s0;
+                self->chosenIndex = s0;
             }
             break;
         }
@@ -1798,8 +1798,8 @@ void LoadZoneCollider(ZoneCollider* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
     CollectZoneChildren(&self->zone, self);
-    if (self->f790 != 0) {
-        self->zone.f13C = 1;
+    if (self->reportInside != 0) {
+        self->zone.staysActive = 1;
     }
 }
 
@@ -1822,7 +1822,7 @@ void StartZoneCollider(ZoneCollider* self)
         }
     }
     if (self->countIds == 0) {
-        self->f5BC = 1;
+        self->testsActiveCollider = 1;
     }
 }
 
@@ -1870,7 +1870,7 @@ void UpdateZoneCollider(ZoneCollider* self, f32 dt)
     switch (self->zone.mode) {
     case 2:
         if (0.0f <= self->zone.duration && self->zone.duration < g_gameTime - self->zone.stamp) {
-            if (self->f78C != 0) {
+            if (self->timedModeNext != 0) {
                 SetZoneColliderMode(self, 1);
             } else {
                 SetZoneColliderMode(self, 0);
@@ -1886,7 +1886,7 @@ void UpdateZoneCollider(ZoneCollider* self, f32 dt)
     }
     s32 n = 0;
     s32 hit = 0;
-    if (self->f5BC != 0) {
+    if (self->testsActiveCollider != 0) {
         obj = (ZoneTarget*)GetActiveSwitchedCollider();
         if (obj != 0) {
             self->objs[0] = (s32)obj;
@@ -1913,7 +1913,7 @@ void UpdateZoneCollider(ZoneCollider* self, f32 dt)
         }
         if (inside) {
             hit = 1;
-            if (self->f790 == 0) {
+            if (self->reportInside == 0) {
                 break;
             }
             if (IsObjectAttached((BaseObject*)obj) != 0) {
@@ -1921,7 +1921,7 @@ void UpdateZoneCollider(ZoneCollider* self, f32 dt)
             }
         }
     }
-    if (self->f790 != 0) {
+    if (self->reportInside != 0) {
         s32 changed = 0;
         if (self->countInside != n) {
             changed = 1;

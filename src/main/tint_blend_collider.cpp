@@ -199,7 +199,7 @@ void SimulateRedirectChain(RedirectObject* self)
         return;
     }
     s32 first = self->f310 != 0 ? 1 : 2;
-    if (self->steps[first - 1].node->f1F0 != 0) {
+    if (self->steps[first - 1].node->orientationAttachment != 0) {
         self->targetIsSelf = 1;
         return;
     }
@@ -299,10 +299,10 @@ void SimulateRedirectChain(RedirectObject* self)
     for (i = first - 1; i < self->chainCount - 1; i++) {
         step = &self->steps[i];
         *(Vec*)&a = Vu0::Sub(Vec::Of(step[1].pos), Vec::Of(step->pos));
-        Rec2195_224* rec = step->node->f224;
+        Rec2195_224* rec = step->node->linkRecord;
         if (rec != 0) {
             M = MulRotationValue(MulRotationValue(MulRotationValue(m, *(Mat02*)((u8*)rec + 0x30)), step->node->m1A0),
-                                 *(Mat02*)step->node->f224);
+                                 *(Mat02*)step->node->linkRecord);
         } else {
             M = MulRotationValue(m, step->node->m1A0);
         }
@@ -343,9 +343,9 @@ void InitTintBlendCollider(TintBlendCollider* self)
     f = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     self->f638 = f;
     BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), f);
-    self->f720 = -1;
-    self->f72C = -10.0f;
-    (*(Quad16*)&self->v6F0) = D_00275740;
+    self->state = -1;
+    self->tintStartTime = -10.0f;
+    (*(Quad16*)&self->headingWeightCurve) = D_00275740;
 }
 
 // EXACT: literal 1 stores (no `one` local), `||` condition, D_00262E10 compared as a pointer
@@ -368,7 +368,7 @@ void StartTintBlendCollider(TintBlendCollider* self)
 
     StartTurningCollider(self);
     ResolveObjectLinks(self, 9, (ObjectLink*)&D_00275750);
-    ((LinkTargetFn)s->desc03()->m34)(self, s->f6DC, 1);
+    ((LinkTargetFn)s->desc03()->m34)(self, s->followedMesh, 1);
     AddMatrixAttachment((PlacedObject*)s->f748, 5, (Attachment**)&s->f74C);
     ((u8*)s->f74C)[0x10] = 1;
     ((u8*)s->f74C)[0x11] = 1;
@@ -376,7 +376,7 @@ void StartTintBlendCollider(TintBlendCollider* self)
     AddMatrixAttachment((PlacedObject*)s->f750, 5, (Attachment**)&s->f754);
     ((u8*)s->f754)[0x11] = 1;
     ((AttachedEffectFn)((AttachedEffect*)s->f750)->vtbl[47])(s->f750);
-    s->f75C = (StateWalker*)CreateStateWalker((StateGraph*)s->f758, self, -1, 1);
+    s->walker = (StateWalker*)CreateStateWalker((StateGraph*)s->walkerGraph, self, -1, 1);
     if (s->f73C == 0 || g_player == 0) {
         flag = 1;
     } else {
@@ -415,17 +415,17 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
     if (HasAnimationDrivenAttachment(self) != 0) {
         ResetTintBlendColliderOrientation(self);
     }
-    Contact03* head = ((Contact03*)self->f740);
+    Contact03* head = ((Contact03*)self->heldContacts);
     if (head != 0) {
         s1 = head;
         do {
             idx = (s1->end[0].body != self);
             s0 = s1->end[1 - idx].part;
-            while (s0 != 0 && s0->f4E0 == 0) {
+            while (s0 != 0 && s0->partMode == 0) {
                 s0 = (Collider*)s0->parent;
             }
             if (s0 != 0) {
-                v = s0->f4E0;
+                v = s0->partMode;
                 if (v == 1 || v == 4) {
                     InitOwnerMessage(&loc, 0, s0);
                     while (s0 != 0) {
@@ -439,11 +439,11 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
             }
             s1 = s1->next;
         } while (s1 != 0);
-        FreePooledContactChain(self->world, ((Contact03*)self->f740));
-        self->f740 = 0;
+        FreePooledContactChain(self->world, ((Contact03*)self->heldContacts));
+        self->heldContacts = 0;
     }
     {
-        f32 d = g_gameClock[1] - self->f72C;
+        f32 d = g_gameClock[1] - self->tintStartTime;
         f32 x = D_002757C0[0] + d * (D_002757C0[1] + d * D_002757C0[2]);
         f32 c0 = ((f32*)&g_unitRange)[0];
         f32 c1 = ((f32*)&g_unitRange)[1];
@@ -457,10 +457,10 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
     }
     SetScaledPositionSpring((PlacedObject*)self->f748, f20 * D_002757D0[0]);
     SetScaledRotationSpring((PlacedObject*)self->f748, f20 * D_002757D4);
-    if (self->f728 != 0 && self->f720 != 2) {
-        f32 e = g_gameClock[1] - self->f730;
+    if (self->tinted != 0 && self->state != 2) {
+        f32 e = g_gameClock[1] - self->tintFadeTime;
         if (2.0f < e) {
-            self->f728 = 0;
+            self->tinted = 0;
         }
     }
 }
@@ -474,8 +474,8 @@ void ResetTintBlendColliderOrientation(TintBlendCollider* self)
     f32 heading, pitch, speed;
     ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &heading, &pitch, &speed);
     self->f638 = heading;
-    BuildYawPitchMatrix(heading, pitch, &self->m660);
-    Vu0::Q(self->v640) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
+    BuildYawPitchMatrix(heading, pitch, &self->headingMatrix);
+    Vu0::Q(self->headingVelocity) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
 }
 
 void FinishSwitchedCollider(SwitchedCollider* self);
@@ -542,16 +542,16 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     if (HasAnimationDrivenAttachment(self) != 0) {
         return;
     }
-    GetStateWalkerCurrentKey(self->f75C, &cur);
-    GetStateWalkerTargetKey(self->f75C, &tgt);
-    if (self->f720 == 2) {
+    GetStateWalkerCurrentKey(self->walker, &cur);
+    GetStateWalkerTargetKey(self->walker, &tgt);
+    if (self->state == 2) {
         if (cur == 0x352) {
             ((TintSelfFn*)self->desc)[84](self);
-        } else if (self->f738 != 0 && 0.7f < pad->f7C) {
+        } else if (self->f738 != 0 && 0.7f < pad->secondStickMagnitude) {
             ((TintSelfFn*)self->desc)[84](self);
-            TeleportStateWalker((StateWalker*)self->f75C, 0x352);
-            GetStateWalkerCurrentKey(self->f75C, &cur);
-            GetStateWalkerTargetKey(self->f75C, &tgt);
+            TeleportStateWalker((StateWalker*)self->walker, 0x352);
+            GetStateWalkerCurrentKey(self->walker, &cur);
+            GetStateWalkerTargetKey(self->walker, &tgt);
         }
     }
     if ((u32)(cur - 0x352) >= 2) {
@@ -561,30 +561,30 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
         return;
     }
     HandleStepSequenceSkipButtons(self, pad);
-    if (IsTopCameraController(&g_camera->ctl454) == 0 && 0.7f < pad->f7C) {
+    if (IsTopCameraController(&g_camera->ctl454) == 0 && 0.7f < pad->secondStickMagnitude) {
         ComputeCameraRelativeStickHeading(g_camera, pad, 1, &self->f638);
         if (__builtin_fabsf(WrapAngle(self->f638 - ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x))) < 0.5f && g_movieChecksumFailed == 0) {
-            SetStateWalkerTarget((StateWalker*)self->f75C, 0x353);
+            SetStateWalkerTarget((StateWalker*)self->walker, 0x353);
         }
     } else {
-        SetStateWalkerTarget((StateWalker*)self->f75C, 0x352);
+        SetStateWalkerTarget((StateWalker*)self->walker, 0x352);
     }
     ComputeCameraRelativeStickHeading(g_camera, pad, 0, &stick);
-    f32 reach = ((ValueRange*)D_002757F0)->Clamp(Quadratic(&D_002757E0.x, pad->f48));
+    f32 reach = ((ValueRange*)D_002757F0)->Clamp(Quadratic(&D_002757E0.x, pad->stickMagnitude));
     ComputePolarOffset((Vec3*)&offset, stick + 3.14159274f, reach, 0.0f);
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
     Vu0::Q(axis) = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(axis));
-    f32 lean = g_unitRange.Limit(Quadratic(D_00275800, pad->f48));
+    f32 lean = g_unitRange.Limit(Quadratic(D_00275800, pad->stickMagnitude));
     BuildAxisAngleMatrix(&axis, &tilt, D_00275810[0] * lean);
     BuildAxisAngleMatrix(&g_unitZVector, &turn, self->f638);
     // Row 0 is stored after rows 1 and 2: the six stores of this block tie in sched1 and go in
     // the order they are written (docs/toolchain/sched1.md, "Argument moves held back").
     u128 p0 = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[0]));
-    Vu0::Q(self->m660.r[1]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[1]));
-    Vu0::Q(self->m660.r[2]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[2]));
-    Vu0::Q(self->m660.r[0]) = p0;
-    m = self->m660;
-    Vu0::Q(self->v640) = Vu0::RotateTransposed(self->m660, Vu0::Q(offset));
+    Vu0::Q(self->headingMatrix.r[1]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[1]));
+    Vu0::Q(self->headingMatrix.r[2]) = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[2]));
+    Vu0::Q(self->headingMatrix.r[0]) = p0;
+    m = self->headingMatrix;
+    Vu0::Q(self->headingVelocity) = Vu0::RotateTransposed(self->headingMatrix, Vu0::Q(offset));
     rot = m;
     // The second curve's amount, computed and never used: the call below takes the first
     // one's. Retail's data has the curve (D_00275820, the same shape as D_00275800) between
@@ -592,7 +592,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     // clamp's test ends the block here, which holds the call's arguments back behind the
     // stores, and its sums are scheduled among the rows' loads (docs/toolchain/sched1.md,
     // "Argument moves held back").
-    f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->f48));
+    f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->stickMagnitude));
     BuildAxisAngleMatrix(&axis, &m, D_00275830[0] * lean);
     PlacedObject* frame = ((TintPart*)self->f748)->frame;
     rot = MultiplyByTransposedMatrix3x3(frame->m110, RotatedRows(m, frame->m110));
@@ -605,7 +605,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     } else {
         k = 0.0f;
     }
-    f32 w = D_00275864 * g_unitRange.Clamp(Quadratic(D_00275850, pad->f48));
+    f32 w = D_00275864 * g_unitRange.Clamp(Quadratic(D_00275850, pad->stickMagnitude));
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
     Vec02 vel;
     Vu0::Q(vel) = Vu0::MulXSum(Vu0::Q(self->v150), Vu0::Scalar(k), Vu0::Q(axis), Vu0::Scalar(w));
@@ -622,7 +622,7 @@ void SetTintBlendColliderTracked(TintBlendCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p == 0) {
-        self->f728 = 0;
+        self->tinted = 0;
     }
 }
 
@@ -647,13 +647,13 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
     f32 t;
     if (!(self->flags & 0x100000000UL)) {
         *(u32*)&col = 0x800000A0;
-        if (self->f728 != 0) {
-            if (self->f720 != 2) {
-                t = (g_gameClock[1] - self->f730) * 0.5f;
+        if (self->tinted != 0) {
+            if (self->state != 2) {
+                t = (g_gameClock[1] - self->tintFadeTime) * 0.5f;
             } else {
                 t = 0.0f;
             }
-            f32 r = Cosine((g_gameClock[1] - self->f72C) * 10.0f);
+            f32 r = Cosine((g_gameClock[1] - self->tintStartTime) * 10.0f);
             f32 a = D_00275870.x + t * (D_00275870.y + t * D_00275870.z);
             a = UnitClamp::Of(a, ((f32*)&g_unitRange)[0], ((f32*)&g_unitRange)[1]);
             f32 b = D_00275880[0] + r * (D_00275880[1] + r * D_00275880[2]);
@@ -694,7 +694,7 @@ s32 IsPadSelectFlagHeld(World* self);
 
 s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
 {
-    if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
+    if (mode == 5 || self->state == 2 || self->state == 0 || self->state == 3 || self->tinted != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 
@@ -732,9 +732,9 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
         return 0;
     }
     if (HasSpareCount()) {
-        self->f728 = 1;
+        self->tinted = 1;
     }
-    self->f72C = g_gameClock[1];
+    self->tintStartTime = g_gameClock[1];
     ClearRootObjectStateBits(self->world, self, 7);
     if (req->mode == 0 && req->reply != 0) {
         req->reply(req->c, self);
@@ -779,7 +779,7 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
         InitOwnerMessage(&msg, 0, self);
         msg.reply = (void (*)(void*, void*))ContinueTintBlendColliderRequest;
         g_player->desc05()->m4C(g_player, &msg);
-        self->f4E0 = 3;
+        self->partMode = 3;
     }
     msg.mode = (s32)self;
     msg.owner = req->owner;
@@ -796,7 +796,7 @@ void CollectTintBlendColliderContacts(TintBlendCollider* self)
     CollectTurningColliderContacts(self);
 }
 
-struct TintBlendOutput { u8 pad0[0x94]; f32 f94; s32 f98; };
+struct TintBlendOutput { u8 pad0[0x94]; f32 contactValue; s32 f98; };
 
 typedef s32 (*TintBlendTestFn)(void* self, void* out);
 
@@ -808,7 +808,7 @@ void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
     TintBlendOutput* o = (TintBlendOutput*)out;
 
     if (((TintBlendTestFn)obj->desc06()->m56)(self, out)) {
-        f32 d = g_gameTime - obj->f72C;
+        f32 d = g_gameTime - obj->tintStartTime;
         f32 lo = ((f32*)&g_unitRange)[0];
         f32 hi = ((f32*)&g_unitRange)[1];
         f32 v = D_002758C0[0] + d * (D_002758C0[1] + d * D_002758C0[2]);
@@ -822,9 +822,9 @@ void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
         }
         f32 k = D_002758B0[0];
         o->f98 = 0;
-        o->f94 = r * k;
+        o->contactValue = r * k;
     } else {
-        o->f94 = 0.0f;
+        o->contactValue = 0.0f;
         o->f98 = 0;
     }
 }
@@ -839,13 +839,13 @@ void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, Mess
 
     if (code != 0x13) {
         if (code == 0x14) {
-            if (rec == (MessageBody*)self->f75C) {
+            if (rec == (MessageBody*)self->walker) {
                 GetStateWalkerCurrentKey((StateWalker*)rec, &loc[0]);
-                GetStateWalkerTargetKey(self->f75C, &loc[1]);
+                GetStateWalkerTargetKey(self->walker, &loc[1]);
             }
         }
     } else {
-        StateWalker* dev = self->f75C;
+        StateWalker* dev = self->walker;
         s32 key = rec->sourceId;
         if (dev != 0 && key == (s32)dev->player) {
             s32 kind = rec->code;
@@ -863,7 +863,7 @@ void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, Mess
 
 s32 GetTintBlendColliderRequestPhase(TintBlendCollider* self)
 {
-    return self->f728 != 0;
+    return self->tinted != 0;
 }
 
 extern f32 g_gameClock[];
@@ -876,40 +876,40 @@ void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
 {
-    s32 old = self->f720;
+    s32 old = self->state;
     if (mode != old) {
         switch (old) {
         case 2:
-            self->f730 = g_gameClock[1];
+            self->tintFadeTime = g_gameClock[1];
             break;
         case 3:
-            self->f4E0 = 0;
-            self->f730 = g_gameClock[1];
+            self->partMode = 0;
+            self->tintFadeTime = g_gameClock[1];
             break;
         }
         switch (mode) {
         case 0:
-            SetStateWalkerTarget((StateWalker*)self->f75C, 0x351);
+            SetStateWalkerTarget((StateWalker*)self->walker, 0x351);
             break;
         case 1:
-            SetStateWalkerTarget((StateWalker*)self->f75C, 0x352);
+            SetStateWalkerTarget((StateWalker*)self->walker, 0x352);
             break;
         case 2:
-            TeleportStateWalker((StateWalker*)self->f75C, 0x354);
-            self->f730 = 3.40282347e+38f;
+            TeleportStateWalker((StateWalker*)self->walker, 0x354);
+            self->tintFadeTime = 3.40282347e+38f;
             break;
         case 3:
-            TeleportStateWalker((StateWalker*)self->f75C, 0x355);
-            self->f4E0 = mode;
-            self->f730 = 3.40282347e+38f;
+            TeleportStateWalker((StateWalker*)self->walker, 0x355);
+            self->partMode = mode;
+            self->tintFadeTime = 3.40282347e+38f;
             break;
         }
         switch (mode) {
         case 0:
         case 2:
         case 3:
-            self->v640 = D_00248D30;
-            BuildAxisAngleMatrix(&g_unitZVector, &self->m660, self->f638);
+            self->headingVelocity = D_00248D30;
+            BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->f638);
 
             self->f580 = 0;
             break;
@@ -917,7 +917,7 @@ void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
             self->f580 = 1;
             break;
         }
-        self->f720 = mode;
-        self->f724 = g_gameClock[1];
+        self->state = mode;
+        self->stateTime = g_gameClock[1];
     }
 }

@@ -10,7 +10,7 @@
 
 struct LevelEntry {
     s32 levelId;            // 0x00: func_001DFE80's key
-    f32 f04;                // 0x04
+    f32 timerDuration;      // 0x04: the timer length of the level
     u32 record[8];          // 0x08
     const char* credits;    // 0x28
 };

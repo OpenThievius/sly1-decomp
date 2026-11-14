@@ -235,7 +235,7 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     s32 s1 = 0;
     StateWalker* p = self->walkers[0].walker;
 
-    if (p->f28 != p->index) {
+    if (p->currentEntry != p->index) {
         D_0026F138.vt->m08(&D_0026F138, "");
     } else if (self->choice == 0) {
         D_0026F138.vt->m08(&D_0026F138, "Bentley");
@@ -360,9 +360,9 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (a != self->walkerChoice && a > 0) {
         ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
-            s32 fl = g_saveData->f19EC;
+            s32 fl = g_saveData->optionFlags;
             if (!(fl & 2)) {
-                g_saveData->f19EC = fl | 2;
+                g_saveData->optionFlags = fl | 2;
                 slot = (ChoiceSound*)&D_00262950;
             }
         } else {
@@ -468,7 +468,7 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
     }
     ShowCurrentObjectCaptions(o);
     f32 delay = 0.3f;
-    if (o->keyIndex == 1 && (p->f28 == p->index || delay <= g_gameTime[0] - o->choiceTime)) {
+    if (o->keyIndex == 1 && (p->currentEntry == p->index || delay <= g_gameTime[0] - o->choiceTime)) {
         s32 idx = o->choice;
         if (idx == 0) {
             if (D_0026FD00.mode != 0) {
@@ -484,10 +484,10 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
         PushStackElement((ElementStack*)g_elementStack, &g_mapScreenList);
         return;
     }
-    if (p->f28 != p->index) {
+    if (p->currentEntry != p->index) {
         return;
     }
-    if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= g_gameTime[0])) {
+    if ((arg->flags & 0x800) || (arg->connectionMode == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(arg, 0x800);
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x17);
         return;
@@ -625,7 +625,7 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
     s32 s1;
     s32 r2;
 
-    if ((o->flags & 0x9B0) != 0 || (o->f14 == 1 && 5.0f <= g_gameTime[0])) {
+    if ((o->flags & 0x9B0) != 0 || (o->connectionMode == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(o, 0x9B0);
         PopStackElement((ElementStack*)g_elementStack);
         return;
@@ -644,8 +644,8 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
     if (s1 == 0 && r2 == 0) {
         return;
     }
-    o->f30 = g_gameClock[4] + o->f34;
-    o->f38 = g_gameClock[4] + o->f3C;
+    o->nextStepTimeX = g_gameClock[4] + o->stepDelayX;
+    o->nextStepTimeY = g_gameClock[4] + o->stepDelayY;
 
     {
         s32 n = ctx->cursor;
@@ -785,22 +785,22 @@ void DrawGridSelector(T217D_1330* self)
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 struct BoxStyle {
-    void* f0;
+    void* font;
     u8 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-    u32 f18;
+    f32 paddingX;
+    f32 paddingY;
+    f32 scaleX;
+    f32 scaleY;
+    u32 color;
     BoxStyle(f32 w, f32 h)
     {
         FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
-        f8 = w;
-        fC = h;
-        f10 = 0.3f;
-        f14 = 0.3f;
-        f18 = 0xFF7D4B00;
+        paddingX = w;
+        paddingY = h;
+        scaleX = 0.3f;
+        scaleY = 0.3f;
+        color = 0xFF7D4B00;
     }
 };
 

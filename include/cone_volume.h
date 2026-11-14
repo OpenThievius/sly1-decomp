@@ -38,13 +38,13 @@ struct ConeVolume : PlacedObject {
     f32 outerAngle;         // 0x338: 60.0 at setup
     f32 innerAngle;         // 0x33C
     Quad16 q340;            // 0x340: D_00248D10 at setup
-    f32 f350;               // 0x350
-    f32 f354;               // 0x354
-    f32 f358;               // 0x358
+    f32 tangentX;           // 0x350
+    f32 tangentY;           // 0x354
+    f32 innerRatioRoot;     // 0x358
     f32 f35C;               // 0x35C
-    f32 f360;               // 0x360
+    f32 innerRatioX;        // 0x360
     f32 f364;               // 0x364
-    f32 f368;               // 0x368
+    f32 innerRatioY;        // 0x368
     f32 f36C;               // 0x36C
     Vec02 planes[6];        // 0x370: the four sides (func_001443C8), the far and the near plane, each with its distance in w
     s32 mask;               // 0x3D0: the value lists' mask where it is (QueryValueListMask; all 28 bits in mode 0)

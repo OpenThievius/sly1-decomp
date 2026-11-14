@@ -41,9 +41,9 @@ struct ContactEvent {
 struct ContactObject {
     s32* vtbl;
     u8 pad0[0x18 - 4];
-    ContactObject* f18;
+    ContactObject* parent;
     u8 pad1[0x50 - 0x1C];
-    s32 f50;
+    s32 root;
 };
 
 
@@ -120,9 +120,9 @@ void ShowModeLabel(s32 mode)
     }
     if (g_player != 0) {
         g_stepScale = 1.0f;
-        if (((PlayerHeldObject*)g_player->f2750) != 0) {
-            if (IsObjectAttached((BaseObject*)g_player->f2750) != 0)
-                TakeCountedColliderTouch((CountedCollider*)g_player->f2750, g_player, 1);
+        if (((PlayerHeldObject*)g_player->contactOwner) != 0) {
+            if (IsObjectAttached((BaseObject*)g_player->contactOwner) != 0)
+                TakeCountedColliderTouch((CountedCollider*)g_player->contactOwner, g_player, 1);
         }
         SeekObjects105Animations(g_player, 0);
         if (g_player != 0) {
@@ -131,12 +131,12 @@ void ShowModeLabel(s32 mode)
         }
     }
 tail:
-    if (mode != g_saveData->f19FC && (u32)mode < 7) {
+    if (mode != g_saveData->lastHintMode && (u32)mode < 7) {
         SetScreenElementHoldTime(&g_buttonHintElement, (g_player != 0 && (void*)g_player == GetActiveSwitchedCollider()) ? 3.0f : 8.0f);
         SetScreenElementScale(&g_buttonHintElement, 0.6f);
         g_buttonHintElement.vt->m08(&g_buttonHintElement, g_modeLabels[mode]);
         g_buttonHintElement.vt->m14(&g_buttonHintElement);
-        g_saveData->f19FC = mode;
+        g_saveData->lastHintMode = mode;
     }
 }
 
@@ -155,7 +155,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     if (g_currentMode >= 0) {
         if ((g_modeMasks[g_currentMode] & MaskWorldBitsBySave()) == 0) {
             ShowModeLabel(-1);
-            g_saveData->f19FC = -1;
+            g_saveData->lastHintMode = -1;
         }
     }
     switch (g_currentMode) {
@@ -183,7 +183,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
             if (state == 10) {
                 break;
             }
-            if (state == 2 && g_player->f2228 == 8) {
+            if (state == 2 && g_player->subState == 8) {
                 break;
             }
         }
@@ -195,7 +195,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     case 6:
         ok = 0;
         if (g_player->f2220 != 15) {
-            ok = g_player->f275C == 0;
+            ok = g_player->animSeekValue == 0;
         }
         break;
     case 3:
@@ -210,40 +210,40 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     }
     if (ok && (pad->flags & 3)) {
         s32 m = FindNextTableIndexMatchingMask(pad, g_currentMode, 7, g_modeMasks);
-        g_saveData->f19FC = -1;
+        g_saveData->lastHintMode = -1;
         ShowModeLabel(m);
     }
     switch (g_currentMode) {
     case 4:
         if (g_typedTextCaptionBox.state == 3) {
-            self->f2748 = 0.0f;
-        } else if (pad->keyA8 & 0x10) {
-            self->f2748 = 1.0f;
+            self->speedUpAmount = 0.0f;
+        } else if (pad->buttons & 0x10) {
+            self->speedUpAmount = 1.0f;
         } else {
-            self->f2748 = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->f2748, 0.0f, g_frameStep);
+            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->speedUpAmount, 0.0f, g_frameStep);
         }
-        g_stepScale = self->f2748 * D_00274F84 + (1.0f - self->f2748);
+        g_stepScale = self->speedUpAmount * D_00274F84 + (1.0f - self->speedUpAmount);
         break;
     case 2:
         if (g_padSelectFlags & 3) {
-            self->f2744 = 0;
+            self->slowDownHeld = 0;
         } else if (g_typedTextCaptionBox.state == 3) {
-            self->f2744 = 0;
+            self->slowDownHeld = 0;
         } else if (self->f2220 == 2) {
             if (pad->flags & 0x10) {
                 ClearPadPressedBits(pad, 0x10);
-                self->f2744 = 1;
+                self->slowDownHeld = 1;
             }
-        } else if (pad->keyA8 & 0x10) {
+        } else if (pad->buttons & 0x10) {
             if (MaskWorldBitsBySave() & 0x1000) {
-                self->f2744 = 1;
+                self->slowDownHeld = 1;
             } else {
-                self->f2744 = 0;
+                self->slowDownHeld = 0;
             }
         } else {
-            self->f2744 = 0;
+            self->slowDownHeld = 0;
         }
-        if (self->f2744 != 0) {
+        if (self->slowDownHeld != 0) {
             g_stepScale = D_00274F88[0];
         } else {
             g_stepScale = 1.0f;
@@ -256,7 +256,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         case 2:
             if (pad->flags & 0x10) {
                 ClearPadPressedBits(pad, 0x10);
-                if (self->f690 != 0) {
+                if (self->groundContact != 0) {
                     SetPlayerState(self, 13, 0x37);
                 } else {
                     SetPlayerState(self, 13, 0x36);
@@ -265,7 +265,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         }
         break;
     case 5:
-        if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->f2750 != 0) {
+        if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->contactOwner != 0) {
             ClearPadPressedBits(pad, 0x10);
             SetPlayerState(self, 14, -1);
         }
@@ -277,7 +277,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
                 SetPlayerState(self, 15, -1);
             }
         }
-        if (self->f275C != 0 && 3.0f < g_gameClock.time - self->f2758) {
+        if (self->animSeekValue != 0 && 3.0f < g_gameClock.time - self->animSeekTime) {
             SeekObjects105Animations(self, 0);
         }
         break;
@@ -328,7 +328,7 @@ s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* t
 void SeekObjects105Animations(Player* self, s32 value)
 {
     void* buf[0x100];
-    if (value == self->f275C) {
+    if (value == self->animSeekValue) {
         return;
     }
     s32 n = GatherObjectsById(self->world, 0x105, 8, 0, 0x100, buf);
@@ -338,8 +338,8 @@ void SeekObjects105Animations(Player* self, s32 value)
             SeekAnimationPlayer((AnimationPlayer*)item->obj, 1, 0.0f, value != 0 ? 0.0f : 1.0f);
         }
     }
-    self->f275C = value;
-    self->f2758 = g_gameClock.time;
+    self->animSeekValue = value;
+    self->animSeekTime = g_gameClock.time;
 }
 
 void StartCountedCollider(CountedCollider* self)
@@ -408,9 +408,9 @@ void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
         ContactObject* a2 = a1->ref;
         s32 v1;
         if (a2->vtbl[2] & 1) {
-            v1 = a2->f50;
+            v1 = a2->root;
         } else {
-            v1 = a2->f18->f50;
+            v1 = a2->parent->root;
         }
         TakeCountedColliderTouch(a0, a1->ref, (v1 ^ (s32)g_player) == 0);
         FreePooledContactChain(a0->world, a0->contacts);
@@ -429,13 +429,13 @@ void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
 
 void ComputeCountedColliderWorldFrame(CountedCollider* self)
 {
-    if (self->f1F4 != 0) {
+    if (self->matrixAttachment != 0) {
         Mat02 world;
         Mat02 frame;
         Mat02 copyA;
         Mat02 copyB;
         ComputePlacedObjectWorldFrame(self);
-        FrameSource* src = (FrameSource*)self->f1F4;
+        FrameSource* src = (FrameSource*)self->matrixAttachment;
         src->desc->getFrame(src, &frame);
         u128 r0 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[0]));
         u128 r1 = Vu0::RotateUntied(self->m110, Vu0::Q(frame.r[1]));

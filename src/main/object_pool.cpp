@@ -138,9 +138,9 @@ ObjectPoolEntry* FindObjectPoolEntry(ObjectPool* table, s32 key);
 // Where func_001A94C0 takes a position and a matrix from: an object's world frame (f0 or f4), a
 // placed object's m110 and v140 (f8), or its own copy of both.
 struct FrameSource {
-    void* f0;
-    void* f4;
-    PlacedObject* f8;
+    void* positionObject;
+    void* frameObject;
+    PlacedObject* placedObject;
     u8 pad0[4];
     Vec02 pos;
     Vec02 rot[3];
@@ -565,7 +565,7 @@ void InitObjectPool(ObjectPool* self)
     (void)FillMemory(((u8*)self + 0x150), 0, 0x18);
     f32 d = 3.4028235e+38f;
     self->fD8 = 5.0f;
-    self->f168 = 0;
+    self->idsResolved = 0;
     self->f144 = d;
     AppendQueuedCall(self->world, (void*)SpawnObjectPoolCopies, self, 0, 0);
 }
@@ -601,7 +601,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
 {
     s32 i;
     if (self->sub != 0) {
-        if (self->sub->f4 != 0) {
+        if (self->sub->lentOut != 0) {
             self->sub->qC = (Quad16*)AllocateFrontMemory(self->count << 5);
         }
     }
@@ -614,7 +614,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
             e->count = 0;
             continue;
         }
-        if (self->sub != 0 && self->sub->f4 != 0) {
+        if (self->sub != 0 && self->sub->lentOut != 0) {
             s32 x = self->sub->f8;
             if (x == 1) goto c1;
             if (x < 2) {
@@ -658,7 +658,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
         obj->desc->m10(obj);
         obj->desc->m15(obj, 0);
         obj->desc->m03(obj);
-        if (self->sub != 0 && self->sub->f4 != 0) {
+        if (self->sub != 0 && self->sub->lentOut != 0) {
             Quad16* d = self->sub->qC + (i << 1);
             d[0] = *(Quad16*)&obj->v190;
             d[1] = *(Quad16*)&obj->v1D0;
@@ -669,7 +669,7 @@ void SpawnObjectPoolCopies(ObjectPool* self)
 void CopyObjectPool(ObjectPool* self, ObjectPool* other)
 {
     CopyObjectData(self, other);
-    if (self->sub != 0 && self->sub->f4 != 0) {
+    if (self->sub != 0 && self->sub->lentOut != 0) {
         if (other->sub->f8 != 0) {
             self->sub = 0;
         } else {
@@ -678,9 +678,9 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         }
         GetObjectPoolShare(self);
-        self->sub->f4 = 1;
+        self->sub->lentOut = 1;
         self->sub->f8 = 2;
-        self->sub->f14 = other;
+        self->sub->lentTo = other;
         AppendToList((List01*)((u8*)other->sub + 0x14), self->sub);
     } else {
         self->items = (ObjectPoolEntry*)CopyToFrontMemory(other->count * 0x14, other->items);
@@ -690,10 +690,10 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
 void StartObjectPool(ObjectPool* self)
 {
     StartObject(self);
-    if (self->f168 != 0) {
+    if (self->idsResolved != 0) {
         return;
     }
-    self->f168 = 1;
+    self->idsResolved = 1;
     if (self->id4C != -1) {
         void* p = FindFirstObjectByIdMode4(self->world, self->id4C, self);
         if (p != 0) {
@@ -781,7 +781,7 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 {
     Sub8C* group = self->sub;
 
-    if (group != 0 && group->f4 != 0) {
+    if (group != 0 && group->lentOut != 0) {
         List01* list;
         ObjectPool* skip;
         ListFrame it;
@@ -789,23 +789,23 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 
         switch (group->f8) {
         case 1:
-            list = (List01*)&group->f14;
+            list = (List01*)&group->lentTo;
             skip = 0;
             break;
         case 2: {
-            ObjectPool* e = (ObjectPool*)group->f14;
+            ObjectPool* e = (ObjectPool*)group->lentTo;
             skip = self;
-            if (e->f48 == (s32)key) {
+            if (e->chosenItem == (s32)key) {
                 return 0;
             }
-            list = (List01*)&e->sub->f14;
+            list = (List01*)&e->sub->lentTo;
             break;
         }
         }
         ListWalkBegin::Of(&it, list);
         for (obj = ListWalkNext::Of(&it); obj != 0; obj = ListWalkNext::Of(&it)) {
             ObjectPool* e = *(ObjectPool**)obj;
-            if (e != skip && e->f48 == (s32)key) {
+            if (e != skip && e->chosenItem == (s32)key) {
                 ListWalkEnd::Of(&it);
                 return 0;
             }
@@ -834,7 +834,7 @@ void AdvanceObjectPoolEntry(ObjectPool* self)
         return;
     }
     i = 1;
-    pos = (self->f44 + 1) % self->count;
+    pos = (self->lastItemIndex + 1) % self->count;
     if (!(i < self->count)) {
         return;
     }
@@ -852,7 +852,7 @@ void AdvanceObjectPoolEntry(ObjectPool* self)
     } while (i < self->count);
 found:
     if (i < self->count) {
-        self->f44 = pos;
+        self->lastItemIndex = pos;
     }
 }
 
@@ -864,7 +864,7 @@ void ChooseObjectPoolItem(ObjectPool* self)
         if (self->f40 == 0) {
             AdvanceObjectPoolEntry(self);
         }
-        ObjectPoolEntry* rec = &self->items[self->f44];
+        ObjectPoolEntry* rec = &self->items[self->lastItemIndex];
 
         if (rec->flags & 2) {
             s32 i = 0;
@@ -872,8 +872,8 @@ void ChooseObjectPoolItem(ObjectPool* self)
                 do {
                     if (IsObjectPoolItemFree(self, (PoolCandidate*)rec->objects[i]) != 0) {
                         s4 = (s32)rec->objects[i];
-                        if (self->sub != 0 && self->sub->f4 != 0) {
-                            s5 = self->sub->fC + (self->f44 << 5);
+                        if (self->sub != 0 && self->sub->lentOut != 0) {
+                            s5 = self->sub->fC + (self->lastItemIndex << 5);
                         }
                         if (rec->flags & 1) {
                         } else {
@@ -888,19 +888,19 @@ void ChooseObjectPoolItem(ObjectPool* self)
             }
         }
     }
-    self->f48 = s4;
-    if (self->sub != 0 && self->sub->f4 != 0) {
+    self->chosenItem = s4;
+    if (self->sub != 0 && self->sub->lentOut != 0) {
         self->sub->f10 = s5;
     }
 }
 
 s32 HasObjectPoolChoice(ObjectPool* self)
 {
-    if (self->f48 != 0) {
+    if (self->chosenItem != 0) {
         return 1;
     }
     ChooseObjectPoolItem(self);
-    return self->f48 != 0;
+    return self->chosenItem != 0;
 }
 
 #include "placed_object.h"
@@ -935,7 +935,7 @@ struct Released_1A8C90 {
     u8 pad1E0[0x224 - 0x1E0];
     ReleasedTrack_1A8C90* track;    // 0x224
     u8 pad228[0x554 - 0x228];
-    f32 f554;                       // 0x554
+    f32 expiryTime;                 // 0x554: the game time at which the released object expires
     u8 pad558[0x690 - 0x558];
     f32 speed;                      // 0x690
     u8 pad694[0x6E4 - 0x694];
@@ -1044,7 +1044,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     SetColliderAnchors((Collider*)obj, 0, 0, 0, 0);
     obj->desc->m84(obj, &pos);
     obj->desc->m88(obj, &rot);
-    if (self->sub != 0 && self->sub->f4 != 0) {
+    if (self->sub != 0 && self->sub->lentOut != 0) {
         Vec02* q = (Vec02*)self->sub->f10;
         obj->v190 = q[0];
         obj->v1D0 = q[1];
@@ -1120,7 +1120,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
         }
     }
     if (0.0f < self->life && IsObjectOfKind((BaseObject*)obj, 0x3B)) {
-        obj->f554 = g_gameTime + self->life;
+        obj->expiryTime = g_gameTime + self->life;
     }
     if (IsObjectOfKind((BaseObject*)obj, 0x3C)) {
         switch (self->aimMode) {
@@ -1155,7 +1155,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     return 1;
 }
 
-void ClearObjectPoolChoice(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
+void ClearObjectPoolChoice(ObjectPool* p) { p->chosenItem = 0; if (p->sub != 0 && p->sub->lentOut != 0) p->sub->f10 = 0; }
 
 void ResetPlacementRecord(u8* self)
 {
@@ -1182,18 +1182,18 @@ void ClearObjectPoolHeadingRecord(u8* self)
 
 void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
 {
-    if (self->f0 != 0) {
-        ConvertPositionToWorld((BaseObject*)self->f0, a1);
+    if (self->positionObject != 0) {
+        ConvertPositionToWorld((BaseObject*)self->positionObject, a1);
         a2[0] = self->rot[0];
         a2[1] = self->rot[1];
         a2[2] = self->rot[2];
-    } else if (self->f4 != 0) {
-        GetObjectWorldPosition((BaseObject*)self->f4, a1);
-        GetObjectWorldRotation((BaseObject*)self->f4, (Mat02*)a2);
+    } else if (self->frameObject != 0) {
+        GetObjectWorldPosition((BaseObject*)self->frameObject, a1);
+        GetObjectWorldRotation((BaseObject*)self->frameObject, (Mat02*)a2);
     } else {
-        if (self->f8 != 0) {
-            a1[0] = self->f8->v140;
-            PlacedObject* in = self->f8;
+        if (self->placedObject != 0) {
+            a1[0] = self->placedObject->v140;
+            PlacedObject* in = self->placedObject;
             a2[0] = in->m110.r[0];
             a2[1] = in->m110.r[1];
             a2[2] = in->m110.r[2];
@@ -1393,7 +1393,7 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
         }
         Animation* which;
         if ((ev->extraFlags & 2) != 0) {
-            if (g_player == 0 || g_player->f223C == 4 || g_player->f223C == 6)
+            if (g_player == 0 || g_player->aimMode == 4 || g_player->aimMode == 6)
                 which = self->fC14;
             else
                 which = self->fC18;

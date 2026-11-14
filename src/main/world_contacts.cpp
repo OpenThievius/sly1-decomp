@@ -239,7 +239,7 @@ void RemoveColliderFromSweepAxes(World* self, void* owner)
 
 void MarkSweepAxesUnsorted(World* a0)
 {
-    a0->f1AEC = 0;
+    a0->sweepSorted = 0;
 }
 
 void* MoveMemory(void* dst, void* src, s32 bytes);
@@ -257,7 +257,7 @@ struct SweepEntry {
 // the multiply and the product takes its own register (docs/TOOLCHAIN.md, "Loops").
 void SortSweepAxes(World* self)
 {
-    if (self->count38 == 0 || self->f1AEC != 0) {
+    if (self->count38 == 0 || self->sweepSorted != 0) {
         return;
     }
     s32 axisSize = 0x1800; // one axis: 0x200 entries
@@ -295,7 +295,7 @@ void SortSweepAxes(World* self)
         }
         bit <<= 1;
     }
-    self->f1AEC = 1;
+    self->sweepSorted = 1;
 }
 
 void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask)

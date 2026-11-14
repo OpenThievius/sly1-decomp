@@ -37,8 +37,8 @@ struct Rec36 {
 struct Slot36 {
     Collider* obj;               // 0x00
     u8 pad04[0x10 - 0x04];
-    Vec02 q10;              // 0x10
-    Vec02 q20;              // 0x20
+    Vec02 point;            // 0x10
+    Vec02 normal;           // 0x20
 };
 
 // 0x36: set up by func_001F4F70, which marks the part (f4E0 = 1, flag bits 36 to 39 = 2) and

@@ -141,12 +141,12 @@ void CopySwitchedCollider(Agent* self, void* src);
 
 void CopyAgent(Agent* self, void* src)
 {
-    s32 b = self->fB10;
-    s32 a = (s32)self->f720;
+    s32 b = self->flagIndex;
+    s32 a = (s32)self->roster;
     CopySwitchedCollider(self, src);
-    self->fB10 = b;
-    self->f720 = (void*)a;
-    self->fB74 = src;
+    self->flagIndex = b;
+    self->roster = (void*)a;
+    self->copySource = src;
 }
 
 void PostLoadPlacedObject(PlacedObject* self);
@@ -157,19 +157,19 @@ void PostLoadAgent(Agent* self)
 {
     s32 v;
     PostLoadPlacedObject(self);
-    if (self->f924 != -1) {
-        self->f928 = (PointGraphObject*)FindFirstObjectByIdMode4(self->world, self->f924, self);
+    if (self->pathGraphId != -1) {
+        self->pathGraph = (PointGraphObject*)FindFirstObjectByIdMode4(self->world, self->pathGraphId, self);
     }
-    if (self->fB4C != -1) {
+    if (self->secondaryTargetKey != -1) {
         PickAgentSecondaryTarget(self);
     }
-    v = self->fAF8;
+    v = self->hasMemberGroupId;
     if (v != 0) {
-        if (self->fAFC != -1) {
-            self->fB00 = FindFirstObjectById(self->world, 0x101, self->fAFC, self);
+        if (self->memberGroupId != -1) {
+            self->memberGroup = FindFirstObjectById(self->world, 0x101, self->memberGroupId, self);
         }
     } else {
-        FindOrBuildMemberGroup((void**)&self->fB00, self);
+        FindOrBuildMemberGroup((void**)&self->memberGroup, self);
     }
 }
 
@@ -193,26 +193,26 @@ void StartAgent(Agent* self)
 {
     StartTurningCollider(self);
     ResolveObjectLinks(self, 2, (ObjectLink*)D_00274C30);
-    if (self->f720 == 0) {
+    if (self->roster == 0) {
         void* t = CreateItemKeeper(self->world);
-        self->f720 = t;
+        self->roster = t;
         AddItemKeeperMember((ItemKeeper*)t, self);
     }
     ResolveAgentClips(self);
     for (s32 i = 0; i < 17; i++) {
-        void* item = self->f870[i].obj;
+        void* item = self->secondaryClips[i].obj;
         if (item != 0) {
-            self->f6DC = item;
-            self->f8F8 = item;
+            self->followedMesh = item;
+            self->defaultSecondaryClip = item;
             self->desc03()->m34(self, item, 1);
             break;
         }
     }
     s32 j = 0;
-    if (self->fA78 > 0) {
+    if (self->meshKeyCount > 0) {
         u64 bit = 0x8000;
         bit <<= 28;
-        Elem08* e = self->fA7C;
+        Elem08* e = self->meshKeys;
         do {
             Collider* o = (Collider*)FindFirstObjectById(self->world, 0x101, e->key, self);
             e->obj = o;
@@ -222,18 +222,18 @@ void StartAgent(Agent* self)
             }
             e++;
             j++;
-        } while (j < self->fA78);
+        } while (j < self->meshKeyCount);
     }
-    if (self->fB04 != 0) {
-        if (self->fB08 != -1) {
-            self->fB0C = FindFirstObjectById(self->world, 0x101, self->fB08, self);
+    if (self->hasTargetSetId != 0) {
+        if (self->targetSetId != -1) {
+            self->targetSet = FindFirstObjectById(self->world, 0x101, self->targetSetId, self);
         }
     } else {
-        self->fB0C = FindFirstObjectByIdGathered(self->world, 0x101, 0x8C, self);
+        self->targetSet = FindFirstObjectByIdGathered(self->world, 0x101, 0x8C, self);
     }
-    SetTurningColliderGravityScale(self, self->f700);
+    SetTurningColliderGravityScale(self, self->gravityScale);
     ChangeAgentState(self, 0, 0);
-    if (TestFlagTableBit((FlagTable*)g_flagTable, self->fB10)) {
+    if (TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex)) {
         AppendQueuedCall(self->world, (void*)RemoveAgentFromParent, self, 0, 0);
     }
 }
@@ -246,8 +246,8 @@ s32 TestAgentMayContact(Agent* self, Collider* obj)
     if (TestCollidersMayContact(self, obj) != 0) {
         return 1;
     }
-    if (self->fB0C != 0) {
-        if (IsObjectInPool((ObjectPool*)self->fB0C, obj) != 0) {
+    if (self->targetSet != 0) {
+        if (IsObjectInPool((ObjectPool*)self->targetSet, obj) != 0) {
             return 1;
         }
     }
@@ -265,8 +265,8 @@ void AddItemKeeperMember(ItemKeeper* self, Agent* value);
 void RegisterAgent(Agent* self)
 {
     RegisterSwitchedCollider(self);
-    if (self->f720 != 0) {
-        AddItemKeeperMember((ItemKeeper*)self->f720, self);
+    if (self->roster != 0) {
+        AddItemKeeperMember((ItemKeeper*)self->roster, self);
     }
 }
 
@@ -278,25 +278,25 @@ void RemoveItemKeeperMember(ItemKeeper* self, Agent* value);
 void UnregisterAgent(Agent* self)
 {
     UnregisterSwitchedCollider(self);
-    if (self->f7E0 != 0) {
-        StopAnimationPlayer(self->f7E0);
-        self->f7E0 = 0;
+    if (self->statePlayer != 0) {
+        StopAnimationPlayer(self->statePlayer);
+        self->statePlayer = 0;
     }
-    if (self->f754 != 0) {
-        StopAnimationPlayer(self->f754);
-        self->f754 = 0;
+    if (self->mainPlayer != 0) {
+        StopAnimationPlayer(self->mainPlayer);
+        self->mainPlayer = 0;
     }
-    if (self->f720 != 0) {
-        RemoveItemKeeperMember((ItemKeeper*)self->f720, self);
+    if (self->roster != 0) {
+        RemoveItemKeeperMember((ItemKeeper*)self->roster, self);
     }
-    self->f72C = 0;
-    self->fA60 = 0;
-    self->f748 = 0;
-    self->fBA4 = 0;
-    self->fBF4 = 3.4028235e+38f;
+    self->requestBits = 0;
+    self->pathValid = 0;
+    self->targetReadyTime = 0;
+    self->arrivalTime = 0;
+    self->state6Deadline = 3.4028235e+38f;
     self->fBF8 = 3.4028235e+38f;
-    self->fBFC = 3.4028235e+38f;
-    self->fC00 = 3.4028235e+38f;
+    self->clip10Deadline = 3.4028235e+38f;
+    self->state8Deadline = 3.4028235e+38f;
 }
 
 extern f32 g_gameClock[];
@@ -350,21 +350,21 @@ void StepAgent(Agent* self, f32 dt)
     if (F(s32, 0xB78) != 0) {
         Vec02 motion;
         Vec02 v;
-        u8* ap = (u8*)self->f7E0;
+        u8* ap = (u8*)self->statePlayer;
         u8* src = *(u8**)(*(u8**)(*(u8**)(ap + 8) + 0x9C) + 4);
         (**(AgentMotionFn**)src)(src, self, 0, 0, &motion, *(f32*)(ap + 0x14), *(f32*)(ap + 0x18));
-        Vu0::Q(v) = Vu0::DivX(Vu0::Add(Vu0::Vec::Of(motion), Vu0::Vec::Of(self->v640)), Vu0::Vec::Scalar(dt)).q;
-        Vu0::Q(v) = Vu0::RotateMembers(self->m660, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::DivX(Vu0::Add(Vu0::Vec::Of(motion), Vu0::Vec::Of(self->headingVelocity)), Vu0::Vec::Scalar(dt)).q;
+        Vu0::Q(v) = Vu0::RotateMembers(self->headingMatrix, Vu0::Q(v));
         AddColliderForce(self, &v);
-        TurnColliderTowardRotation(self, g_gameClock[2], &self->m660, &self->f6E0);
-    } else if (self->fB1C != 0) {
+        TurnColliderTowardRotation(self, g_gameClock[2], &self->headingMatrix, &self->turnGain);
+    } else if (self->usesPitch != 0) {
         Vec02 v;
         Mat02 m2;
         Mat02 m;
-        f32 a = __builtin_fabsf(Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot.r[0]), Vu0::Q(self->m660.r[0])))));
+        f32 a = __builtin_fabsf(Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot.r[0]), Vu0::Q(self->headingMatrix.r[0])))));
         f32 k = LimitToUnitRange(D_00274C50.c[0] + a * (D_00274C50.c[1] + a * D_00274C50.c[2]));
         if (self->f724 == 12) {
-            f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->vA50), Vu0::Q(self->v140))));
+            f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(self->v140))));
             f32* q = &F(f32, 0xB30);
             k = k * LimitToUnitRange(q[0] + d * (q[1] + d * q[2]));
         }
@@ -373,9 +373,9 @@ void StepAgent(Agent* self, f32 dt)
         Vu0::Q(m.r[1]) = Vu0::MulX(Vu0::Q(self->m110.r[1]), s);
         Vu0::Q(m.r[2]) = Vu0::MulX(Vu0::Q(self->m110.r[2]), s);
         CopyBytes(&m2, &m, 0x30);
-        Vu0::Q(v) = Vu0::Rotate(m2, Vu0::Q(self->v640));
+        Vu0::Q(v) = Vu0::Rotate(m2, Vu0::Q(self->headingVelocity));
         SteerColliderTowardPosition(self, 0, 0, &v, F(f32*, 0x210), dt);
-        TurnColliderTowardRotation(self, g_gameClock[2], &self->m660, &self->f6E0);
+        TurnColliderTowardRotation(self, g_gameClock[2], &self->headingMatrix, &self->turnGain);
     } else if (g_gameTime[0] < F(f32, 0xBA4)) {
         Vec02 p;
         Vec02 w;
@@ -385,12 +385,12 @@ void StepAgent(Agent* self, f32 dt)
         Vu0::Q(v) = Vu0::DivX(Vu0::Sub(Vu0::Q(w), Vu0::Q(self->v150)), Vu0::Scalar(dt));
         ClampVectorLength(&v, &v, 20000.0f);
         AddColliderForce(self, &v);
-        TurnColliderTowardRotation(self, dt, &self->m660, &self->f6E0);
+        TurnColliderTowardRotation(self, dt, &self->headingMatrix, &self->turnGain);
     } else if (self->f724 == 16 && self->fA6C != 0) {
         Vec02 q2;
         Vec02 q;
         f32 x;
-        u8* ap = (u8*)self->f7E0;
+        u8* ap = (u8*)self->statePlayer;
         if (ap != 0) {
             x = *(f32*)(ap + 0x14) / *(f32*)(*(u8**)(ap + 8) + 0x34);
         } else {
@@ -399,7 +399,7 @@ void StepAgent(Agent* self, f32 dt)
         f32 k = LimitToUnitRange(D_00274C60.c[0] + x * (D_00274C60.c[1] + x * D_00274C60.c[2]));
         StoreScaledQuadword(&q, k, (u8*)&D_00274C70);
         StoreScaledQuadword(&q2, k, (u8*)&D_00274C80);
-        SteerColliderTowardRotation(self, &self->m660, (f32*)&q, (Vec02*)&D_00248D30, (f32*)&q2, dt);
+        SteerColliderTowardRotation(self, &self->headingMatrix, (f32*)&q, (Vec02*)&D_00248D30, (f32*)&q2, dt);
         AddColliderForce(self, &self->gravity);
     } else {
         StepTurningCollider(self, dt);
@@ -427,7 +427,7 @@ void BuildAxisAngleMatrix(const Vec02* v, f32 angle, Mat02* out);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
 {
     if (IsAgentFacingBlocked(self) != 0) return;
-    s32 t = self->fB1C;
+    s32 t = self->usesPitch;
     self->f638 = x;
     self->fB24 = y;
     if (t != 0) {
@@ -441,9 +441,9 @@ void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void SettleAgentState(Agent* self)
 {
-    if (self->fB84 != 0) return;
-    if (self->fB88 != 0) return;
-    if (g_player != 0 && g_player->f275C != 0) return;
+    if (self->stateLocked != 0) return;
+    if (self->stateForced != 0) return;
+    if (g_player != 0 && g_player->animSeekValue != 0) return;
     for (;;) {
         s32 v = self->desc08()->m59(self);
         if (v == self->f724) break;
@@ -460,10 +460,10 @@ void FaceAgentFromAnimationMotion(Agent* self)
     f32 out[3];
     f32 zero = 0.0f;
     out[1] = zero;
-    ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
-    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v640)));
+    ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->usesPitch ? &out[1] : 0, &out[2]);
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->headingVelocity)));
     if (0.0001f < out[2] && 0.0001f < len) {
-        self->f754->speed *= len / out[2];
+        self->mainPlayer->speed *= len / out[2];
     }
     f32 y = out[1];
     SetAgentFacingAngles(self, out[0], y);
@@ -506,7 +506,7 @@ static inline void MulRotationInto(Agent* self, const Mat02& a, const Mat02& b)
     r.r[1] = y;
     Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
     r.r[2] = z;
-    self->m660 = r;
+    self->headingMatrix = r;
 }
 
 void UpdateAgent(Agent* self, f32 dt)
@@ -519,51 +519,51 @@ void UpdateAgent(Agent* self, f32 dt)
     if (*(s32*)((u8*)self + 0xB44) != 0) {
         PickAgentSecondaryTarget(self);
     }
-    void* held = self->fB50;
+    void* held = self->primaryTarget;
     if (held == 0) {
-        if (((AgentLinks*)self->f720)->state != 2) {
+        if (((AgentLinks*)self->roster)->state != 2) {
             Player* target = (Player*)self->desc08()->m62(self);
             if (target != 0 && target == g_player) {
-                if (target->f2750 != 0 && IsObjectAttached((Collider*)target->f2750) != 0) {
-                    SetAgentPrimaryTarget(self, (s32)g_player->f2750);
+                if (target->contactOwner != 0 && IsObjectAttached((Collider*)target->contactOwner) != 0) {
+                    SetAgentPrimaryTarget(self, (s32)g_player->contactOwner);
                     if (self->desc08()->m57(self) == 0) {
                         SetAgentPrimaryTarget(self, 0);
                     } else {
-                        for (s32 i = 0; i < ((AgentLinks*)self->f720)->count; i++) {
-                            if (((AgentLinks*)self->f720)->found[i] != self) {
-                                SetAgentPrimaryTarget(self, (s32)g_player->f2750);
+                        for (s32 i = 0; i < ((AgentLinks*)self->roster)->count; i++) {
+                            if (((AgentLinks*)self->roster)->found[i] != self) {
+                                SetAgentPrimaryTarget(self, (s32)g_player->contactOwner);
                             }
                         }
                     }
                 }
             }
         }
-    } else if (IsObjectAttached((Collider*)held) == 0 || ((AgentLinks*)self->f720)->state != 2) {
+    } else if (IsObjectAttached((Collider*)held) == 0 || ((AgentLinks*)self->roster)->state != 2) {
         SetAgentPrimaryTarget(self, 0);
     }
-    if (self->fB8C != 0 && FindColliderFloorContact(self, 0, 0) != 0) {
+    if (self->loopBackArmed != 0 && FindColliderFloorContact(self, 0, 0) != 0) {
         ((void (*)(Agent*))((void**)self->desc)[100])(self);
     }
     ApplyPendingAgentChanges(self);
     SettleAgentState(self);
-    AnimationPlayer* player = self->f7E0;
-    if (player != 0 && player->anim->f9C != 0) {
-        PositionCurve* curve = player->anim->f9C->pos;
+    AnimationPlayer* player = self->statePlayer;
+    if (player != 0 && player->anim->movedTrack != 0) {
+        PositionCurve* curve = player->anim->movedTrack->pos;
         if (curve != 0) {
-            curve->vt->eval(curve, self, player->time, player->speed, 0, 0, &self->v640);
+            curve->vt->eval(curve, self, player->time, player->speed, 0, 0, &self->headingVelocity);
             u128 neg = Vu0::FromFloat(-1.0f);
-            Vu0::Q(self->v640) = Vu0::MulX(Vu0::Q(self->v640), neg);
+            Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(self->headingVelocity), neg);
             Vu0::Q(push) = neg;
         } else {
-            self->v640 = D_00248D30;
+            self->headingVelocity = D_00248D30;
         }
     } else {
-        self->v640 = D_00248D30;
+        self->headingVelocity = D_00248D30;
     }
     self->desc08()->m5E(self, 0);
     ((void (*)(Agent*))self->desc08()->m5A)(self);
-    if (self->f720 != 0) {
-        QueueItemKeeperUpdate((ItemKeeper*)self->f720);
+    if (self->roster != 0) {
+        QueueItemKeeperUpdate((ItemKeeper*)self->roster);
     }
     DispatchAgentContactHits(self);
     if (*(s32*)((u8*)self + 0xC08) != 0) {
@@ -593,9 +593,9 @@ s32 ChooseAgentState(Agent* self)
     s32 s = self->f724;
     s32 m = GetAgentRosterState(self);
 
-    if (self->fBFC < g_gameClock[1]) {
+    if (self->clip10Deadline < g_gameClock[1]) {
         if (self->f724 != 0xB && self->f724 != 0x10) {
-            if (self->f758[10].obj != 0) {
+            if (self->stateClips[10].obj != 0) {
                 s = 0xA;
                 goto done;
             }
@@ -624,7 +624,7 @@ s32 ChooseAgentState(Agent* self)
             }
             break;
         case 0:
-            if (self->f754 != 0) {
+            if (self->mainPlayer != 0) {
                 if ((self->flags & 0xC0000000) == 0x40000000) {
                     s = 2;
                 }
@@ -647,7 +647,7 @@ s32 ChooseAgentState(Agent* self)
             }
             break;
         case 0:
-            if (self->f754 != 0) {
+            if (self->mainPlayer != 0) {
                 if ((self->flags & 0xC0000000) == 0) {
                     s = 1;
                 }
@@ -694,12 +694,12 @@ s32 ChooseAgentState(Agent* self)
     case 6:
         switch (m) {
         case 0:
-            if (self->fBF4 < g_gameClock[1]) {
+            if (self->state6Deadline < g_gameClock[1]) {
                 s = 9;
             }
             break;
         case 1:
-            if (self->fA60 == 0) {
+            if (self->pathValid == 0) {
                 s = 5;
             }
             break;
@@ -733,7 +733,7 @@ s32 ChooseAgentState(Agent* self)
             s = 5;
             break;
         case 0:
-            if (self->f7E0 == 0) {
+            if (self->statePlayer == 0) {
                 s = 4;
             }
             break;
@@ -747,7 +747,7 @@ s32 ChooseAgentState(Agent* self)
     case 8:
     case 10:
     case 16:
-        if (self->f7E0 == 0) {
+        if (self->statePlayer == 0) {
             s = 0;
         }
         break;
@@ -758,18 +758,18 @@ s32 ChooseAgentState(Agent* self)
         if (m < 2) {
             goto c83D0;
         } else if (m == 2) {
-            if (self->f7E0 == 0) {
+            if (self->statePlayer == 0) {
                 s = 0xD;
                 break;
             } else {
-                if (self->f758[14].obj != 0) {
+                if (self->stateClips[14].obj != 0) {
                     if (self->desc08()->m5D(self) != 0) {
                         s = 0xE;
                         break;
                     }
                 }
                 if (HasAgentReachedPathEnd(self) != 0) {
-                    if (self->f758[13].obj != 0) {
+                    if (self->stateClips[13].obj != 0) {
                         s = 0xD;
                     }
                 }
@@ -783,14 +783,14 @@ s32 ChooseAgentState(Agent* self)
         if (m < 2) {
             goto c83D0;
         } else if (m == 2) {
-            if (self->f758[14].obj != 0) {
+            if (self->stateClips[14].obj != 0) {
                 if (self->desc08()->m5D(self) != 0) {
                     s = 0xE;
                     break;
                 }
             }
-            if (self->fA60 == 0) {
-                if (self->f758[12].obj != 0) {
+            if (self->pathValid == 0) {
+                if (self->stateClips[12].obj != 0) {
                     s = 0xC;
                 }
             }
@@ -807,13 +807,13 @@ s32 ChooseAgentState(Agent* self)
         }
         break;
 c83D0:
-        if (self->fC00 < g_gameClock[1]) {
+        if (self->state8Deadline < g_gameClock[1]) {
             s = 8;
         }
         break;
     case 7:
 c7:
-        if (self->f7E0 == 0) {
+        if (self->statePlayer == 0) {
             s = 0xC;
         }
         break;
@@ -827,28 +827,28 @@ void SnapPointToOwnerGraph(PointGraphObject* self, Vec02* p, Vec02* out);
 void SetAgentGoalPoint(Agent* self, Vec02* p)
 {
     Vec02 t;
-    self->vA40 = *p;
-    t = self->vA40;
-    if (self->f928 != 0) {
-        SnapPointToOwnerGraph(self->f928, &t, &t);
+    self->goalPoint = *p;
+    t = self->goalPoint;
+    if (self->pathGraph != 0) {
+        SnapPointToOwnerGraph(self->pathGraph, &t, &t);
     }
-    if (self->fA60 != 0) {
-        u128 d = Vu0::Sub(Vu0::Q(self->vA50), Vu0::Q(t));
+    if (self->pathValid != 0) {
+        u128 d = Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(t));
         s32 far = D_00274C90 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (far) {
-            self->fA60 = 0;
+            self->pathValid = 0;
         }
     }
-    if (self->fA60 == 0) {
-        self->vA50 = t;
+    if (self->pathValid == 0) {
+        self->snappedGoal = t;
     }
 }
 
 s32 HasAgentReachedPathEnd(Agent* self)
 {
     s32 result = 0;
-    if (self->fA60 != 0) {
-        result = self->f930 == self->f92C;
+    if (self->pathValid != 0) {
+        result = self->pathIndex == self->pathCount;
     }
     return result;
 }
@@ -861,7 +861,7 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
     if ((self->flags538 & (1ULL << 43)) != 0) {
         if ((self->desc->flags & 0x80) == 0)
             return 0;
-        if (self->f360 == 0.0f)
+        if (self->pushFactor == 0.0f)
             return 0;
     }
     if (IsObjectOfKind(self->root, 5) != 0 || IsObjectOfKind(self->root, 0x40) != 0 || IsObjectOfKind(self->root, 0x41) != 0)
@@ -894,7 +894,7 @@ void BuildAgentPath(Agent* self)
         u128 pos = Vu0::Q(self->v140);
         Vu0::Q(F(Vec02, 0x940)) = pos;
         f32 maxLen = __builtin_fabsf(F(f32, 0xB94));
-        u128 goal = Vu0::Q(self->vA50);
+        u128 goal = Vu0::Q(self->snappedGoal);
         f32 len = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(goal, pos), Vu0::Sub(goal, pos))));
         Vec02 a;
         if (maxLen < len) {
@@ -904,8 +904,8 @@ void BuildAgentPath(Agent* self)
             Vu0::Q(a) = goal;
         }
         Vec02 b;
-        if (self->f928 != 0) {
-            SnapPointToOwnerGraph(self->f928, &a, &b);
+        if (self->pathGraph != 0) {
+            SnapPointToOwnerGraph(self->pathGraph, &a, &b);
         } else {
             b = a;
         }
@@ -915,8 +915,8 @@ void BuildAgentPath(Agent* self)
             f32 next = maxLen + 100.0f;
             maxLen = next <? len;
             f32 t = maxLen / len;
-            Vu0::Q(c) = Vu0::MulXSum(Vu0::Q(self->vA50), Vu0::Scalar(t), Vu0::Q(self->v140), Vu0::Scalar(1.0f - t));
-            SnapPointToOwnerGraph(self->f928, &c, &c);
+            Vu0::Q(c) = Vu0::MulXSum(Vu0::Q(self->snappedGoal), Vu0::Scalar(t), Vu0::Q(self->v140), Vu0::Scalar(1.0f - t));
+            SnapPointToOwnerGraph(self->pathGraph, &c, &c);
         }
         PushBackMemoryMark();
         Vec02 d1;
@@ -936,13 +936,13 @@ void BuildAgentPath(Agent* self)
         F(Vec02, 0x950) = c;
     } else {
         F(s32, 0x92C) = 0;
-        if (self->f928 != 0) {
-            F(s32, 0x92C) = FindOwnerGraphPath(self->f928, &self->v140, &self->vA50, 0x10, (Vec02*)((u8*)self + 0x940));
+        if (self->pathGraph != 0) {
+            F(s32, 0x92C) = FindOwnerGraphPath(self->pathGraph, &self->v140, &self->snappedGoal, 0x10, (Vec02*)((u8*)self + 0x940));
         }
         if (F(s32, 0x92C) == 0) {
             F(s32, 0x92C) = 2;
             F(Vec02, 0x940) = self->v140;
-            F(Vec02, 0x950) = self->vA50;
+            F(Vec02, 0x950) = self->snappedGoal;
         }
     }
     F(s32, 0x930) = 0;
@@ -968,18 +968,18 @@ void FaceAgentAlongPath(Agent* self)
 {
     ((void (*)(Agent*))self->desc08()->m5F)(self);
     for (;;) {
-        if (!(self->f930 < self->f92C)) break;
-        s32 i = self->f930;
+        if (!(self->pathIndex < self->pathCount)) break;
+        s32 i = self->pathIndex;
         u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (i << 4))));
         s32 far = D_00274C94 < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
         if (far) break;
-        self->f930 = i + 1;
+        self->pathIndex = i + 1;
     }
     Vec02 dir;
-    if (self->f930 < self->f92C) {
-        Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (self->f930 << 4))), Vu0::Q(self->v140)));
+    if (self->pathIndex < self->pathCount) {
+        Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (self->pathIndex << 4))), Vu0::Q(self->v140)));
     } else {
-        s32 m = self->f92C;
+        s32 m = self->pathCount;
         Vu0::Set(dir, Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x930 + (m << 4))), Vu0::Q(*(Vec02*)((u8*)self + 0x920 + (m << 4)))));
     }
     f32 yaw;
@@ -992,9 +992,9 @@ void FaceAgentAlongPath(Agent* self)
     if (F(s32, 0xB1C) == 0) {
         pitch = 0.0f;
     } else {
-        u128 e = Vu0::Sub(Vu0::Q(self->vA50), Vu0::Q(self->v140));
+        u128 e = Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(self->v140));
         f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(e, e)));
-        f32 dz = self->vA50.z - self->v140.z;
+        f32 dz = self->snappedGoal.z - self->v140.z;
         switch (self->f724) {
         case 5: case 6: case 7: case 10: case 12: case 13: case 14: case 15:
             dz += F(f32, 0xB20);
@@ -1041,19 +1041,19 @@ void UpdateAgentGoal(Agent* self, s32 flag)
     }
     case 4:
         if (flag != 0) {
-            if (self->f750 != 0) {
+            if (self->mainClip != 0) {
                 switch (self->f920) {
                 case 0:
-                    FindNearestAnimationPathTime((Animation*)self->f750, self, self->f918, (Vec02*)((u8*)self + 0x140), (f32*)((u8*)self + 0x914), &q, 0);
+                    FindNearestAnimationPathTime((Animation*)self->mainClip, self, self->savedClipTime, (Vec02*)((u8*)self + 0x140), (f32*)((u8*)self + 0x914), &q, 0);
                     break;
                 case 1: {
-                    self->f914 = self->f918;
-                    PoseSource* t = FindEntryByObjectId((BlendAnimationView*)self->f750, self)->mover;
-                    t->vtbl[0](t, self, self->f914, 1.0f, 0, &q, 0);
+                    self->resumeTime = self->savedClipTime;
+                    PoseSource* t = FindEntryByObjectId((BlendAnimationView*)self->mainClip, self)->mover;
+                    t->vtbl[0](t, self, self->resumeTime, 1.0f, 0, &q, 0);
                     break;
                 }
                 }
-                self->f91C = 1.0f;
+                self->savedClipSpeed = 1.0f;
             } else {
                 q = self->v190;
             }
@@ -1066,7 +1066,7 @@ void UpdateAgentGoal(Agent* self, s32 flag)
     }
 }
 
-void IsAgentNearPathEnd(Agent* self, s32* out) { if (self->fA60 && self->f930 >= self->f92C - 2) { *out = 1; return; } *out = 0; }
+void IsAgentNearPathEnd(Agent* self, s32* out) { if (self->pathValid && self->pathIndex >= self->pathCount - 2) { *out = 1; return; } *out = 0; }
 
 void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
@@ -1075,18 +1075,18 @@ Attachment* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner);
 
 void CreateAgentAnimationPlayer(Agent* self)
 {
-    StateResetObject* sub = ((StateResetObject*)self->fA74);
+    StateResetObject* sub = ((StateResetObject*)self->stateObject);
     if (sub->id2DC != 0) {
         s32 pair[2];
         pair[0] = sub->id;
         pair[1] = (s32)self;
-        CreateAnimationPlayer((Animation*)sub->id2DC, self, 1, (TargetBinding*)pair, 1, &self->f754, 0.0f, 1.0f);
-        AddAnimationPlayerRecordCallback(self->f754, (PlacedObject**)((self->fA74)));
-        Attachment* node = FindPlayerAttachmentByOwner(self->f754, GetEffectiveObjectId(self));
-        if ((void*)node == self->f1EC) {
+        CreateAnimationPlayer((Animation*)sub->id2DC, self, 1, (TargetBinding*)pair, 1, &self->mainPlayer, 0.0f, 1.0f);
+        AddAnimationPlayerRecordCallback(self->mainPlayer, (PlacedObject**)((self->stateObject)));
+        Attachment* node = FindPlayerAttachmentByOwner(self->mainPlayer, GetEffectiveObjectId(self));
+        if ((void*)node == self->positionAttachment) {
             node->mode0 = 5;
         }
-        if ((void*)node == self->f1F0) {
+        if ((void*)node == self->orientationAttachment) {
             node->mode1 = 5;
         }
     }
@@ -1114,15 +1114,15 @@ void UpdateAgentState(Agent* self)
             FaceAgentFromAnimationMotion(self);
         break;
     case 3:
-        if (self->f754 != 0) {
+        if (self->mainPlayer != 0) {
             f32 out[3];
             f32 zero = 0.0f;
             out[1] = zero;
-            ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
+            ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->usesPitch ? &out[1] : 0, &out[2]);
             f32 y = out[1];
             SetAgentFacingAngles(self, out[0], y);
         }
-        ScheduleItemTimeouts((StateResetGroup*)(((StateResetObject*)self->fA74)->group));
+        ScheduleItemTimeouts((StateResetGroup*)(((StateResetObject*)self->stateObject)->group));
         break;
     case 4:
     case 5:
@@ -1145,12 +1145,12 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void ChangeAgentState(Agent* self, s32 state, void* context)
 {
-    self->f72C &= -2;
+    self->requestBits &= -2;
     if (self->f724 == state) return;
     s32 old = self->f724;
     self->desc08()->m5B(self, state, context);
     self->f724 = state;
-    self->f728 = g_gameClock[1];
+    self->stateTime = g_gameClock[1];
     self->desc08()->m5C(self, old, context);
     StateChangeArgs frame;
     frame.oldSlot = &old;
@@ -1163,9 +1163,9 @@ void ChangeAgentState(Agent* self, s32 state, void* context);
 void ForceAgentState(Agent* self, s32 mode, void* value)
 {
     if (mode == -1) {
-        self->fB88 = 0;
+        self->stateForced = 0;
     } else {
-        self->fB88 = 1;
+        self->stateForced = 1;
         ChangeAgentState(self, mode, value);
     }
 }
@@ -1178,54 +1178,54 @@ void InitContactPairFlags(World* self, Collider* obj);
 void LeaveAgentState(Agent* self, s32 mode)
 {
     s32 i;
-    if (self->f7E0 != 0) {
-        self->f86C = self->f7E0->time / self->f7E0->anim->length;
+    if (self->statePlayer != 0) {
+        self->lastClipPhase = self->statePlayer->time / self->statePlayer->anim->length;
     }
-    self->fB78 = 0;
-    self->fB7C = 0;
-    self->fB84 = 0;
-    self->fB8C = 0;
-    for (i = 0; i < self->fA78; i++) {
-        ((BaseObject*)self->fA7C[i].obj)->desc->m03((BaseObject*)self->fA7C[i].obj);
+    self->followsClipMotion = 0;
+    self->facingLocked = 0;
+    self->stateLocked = 0;
+    self->loopBackArmed = 0;
+    for (i = 0; i < self->meshKeyCount; i++) {
+        ((BaseObject*)self->meshKeys[i].obj)->desc->m03((BaseObject*)self->meshKeys[i].obj);
     }
     switch (self->f724) {
     case 1:
-        if (self->f754 != 0 && mode != 2) {
-            self->f918 = self->f754->time;
-            self->f91C = self->f754->speed;
-            StopAnimationPlayer(self->f754);
-            self->f754 = 0;
+        if (self->mainPlayer != 0 && mode != 2) {
+            self->savedClipTime = self->mainPlayer->time;
+            self->savedClipSpeed = self->mainPlayer->speed;
+            StopAnimationPlayer(self->mainPlayer);
+            self->mainPlayer = 0;
         }
         break;
     case 3:
-        if (self->f754 != 0) {
-            StopAnimationPlayer(self->f754);
-            self->f754 = 0;
+        if (self->mainPlayer != 0) {
+            StopAnimationPlayer(self->mainPlayer);
+            self->mainPlayer = 0;
         }
-        ((StateResetObject*)self->fA74)->desc->m18(((StateResetObject*)self->fA74), self);
-        SetStateAndNotify(((StateResetObject*)self->fA74), 0);
-        self->fA74 = 0;
+        ((StateResetObject*)self->stateObject)->desc->m18(((StateResetObject*)self->stateObject), self);
+        SetStateAndNotify(((StateResetObject*)self->stateObject), 0);
+        self->stateObject = 0;
         if (mode == 1) {
-            self->f914 = self->f918;
+            self->resumeTime = self->savedClipTime;
         }
         break;
     case 14:
-        self->f748 = g_gameTime[0] + RandomFloatInRange(self->f740, self->f744);
+        self->targetReadyTime = g_gameTime[0] + RandomFloatInRange(self->retargetDelayMin, self->retargetDelayMax);
         break;
     case 11:
         self->f724 = mode;
         InitContactPairFlags(g_currentWorld, self);
     case 16:
-        self->fC04 = 0;
+        self->contactsDisabled = 0;
         break;
     case 8:
-        self->fC00 = 3.4028235e+38f;
+        self->state8Deadline = 3.4028235e+38f;
         break;
     }
-    if (self->f7E0 != 0) {
-        StopAnimationPlayer(self->f7E0);
-        self->f7E0 = 0;
-        self->f72C &= ~2;
+    if (self->statePlayer != 0) {
+        StopAnimationPlayer(self->statePlayer);
+        self->statePlayer = 0;
+        self->requestBits &= ~2;
     }
 }
 
@@ -1264,37 +1264,37 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     if (arg != 0) {
         tgt = arg;
     } else {
-        tgt = (Animation*)self->f758[self->f724].obj;
+        tgt = (Animation*)self->stateClips[self->f724].obj;
     }
-    t = (Animation*)self->f870[self->f724].obj;
+    t = (Animation*)self->secondaryClips[self->f724].obj;
     if (t == 0) {
-        t = ((Animation*)self->f8F8);
+        t = ((Animation*)self->defaultSecondaryClip);
     }
     SetTurningColliderFollowedMesh(self, (Collider*)t, 0);
     self->desc08()->m5E(self, 1);
 
     switch (self->f724) {
     case 2:
-        if (self->f754 != 0) {
-            SetAnimationPlayerSpeed(self->f754, 1.0f);
+        if (self->mainPlayer != 0) {
+            SetAnimationPlayerSpeed(self->mainPlayer, 1.0f);
         } else {
             SetAgentFacingAngles(self, self->v1D0.z, 0.0f);
         }
         break;
     case 3:
-        if (((StateResetObject*)self->fA74)->id2D0 == 2) {
+        if (((StateResetObject*)self->stateObject)->id2D0 == 2) {
             CreateAgentAnimationPlayer(self);
         }
         break;
     case 1:
-        if (((Animation*)self->f750) != 0 && evt != 2) {
+        if (((Animation*)self->mainClip) != 0 && evt != 2) {
             Attachment* v;
-            CreateAnimationPlayerWithoutPresetTargets(((Animation*)self->f750), self, 1, &self->f754, self->f914, self->f91C);
-            v = FindPlayerAttachmentByOwner(self->f754, GetEffectiveObjectId(self));
-            if ((void*)v == self->f1EC) {
+            CreateAnimationPlayerWithoutPresetTargets(((Animation*)self->mainClip), self, 1, &self->mainPlayer, self->resumeTime, self->savedClipSpeed);
+            v = FindPlayerAttachmentByOwner(self->mainPlayer, GetEffectiveObjectId(self));
+            if ((void*)v == self->positionAttachment) {
                 v->mode0 = 5;
             }
-            if ((void*)v == self->f1F0) {
+            if ((void*)v == self->orientationAttachment) {
                 v->mode1 = 5;
             }
         }
@@ -1303,48 +1303,48 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         Quad4 vec;
         s32 count;
         BaseObject** list;
-        TransformPointBetweenFrames(self, 0, (Vec02*)self->fB60, (Vec02*)&vec);
+        TransformPointBetweenFrames(self, 0, (Vec02*)self->scatterPoint, (Vec02*)&vec);
         ScatterObjectsAtPoint((ScatterController*)g_scatterController, &vec, self->fB58, self->fB70);
         InitContactPairFlags(g_currentWorld, self);
-        if (((Animation*)self->f750) != 0) {
+        if (((Animation*)self->mainClip) != 0) {
             s32 i;
             PushBackMemoryMark();
             i = 0;
-            GatherAnimationEventObjects(((Animation*)self->f750), self, &count, &list);
+            GatherAnimationEventObjects(((Animation*)self->mainClip), self, &count, &list);
             while (i < count) {
                 BaseObject* e = list[i++];
                 RemoveFromSmallList((StateResetGroup*)(*(s32*)((u8*)e + 0x328)), (StateResetObject*)e);
             }
             PopBackMemoryMark();
         }
-        SetFlagTableBit((FlagTable*)g_flagTable, self->fB10);
+        SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
         if (((BaseObject*)self->fB54) != 0) {
             ((BaseObject*)self->fB54)->desc->m18(((BaseObject*)self->fB54), self);
             self->fB54 = 0;
         }
-        if (self->fBD4 != 0) {
-            f32 f = self->fA70;
+        if (self->fadesOut != 0) {
+            f32 f = self->fadeDelay;
             if (tgt != 0) {
                 f += tgt->length;
             }
             FadeOutPlacedObject(self, f);
         }
-        self->fC04 = 1;
+        self->contactsDisabled = 1;
         break;
     }
     case 16:
-        self->fC04 = 1;
-        self->fA68--;
+        self->contactsDisabled = 1;
+        self->hitsLeft--;
         break;
     case 6:
-        self->fBF4 = 3.4028235e+38f;
-        SetAgentFacingAngles(self, self->f910, 0.0f);
+        self->state6Deadline = 3.4028235e+38f;
+        SetAgentFacingAngles(self, self->placeHeading, 0.0f);
         break;
     case 7:
         self->fBF8 = 3.4028235e+38f;
         break;
     case 10:
-        self->fBFC = 3.4028235e+38f;
+        self->clip10Deadline = 3.4028235e+38f;
         break;
     }
 
@@ -1352,22 +1352,22 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         f32 w;
         s32 mode;
         if (self->f724 == 2 && self->fB14 != 0) {
-            f32 t = self->fB18;
+            f32 t = self->startPhase;
             w = (0.0f <= t) ? t : RandomFloatInRange(0.0f, 1.0f);
         } else {
-            Animation* cur = ((Animation*)self->f868);
+            Animation* cur = ((Animation*)self->lastClip);
             if (cur == 0) {
                 w = 0.0f;
             } else if (tgt == cur) {
-                w = self->f86C;
+                w = self->lastClipPhase;
             } else {
                 s32 i;
                 w = 0.0f;
-                for (i = 0; i < self->f7E4; i++) {
-                    Group08* g = &self->f7E8[i];
+                for (i = 0; i < self->clipGroupCount; i++) {
+                    Group08* g = &self->clipGroups[i];
                     u32 j;
                     for (j = 0; j < 4; j++) {
-                        if (((BaseObject*)self->f868)->id == g->ids[j]) {
+                        if (((BaseObject*)self->lastClip)->id == g->ids[j]) {
                             break;
                         }
                     }
@@ -1378,7 +1378,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
                             }
                         }
                         if (j < 4) {
-                            w = self->f86C;
+                            w = self->lastClipPhase;
                             break;
                         }
                     }
@@ -1389,13 +1389,13 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         if ((evt ^ 0xB) == 0) {
             mode |= 4;
         }
-        if (self->fBEC == -1 || self->fBF0 == 0) {
-            CreateAnimationPlayerWithoutPresetTargets(tgt, self, mode, &self->f7E0, w * tgt->length, 1.0f);
+        if (self->bindingKey == -1 || self->bindingObject == 0) {
+            CreateAnimationPlayerWithoutPresetTargets(tgt, self, mode, &self->statePlayer, w * tgt->length, 1.0f);
         } else {
-            CreateAnimationPlayer(tgt, self, 1, (TargetBinding*)&self->fBEC, mode, &self->f7E0, w * tgt->length, 1.0f);
+            CreateAnimationPlayer(tgt, self, 1, (TargetBinding*)&self->bindingKey, mode, &self->statePlayer, w * tgt->length, 1.0f);
         }
-        self->f868 = tgt;
-        self->f86C = 0.0f;
+        self->lastClip = tgt;
+        self->lastClipPhase = 0.0f;
     }
 
     switch (self->f724) {
@@ -1414,7 +1414,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     }
 }
 
-s32 GetAgentRosterState(Agent* self) { if (!self->f720) return 3; return *(s32*)((u32)self->f720 + 0x50); }
+s32 GetAgentRosterState(Agent* self) { if (!self->roster) return 3; return *(s32*)((u32)self->roster + 0x50); }
 
 #include "object_message.h"
 struct TrackedNodeOffer;
@@ -1444,10 +1444,10 @@ extern const Vec02 g_unitXVector;
 s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 {
     SlotMessage msg;
-    if (self->fBD8 != 0) {
+    if (self->requestsBlocked != 0) {
         return 1;
     }
-    if (self->fB0C != 0 && (ev->obj->desc->flags & 2) != 0 && IsObjectInPool((ObjectPool*)self->fB0C, (Collider*)ev->obj) != 0) {
+    if (self->targetSet != 0 && (ev->obj->desc->flags & 2) != 0 && IsObjectInPool((ObjectPool*)self->targetSet, (Collider*)ev->obj) != 0) {
         return 1;
     }
     s32 handled = HandleObjectEvent(self, (ObjectEvent*)ev);
@@ -1455,25 +1455,25 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
         return handled;
     }
     void* key = 0;
-    s32 i = self->fAC4;
+    s32 i = self->extraClipCount;
     while (--i >= 0) {
-        Pend08* r = &self->fAC8[i];
-        if (r->f00 & ev->mask) {
+        Pend08* r = &self->extraClips[i];
+        if (r->mask & ev->mask) {
             key = r->obj;
             break;
         }
     }
     if (*(s32*)((u8*)self + 0xBDC) != 0) {
         if (0.0001f < Vu0::ToFloat(Vu0::Length(Vu0::Q(ev->push)))) {
-            self->fB7C = 0;
+            self->facingLocked = 0;
             f32 heading = ArctangentOfRatio(-ev->push.y, -ev->push.x);
             f32 turn = WrapAngle(heading - self->f638);
             SetAgentFacingAngles(self, WrapAngle(self->f638 + turn * *(f32*)&self->fBD0), self->fB24);
             TurnColliderTowardHeading(self);
         }
     }
-    ChangeAgentState(self, self->fA68 > 0 ? 16 : 11, key);
-    if (self->fB00 != 0) {
+    ChangeAgentState(self, self->hitsLeft > 0 ? 16 : 11, key);
+    if (self->memberGroup != 0) {
         msg.kind = 6;
         Vu0::Q(msg.vb) = Vu0::Q(self->v140);
         msg.vb.z = ev->height;
@@ -1482,7 +1482,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
         } else {
             Vu0::Set(msg.va, Vu0::NormalizeOrMoved(Vu0::Q(ev->push), Vu0::Q(g_unitXVector)));
         }
-        self->fB00->desc->m1B(self->fB00, &msg);
+        self->memberGroup->desc->m1B(self->memberGroup, &msg);
     }
     ((AgentNotice*)&msg)->self = self;
     ((AgentNotice*)&msg)->obj = ev->obj;
@@ -1517,7 +1517,7 @@ s32 AcceptAgentRequest(Agent* self, AgentRequest* req)
     return FindNodeForQuery(&f, 0, 0) != 0;
 }
 
-s32 IsAgentRequestBlocked(Agent* self, s32 unused1) { return self->fBD8 != 0; }
+s32 IsAgentRequestBlocked(Agent* self, s32 unused1) { return self->requestsBlocked != 0; }
 
 
 
@@ -1525,23 +1525,23 @@ void StopAnimationPlayer(AnimationPlayer* self);
 void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void ApplyPendingAgentChanges(Agent* self) {
-    if (self->f72C == 0) {
+    if (self->requestBits == 0) {
         return;
     }
-    if (self->f72C & 2) {
-        if (self->f7E0 != 0) {
+    if (self->requestBits & 2) {
+        if (self->statePlayer != 0) {
             if (self->f724 != 0xB) {
-                StopAnimationPlayer(self->f7E0);
-                self->f7E0 = 0;
+                StopAnimationPlayer(self->statePlayer);
+                self->statePlayer = 0;
             } else {
-                self->f7E0->time = self->f7E0->anim->length;
-                self->f7E0->f10 = 3.4028235e+38f;
+                self->statePlayer->time = self->statePlayer->anim->length;
+                self->statePlayer->f10 = 3.4028235e+38f;
             }
         }
         s32 m = -3;
-        self->f72C &= m;
+        self->requestBits &= m;
     }
-    if (self->f72C & 1) {
+    if (self->requestBits & 1) {
 
         ChangeAgentState(self, self->f730, 0);
     }
@@ -1553,8 +1553,8 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
 
 void SteerAgentAlongPath(Agent* self)
 {
-    s32 last = self->f92C - 1;
-    s32 n = self->f930;
+    s32 last = self->pathCount - 1;
+    s32 n = self->pathIndex;
     n = (n < last) ? n : last;
     Vec02 target;
     Vu0::Q(target) = Vu0::Q(*(Vec02*)((u8*)self + 0x940 + (n << 4)));
@@ -1590,11 +1590,11 @@ void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
 
 void RestartAgentClip(Agent* self)
 {
-    self->fB8C = 0;
-    self->fA60 = 0;
-    f32 r = GetAnimationMarkerTime(self->f7E0->anim, 0x1B1);
-    SeekAnimationPlayer(self->f7E0, 0, r, 1.0f);
-    self->fBA4 = 0;
+    self->loopBackArmed = 0;
+    self->pathValid = 0;
+    f32 r = GetAnimationMarkerTime(self->statePlayer->anim, 0x1B1);
+    SeekAnimationPlayer(self->statePlayer, 0, r, 1.0f);
+    self->arrivalTime = 0;
 }
 
 s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
@@ -1617,9 +1617,9 @@ s32 TestAgentTargetContact(Agent* self, s32 key, Collider* other)
         goto ret0;
     if (other->root == self->root)
         goto ret1;
-    if (!self->fB0C)
+    if (!self->targetSet)
         goto ret0;
-    if (!IsObjectInPool((ObjectPool*)self->fB0C, other))
+    if (!IsObjectInPool((ObjectPool*)self->targetSet, other))
         goto ret0;
 ret1:
     return 1;
@@ -1649,37 +1649,37 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
     HandleSwitchedColliderNotification(self, kind, msg);
     switch (kind) {
     case 5:
-        if ((void*)msg == self->f7E0) {
-            self->f72C |= 2;
-        } else if ((void*)msg == self->f754) {
+        if ((void*)msg == self->statePlayer) {
+            self->requestBits |= 2;
+        } else if ((void*)msg == self->mainPlayer) {
             SetAgentMainClip(self, 0);
         }
         break;
     case 0x15: {
-        if (msg->source != self->f754) {
+        if (msg->source != self->mainPlayer) {
             break;
         }
         StateResetObject* obj = (StateResetObject*)msg->obj;
-        self->fA74 = obj;
+        self->stateObject = obj;
         obj->desc->m17(obj, self);
-        self->f72C |= 1;
+        self->requestBits |= 1;
         self->f730 = 3;
         s32 state;
-        s32 id = ((StateResetObject*)self->fA74)->id2E0;
+        s32 id = ((StateResetObject*)self->stateObject)->id2E0;
         ItemKeeper* keeper;
-        if (id != -1 && (keeper = (ItemKeeper*)self->f720) != 0) {
-            if (keeper->f180 == -1) {
-                keeper->f180 = id;
+        if (id != -1 && (keeper = (ItemKeeper*)self->roster) != 0) {
+            if (keeper->selectedId == -1) {
+                keeper->selectedId = id;
             }
-            state = ((ItemKeeper*)self->f720)->f180 == ((StateResetObject*)self->fA74)->id2E0 ? 1 : 2;
+            state = ((ItemKeeper*)self->roster)->selectedId == ((StateResetObject*)self->stateObject)->id2E0 ? 1 : 2;
         } else {
             state = 2;
         }
-        SetStateAndNotify((StateResetObject*)self->fA74, state);
+        SetStateAndNotify((StateResetObject*)self->stateObject, state);
         break;
     }
     case 0x16:
-        if (msg->source != self->fA74) {
+        if (msg->source != self->stateObject) {
             break;
         }
         switch (msg->code) {
@@ -1690,25 +1690,25 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             break;
         case 0:
             self->f730 = 1;
-            self->f72C |= 1;
+            self->requestBits |= 1;
             break;
         }
         break;
     case 0x13: {
         AnimationPlayer* player = (AnimationPlayer*)msg->source;
         Animation* anim = player->anim;
-        if (player != self->f7E0) {
+        if (player != self->statePlayer) {
             break;
         }
         switch (msg->code) {
         case 0x138:
-            if (anim->f9C == 0) {
+            if (anim->movedTrack == 0) {
                 break;
             }
         slope: {
             Vec02 v;
             Vec02 w;
-            PositionCurve* c = anim->f9C->pos;
+            PositionCurve* c = anim->movedTrack->pos;
             c->vt->eval(c, self, msg->time, player->speed, 0, 0, &v);
             u128 s = Vu0::FromFloat(-1.0f);
             Vu0::Q(F(Vec02, 0x640)) = Vu0::MulX(Vu0::Q(v), s);
@@ -1721,17 +1721,17 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             if (FindAnimationMarkerEvent(anim, 0x1A7) == 0) {
                 break;
             }
-            if (anim->f9C == 0 || anim->f9C->pos == 0) {
+            if (anim->movedTrack == 0 || anim->movedTrack->pos == 0) {
                 break;
             }
-            self->fB78 = 1;
+            self->followsClipMotion = 1;
             goto slope;
         case 0x1A7:
-            self->fB78 = 0;
+            self->followsClipMotion = 0;
             break;
         case 0x1AC: {
             F(s32, 0xB90) = 1;
-            self->fA60 = 0;
+            self->pathValid = 0;
             AnimEvent* from = FindAnimationMarkerEvent(anim, 0x1AE);
             AnimEvent* mid = FindAnimationMarkerEvent(anim, 0x1AF);
             AnimEvent* to = FindAnimationMarkerEvent(anim, 0x1B1);
@@ -1745,8 +1745,8 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             Vec02 p0;
             Vec02 p1;
             f32 zero = 0.0f;
-            anim->f9C->pos->vt->eval(anim->f9C->pos, self, from->a0.f, zero, 0, &p0, 0);
-            anim->f9C->pos->vt->eval(anim->f9C->pos, self, end->a0.f, zero, 0, &p1, 0);
+            anim->movedTrack->pos->vt->eval(anim->movedTrack->pos, self, from->a0.f, zero, 0, &p0, 0);
+            anim->movedTrack->pos->vt->eval(anim->movedTrack->pos, self, end->a0.f, zero, 0, &p1, 0);
             F(f32, 0xB94) = p1.x - p0.x;
             F(f32, 0xB98) = (end->a0.f - from->a0.f) / *(f32*)&anim->props6C[0x10];
             break;
@@ -1758,40 +1758,40 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             ((AgentSlotFn)self->desc08()->m61)(self);
             break;
         case 0x1AF:
-            self->fB8C = 1;
+            self->loopBackArmed = 1;
             break;
         case 0x1B1:
-            if (self->fB8C != 0) {
+            if (self->loopBackArmed != 0) {
                 AnimEvent* e = FindAnimationMarkerEvent(anim, 0x1B0);
                 f32 t = e != 0 ? e->a0.f : msg->time;
-                SeekAnimationPlayer(self->f7E0, 0, t, e != 0 ? 1.0f : 0.0f);
+                SeekAnimationPlayer(self->statePlayer, 0, t, e != 0 ? 1.0f : 0.0f);
             }
             break;
         case 0x1AA:
-            self->fB84 = 1;
+            self->stateLocked = 1;
             break;
         case 0x1AB:
-            self->fB84 = 0;
+            self->stateLocked = 0;
             break;
         case 0x1A8:
-            self->fB7C = 1;
+            self->facingLocked = 1;
             break;
         case 0x1A9:
-            self->fB7C = 0;
+            self->facingLocked = 0;
             break;
         case 0x1B2:
-            self->fBD8 = 1;
+            self->requestsBlocked = 1;
             break;
         case 0x1B3:
-            self->fBD8 = 0;
+            self->requestsBlocked = 0;
             break;
         case 0x1A5: {
-            u8* g = (u8*)self->fB0C;
+            u8* g = (u8*)self->targetSet;
             if (g != 0) {
                 if (*(s32*)(g + 0x50) == -1) {
                     *(void**)(g + 0xE0) = self->desc08()->m62(self);
                 }
-                LaunchChosenPoolObject((ObjectPool*)self->fB0C, 1);
+                LaunchChosenPoolObject((ObjectPool*)self->targetSet, 1);
             }
             break;
         }
@@ -1799,7 +1799,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
         break;
     }
     case 0xA:
-        if (msg->obj == self && self->fB8C != 0) {
+        if (msg->obj == self && self->loopBackArmed != 0) {
             ((AgentSlotFn)self->desc08()->m60)(self);
         }
         break;
@@ -1827,10 +1827,10 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
             nearer += closer;
         }
         if (nearer == 0) {
-            self->fBFC = g_gameClock[1] + F(f32, 0xBE0);
+            self->clip10Deadline = g_gameClock[1] + F(f32, 0xBE0);
         } else {
             f32 r = RandomFloatInRange((f32)(nearer - 1) / (f32)count, (f32)nearer / (f32)count);
-            self->fBFC = g_gameClock[1] + (1.0f - r) * F(f32, 0xBE0) + r * F(f32, 0xBE4);
+            self->clip10Deadline = g_gameClock[1] + (1.0f - r) * F(f32, 0xBE0) + r * F(f32, 0xBE4);
         }
         break;
     }
@@ -1865,19 +1865,19 @@ s32 IsAgentTargetInRange(Agent* self)
         }
     }
     f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140))));
-    if (IsInsideRange((ValueRange*)&self->f738, dist) == 0) {
+    if (IsInsideRange((ValueRange*)&self->targetRangeMin, dist) == 0) {
         return 0;
     }
     f32 bearing = __builtin_fabsf(ComputeAgentTargetBearing(self));
     f32 g = D_00274CE0.c[0] + dist * (D_00274CE0.c[1] + dist * D_00274CE0.c[2]);
     g = Limit(g, g_unitRange[0], g_unitRange[1]);
-    if (self->f74C < g * bearing) {
+    if (self->targetAngleLimit < g * bearing) {
         return 0;
     }
-    if (g_gameTime[0] < self->f748) {
+    if (g_gameTime[0] < self->targetReadyTime) {
         return 0;
     }
-    if (self->fB0C != 0 && HasObjectPoolChoice((ObjectPool*)self->fB0C) == 0) {
+    if (self->targetSet != 0 && HasObjectPoolChoice((ObjectPool*)self->targetSet) == 0) {
         return 0;
     }
     return 1;
@@ -1909,7 +1909,7 @@ s32 IsAgentSlotIndex(s32 index);
 void SetAgentStateClip(Agent* self, s32 index, s32 value)
 {
     if (IsAgentSlotIndex(index)) {
-        Slot08* p = &self->f758[index];
+        Slot08* p = &self->stateClips[index];
         p->id = value;
         if (value == -1) {
             p->obj = 0;
@@ -1925,16 +1925,16 @@ s32 GetAgentStateClip(Agent* self, s32 index)
 {
     if (IsAgentSlotIndex(index) == 0)
         return 0;
-    return (s32)self->f758[index].obj;
+    return (s32)self->stateClips[index].obj;
 }
 
 void AddAgentExtraClip(Agent* self, s32 a1, s32 a2)
 {
-    s32 n = self->fAC4;
+    s32 n = self->extraClipCount;
     if ((u32)n < 4) {
-        self->fAC4 = n + 1;
-        Pend08* p = &self->fAC8[n];
-        p->f00 = a1;
+        self->extraClipCount = n + 1;
+        Pend08* p = &self->extraClips[n];
+        p->mask = a1;
         p->id = a2;
 
     }
@@ -1945,7 +1945,7 @@ void ResolveAndStartObject(BaseObject* self);
 
 void* ResolveAgentClip(Agent* self, s32 id)
 {
-    Animation* item = (Animation*)FindFirstObjectById(self->world, 0x101, id, self->fB74);
+    Animation* item = (Animation*)FindFirstObjectById(self->world, 0x101, id, self->copySource);
     if (item != 0) {
         item->enabled = 0;
         MoveObjectAnimationTrackToEnd(item, self);
@@ -1959,7 +1959,7 @@ void* ResolveAgentClip(Agent* self, s32 arg);
 void ResolveAgentClips(Agent* self)
 {
     s32 i = 16;
-    Slot08* slot = self->f758;
+    Slot08* slot = self->stateClips;
     do {
         if (slot->id != -1) {
             slot->obj = ResolveAgentClip(self, slot->id);
@@ -1970,29 +1970,29 @@ void ResolveAgentClips(Agent* self)
     } while (i >= 0);
 
     s32 j = 0;
-    if (self->fAC4 > 0) {
+    if (self->extraClipCount > 0) {
         do {
-            Pend08* late = &self->fAC8[j];
+            Pend08* late = &self->extraClips[j];
             if (late->id != -1) {
                 late->obj = ResolveAgentClip(self, late->id);
                 late->id = -1;
             }
             j++;
-        } while (j < self->fAC4);
+        } while (j < self->extraClipCount);
 
     }
 }
 
 void SetAgentMemberGroupId(Agent* self, s32 v)
 {
-    self->fAFC = v;
-    self->fAF8 = 1;
+    self->memberGroupId = v;
+    self->hasMemberGroupId = 1;
 }
 
 void SetAgentTargetSetId(Agent* self, s32 v)
 {
-    self->fB08 = v;
-    self->fB04 = 1;
+    self->targetSetId = v;
+    self->hasTargetSetId = 1;
 }
 
 s32 IsAgentSlotIndex(s32 index);
@@ -2000,7 +2000,7 @@ s32 IsAgentSlotIndex(s32 index);
 void SetAgentSecondaryClipId(Agent* self, s32 index, s32 value)
 {
     if (IsAgentSlotIndex(index))
-        self->f870[index].id = value;
+        self->secondaryClips[index].id = value;
 }
 
 void ResolveAndStartObject(BaseObject* self);
@@ -2008,7 +2008,7 @@ void ResolveAndStartObject(BaseObject* self);
 void ResolveAgentSecondaryClips(Agent* self)
 {
     for (s32 i = 16; i >= 0; i--) {
-        Slot08* e = &self->f870[16 - i];
+        Slot08* e = &self->secondaryClips[16 - i];
         if (e->id != -1) {
             void* r = FindFirstObjectById(self->world, 0x101, e->id, self);
             e->obj = r;
@@ -2019,12 +2019,12 @@ void ResolveAgentSecondaryClips(Agent* self)
 
 void AddAgentMeshKey(Agent* self, s32 a, s32 b)
 {
-    u32 n = self->fA78;
+    u32 n = self->meshKeyCount;
     if (n < 4) {
-        self->fA78 = n + 1;
-        Elem08* e = &self->fA7C[n];
+        self->meshKeyCount = n + 1;
+        Elem08* e = &self->meshKeys[n];
         e->key = a;
-        e->f08 = b;
+        e->messageKind = b;
     }
 }
 
@@ -2039,10 +2039,10 @@ void SetAgentPathObjectId(Agent* self, s32 index)
         if (v == 0)
             return;
     }
-    if (v != self->f928)
-        self->fA60 = 0;
-    self->f924 = index;
-    self->f928 = v;
+    if (v != self->pathGraph)
+        self->pathValid = 0;
+    self->pathGraphId = index;
+    self->pathGraph = v;
 }
 
 void* GetActiveSwitchedCollider(void);
@@ -2050,10 +2050,10 @@ void* GetActiveSwitchedCollider(void);
 void* SelectAgentTarget(Agent* self)
 {
     void* s0;
-    if (self->fB50 != 0) {
-        s0 = self->fB50;
-    } else if (self->fB40 != 0) {
-        s0 = self->fB48;
+    if (self->primaryTarget != 0) {
+        s0 = self->primaryTarget;
+    } else if (self->hasSecondaryTarget != 0) {
+        s0 = self->secondaryTarget;
     } else {
         s0 = GetActiveSwitchedCollider();
     }
@@ -2083,8 +2083,8 @@ void StoreAgentTarget(Agent* self, s32* out)
 
 void SetAgentSecondaryTarget(Agent* self, s32 value)
 {
-    self->fB48 = (void*)value;
-    self->fB40 = 1;
+    self->secondaryTarget = (void*)value;
+    self->hasSecondaryTarget = 1;
 
 }
 
@@ -2096,7 +2096,7 @@ void PickAgentSecondaryTarget(Agent* self)
     Vec02 here;
     Vec02 there;
     Vec02 lead;
-    s32 n = GatherObjectsByMode(self->world, 5, self->fB4C, 0, 0x20, found);
+    s32 n = GatherObjectsByMode(self->world, 5, self->secondaryTargetKey, 0, 0x20, found);
     PlacedObject* pick = 0;
     f32 best = 3.40282347e+38f;
     vel = self->v150;
@@ -2113,7 +2113,7 @@ void PickAgentSecondaryTarget(Agent* self)
         *(Vu0::Vec*)&lead = k;
         u128 delta = Vu0::Sub(Vu0::Q(here), Vu0::Q(there));
         f32 d = Vu0::ToFloat(Vu0::Dot(delta, delta));
-        if (obj == self->fB48) {
+        if (obj == self->secondaryTarget) {
             d *= 0.5f;
         }
         if (d < best) {
@@ -2121,32 +2121,32 @@ void PickAgentSecondaryTarget(Agent* self)
             pick = obj;
         }
     }
-    self->fB48 = pick;
-    self->fB40 = 1;
+    self->secondaryTarget = pick;
+    self->hasSecondaryTarget = 1;
 }
 
 void SetAgentPrimaryTarget(Agent* self, s32 value)
 {
-    self->fB50 = (void*)value;
+    self->primaryTarget = (void*)value;
 }
 
 
 
 void ComputeAgentContactValue(Agent* self, Contact03* out)
 {
-    if (self->fC04 != 0) {
+    if (self->contactsDisabled != 0) {
         f32 a = D_00274CF4;
         f32 b = D_00274CF8[0];
-        out->f94 = a;
-        out->f98 = b;
+        out->friction = a;
+        out->bounce = b;
     } else {
         if (((s32 (*)(Agent*, void*))self->desc06()->m56)(self, out) != 0) {
-            f32 t = self->fBE8;
-            out->f98 = 0.0f;
-            out->f94 = t;
+            f32 t = self->contactValue;
+            out->bounce = 0.0f;
+            out->friction = t;
         } else {
-            out->f94 = 0.0f;
-            out->f98 = 0.0f;
+            out->friction = 0.0f;
+            out->bounce = 0.0f;
         }
     }
 }
@@ -2155,18 +2155,18 @@ void ClampTurningColliderContactLimit(TurningCollider* self, s32 flags, ContactL
 
 void ClampAgentContactLimit(Agent* self, s32 flags, ContactLimit03* out)
 { ClampTurningColliderContactLimit(self, flags, out);
-    if (self->fC04 != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->contact->v80.z) { out->limit = 0; } } } }
+    if (self->contactsDisabled != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->contact->normal.z) { out->limit = 0; } } } }
 
-void SetAgentAngleLimitDegrees(Agent* self, f32 value) { self->f74C = value * 0.017453294f; }
+void SetAgentAngleLimitDegrees(Agent* self, f32 value) { self->targetAngleLimit = value * 0.017453294f; }
 
 void AddItemKeeperStateTrigger(ItemKeeper* self, StateTrigger* value);
 
 void AddAgentStateTrigger(Agent* self, StateTrigger* value)
 {
-    AddItemKeeperStateTrigger((ItemKeeper*)self->f720, value);
+    AddItemKeeperStateTrigger((ItemKeeper*)self->roster, value);
 }
 
-void AddAgentClipGroup(Agent* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self->f7E4 < 8) { Group08* e = &self->f7E8[self->f7E4]; self->f7E4++; e->ids[0] = a; e->ids[1] = b; e->ids[2] = c; e->ids[3] = d; } }
+void AddAgentClipGroup(Agent* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self->clipGroupCount < 8) { Group08* e = &self->clipGroups[self->clipGroupCount]; self->clipGroupCount++; e->ids[0] = a; e->ids[1] = b; e->ids[2] = c; e->ids[3] = d; } }
 
 struct FaceRef;
 struct PooledContact;
@@ -2178,7 +2178,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
 
 void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
-    if (a0->fC04 == 0) {
+    if (a0->contactsDisabled == 0) {
         AddTurningColliderProbeContact(a0, a1, (void*)a4, (void*)a5);
     }
     if (a1 != a0->desc08()->m62(a0)) {
@@ -2189,8 +2189,8 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
             return;
         }
     }
-    for (s32 i = 0; i < a0->fA78; i++) {
-        Elem08* e = &a0->fA7C[i];
+    for (s32 i = 0; i < a0->meshKeyCount; i++) {
+        Elem08* e = &a0->meshKeys[i];
         if (IsObjectAttached((Collider*)e->obj) != 0) {
             if (a1->flags538 & 0x10000000000ULL) {
                 AddMeshContacts(a1, a1->radius3CC, (Vec02*)((u8*)a1 + 0x140), (Collider*)e->obj,
@@ -2235,34 +2235,34 @@ void DispatchAgentContactHits(Agent* self)
     if (target == 0) {
         return;
     }
-    if (self->fC04 == 0) {
-        Contact03* head = self->fAAC;
+    if (self->contactsDisabled == 0) {
+        Contact03* head = self->hitContacts;
         if (head == 0) {
             goto out;
         }
         Player* p = g_player;
-        if (target == p || target == self->fB50) {
-            if (self->fAC0 == 0) {
-                void* h = p->f2200;
+        if (target == p || target == self->primaryTarget) {
+            if (self->sparePlayerContacts == 0) {
+                void* h = p->aimTarget;
                 if (h != 0) {
                     h = *(void**)((u8*)h + 0x18);
                     if (h != 0 && *(Agent**)((u8*)h + 0x50) == self) {
-                        switch (p->f223C) {
+                        switch (p->aimMode) {
                         case 4:
                         case 5:
                         case 6:
                         case 7:
-                            if (g_gameTime[0] - p->f2240 < 0.25f) {
+                            if (g_gameTime[0] - p->aimStartTime < 0.25f) {
                                 goto out;
                             }
                         }
-                        if (g_player->f2220 == 10 && g_gameTime[0] - g_player->f2224 < 0.25f) {
+                        if (g_player->f2220 == 10 && g_gameTime[0] - g_player->stateStartTime < 0.25f) {
                             goto out;
                         }
-                        switch (g_player->f2228) {
+                        switch (g_player->subState) {
                         case 7:
                         case 8:
-                            if (g_gameTime[0] - g_player->f222C < 0.25f) {
+                            if (g_gameTime[0] - g_player->subStateStartTime < 0.25f) {
                                 goto out;
                             }
                         }
@@ -2274,24 +2274,24 @@ void DispatchAgentContactHits(Agent* self)
             s32 j = (c->end[0].body != (Collider*)self);
             s32 i;
             Elem08* e;
-            for (i = 0; i < self->fA78; i++) {
-                e = &self->fA7C[i];
+            for (i = 0; i < self->meshKeyCount; i++) {
+                e = &self->meshKeys[i];
                 if (e->obj == c->end[j].part && IsObjectAttached((Collider*)e->obj) != 0) {
                     break;
                 }
             }
-            if (i < self->fA78) {
+            if (i < self->meshKeyCount) {
                 ContactEnd03* other = &c->end[1 - j];
                 Collider* part = other->part;
                 OwnerMessage msg;
                 Vec02 vel;
                 if (IsObjectOfKind(part, 5) != 0) {
-                    InitOwnerMessage(&msg, e->f08, self);
+                    InitOwnerMessage(&msg, e->messageKind, self);
                     switch (msg.mode) {
                     case 6:
-                        if (self->fB1C != 0) {
+                        if (self->usesPitch != 0) {
                             msg.fn = (void (*)(void))LaunchObjectWithAgentVelocity;
-                            self->vAB0 = D_00248D30;
+                            self->launchVelocity = D_00248D30;
                             break;
                         }
                     case 0:
@@ -2300,7 +2300,7 @@ void DispatchAgentContactHits(Agent* self)
                         ClampVectorLength(&vel, &vel, D_00274D04);
                         vel.z = D_00274D00 >? vel.z;
                         msg.fn = (void (*)(void))LaunchObjectWithAgentVelocity;
-                        self->vAB0 = vel;
+                        self->launchVelocity = vel;
                         break;
                     }
                     ((SwitchedCollider*)part)->desc05()->m4C((SwitchedCollider*)part, &msg);
@@ -2311,16 +2311,16 @@ void DispatchAgentContactHits(Agent* self)
                     q.kind = 2;
                     FindNodeForQuery(&q, 0, 0);
                 }
-                for (i = 0; i < self->fA78; i++) {
-                    ((BaseObject*)self->fA7C[i].obj)->desc->m03((BaseObject*)self->fA7C[i].obj);
+                for (i = 0; i < self->meshKeyCount; i++) {
+                    ((BaseObject*)self->meshKeys[i].obj)->desc->m03((BaseObject*)self->meshKeys[i].obj);
                 }
                 break;
             }
         }
     }
 out:
-    FreePooledContactChain(self->world, self->fAAC);
-    self->fAAC = 0;
+    FreePooledContactChain(self->world, self->hitContacts);
+    self->hitContacts = 0;
 }
 
 void StopAnimationPlayer(AnimationPlayer* self);
@@ -2332,20 +2332,20 @@ void SetAgentMainClip(Agent* self, void* value)
 {
     void* p;
 
-    if (value == self->f750) {
+    if (value == self->mainClip) {
         return;
     }
-    p = self->f754;
+    p = self->mainPlayer;
     if (p != 0) {
         StopAnimationPlayer((AnimationPlayer*)p);
-        self->f754 = 0;
+        self->mainPlayer = 0;
     }
-    self->f750 = value;
+    self->mainClip = value;
     if (GetAgentRosterState(self) == 0) {
         self->f730 = 0;
-        self->f72C = self->f72C | 1;
+        self->requestBits = self->requestBits | 1;
     }
-    p = self->f750;
+    p = self->mainClip;
     if (p != 0) {
         FindNearestAnimationPathTime((Animation*)p, self, 0.0f, (Vec02*)((u8*)self + 0x140), (f32*)((u8*)self + 0x918), 0, 0);
     }
@@ -2364,11 +2364,11 @@ s32 IsAgentFree(void)
 // What func_001CB3D0 reads of the player's f23A0 and f23A8: a word that, set, ends the test.
 struct Blocker_23A0 {
     u8 pad00[0x54];
-    s32 f54;                // 0x54
+    s32 untargetable;       // 0x54: non-zero when the object the player holds stops agents targeting it
 };
 struct Blocker_23A8 {
     u8 pad00[0x6C];
-    s32 f6C;                // 0x6C
+    s32 untargetable;       // 0x6C: non-zero when the object the player holds stops agents targeting it
 };
 
 s32 MaskWorldBitsBySave(void);
@@ -2388,17 +2388,17 @@ s32 IsPlayerUntargetableByAgent(Agent* self)
     u128 diff = Vu0::Sub(Vu0::Q(t->v140), Vu0::Q(self->v140));
     u128 dv = Vu0::Copy(diff);
     Vu0::Q(d) = dv;
-    switch (t->f239C) {
+    switch (t->targetMode) {
     case 3:
         if (MaskWorldBitsBySave() & 0x12000) {
             return 1;
         }
         break;
     case 0:
-        if (t->f23A0 != 0 && ((Blocker_23A0*)t->f23A0)->f54 != 0) {
+        if (t->targetCurve != 0 && ((Blocker_23A0*)t->targetCurve)->untargetable != 0) {
             return 0;
         }
-        if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
+        if (t->targetPoint != 0 && ((Blocker_23A8*)t->targetPoint)->untargetable != 0) {
             return 0;
         }
         if (Vu0::ToFloat(Vu0::Dot(dv, Vu0::Q(t->m110.r[0]))) > 0.0f) {
@@ -2406,10 +2406,10 @@ s32 IsPlayerUntargetableByAgent(Agent* self)
         }
         break;
     case 1:
-        if (t->f23A0 != 0 && ((Blocker_23A0*)t->f23A0)->f54 != 0) {
+        if (t->targetCurve != 0 && ((Blocker_23A0*)t->targetCurve)->untargetable != 0) {
             return 0;
         }
-        if (t->f23A8 != 0 && ((Blocker_23A8*)t->f23A8)->f6C != 0) {
+        if (t->targetPoint != 0 && ((Blocker_23A8*)t->targetPoint)->untargetable != 0) {
             return 0;
         }
         if (Vu0::ToFloat(Vu0::Dot(diff, Vu0::Q(t->m110.r[0]))) < 0.0f) {
@@ -2417,7 +2417,7 @@ s32 IsPlayerUntargetableByAgent(Agent* self)
         }
         break;
     case 2:
-        if (t->f2228 == 0x10) {
+        if (t->subState == 0x10) {
             return 1;
         }
         break;
@@ -2430,14 +2430,14 @@ s32 IsAgentFacingBlocked(Agent* self)
 {
     s32 r = 0;
     Player* g;
-    if (self->fB7C != 0) {
+    if (self->facingLocked != 0) {
         goto set;
     }
     if (self->fB80 != 0) {
         r = 1;
     } else {
         g = g_player;
-        if (g != 0 && g->f275C != 0) {
+        if (g != 0 && g->animSeekValue != 0) {
 set:
             r = 1;
         }
@@ -2462,7 +2462,7 @@ void InitObject(BaseObject* self);
 void InitItemKeeper(ItemKeeper* self)
 {
     InitObject(self);
-    self->f180 = -1;
+    self->selectedId = -1;
 }
 
 void SetItemKeeperState(ItemKeeper* self, s32 ns);
@@ -2520,7 +2520,7 @@ void FindWantedItems(ItemKeeper* a0)
             if ((u32)n < 16) {
                 a0->owned.found[n] = r;
                 a0->owned.count = n + 1;
-                r->f720 = a0;
+                r->roster = a0;
             }
         }
     }
@@ -2566,8 +2566,8 @@ void GroupAnimationEventObjects(ItemKeeper* self)
     arr = (GatheredObjects*)AllocateZeroedBackMemory(self->owned.count * 8);
     for (i = 0; i < self->owned.count; i++) {
         Agent* agent = self->owned.found[i];
-        if (agent->f750 != 0) {
-            GatherAnimationEventObjects((Animation*)agent->f750, agent, &arr[i].count, (BaseObject***)&arr[i].items);
+        if (agent->mainClip != 0) {
+            GatherAnimationEventObjects((Animation*)agent->mainClip, agent, &arr[i].count, (BaseObject***)&arr[i].items);
         }
     }
     for (i = 0; i < self->owned.count; i++) {
@@ -2766,7 +2766,7 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
                 f32 t = g_gameClock[1];
                 i++;
                 f32 r = RandomFloatInRange(D_00274D18[0], D_00274D18[1]);
-                it->fC00 = g_gameClock[1] + r;
+                it->state8Deadline = g_gameClock[1] + r;
                 p++;
             } while (i < self->owned.count);
         }
@@ -2779,7 +2779,7 @@ void SetItemKeeperState(ItemKeeper* self, s32 ns)
                 f32 t = g_gameClock[1];
                 j++;
                 f32 r = RandomFloatInRange(D_00274D08[0], D_00274D08[1]);
-                (*p)->fBF4 = g_gameClock[1] + r;
+                (*p)->state6Deadline = g_gameClock[1] + r;
                 p++;
             } while (j < self->owned.count);
         }
@@ -2857,9 +2857,9 @@ void AssignItemKeeperMemberPlaces(ItemKeeper* self)
         used[best] = 1;
         Agent* m = self->listed.found[best];
         i++;
-        GetObjectWorldPosition(m, &member->v900);
+        GetObjectWorldPosition(m, &member->placePosition);
         GetObjectWorldRotation(m, &rot);
-        member->f910 = ArctangentOfRatio(rot.r[0].y, rot.r[0].x);
+        member->placeHeading = ArctangentOfRatio(rot.r[0].y, rot.r[0].x);
     }
     PopBackMemoryMark();
     if (i != self->owned.count) {
@@ -2880,8 +2880,8 @@ void AssignItemKeeperMemberPlaces(ItemKeeper* self)
             f32 r2 = RandomFloatInRange(D_00274D30.c[0], D_00274D30.c[1]);
             ComputePolarOffset((Vec3*)&offset, ang, r2 * radius, 0.0f);
             u128 q = Vu0::Add(Vu0::Q(self->targetPos), Vu0::Q(offset));
-            m->f910 = ang;
-            Vu0::Q(m->v900) = q;
+            m->placeHeading = ang;
+            Vu0::Q(m->placePosition) = q;
             ang0 = WrapAngle(ang0 + step);
         }
     }

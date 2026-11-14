@@ -8,7 +8,7 @@ void DrawFontGlyphTurned(Font* self, u16 key, u32 color, PacketWriter* s, f32 x,
 {
     FontGlyph* e = FindFontGlyph(self, key);
     if (e != 0) {
-        s32 shift = (s32)((self->f60u >> 30) & 0xF);
+        s32 shift = (s32)((self->texWordU >> 30) & 0xF);
         s32 s4 = 1 << shift;
         f32 h = (f32)self->height * self->sy;
         f32 w = (f32)e->w * self->sx;
@@ -25,12 +25,12 @@ void DrawFontGlyphTurned(Font* self, u16 key, u32 color, PacketWriter* s, f32 x,
                 AddGifRegisterWrite(s, 0x3F, (u64)0);
             }
             u64 v = 0x31001;
-            if (self->f30 != 0) {
-                v = self->f38;
+            if (self->useTestWord != 0) {
+                v = self->testWord;
             }
             AddGifRegisterWrite(s, 0x47, (u64)v);
             AddGifRegisterWrite(s, 0x42, (u64)0x44);
-            AddGifRegisterWrite(s, 6, (u64)self->f60u);
+            AddGifRegisterWrite(s, 6, (u64)self->texWordU);
             AddGifRegisterWrite(s, 0x14, (u64)0x60);
             AddGifRegisterWrite(s, 8, (u64)5);
             AddGifRegisterWrite(s, 0, (u64)0x1D4);
@@ -40,15 +40,15 @@ void DrawFontGlyphTurned(Font* self, u16 key, u32 color, PacketWriter* s, f32 x,
             AddGifUvRegListEntry(s, u0, v0);
             s32 sx = (s32)((x + 1728.0f) * 16.0f);
             s32 sy = (s32)((py * 0.5462963f + 1920.0f) * 16.0f);
-            AddGifXyzfRegListEntry(s, sx, sy, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx, sy, self->drawZ, 0);
             AddGifUvRegListEntry(s, u1, v0);
             s32 sy2 = (s32)((y * 0.5462963f + 1920.0f) * 16.0f);
-            AddGifXyzfRegListEntry(s, sx, sy2, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx, sy2, self->drawZ, 0);
             AddGifUvRegListEntry(s, u0, v1);
             s32 sx2 = (s32)((px + 1728.0f) * 16.0f);
-            AddGifXyzfRegListEntry(s, sx2, sy, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx2, sy, self->drawZ, 0);
             AddGifUvRegListEntry(s, u1, v1);
-            AddGifXyzfRegListEntry(s, sx2, sy2, self->f40, 0);
+            AddGifXyzfRegListEntry(s, sx2, sy2, self->drawZ, 0);
             self->vt->end((Font*)((u8*)self + self->vt->adj7), 0, &g_gsPacketWriter);
         }
     }

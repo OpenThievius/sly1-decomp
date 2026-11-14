@@ -13,7 +13,7 @@ struct ObjectCreator : Collider {
     f32 stateTime;  // 0x554: the time of the last state change (func_001A7998)
     s32 createsObject;  // 0x558: whether slot 16 creates the object
     void* created;  // 0x55C: the object slot 16 creates (func_0015A838)
-    void* f560;  // 0x560
+    void* startAnimation; // 0x560
     void* activeHandle;  // 0x564: the handle func_001A7998 starts (func_0012C7B0)
     void* notifyRecord;  // 0x568: a record set up by slot 10 (func_00159478); its first word
                             //         is the object func_001A7998 sends a message to

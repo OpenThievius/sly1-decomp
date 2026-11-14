@@ -213,10 +213,10 @@ void PlacePlayerOnLinkedObject(Player* self)
     Vec02 along;
     Vec02 n1;
     Vec02 w1;
-    LinkAnchor* anchor = (LinkAnchor*)self->f2204;
+    LinkAnchor* anchor = (LinkAnchor*)self->boundObject;
     GetObjectWorldPosition((BaseObject*)anchor, &pos);
-    GetObjectWorldRotation((BaseObject*)self->f2204, &rot);
-    ComputeObjectMotionInFrame((PlacedObject*)(((LinkAnchor*)self->f2204)->parent), 0, &pos, &vel, 0, 0, 0);
+    GetObjectWorldRotation((BaseObject*)self->boundObject, &rot);
+    ComputeObjectMotionInFrame((PlacedObject*)(((LinkAnchor*)self->boundObject)->parent), 0, &pos, &vel, 0, 0, 0);
     Vu0::Q(delta) = Vu0::Q(dir) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(pos));
     f32 dist = NormalizeInPlace(&dir, g_unitZVector);
     Vu0::Q(rel) = Vu0::Sub(Vu0::Q(self->v150), Vu0::Q(vel));
@@ -234,7 +234,7 @@ void PlacePlayerOnLinkedObject(Player* self)
     Vec02 w2;
     Vu0::Set(w2, Vu0::MulX(a2, Vu0::Vec::Scalar(Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(g))) / dist)).q);
     f32 gain;
-    if (self->f2228 == 0x32 || self->f2228 == 0x34) {
+    if (self->subState == 0x32 || self->subState == 0x34) {
         gain = D_00274D44;
     } else {
         gain = D_00274D48;
@@ -246,13 +246,13 @@ void PlacePlayerOnLinkedObject(Player* self)
     SplitVectorAlongAxis(&acc, &rot.r[1], &accAlong, &accAcross);
     f32 dt = ClockDt((LinkClock*)g_gameClock);
     Vu0::Q(acc) = Vu0::MulXSum(Vu0::Q(accAlong), Vu0::Scalar(D_00274D40 * dt + 1.0f), Vu0::Q(accAcross), Vu0::Scalar(gain * dt + 1.0f));
-    if (self->f2228 == 0x32 || self->f2228 == 0x34) {
-        if (ClockTime((LinkClock*)g_gameClock) - self->f222C < D_00274D4C) {
+    if (self->subState == 0x32 || self->subState == 0x34) {
+        if (ClockTime((LinkClock*)g_gameClock) - self->subStateStartTime < D_00274D4C) {
             f32 push = dt * D_00274D50[0];
-            if (self->f2228 == 0x32) {
+            if (self->subState == 0x32) {
                 push = -push;
             }
-            if (self->f22A8 != 0) {
+            if (self->linkReversed != 0) {
                 push = -push;
             }
             f32 l = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(across)));
@@ -263,16 +263,16 @@ void PlacePlayerOnLinkedObject(Player* self)
         }
     }
     f32 rate;
-    f32 r = ApproachValueClampingVelocity(dist, speed, D_00274D84 - ((LinkAnchor*)self->f2204)->fB0, ClockDt((LinkClock*)g_gameClock), D_00274D70, &rate);
+    f32 r = ApproachValueClampingVelocity(dist, speed, D_00274D84 - ((LinkAnchor*)self->boundObject)->fB0, ClockDt((LinkClock*)g_gameClock), D_00274D70, &rate);
     f32 lo = D_00274D80;
     f32 hi = D_00274D84;
     Vu0::Q(acc) = Vu0::MulX(Vu0::Q(acc), Vu0::Scalar((hi <? dist) / (lo >? r)));
     Vec02 v2;
     Vec02 lin;
     Vec02 ang;
-    if (self->f22AC != 0) {
-        PlacedObject* o = ((LinkSystem*)self->f22AC)->object;
-        Attachment* a = o->f1EC;
+    if (self->linkSystem != 0) {
+        PlacedObject* o = ((LinkSystem*)self->linkSystem)->object;
+        Attachment* a = o->positionAttachment;
         if (a != 0 && a->mode0 == 1) {
             Vec02 p;
             Vec02 v;
@@ -282,7 +282,7 @@ void PlacePlayerOnLinkedObject(Player* self)
         } else {
             lin = D_00248D30;
         }
-        a = o->f1F0;
+        a = o->orientationAttachment;
         if (a != 0 && a->mode1 == 1) {
             Mat02 m;
             Vec02 w;
@@ -310,10 +310,10 @@ void PlacePlayerOnLinkedObject(Player* self)
     Vu0::Q(v) = Vu0::Add(Vu0::Add(Vu0::Q(v2), Vu0::Cross(Vu0::Q(acc), Vu0::MulX(nd, Vu0::Scalar(r)))), Vu0::MulX(nd, Vu0::ScalarAt(rate)));
     *(u128*)&g = Vu0::Sub(Vu0::DivX(Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v150)), Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock))), Vu0::Q(self->gravity));
     Vu0::Q(ang) = nd;
-    if (self->f22AC != 0) {
-        SolvePlayerLinkSystem(self, ((LinkSystem*)self->f22AC)->object, &pos, (const LinkVector*)&g, (LinkRow*)&self->v22B0);
+    if (self->linkSystem != 0) {
+        SolvePlayerLinkSystem(self, ((LinkSystem*)self->linkSystem)->object, &pos, (const LinkVector*)&g, (LinkRow*)&self->linkAcceleration);
     } else {
-        Vu0::Q(self->v22B0) = Vu0::Q(g);
+        Vu0::Q(self->linkAcceleration) = Vu0::Q(g);
     }
 }
 
@@ -348,7 +348,7 @@ void TurnPlayerTowardLinkedObject(Player* self)
     Mat02 b;
     Mat02 r;
     AddColliderForce(self, (u8*)self + 0x22B0);
-    GetObjectWorldPosition((BaseObject*)self->f2204, &pos);
+    GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(*(Vec02*)((u8*)self + 0x140)));
     BuildShortestArcRotation(&g_unitZVector, &d, &a);
     BuildAxisAngleMatrix(&g_unitZVector, &b, self->f638);
@@ -362,8 +362,8 @@ void AddColliderTorque(void* target, void* slot);
 
 void SyncPlayerTarget(Player* self)
 {
-    AddColliderForce(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22D0);
-    AddColliderTorque(((LinkTargetHolder*)self->f22AC)->target, (u8*)self + 0x22E0);
+    AddColliderForce(((LinkTargetHolder*)self->linkSystem)->target, (u8*)self + 0x22D0);
+    AddColliderTorque(((LinkTargetHolder*)self->linkSystem)->target, (u8*)self + 0x22E0);
 }
 
 void GetLinkedObjectHeading(Player* self, f32* heading);
@@ -406,39 +406,39 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     s32 toward = 0;
     s32 away = 0;
     GetLinkedObjectHeading(self, &self->f638);
-    if (self->f22A8 != 0) {
+    if (self->linkReversed != 0) {
         self->f638 = WrapAngle(self->f638 + 3.14159274f);
     }
     ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)pad, 0, &stick);
     f32 diff = WrapAngle(stick - self->f638);
-    if (0.3f < self->f634) {
+    if (0.3f < self->stickLevel) {
         f32 ad = __builtin_fabsf(diff);
         if (ad < 1.04719758f) {
             toward = 1;
-            self->f22A0 = g_gameTime;
+            self->linkPushTime = g_gameTime;
         } else if (2.09439516f < ad) {
             away = 1;
-            self->f22A0 = g_gameTime;
+            self->linkPushTime = g_gameTime;
         }
     } else {
-        self->f22A4 = -1;
+        self->linkReturnState = -1;
     }
-    GetObjectWorldPosition((BaseObject*)self->f2204, &pos);
+    GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140)), Vu0::Q(g_unitZVector)));
     BuildAxisAngleMatrix(&g_unitZVector, &m, self->f638);
     Vu0::Q(local) = Vu0::RotateTransposed(m, Vu0::Q(dir));
     f32 angle = WrapAngle(ArctangentOfRatio(local.z, local.x) - 1.57079637f);
-    s32 state = self->f2228;
+    s32 state = self->subState;
     switch (state) {
     case 0x32:
         if (away) {
             state = 0x34;
         } else if (toward) {
-            if (D_00274D94 < g_gameTime - self->f222C) {
-                self->f22A4 = state;
+            if (D_00274D94 < g_gameTime - self->subStateStartTime) {
+                self->linkReturnState = state;
                 state = 0x33;
             }
-        } else if (D_00274D9C < g_gameTime - self->f22A0) {
+        } else if (D_00274D9C < g_gameTime - self->linkPushTime) {
             state = 0x33;
         }
         break;
@@ -446,20 +446,20 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
         if (toward) {
             state = 0x32;
         } else if (away) {
-            if (D_00274D98 < g_gameTime - self->f222C) {
-                self->f22A4 = state;
+            if (D_00274D98 < g_gameTime - self->subStateStartTime) {
+                self->linkReturnState = state;
                 state = 0x33;
             }
-        } else if (D_00274D9C < g_gameTime - self->f22A0) {
+        } else if (D_00274D9C < g_gameTime - self->linkPushTime) {
             state = 0x33;
         }
         break;
     case 0x33:
-        if (toward && self->f22A4 != 0x32) {
-            self->f22A4 = -1;
+        if (toward && self->linkReturnState != 0x32) {
+            self->linkReturnState = -1;
             state = 0x32;
-        } else if (away && self->f22A4 != 0x34) {
-            self->f22A4 = -1;
+        } else if (away && self->linkReturnState != 0x34) {
+            self->linkReturnState = -1;
             state = 0x34;
         } else if (__builtin_fabsf(angle) < D_00274DA0) {
             s32 slow = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150))) < D_00274DA8;
@@ -469,11 +469,11 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
         }
         break;
     case 0x35:
-        if (toward && self->f22A4 != 0x32) {
-            self->f22A4 = -1;
+        if (toward && self->linkReturnState != 0x32) {
+            self->linkReturnState = -1;
             state = 0x32;
-        } else if (away && self->f22A4 != 0x34) {
-            self->f22A4 = -1;
+        } else if (away && self->linkReturnState != 0x34) {
+            self->linkReturnState = -1;
             state = 0x34;
         } else if (__builtin_fabsf(angle) > D_00274DA4) {
             s32 fast = D_00274DAC < Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v150)));
@@ -485,15 +485,15 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     }
     SetPlayerState(self, 3, state);
     PlacePlayerOnLinkedObject(self);
-    if (self->f22AC != 0) {
-        ClearRootTries((PlacedObject*)(((LinkRoot_1CD0C8*)self->f22AC)->root));
+    if (self->linkSystem != 0) {
+        ClearRootTries((PlacedObject*)(((LinkRoot_1CD0C8*)self->linkSystem)->root));
     }
     f32 w0;
     f32 w1;
-    if (self->f2228 == 0x35) {
+    if (self->subState == 0x35) {
         return;
     }
-    switch (self->f2228) {
+    switch (self->subState) {
     case 0x32:
         w0 = w1 = 1.0f;
         break;
@@ -503,19 +503,19 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
         break;
     case 0x33:
         w0 = 0.0f;
-        w1 = (0.5f < self->f2388) ? 1.0f : 0.0f;
+        w1 = (0.5f < self->linkTowardRamp) ? 1.0f : 0.0f;
         break;
     }
-    self->f238C = ApproachValueWithRamp(self->f238C, w0, g_gameClock[2], (RampProfile*)D_00274DB0, 0);
-    f32 b = ApproachValueWithRamp(self->f2388, w1, g_gameClock[2], (RampProfile*)D_00274DC0, 0);
-    self->f2388 = b;
-    f32 a = self->f238C;
-    self->f2360 = a * b;
-    self->f236C = a * (1.0f - b);
-    self->f2378 = 1.0f - a;
-    SetBlendItemWeights((BlendAnimationView*)self->f2384, 0xC, 3, &self->f2360);
+    self->linkMoveRamp = ApproachValueWithRamp(self->linkMoveRamp, w0, g_gameClock[2], (RampProfile*)D_00274DB0, 0);
+    f32 b = ApproachValueWithRamp(self->linkTowardRamp, w1, g_gameClock[2], (RampProfile*)D_00274DC0, 0);
+    self->linkTowardRamp = b;
+    f32 a = self->linkMoveRamp;
+    self->linkTowardWeight = a * b;
+    self->linkAwayWeight = a * (1.0f - b);
+    self->linkIdleWeight = 1.0f - a;
+    SetBlendItemWeights((BlendAnimationView*)self->linkBlend, 0xC, 3, &self->linkTowardWeight);
     f32 c = ClampBetween(angle / D_00274DCC, -1.0f, 1.0f);
-    ((LinkMessage_1CD0C8*)self->watched2230)->f18 = ClampToMagnitude((((LinkBlend_1CD0C8*)self->f2384)->f34 * (c + 1.0f) * 0.5f - ((LinkMessage_1CD0C8*)self->watched2230)->f14) / g_gameClock[2], D_00274DD0);
+    ((LinkMessage_1CD0C8*)self->stateAnimPlayer)->f18 = ClampToMagnitude((((LinkBlend_1CD0C8*)self->linkBlend)->f34 * (c + 1.0f) * 0.5f - ((LinkMessage_1CD0C8*)self->stateAnimPlayer)->f14) / g_gameClock[2], D_00274DD0);
 }
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
@@ -666,14 +666,14 @@ void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
     Mat02 arc;
     Mat02 axis;
     Vec02 k;
-    LinkSource* source = (LinkSource*)self->f2204;
-    PlacedObject* held = ((LinkRecord*)((PlacedObject*)self->f61C)->f224)->object;
+    LinkSource* source = (LinkSource*)self->boundObject;
+    PlacedObject* held = ((LinkRecord*)((PlacedObject*)self->f61C)->linkRecord)->object;
     TransformPointBetweenFrames((PlacedObject*)source->frame, self, &source->point, &a);
     TransformPointBetweenFrames(0, self, &held->v140, &b);
     Vu0::Q(gap) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
     BuildShortestArcRotation(&g_unitXVector, &gap, &arc);
     u128 here = Vu0::Q(a);
-    u128 reach = Vu0::FromFloatAt(((LinkSource*)self->f2204)->reach);
+    u128 reach = Vu0::FromFloatAt(((LinkSource*)self->boundObject)->reach);
     Vu0::Q(k) = reach;
     Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(D_00248D30)), reach);
     BuildAxisAngleMatrix(&g_unitXVector, &axis, D_00274DD4);

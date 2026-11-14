@@ -37,12 +37,12 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
         SetWarpCursor(self->f570, r, 2);
         self->f590 = 1.0f;
         self->f58C = 1.0f;
-        Animation* an = self->f570->f2E4;
+        Animation* an = self->f570->openAnimation;
         if (an != 0) {
             SetScreenElementSlideInTime(self, an->length);
         }
         GameProgress* g = g_saveData;
-        if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+        if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
             PauseStagedBankVoice();
         }
         self->vtbl[14](self);
@@ -53,14 +53,14 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
         self->vtbl[15](self);
         if (self->f570->f560 == 0) {
             BeginWarpPageClose(self->f570);
-            Animation* an = self->f570->f2E8;
+            Animation* an = self->f570->closeAnimation;
             if (an != 0) {
                 SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
             SetElementStackState((ElementStack*)g_elementStack, 3);
             GameProgress* g = g_saveData;
-            if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+            if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
                 ResumeStagedBankVoice();
             }
         }

@@ -13,9 +13,9 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
     if (a != self->walkerChoice && a > 0) {
         ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
-            if (!(g_saveData->f19EC & 2)) {
+            if (!(g_saveData->optionFlags & 2)) {
                 slot = GetLoadedKeyRecord(5);
-                g_saveData->f19EC |= 2;
+                g_saveData->optionFlags |= 2;
             }
         } else {
             Gl_eu_16B300* gp = (Gl_eu_16B300*)&D_0026FA90;

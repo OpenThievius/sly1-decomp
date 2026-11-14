@@ -109,11 +109,11 @@ void AppendToList(List01* self, void* item);
 
 struct CyclerEventMessage {
     u8 pad0[0x8];
-    f32 f8;
-    s32 fC;
+    f32 impulse;
+    s32 flags;
     u8 pad1[0x20 - 0x10];
-    Quad16 f20;
-    Quad16 f30;
+    Quad16 origin;
+    Quad16 target;
 };
 struct __attribute__((aligned(16))) GroupForwardMessage {
     s32 f0;
@@ -197,8 +197,8 @@ s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider**
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
-struct GroundFilterContext { u8 pad[0x50]; s32 f50; };
-struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
+struct GroundFilterContext { u8 pad[0x50]; s32 root; };
+struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
 struct FrameNode {
@@ -300,11 +300,11 @@ void StartObjectCycler(ObjectCycler* self)
         f32 t = RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
         self->nextCheckTime = g_gameClock[1] + t;
         t = RandomFloatInRange(self->p670.a, self->p670.b);
-        self->f680 = g_gameClock[1] + t;
+        self->nextMessageTime = g_gameClock[1] + t;
     }
     SetObjectCyclerState(self, self->startState);
     StartPlacedObject(self);
-    self->f64C = self->radius3CC + self->radius3CC;
+    self->searchRadius = self->radius3CC + self->radius3CC;
 }
 
 extern f32 D_002621F8[6];
@@ -520,14 +520,14 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 {
     if (self->state != 1) {
         SetObjectCyclerState(self, 1);
-        if ((r->fC & 8) != 0) {
-            ApplyColliderImpulseEvent(self, r->f8, &r->f20, &r->f30);
+        if ((r->flags & 8) != 0) {
+            ApplyColliderImpulseEvent(self, r->impulse, &r->origin, &r->target);
         }
         if (self->group != 0) {
             GroupForwardMessage loc;
             loc.f0 = 6;
-            loc.f20 = r->f20;
-            loc.f10 = r->f30;
+            loc.f20 = r->origin;
+            loc.f10 = r->target;
             self->group->desc->m1B(self->group, &loc);
         }
     }
@@ -562,10 +562,10 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
     case 6:
         SetColliderAnchors(self, 0, 0, 0, 0);
         self->index = 0;
-        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+        self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
         break;
     }
-    (*(PlacedObject**)((u8*)self + 0x5D8))->f88 = 14;
+    (*(PlacedObject**)((u8*)self + 0x5D8))->visibilityMask = 14;
     self->stateEnd = g_gameClock[1];
     switch (state) {
     case 0:
@@ -626,7 +626,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
         SetColliderAnchors(self, 3, 0, 3, 0);
         self->index = 0;
         self->nextAdvanceTime = g_gameClock[1] + RandomFloatInRange(self->p658.a, self->p658.b);
-        self->f66C = g_gameClock[1];
+        self->lastLookTime = g_gameClock[1];
         self->stateEnd += RandomFloatInRange(self->p650.a, self->p650.b);
         break;
     }
@@ -642,7 +642,7 @@ void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 void SendObjectCyclerMessage(ObjectCycler* self)
 {
     GroupForwardMessage loc;
-    if (self->receiver678 && self->f680 <= g_gameClock[1]) {
+    if (self->receiver678 && self->nextMessageTime <= g_gameClock[1]) {
         loc.f0 = 6;
         if (self->source67C)
             ConvertPositionToWorld(self->source67C, (Vec02*)&loc.f20);
@@ -651,7 +651,7 @@ void SendObjectCyclerMessage(ObjectCycler* self)
         Vu0::Q(loc.f10) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
         ((f32*)&loc.f10)[2] = 0.0f;
         self->receiver678->desc->m1B(self->receiver678, &loc);
-        self->f680 = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
+        self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
     }
 }
 
@@ -717,7 +717,7 @@ s32 ChooseObjectCyclerNextState(ObjectCycler* self)
             break;
         }
     }
-    if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v5F0)))) < self->f64C) {
+    if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(self->v5F0)))) < self->searchRadius) {
         next = 6;
     } else if (touching) {
         next = 0;
@@ -750,7 +750,7 @@ s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
     if (active != 0) {
         Vu0::Vec pos = Vu0::Vec::Of(active->v140);
         Vu0::Q(point) = Vu0::MulAddX(pos.q, Vu0::Q(active->v150), Vu0::Scalar(0.5f));
-        s32 inside = LengthSquared(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))) < self->f684 * self->f684;
+        s32 inside = LengthSquared(Vu0::Sub(Vu0::Q(point), Vu0::Q(self->v140))) < self->triggerDistance * self->triggerDistance;
         if (inside) {
             return 1;
         }
@@ -760,25 +760,25 @@ s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
 
 s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {
-    if ((a1->f538 & 0x80000000000ULL) || a1->f50 == a0->f50) return 0;
-    u64 v = a1->f2CC;
+    if ((a1->flags & 0x80000000000ULL) || a1->root == a0->root) return 0;
+    u64 v = a1->flagsHigh;
     return ((s32)v ^ 1) & 1;
 }
 
 s32 IsObjectCyclerUnsupported(ObjectCycler* self)
 {
     f32* tbl = g_gameClock;
-    if (tbl[1] - self->f66C < 0.05f) {
+    if (tbl[1] - self->lastLookTime < 0.05f) {
         return 0;
     }
     PushBackMemoryMark();
     GroundProbe fr;
-    GatherCollidersInSphere(self->world, 0, self->f64C, &self->v140, (s32 (*)(void*, Collider*))(s32 (*)(GroundFilterContext*, GroundCandidate*))IsCyclerGroundCandidate, self, &fr.a, &fr.b);
+    GatherCollidersInSphere(self->world, 0, self->searchRadius, &self->v140, (s32 (*)(void*, Collider*))(s32 (*)(GroundFilterContext*, GroundCandidate*))IsCyclerGroundCandidate, self, &fr.a, &fr.b);
     fr.q = self->v140;
-    fr.q.z = fr.q.z - self->f64C;
+    fr.q.z = fr.q.z - self->searchRadius;
     s32 r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);
     PopBackMemoryMark();
-    self->f66C = tbl[1];
+    self->lastLookTime = tbl[1];
     return r == 0;
 }
 

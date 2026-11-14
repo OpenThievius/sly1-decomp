@@ -8,7 +8,7 @@ void StartRandomStreamVoice(TargetFollower* self)
     s32 r;
     s32* tbl;
 
-    if (self->f5C0 == 0) {
+    if (self->voiceEnabled == 0) {
         return;
     }
     if (HasStreamVoice() != 0) {
@@ -21,5 +21,5 @@ void StartRandomStreamVoice(TargetFollower* self)
     tbl = D_eu_0024AFD8;
     r = RandomIntInRange(0, 6);
     OpenKeyRecord(GetLoadedKeyRecord(tbl[r]));
-    self->f5CC = 1;
+    self->voicePending = 1;
 }

@@ -32,9 +32,9 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     s1 = self->state2D4;
     switch (s1) {
     case 0:
-        if (self->f324 != 0) {
+        if (self->startPending != 0) {
             if (D_00275F84 == 0 && q[1] != 0) {
-                self->f324 = 0;
+                self->startPending = 0;
                 ChooseStepSequenceState(self);
                 s1 = self->state2D4;
             }

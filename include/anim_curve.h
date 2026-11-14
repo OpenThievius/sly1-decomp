@@ -185,7 +185,7 @@ struct VectorKeyPositionCurve : PositionCurve {
 
 // Kind 2 (D_002196D8, 0x18 bytes): nothing read yet.
 struct PositionCurveKind2 : PositionCurve {
-    s32 f8;                 // 0x8
+    s32 closed;             // 0x8
     BlendConfig* cfg;       // 0xC: the records it mixes (func_00120470)
     BlendSequence* seq;     // 0x10: the time map, or 0
     PositionCurve** targets; // 0x14: one for each record of cfg
@@ -232,11 +232,11 @@ struct KeyedRotationCurve : RotationCurve {
 
 // Kind 2 (D_00219708, 0x1C bytes): a blend, as the position curves' kind 2 (func_00120700).
 struct RotationCurveKind2 : RotationCurve {
-    s32 f8;                 // 0x08
+    s32 closed;             // 0x08
     BlendConfig* cfg;       // 0x0C: the records it mixes
     BlendSequence* seq;     // 0x10: the time map, or 0
     RotationCurve** targets; // 0x14: one for each record of cfg
-    s32 f18;                // 0x18: 0 mixes the angles, otherwise the rotations are multiplied
+    s32 multiplyRotations;  // 0x18: 0 mixes the angles, otherwise the rotations are multiplied
 };
 
 // ---------------------------------------------------------------------------------------------

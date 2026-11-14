@@ -20,7 +20,7 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
     if (self->f570 == 0) return;
     if (self->f570->mode != 2) return;
     if (self->f570->f560 != 0) return;
-    if ((t->flags & 0x910) != 0 || t->f14 == 1) {
+    if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
         PopStackElement((ElementStack*)g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
         return;
@@ -30,8 +30,8 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
     s3 = IsWarpEntryAvailable(self->f570, self->f570->cursor, &loc[0], &loc[1]);
     s2 = GetPadHorizontalStep(t);
     v1 = GetPadVerticalStep(t);
-    t->f30 = g_gameClock.elapsed + t->f34;
-    t->f38 = g_gameClock.elapsed + t->f3C;
+    t->nextStepTimeX = g_gameClock.elapsed + t->stepDelayX;
+    t->nextStepTimeY = g_gameClock.elapsed + t->stepDelayY;
 
     if (v1 < 0) {
         MoveWarpCursor(self->f570, 0);

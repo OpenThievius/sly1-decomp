@@ -49,26 +49,26 @@ extern Camera* g_camera;
 struct GsWriterState {
     u8* end;                    // 0x00
     u8* begin;                  // 0x04
-    s32* f08;                   // 0x08
+    s32* packetHeader;          // 0x08
     u8* cur;                    // 0x0C
-    s32 f10;                    // 0x10
-    s32 f14;                    // 0x14
+    s32 padsOnClose;            // 0x10
+    s32 callsCloseHook;         // 0x14
     const PacketWriterVt* vt;   // 0x18
-    u32* f1C;                   // 0x1C
-    u32 f20;                    // 0x20
-    u32 f24;                    // 0x24: the GIF entry count
+    u32* openHeader;            // 0x1C
+    u32 elementCount;           // 0x20
+    u32 entryCount;             // 0x24: the GIF entry count
 };
 
 struct VifWriterState {
     u8* end;                    // 0x00
     u8* begin;                  // 0x04
-    s32* f08;                   // 0x08
+    s32* packetHeader;          // 0x08
     u8* cur;                    // 0x0C
-    s32 f10;                    // 0x10
-    s32 f14;                    // 0x14
+    s32 padsOnClose;            // 0x10
+    s32 callsCloseHook;         // 0x14
     const PacketWriterVt* vt;   // 0x18
-    u32* f1C;                   // 0x1C
-    u32 f20;                    // 0x20
+    u32* openHeader;            // 0x1C
+    u32 elementCount;           // 0x20
 };
 
 typedef char check_GsWriterState[sizeof(GsWriterState) == 0x28 ? 1 : -1];
@@ -246,9 +246,9 @@ void FlipDisplayFrame(void);
 
 struct FrameNode {
     u8 pad0[0x14];
-    u8* f14;
+    u8* owner;
     u8 pad18[0x1088 - 0x18];
-    void* f1088;
+    void* pooledSlot;
 };
 
 
@@ -337,10 +337,10 @@ void InitRenderFrames(void)
         RenderFrame* r = &g_renderFrames[i];
         r->bufA = (u8*)D_002C3B00 + i * 0x80000;
         r->bufB = D_003C3B00 + i * 0x100000;
-        r->f10 = D_005C3B00 + i * 0x10600;
-        SetListLinkOffset(&r->l20, 0x630);
-        SetListLinkOffset(&r->l2C, 0x1090);
-        SetListLinkOffset(&r->l38, 0xB8);
+        r->frameData = D_005C3B00 + i * 0x10600;
+        SetListLinkOffset(&r->releasedObjects, 0x630);
+        SetListLinkOffset(&r->detachedRecords, 0x1090);
+        SetListLinkOffset(&r->deferredReleases, 0xB8);
     }
     SetListLinkOffset(&D_002622E0, 0x630);
     SetListLinkOffset(&D_002622F0, 0x1090);
@@ -381,12 +381,12 @@ void BeginRenderFrame(void)
         RenderFrame* slot = g_buildFrame;
         s32 v = *(s32*)((u8*)g_camera + 0x21C);
         slot->flags = 0;
-        slot->f44 = v;
-        slot->f1C = 0;
+        slot->imageMask = v;
+        slot->hasMaskedImages = 0;
         UsePacketBufferMemory((PacketWriter*)&g_gsPacketWriter, 0x8000, slot->bufA);
     }
     UsePacketBufferMemory((PacketWriter*)&g_vifPacketWriter, 0x10000, g_buildFrame->bufB);
-    g_buildFrameData = g_buildFrame->i10;
+    g_buildFrameData = g_buildFrame->frameDataWord;
     BeginDmaTag((PacketWriter*)&g_gsPacketWriter);
     BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
 }
@@ -429,11 +429,11 @@ void SubmitRenderFrame(void)
 {
     WriteGsFinishPacket((PacketWriter*)&g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
     CloseDrawBuffer((PacketWriter*)&g_gsPacketWriter, g_buildFrame, 0);
-    g_buildFrame->l20 = D_002622E0;
+    g_buildFrame->releasedObjects = D_002622E0;
     ClearList(&D_002622E0);
-    g_buildFrame->l2C = D_002622F0;
+    g_buildFrame->detachedRecords = D_002622F0;
     ClearList(&D_002622F0);
-    g_buildFrame->l38 = g_deferredReleaseListC;
+    g_buildFrame->deferredReleases = g_deferredReleaseListC;
     ClearList(&g_deferredReleaseListC);
     g_buildFrameData = 0;
     g_buildFrame = 0;
@@ -442,9 +442,9 @@ void SubmitRenderFrame(void)
 
 void ActivateRenderFrame(RenderFrame* self)
 {
-    g_drawFrameData = self->i10;
-    SwitchActiveImageMask(self->f44);
-    if (self->f1C != 0 && g_maskedImagesPacket != 0) {
+    g_drawFrameData = self->frameDataWord;
+    SwitchActiveImageMask(self->imageMask);
+    if (self->hasMaskedImages != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
         StartDmaChain((DmaChannel*)g_gifChannel, (void*)g_maskedImagesPacket);
     }
@@ -511,31 +511,31 @@ void ReleaseFrameNodes(RenderFrame* self)
 {
     ListFrame it;
     FrameNode* n;
-    if (IsListEmpty(&self->l20) == 0) {
-        BeginListWalk::Of(&it, &self->l20);
+    if (IsListEmpty(&self->releasedObjects) == 0) {
+        BeginListWalk::Of(&it, &self->releasedObjects);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
-            RemoveFromList(&self->l20, n);
-            AppendToList((List01*)(n->f14 + 0x1CC0), n);
+            RemoveFromList(&self->releasedObjects, n);
+            AppendToList((List01*)(n->owner + 0x1CC0), n);
         }
-        ClearList(&self->l20);
+        ClearList(&self->releasedObjects);
         g_activeListFrames = it.prev;
     }
-    if (IsListEmpty(&self->l2C) == 0) {
-        BeginListWalk::Of(&it, &self->l2C);
+    if (IsListEmpty(&self->detachedRecords) == 0) {
+        BeginListWalk::Of(&it, &self->detachedRecords);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
-            if (n->f1088 != 0) {
-                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->f1088);
+            if (n->pooledSlot != 0) {
+                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->pooledSlot);
             }
-            RemoveFromList(&self->l2C, n);
+            RemoveFromList(&self->detachedRecords, n);
             PushFreeSlot(&g_currentWorld->pool1B40, n);
         }
-        ClearList(&self->l2C);
+        ClearList(&self->detachedRecords);
         g_activeListFrames = it.prev;
     }
-    if (IsListEmpty(&self->l38) == 0) {
-        BeginListWalk::Of(&it, &self->l38);
+    if (IsListEmpty(&self->deferredReleases) == 0) {
+        BeginListWalk::Of(&it, &self->deferredReleases);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
-            RemoveFromList(&self->l38, n);
+            RemoveFromList(&self->deferredReleases, n);
             PushFreeSlot(&g_currentWorld->pool1BF4, n);
         }
         g_activeListFrames = it.prev;

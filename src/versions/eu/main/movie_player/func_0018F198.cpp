@@ -17,7 +17,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
             u32 m;
             if (self->movieIndex >= 16) m = 0;
             else m = 1u << self->movieIndex;
-            if (g_saveData->f19F8 & m) flag = 1;
+            if (g_saveData->movieBits & m) flag = 1;
             if (flag) {
                 s32 stop = 0;
                 if (RestoreFadeRequest((ScreenFade*)g_screenFade, &g_padRecord, 2)) {

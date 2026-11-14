@@ -61,11 +61,11 @@ void RegisterWorldListedAgent(WorldListedAgent* self)
 
 void UnregisterWorldListedAgent(WorldListedAgent* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
 
-void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
+void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->listLink; CopyAgent(self,other); self->listLink=save; }
 
 void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
 
-void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->fC2C=D_0027C008++; }
+void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->number=D_0027C008++; }
 
 void SetSinCosPair(f32 value, SinCosPair* self)
 {

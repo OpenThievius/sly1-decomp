@@ -191,9 +191,9 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
     Vec02 edge[3];
     f32 u;
     f32 v;
-    BaseObject* end = obj->f224->p64;
+    BaseObject* end = obj->linkRecord->p64;
     TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)((u8*)end + 0x40), &b);
-    end = obj->f224->p60;
+    end = obj->linkRecord->p60;
     TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)((u8*)end + 0x40), &a);
     CopyVec3((Vec3*)&tri[1], (Vec3*)&self->points[0]);
     CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[1]);
@@ -331,7 +331,7 @@ void StartCameraPositionedObject(CameraPositionedObject* self)
 void MoveObjectToCamera(CameraPositionedObject* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
-    Vec02* src = (Vec02*)g_camera->f40;
+    Vec02* src = (Vec02*)g_camera->position;
     Vec02 q = *src;
     if (self->followHeight == 0) {
         q.z = self->v140.z;
@@ -415,15 +415,15 @@ void LoadStateGraph(StateGraph* self, BufferedStream* s)
     s32 i;
     s32 j;
     SetListLinkOffset(&self->walkers, 8);
-    self->f34 = ReadBufferedU8(s);
-    self->f38 = (StateEntry*)AllocateFrontMemory(self->f34 * sizeof(StateEntry));
-    for (i = 0; i < self->f34; i++) {
-        StateEntry* e = &self->f38[i];
+    self->stateCount = ReadBufferedU8(s);
+    self->states = (StateEntry*)AllocateFrontMemory(self->stateCount * sizeof(StateEntry));
+    for (i = 0; i < self->stateCount; i++) {
+        StateEntry* e = &self->states[i];
         e->key = ReadBufferedS16(s);
         e->extra = ReadBufferedS16(s);
     }
-    for (i = 0; i < self->f34; i++) {
-        StateEntry* e = &self->f38[i];
+    for (i = 0; i < self->stateCount; i++) {
+        StateEntry* e = &self->states[i];
         if (e->extra != -1) {
             e->extra = FindStateEntryIndexOrZero(self, e->extra);
         }
@@ -489,16 +489,16 @@ StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3)
     StateWalker* obj = (StateWalker*)PopZeroedFreeSlot(&self->world->pool1B88);
     obj->f1C = a1;
     obj->vt = (void*)&g_stateWalkerMethods;
-    obj->f20 = a3;
+    obj->playerFlags = a3;
     obj->f38 = 1.0f;
     obj->owner = self;
-    obj->f2C = -1;
+    obj->nextEntry = -1;
     AppendToList(&self->world->list1B94, obj);
 
     AppendToList((List01*)((u8*)self + 0x48), obj);
     if (a2 != -1) {
         s32 v = FindStateEntryIndexOrZero(self, a2);
-        obj->f28 = v;
+        obj->currentEntry = v;
         obj->index = v;
         NotifyStateWalkerChange(obj, -1, v);
     }
@@ -525,9 +525,9 @@ void* FindListNodeByKey(StateGraph* self, void* key)
 
 s32 FindStateEntryIndex(StateGraph* self, s32 key)
 {
-    s32 count = self->f34;
+    s32 count = self->stateCount;
     if (count > 0) {
-        StateEntry* p = self->f38;
+        StateEntry* p = self->states;
         s32 i = 0;
         do {
             if (p->key == key) {
@@ -548,7 +548,7 @@ s32 FindStateEntryIndexOrZero(void* self, s32 key)
 
 u32 GetStateEntryKey(StateGraph* a0, s32 a1)
 {
-    a1 = (a1 << 3) + (u32)a0->f38;
+    a1 = (a1 << 3) + (u32)a0->states;
     return *(u32*)a1;
 }
 
@@ -593,7 +593,7 @@ void GetStateWalkerTargetKey(StateWalker* a0, s32* out) {
     s32 idx = a0->index;
     s32 v;
     if (idx >= 0) {
-        v = ((StateGraph*)a0->owner)->f38[idx].key;
+        v = ((StateGraph*)a0->owner)->states[idx].key;
     } else {
         v = -1;
     }
@@ -601,10 +601,10 @@ void GetStateWalkerTargetKey(StateWalker* a0, s32* out) {
 }
 
 void GetStateWalkerCurrentKey(StateWalker* a0, s32* out) {
-    s32 idx = a0->f28;
+    s32 idx = a0->currentEntry;
     s32 v;
     if (idx >= 0) {
-        v = ((StateGraph*)a0->owner)->f38[idx].key;
+        v = ((StateGraph*)a0->owner)->states[idx].key;
     } else {
         v = -1;
     }
@@ -614,8 +614,8 @@ void GetStateWalkerCurrentKey(StateWalker* a0, s32* out) {
 void GetStateWalkerNextKey(StateWalker* self, s32* out)
 {
     s32 value;
-    if (self->f2C >= 0) {
-        value = ((StateGraph*)self->owner)->f38[self->f2C].key;
+    if (self->nextEntry >= 0) {
+        value = ((StateGraph*)self->owner)->states[self->nextEntry].key;
     } else {
         value = -1;
     }
@@ -633,16 +633,16 @@ void SetStateWalkerSpeed(StateWalker* self, f32 v)
 void TeleportStateWalker(StateWalker* self, s32 key)
 {
     s32 s1 = FindStateEntryIndexOrZero(self->owner, key);
-    if (self->f28 == s1) {
+    if (self->currentEntry == s1) {
         s32 v = self->index;
         if (v == s1 || v == -1) {
             return;
         }
     }
-    NotifyStateWalkerChange(self, self->f28, s1);
+    NotifyStateWalkerChange(self, self->currentEntry, s1);
     self->index = s1;
-    self->f28 = s1;
-    self->f2C = -1;
+    self->currentEntry = s1;
+    self->nextEntry = -1;
     StartNextStateWalkerEdge(self);
 }
 
@@ -651,9 +651,9 @@ void StartNextStateWalkerEdge(StateWalker* self)
 {
     StateGraph* g = self->owner;
     PushBackMemoryMark();
-    if (self->index == self->f28)
+    if (self->index == self->currentEntry)
     {
-        self->index = g->f38[self->index].extra;
+        self->index = g->states[self->index].extra;
     }
     s32 target = self->index;
     if (target == -1)
@@ -661,12 +661,12 @@ void StartNextStateWalkerEdge(StateWalker* self)
         goto fail;
     }
     {
-        s32 cur = self->f28;
-        s32* dist = (s32*)AllocateBackMemory(g->f34 * 4);
+        s32 cur = self->currentEntry;
+        s32* dist = (s32*)AllocateBackMemory(g->stateCount * 4);
         s32 i;
         s32 j;
         StateEdge* p;
-        for (i = 0; i < g->f34; i++)
+        for (i = 0; i < g->stateCount; i++)
         {
             dist[i] = (i == cur) ? 0 : -1;
         }
@@ -716,7 +716,7 @@ void StartNextStateWalkerEdge(StateWalker* self)
             goto fail;
         }
     found:
-        for (i = 0; i < g->f34; i++)
+        for (i = 0; i < g->stateCount; i++)
         {
             if (i != target && dist[i] == level)
             {
@@ -777,13 +777,13 @@ void StartNextStateWalkerEdge(StateWalker* self)
             }
             if (e->a == cur)
             {
-                NotifyStateWalkerChange(self, self->f28, e->b);
-                self->f28 = cur = e->b;
+                NotifyStateWalkerChange(self, self->currentEntry, e->b);
+                self->currentEntry = cur = e->b;
             }
             else
             {
-                NotifyStateWalkerChange(self, self->f28, e->a);
-                self->f28 = cur = e->a;
+                NotifyStateWalkerChange(self, self->currentEntry, e->a);
+                self->currentEntry = cur = e->a;
             }
             if (cur == target)
             {
@@ -796,13 +796,13 @@ void StartNextStateWalkerEdge(StateWalker* self)
             f32 fb;
             if (e->a == cur)
             {
-                self->f2C = e->b;
+                self->nextEntry = e->b;
                 fa = 0.0f;
                 fb = self->f38;
             }
             else
             {
-                self->f2C = e->a;
+                self->nextEntry = e->a;
                 fb = -self->f38;
                 fa = e->anim->length;
             }
@@ -811,7 +811,7 @@ void StartNextStateWalkerEdge(StateWalker* self)
             self->player = 0;
             if (e->anim != 0)
             {
-                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->f1C, self->f20, &self->player, fa, fb);
+                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->f1C, self->playerFlags, &self->player, fa, fb);
                 if (self->player != 0)
                 {
                     AddAnimationPlayerCallback(self->player, HandleStateWalkerTrackEnd, self);
@@ -844,10 +844,10 @@ done:
 
 void CommitStateWalkerArrival(StateWalker* self)
 {
-    NotifyStateWalkerChange(self, self->f28, self->f2C);
-    s32 v = self->f2C;
-    self->f2C = -1;
-    self->f28 = v;
+    NotifyStateWalkerChange(self, self->currentEntry, self->nextEntry);
+    s32 v = self->nextEntry;
+    self->nextEntry = -1;
+    self->currentEntry = v;
 }
 
 void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
@@ -902,12 +902,12 @@ void NotifyStateWalkerChange(StateWalker* self, s32 idx1, s32 idx2)
     s32 v1;
     s32 v2;
     if (idx1 >= 0) {
-        v1 = self->owner->f38[idx1].key;
+        v1 = self->owner->states[idx1].key;
     } else {
         v1 = -1;
     }
     if (idx2 >= 0) {
-        v2 = self->owner->f38[idx2].key;
+        v2 = self->owner->states[idx2].key;
     } else {
         v2 = -1;
     }
@@ -920,27 +920,27 @@ void NotifyStateWalkerChange(StateWalker* self, s32 idx1, s32 idx2)
 void InitCompanionAgent(CompanionAgent* self)
 {
     InitAgent(self);
-    self->fC20 = 2000.0f;
-    self->fC18 = 300.0f;
-    self->fC1C = 300.0f;
-    self->fC24 = 300.0f;
-    self->fC28 = -1;
-    self->fC2C = 0;
+    self->closeRadius = 2000.0f;
+    self->reachRadius = 300.0f;
+    self->reachHeight = 300.0f;
+    self->closeHeight = 300.0f;
+    self->closeZoneId = -1;
+    self->closeZone = 0;
     s32 i = 16;
-    Slot08* e = &self->fC38[16];
+    Slot08* e = &self->lookEntries[16];
     do {
         e->id = -1;
         i--;
         e--;
     } while (i >= 0);
-    self->fC10 = -1;
+    self->companionId = -1;
 }
 
 void ResolveCompanionAgentObjects(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
-    Slot08* e = self->fC38;
+    Slot08* e = self->lookEntries;
     do {
         s32 key = e->id;
         if (key == best) {
@@ -959,7 +959,7 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
     count = GatherObjectsById(self->world, 0x201, 0x60, self, count, list);
     if (count > 0) {
         do {
-            if (MatchesObjectId(*list, self->fC10) != 0) {
+            if (MatchesObjectId(*list, self->companionId) != 0) {
                 best = (s32)*list;
             } else {
                 (*list)->desc->m03(*list);
@@ -971,28 +971,28 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
     self->fC14 = (void*)best;
     PopBackMemoryMark();
     if (self->fC14 != 0) {
-        self->fC34 = CreatePoseSource(self->world, (PlacedObject*)self->fC14, (const T2195_Vt*)D_0021A790);
-        ((T2195_790*)self->fC34)->mode1 = 2;
-        ((T2195_790*)self->fC34)->hasTarget = 1;
-        ((T2195_790*)self->fC34)->f84 = ((T2195_790*)self->fC34)->f80 = 0;
-        InsertAttachment((PlacedObject*)self->fC14, (Attachment*)self->fC34);
-        self->fBF0 = (s32)self->fC14;
+        self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->fC14, (const T2195_Vt*)D_0021A790);
+        ((T2195_790*)self->poseSource)->mode1 = 2;
+        ((T2195_790*)self->poseSource)->hasTarget = 1;
+        ((T2195_790*)self->poseSource)->f84 = ((T2195_790*)self->poseSource)->f80 = 0;
+        InsertAttachment((PlacedObject*)self->fC14, (Attachment*)self->poseSource);
+        self->bindingObject = (s32)self->fC14;
     }
 }
 
 void SetCompanionAgentLookId(CompanionAgent* self, s32 index, s32 value)
 {
     (void)IsAgentSlotIndex(index);
-    self->fC38[index].id = value;
+    self->lookEntries[index].id = value;
 }
 
 void AddCompanionAgentExcludedId(CompanionAgent* self, s32 value)
 {
-    s32 n = self->fCD4;
+    s32 n = self->excludedCount;
     if ((u32)n < 4) {
-        self->fCD8[n].id = value;
+        self->excludedObjects[n].id = value;
         n++;
-        self->fCD4 = n;
+        self->excludedCount = n;
     }
 }
 
@@ -1000,17 +1000,17 @@ void StartCompanionAgent(CompanionAgent* self)
 {
     StartAgent(self);
     ResolveCompanionAgentObjects(self);
-    if (self->fC28 != -1) {
-        self->fC2C = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->fC28, self);
+    if (self->closeZoneId != -1) {
+        self->closeZone = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->closeZoneId, self);
     }
-    if (self->fCD4 > 0) {
+    if (self->excludedCount > 0) {
         s32 i = 0;
-        Slot08* p = self->fCD8;
+        Slot08* p = self->excludedObjects;
         do {
             p->obj = (void*)FindFirstObjectById(self->world, 0x104, p->id, self);
             p++;
             i++;
-        } while (i < self->fCD4);
+        } while (i < self->excludedCount);
     }
 }
 
@@ -1025,8 +1025,8 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
     if (IsObjectOfKind(ent->root, 0x4C) != 0) {
         return 0;
     }
-    for (s32 i = 0; i < self->fCD4; i++) {
-        if (IsObjectDescendantOf(ent, (BaseObject*)self->fCD8[i].obj) != 0) {
+    for (s32 i = 0; i < self->excludedCount; i++) {
+        if (IsObjectDescendantOf(ent, (BaseObject*)self->excludedObjects[i].obj) != 0) {
             return 0;
         }
     }
@@ -1076,23 +1076,23 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(a), Vu0::Q(self->v140));
         f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(delta), Vu0::Q(delta))));
         s32 near;
-        if (self->fC2C != 0) {
-            near = TestPointAgainstObjectShape(self->fC2C, &a);
+        if (self->closeZone != 0) {
+            near = TestPointAgainstObjectShape(self->closeZone, &a);
         } else {
             near = 0;
-            if (dist < self->fC20) {
-                if (__builtin_fabsf(delta.z) < self->fC24) near = 1;
+            if (dist < self->closeRadius) {
+                if (__builtin_fabsf(delta.z) < self->closeHeight) near = 1;
             }
         }
         if (near != 0) {
-            if (self->fCC0 == 0) self->fCC0 = PushSoundLevel(-0x14);
+            if (self->soundLevel == 0) self->soundLevel = PushSoundLevel(-0x14);
         } else {
-            RemoveSoundLevelAndRecompute((SoundLevelEntry*)self->fCC0);
-            self->fCC0 = 0;
+            RemoveSoundLevelAndRecompute((SoundLevelEntry*)self->soundLevel);
+            self->soundLevel = 0;
         }
         if (IsPointInsideObjectFaces((ScalingVolume*)self->fC14, &a) == 0) {
-            if (self->fC18 < dist) return 0;
-            if (self->fC1C < __builtin_fabsf(delta.z)) return 0;
+            if (self->reachRadius < dist) return 0;
+            if (self->reachHeight < __builtin_fabsf(delta.z)) return 0;
         }
         s32 v = GetAgentRosterState(self);
         if ((F(s32, 0xCD0) & 1) == 0) {
@@ -1154,13 +1154,13 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     if (self->fC14 == 0) {
         return;
     }
-    t = (T2195_790 *)self->fC34;
+    t = (T2195_790 *)self->poseSource;
     r = GetAgentRosterState(self);
     switch (r) {
     case 0:
     case 1:
-        if ((void *)self->fC30 != 0) {
-            t->target = (void *)self->fC30;
+        if ((void *)self->lookTarget != 0) {
+            t->target = (void *)self->lookTarget;
             t->point = *(Vec02 *)&D_00248D30;
         } else {
             t->target = self;
@@ -1172,8 +1172,8 @@ void AimCompanionAgentPose(CompanionAgent *self) {
         }
         break;
     case 2:
-        if ((void *)self->fC30 != 0) {
-            t->target = (void *)self->fC30;
+        if ((void *)self->lookTarget != 0) {
+            t->target = (void *)self->lookTarget;
             t->point = *(Vec02 *)&D_00248D30;
         } else if (IsAgentFacingBlocked(self) != 0) {
             t->target = self;
@@ -1204,19 +1204,19 @@ void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
     EnterAgentState(self, evt, arg);
     switch (self->f724) {
     case 6:
-        self->fCC4 = 0;
+        self->clipEndCount = 0;
         break;
     case 0xB: {
         BaseObject* p = ((BaseObject*)self->fC14);
         if (p != 0) {
             p->desc->m03(p);
         }
-        ReleaseSoundLevel((SoundLevelEntry*)self->fCC0);
-        self->fCC0 = 0;
+        ReleaseSoundLevel((SoundLevelEntry*)self->soundLevel);
+        self->soundLevel = 0;
         break;
     }
     }
-    self->fC30 = *(s32*)((u8*)self + (self->f724 << 3) + 0xC3C);
+    self->lookTarget = *(s32*)((u8*)self + (self->f724 << 3) + 0xC3C);
 }
 
 s32 IsCompanionAgentTargetInRange(CompanionAgent* self)
@@ -1236,10 +1236,10 @@ s32 AnswerCompanionAgentRosterPoll(CompanionAgent* self)
     if (self->f724 != 6) {
         goto ret0;
     }
-    if (self->fCC4 <= 0) {
+    if (self->clipEndCount <= 0) {
         goto ret0;
     }
-    if (5.0f < g_gameTime - self->f728) {
+    if (5.0f < g_gameTime - self->stateTime) {
         r = 2;
         return r;
     }
@@ -1254,8 +1254,8 @@ void HandleCompanionAgentNotification(CompanionAgent* self, s32 code, void* req)
 {
     HandleAgentNotification(self, code, (AgentNotification*)req);
     if (code == 7) {
-        if (req == self->f7E0) {
-            self->fCC4++;
+        if (req == self->statePlayer) {
+            self->clipEndCount++;
         }
     }
 }
@@ -1264,7 +1264,7 @@ void SetCompanionAgentFrozen(CompanionAgent* self, s32 p)
 {
     SetColliderFrozen(self, p);
     if (p != 0) {
-        ReleaseSoundLevel((SoundLevelEntry*)self->fCC0);
-        self->fCC0 = 0;
+        ReleaseSoundLevel((SoundLevelEntry*)self->soundLevel);
+        self->soundLevel = 0;
     }
 }

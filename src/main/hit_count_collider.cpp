@@ -47,8 +47,8 @@ void InitSwitchedCollider(SwitchedCollider* self);
 void InitHitCountCollider(HitCountCollider* self)
 {
     InitSwitchedCollider(self);
-    self->f610 = -1;
-    self->f694 = 5;
+    self->state = -1;
+    self->hitsLeft = 5;
 }
 
 // Two floats (+0x2DC, +0x2E0 of f62C) copied as one unaligned doubleword, and a pointer stored
@@ -68,12 +68,12 @@ void SetHitCountColliderState(PlacedObject* self, s32 state);
 void StartHitCountCollider(HitCountCollider* self)
 {
     StartPlacedObject(self);
-    self->f68C = self->radius3CC;
+    self->baseRadius = self->radius3CC;
     ResolveObjectLinks(self, 0xC, (ObjectLink*)D_002749B0);
-    self->f668 = CreateStateWalker((StateGraph*)self->f664, self, -1, 0);
-    self->f644 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    PlacedObject* v = self->f660;
-    self->f648 = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
+    self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
+    self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+    PlacedObject* v = self->aimObject;
+    self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&D_0026DD48;
     ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)self + 0x690;
@@ -82,9 +82,9 @@ void StartHitCountCollider(HitCountCollider* self)
     *(void**)(g1 + 0x268) = D_00274A40;
     *(f32*)(g2 + 0x26C) = 4.0f;
     SetWorldActiveFollower(self->world, self);
-    s32 c = self->f71C;
-    self->f720[c] = self;
-    self->f71C = c + 1;
+    s32 c = self->itemCount;
+    self->items[c] = self;
+    self->itemCount = c + 1;
     SetHitCountColliderState(self, 1);
 }
 
@@ -115,32 +115,32 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
     u32 ca[4];
     u32 cb[4];
     UpdateSwitchedCollider(self, t);
-    if (self->f688) {
-        void* h = FindFirstObjectByIdGathered(self->world, 0x101, 0x77, self->f688);
+    if (self->collectedObject) {
+        void* h = FindFirstObjectByIdGathered(self->world, 0x101, 0x77, self->collectedObject);
         if (h) SendEmptyMessage((MemberObject*)h);
-        self->f690 = self->f690 + 1;
-        self->f688->desc->m03(self->f688);
-        self->f688 = 0;
+        self->collectedCount = self->collectedCount + 1;
+        self->collectedObject->desc->m03(self->collectedObject);
+        self->collectedObject = 0;
     }
-    if (self->f684) {
-        SendHitCountColliderRequest(self, self->f684);
-        self->f684 = 0;
+    if (self->touchedObject) {
+        SendHitCountColliderRequest(self, self->touchedObject);
+        self->touchedObject = 0;
     }
-    if (self->f67C) {
-        if (self->f67C->speed == 0.0f) {
-            StopAnimationPlayer(self->f67C);
-            self->f67C = 0;
+    if (self->hitPlayer) {
+        if (self->hitPlayer->speed == 0.0f) {
+            StopAnimationPlayer(self->hitPlayer);
+            self->hitPlayer = 0;
         }
-    } else if (self->f680) {
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->f678, self, 0, &self->f67C, 0.0f, 1.0f);
-        self->f694 = self->f694 - 1;
+    } else if (self->hitPending) {
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->hitClip, self, 0, &self->hitPlayer, 0.0f, 1.0f);
+        self->hitsLeft = self->hitsLeft - 1;
         D_0026E228[0] = -1;
     }
-    self->f680 = 0;
+    self->hitPending = 0;
     f32 u;
-    if (self->f67C) {
+    if (self->hitPlayer) {
         f32* lim = g_unitRange;
-        f32 r = self->f67C->time / self->f67C->anim->length;
+        f32 r = self->hitPlayer->time / self->hitPlayer->anim->length;
         f32* pp = D_00274A50.c;
         f32 lo = lim[0];
         f32 hi = lim[1];
@@ -153,23 +153,23 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         g_stepScale = 1.0f;
         u = 0.0f;
     }
-    f32 w = u * D_00274A44 + (1.0f - u) * self->f68C;
+    f32 w = u * D_00274A44 + (1.0f - u) * self->baseRadius;
     self->radius3D0 = w;
     self->radius3CC = w;
-    if (self->f638) {
-        if (g_gameTime[0] - self->f640 > 2.0f) self->f638 = 0;
+    if (self->acceptedMark) {
+        if (g_gameTime[0] - self->f640 > 2.0f) self->acceptedMark = 0;
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)buf, self->f648 - ang);
-    ApproachRotationWithRamp(&self->f660->rot, (Mat02*)buf, (RampProfile*)D_00274A60, (Mat02*)buf2, 0, t);
-    self->f660->desc02()->m1E(self->f660, (Mat02*)buf2);
+    BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)buf, self->aimHeading - ang);
+    ApproachRotationWithRamp(&self->aimObject->rot, (Mat02*)buf, (RampProfile*)D_00274A60, (Mat02*)buf2, 0, t);
+    self->aimObject->desc02()->m1E(self->aimObject, (Mat02*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
-    if (self->f638) {
+    if (self->acceptedMark) {
         f32 q;
-        if (self->f610 != 2) q = (g_gameClock[1] - self->f614) * 0.5f;
+        if (self->state != 2) q = (g_gameClock[1] - self->stateTime) * 0.5f;
         else q = 0.0f;
-        f32 z = Cosine((g_gameClock[1] - self->f63C) * 10.0f);
+        f32 z = Cosine((g_gameClock[1] - self->acceptedTime) * 10.0f);
         f32 x0 = D_00274A70.c[0] + q * (D_00274A70.c[1] + q * D_00274A70.c[2]);
         f32 lo = g_unitRange[0];
         f32 hi = g_unitRange[1];
@@ -222,7 +222,7 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
 {
     void* obj = P(self, 0x628);
     if (obj != 0 && F(obj, 0x18) == 0.0f) {
-        switch (self->f610) {
+        switch (self->state) {
         case 2:
             self->desc05()->m50(self);
             break;
@@ -231,26 +231,26 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
             break;
         }
     }
-    if (self->f610 != 1) {
+    if (self->state != 1) {
         F(self, 0x66C) = D_00274A98;
         *(Vec02*)((u8*)self + 0x650) = D_00248D30;
     } else {
         if (0.0f < F(ev, 0x48)) {
-            ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 0, &self->f644);
+            ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 0, &self->heading);
         }
         f32 k = D_00274A90[0];
         f32 m = D_00274A98;
         m = m >? F(ev, 0x48);
         F(self, 0x66C) = m;
-        ComputePolarOffset((Vec3*)((u8*)self + 0x650), self->f644, k * F(ev, 0x48), 0.0f);
+        ComputePolarOffset((Vec3*)((u8*)self + 0x650), self->heading, k * F(ev, 0x48), 0.0f);
         self->f670 = (D_00274AA0 >? F(ev, 0x48));
         if (0.0f < F(ev, 0x7C)) {
-            ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 1, &self->f648);
-            if (self->f668 != 0) {
-                SetStateWalkerTarget((StateWalker*)self->f668, 0x485);
+            ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 1, &self->aimHeading);
+            if (self->walker != 0) {
+                SetStateWalkerTarget((StateWalker*)self->walker, 0x485);
             }
-        } else if (self->f668 != 0) {
-            SetStateWalkerTarget((StateWalker*)self->f668, 0x484);
+        } else if (self->walker != 0) {
+            SetStateWalkerTarget((StateWalker*)self->walker, 0x484);
         }
     }
     HandleStepSequenceSkipButtons(self, (PadRecord*)ev);
@@ -270,7 +270,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     Vec02 accel;
     Vec02 t;
     StepCollider(self, dt);
-    BuildYawPitchMatrix(self->f644, 0.0f, &rot);
+    BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, D_00274AA8);
     Vu0::Q(accel) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x650)), Vu0::Q(self->v150));
     ClampVectorLength(&accel, &accel, D_00274A9C * F(self, 0x66C) * dt);
@@ -286,24 +286,24 @@ void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 {
     ContactEnd03* e = &c->end[1 - end];
     if (IsObjectOfKind(e->body, 0x21)) {
-        if (self->f694 > 0) {
-            self->f680 = 1;
+        if (self->hitsLeft > 0) {
+            self->hitPending = 1;
             return;
         }
-        if (self->f67C == 0) self->f684 = e->body;
+        if (self->hitPlayer == 0) self->touchedObject = e->body;
         return;
     }
-    if (MatchesObjectId(e->body, 0x52F)) self->f688 = e->body;
+    if (MatchesObjectId(e->body, 0x52F)) self->collectedObject = e->body;
 }
 
 // The velocity is read first, and each of the three references to the end takes its address
 // again through Q (docs/toolchain/reloads-and-stores.md, "Three adds of one address").
 void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 {
-    AnimationPlayer* p = self->f67C;
+    AnimationPlayer* p = self->hitPlayer;
     if (p != 0) {
         u128 vel = Vu0::Q(c->end[end].v30);
-        u128 k = Vu0::Scalar((D_00274A44 - self->f68C) / p->anim->length);
+        u128 k = Vu0::Scalar((D_00274A44 - self->baseRadius) / p->anim->length);
         u128 d = Vu0::Sub(Vu0::Q(c->end[end].v10), Vu0::Q(self->v140));
         Vu0::Q(c->end[end].v30) = Vu0::MulAddX(vel, Vu0::DivX(d, Vu0::Length(d)), k);
     }
@@ -328,15 +328,15 @@ s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
     if (arg->mode == 0) {
         if (arg->reply != 0) arg->reply(arg->c, self);
     }
-    m = self->f610;
+    m = self->state;
     if (m < 5) {
         if (!(m < 2)) return 1;
     }
-    if (self->f638 != 0) return 1;
+    if (self->acceptedMark != 0) return 1;
     if (HasSpareCount()) {
         SetHitCountColliderState(self, 2);
-        self->f638 = 1;
-        self->f63C = g_gameTime[0];
+        self->acceptedMark = 1;
+        self->acceptedTime = g_gameTime[0];
     } else {
         SetHitCountColliderState(self, 3);
     }
@@ -346,7 +346,7 @@ s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
     return 1;
 }
 
-s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self) { if (self->f610 < 5) { if (self->f610 >= 2) return 1; } return self->f638 != 0; }
+s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self) { if (self->state < 5) { if (self->state >= 2) return 1; } return self->acceptedMark != 0; }
 
 void FinishSwitchedCollider(SwitchedCollider* self);
 void SetHitCountColliderState(PlacedObject* self, s32 state);
@@ -437,9 +437,9 @@ void SetHitCountColliderState(PlacedObject* self, s32 state)
 
 void AddHitCountColliderId(HitCountCollider* self, BaseObject* value)
 {
-    s32 n = self->f698;
-    self->f69C[n] = value;
-    self->f698 = n + 1;
+    s32 n = self->placePointCount;
+    self->placePoints[n] = value;
+    self->placePointCount = n + 1;
 }
 
 s32 IsObjectAttached(BaseObject* self);
@@ -451,8 +451,8 @@ f32 RandomFloatInRange(f32 a, f32 b);
 void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
 {
     s32 i;
-    for (i = 0; i < self->f71C; i++) {
-        if (self->f720[i] == obj) {
+    for (i = 0; i < self->itemCount; i++) {
+        if (self->items[i] == obj) {
             break;
         }
     }
@@ -462,11 +462,11 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
         Vec02 best;
         best = D_00248D30;
         f32 bestDist = 0.0f;
-        for (s32 j = 0; j < self->f698; j++) {
-            ConvertPositionToWorld(self->f69C[j], &p);
+        for (s32 j = 0; j < self->placePointCount; j++) {
+            ConvertPositionToWorld(self->placePoints[j], &p);
             f32 nearest = 3.40282347e+38f;
-            for (s32 k = 0; k < self->f71C; k++) {
-                PlacedObject* o = (PlacedObject*)self->f720[k];
+            for (s32 k = 0; k < self->itemCount; k++) {
+                PlacedObject* o = (PlacedObject*)self->items[k];
                 if (IsObjectAttached(o)) {
                     u128 d = Vu0::Sub(Vu0::Q(p), Vu0::Q(o->pos));
                     nearest = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d))) <? nearest;
@@ -489,6 +489,6 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
             obj->desc02()->m21(obj, &spin);
         }
     }
-    self->f720[i] = obj;
-    self->f71C = n >? self->f71C;
+    self->items[i] = obj;
+    self->itemCount = n >? self->itemCount;
 }

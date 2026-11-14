@@ -55,7 +55,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 typedef signed int s32;
 typedef unsigned char u8;
 void EnsureKeyedList(BaseObject* self);
-// An entry of World::f1EF4: an expression read from the level and the scope it was evaluated in
+// An entry of World::scriptEntries: an expression read from the level and the scope it was evaluated in
 // (0 until func_001C13E8 evaluates it).
 struct ScriptScope;
 struct WorldScriptEntry { R11B008Node* expr; ScriptScope* scope; };
@@ -176,13 +176,13 @@ void LoadScriptEntryTable(World* self, BufferedStream* arg) {
     ScriptValue q2;
     s32 i = 0;
     InitScriptValue(&q0);
-    self->f1EF0 = ReadBufferedU32(arg);
-    self->f1EF4 = AllocateFrontMemory(self->f1EF0 << 3);
+    self->scriptEntryCount = ReadBufferedU32(arg);
+    self->scriptEntries = AllocateFrontMemory(self->scriptEntryCount << 3);
     s32 n1 = ReadBufferedU32(arg);
     s32 n2 = ReadBufferedU32(arg);
-    for (i = 0; i < self->f1EF0; i++) {
+    for (i = 0; i < self->scriptEntryCount; i++) {
         {
-            WorldScriptEntry* e = (WorldScriptEntry*)self->f1EF4 + i;
+            WorldScriptEntry* e = (WorldScriptEntry*)self->scriptEntries + i;
             e->expr = ReadScriptValueChain(arg);
             e->scope = 0;
             if (D_00275714) {
@@ -198,13 +198,13 @@ void LoadScriptEntryTable(World* self, BufferedStream* arg) {
     }
     ScriptScope* r = NewScriptScope();
     i = 0;
-    self->f2C = r;
+    self->scriptScope = r;
     AddUniqueMarkRoot((MarkStacks*)g_markStacks, (MarkEntry*)r);
-    self->f1EF8 = n1;
+    self->scopeVariableId = n1;
     SetScriptValueTag(&q0, 0);
-    DefineScriptVariable(&q1, (ScriptScope*)self->f2C, self->f1EF8, &q0);
+    DefineScriptVariable(&q1, (ScriptScope*)self->scriptScope, self->scopeVariableId, &q0);
     DestroyScriptValue(&q1, 2);
-    if (self->f1EF0 > 0) {
+    if (self->scriptEntryCount > 0) {
         do {
             InitScriptValue(&q1);
             EvalScriptEntry(&q2, i, self);
@@ -212,7 +212,7 @@ void LoadScriptEntryTable(World* self, BufferedStream* arg) {
             AssignScriptValue(&q1, &q2);
             DestroyScriptValue(&q2, 2);
             DestroyScriptValue(&q1, 2);
-        } while (i < self->f1EF0);
+        } while (i < self->scriptEntryCount);
     }
     DestroyScriptValue(&q0, 2);
 }
@@ -222,7 +222,7 @@ void* GetScriptEntryScope(s32 index, World* self)
     if (index == -1) {
         return 0;
     } else {
-        WorldScriptEntry* e = (WorldScriptEntry*)((index << 3) + (u32)self->f1EF4);
+        WorldScriptEntry* e = (WorldScriptEntry*)((index << 3) + (u32)self->scriptEntries);
         void* p = e->scope;
         if (p != 0) AddUniqueMarkRoot((MarkStacks*)g_markStacks, (MarkEntry*)p);
         return p;
@@ -235,11 +235,11 @@ ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx)
     ScriptValue q;
     WorldScriptEntry* e;
     InitScriptValue(&q);
-    e = (WorldScriptEntry*)(off + (s32)ctx->f1EF4);
+    e = (WorldScriptEntry*)(off + (s32)ctx->scriptEntries);
     if (e->expr != 0 && e->scope == 0) {
         ScriptValue t;
-        ((WorldScriptEntry*)(off + (s32)ctx->f1EF4))->scope = NewScriptScope();
-        EvalScriptExpression(&t, ((WorldScriptEntry*)(off + (s32)ctx->f1EF4))->expr, ((WorldScriptEntry*)(off + (s32)ctx->f1EF4))->scope);
+        ((WorldScriptEntry*)(off + (s32)ctx->scriptEntries))->scope = NewScriptScope();
+        EvalScriptExpression(&t, ((WorldScriptEntry*)(off + (s32)ctx->scriptEntries))->expr, ((WorldScriptEntry*)(off + (s32)ctx->scriptEntries))->scope);
         AssignScriptValue(&q, &t);
         DestroyScriptValue(&t, 2);
     }
@@ -690,7 +690,7 @@ ScriptValue* GetObjectProperty(ScriptValue* self, BaseObject* p, s32 n)
     } else {
         ScriptValue q;
         InitScriptValue(&q);
-        FindKeyedValue((R11B008List*)p->f04, n, &q);
+        FindKeyedValue((R11B008List*)p->keyedList, n, &q);
         CopyConstructScriptValue(self, &q);
         DestroyScriptValue(&q, 2);
     }
@@ -703,7 +703,7 @@ ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, Scr
         PropertyDescriptor* d = FindPropertyDescriptor(p, key);
         WritePropertyValue(self, p, d, value);
     } else {
-        UpdateKeyedValue(self, (R11B008List*)p->f04, key, value);
+        UpdateKeyedValue(self, (R11B008List*)p->keyedList, key, value);
     }
     return self;
 }
@@ -711,15 +711,15 @@ ScriptValue* UpdateObjectProperty(ScriptValue* self, BaseObject* p, s32 key, Scr
 ScriptValue* AddObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
-    AddKeyedValue(self, (R11B008List*)p->f04, key, value);
+    AddKeyedValue(self, (R11B008List*)p->keyedList, key, value);
     return self;
 }
 
 ScriptValue* SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
     EnsureKeyedList(p);
-    if (FindKeyedValue((R11B008List*)p->f04, key, 0)) UpdateKeyedValue(self, (R11B008List*)p->f04, key, value);
-    else AddKeyedValue(self, (R11B008List*)p->f04, key, value);
+    if (FindKeyedValue((R11B008List*)p->keyedList, key, 0)) UpdateKeyedValue(self, (R11B008List*)p->keyedList, key, value);
+    else AddKeyedValue(self, (R11B008List*)p->keyedList, key, value);
     return self;
 }
 

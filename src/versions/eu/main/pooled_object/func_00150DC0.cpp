@@ -24,7 +24,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
     switch (msg->type) {
     case 0:
         OpenKeyRecord(msg->f4.key);
-        self->f2E8 |= 1;
+        self->waitFlags |= 1;
         break;
     case 1:
     case 2:
@@ -38,8 +38,8 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         } else {
             s4 = 0;
         }
-        if (s2 && s2->f334) {
-            SetStateWalkerTarget(s2->f334, 0x34C);
+        if (s2 && s2->walker) {
+            SetStateWalkerTarget(s2->walker, 0x34C);
         }
         switch (msg->type) {
         case 1:
@@ -47,7 +47,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             SetArcSpecialObject(&D_002708E0, s4);
             self->p2F0 = s2;
             if (s2) {
-                self->f2E8 |= 2;
+                self->waitFlags |= 2;
             }
             break;
         case 2:
@@ -55,7 +55,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             SetArcSpecialObject(&D_00271558, s4);
             self->p2F4 = s2;
             if (s2) {
-                self->f2E8 |= 4;
+                self->waitFlags |= 4;
             }
             break;
         default:
@@ -78,7 +78,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         a0 = 0;
         if (a2 != -1) {
             a0 = FindFirstObjectById(self->world, 2, a2, self);
-            self->f2E8 |= 0x10;
+            self->waitFlags |= 0x10;
         } else {
             if (s2) {
                 a0 = FindFirstObjectById(self->world, 1, 0x54A, s2);
@@ -88,11 +88,11 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 1, &self->player2F8, 0.0f, 1.0f);
             AddAnimationPlayerRecordCallback(self->player2F8, (PlacedObject**)self);
         }
-        nm = (u16*)msg->f14;
+        nm = (u16*)msg->text;
         if (nm && *nm) {
             (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).vt->f20(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), nm);
             if (s2) {
-                *(Rgba4*)&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = s2->f2D0;
+                *(Rgba4*)&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = s2->color;
             } else {
                 (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = 0x80808080;
             }
@@ -106,37 +106,37 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
                 f20 = msg->f8.f;
             }
             if (0.0f < f20) {
-                (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F0 = (f32)(GetWideStringLength((u16*)msg->f14) + 10) / f20;
+                (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F0 = (f32)(GetWideStringLength((u16*)msg->text) + 10) / f20;
             } else {
                 Hud_150DC0_eu* h3 = &(*(Hud_150DC0_eu*)&g_typedTextCaptionBox);
                 h3->f2F0 = 15.0f;
             }
-            self->f2E8 |= 0x20;
+            self->waitFlags |= 0x20;
         }
         if (msg->f4.f >= 0.0f) {
             SetTextPanelValuePercent(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), msg->f4.f + 1.0f);
-            self->f2E8 |= 0x40;
+            self->waitFlags |= 0x40;
         }
         if (msg->f8.f >= 0.0f) {
-            self->f2E8 |= 0x80;
-            self->f2FC = g_gameTime[0] + msg->f8.f;
+            self->waitFlags |= 0x80;
+            self->waitDeadline = g_gameTime[0] + msg->f8.f;
         }
         if (msg->f20 != -1) {
             BaseObject* r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
             SetTextPanelSubject(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
         }
         if (msg->f24 != -1) {
-            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
+            g_camera->ctl460.anchorObject = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
+            g_camera->ctl460.anchorObject = FindFirstObjectByIdMode4(self->world, self->second300, 0);
         } else {
-            g_camera->ctl460.f5C = 0;
+            g_camera->ctl460.anchorObject = 0;
         }
         if (msg->fC) {
-            self->f2E8 |= 0x100;
-            self->f2EC = msg->f10;
+            self->waitFlags |= 0x100;
+            self->waitKey = msg->f10;
         }
-        self->f2E8 |= 8;
+        self->waitFlags |= 8;
         break;
     case 4: {
         void* tmp = &msg->f4;

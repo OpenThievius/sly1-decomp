@@ -14,7 +14,7 @@ struct BufferedStream;
 // 0x3A: slot 6 appends it to the list (func_00152470), slot 7 removes it (func_00152600),
 // slot 9 keeps the link across the copy.
 struct ListedCollisionPart : Collider {
-    s32 f550;               // 0x550: 0 means func_0016A580 (slot 28) lets the parts follow it
+    s32 skipSteering;       // 0x550: 0 means func_0016A580 (slot 28) lets the parts follow it
     u8 pad554[0x558 - 0x554];
     Link02 listLink;         // 0x558: the link in the list (func_00152438 gets the offset)
     u8 pad560[0x568 - 0x560];

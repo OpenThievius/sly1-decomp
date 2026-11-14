@@ -30,7 +30,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             ReleasePadSelectFlag(g_currentWorld);
         }
         (void)PopStackValue(&g_camera->ctl460);
-        if ((self->f2E8 & 0x10) != 0 && self->player2F8 != 0) {
+        if ((self->waitFlags & 0x10) != 0 && self->player2F8 != 0) {
             StopAnimationPlayer(self->player2F8);
         }
         if (self->mode2D0 == 2 && self->f330 != 0) {
@@ -60,7 +60,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 3:
         self->step2E4 = -1;
-        self->f2E8 = 0;
+        self->waitFlags = 0;
         if (self->mode2D0 == 2) {
             PushStackValue(&g_camera->ctl460, 4);
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
@@ -75,9 +75,9 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
+                    g_camera->ctl460.anchorObject = FindFirstObjectByIdMode4(self->world, self->second300, 0);
                 } else {
-                    g_camera->ctl460.f5C = 0;
+                    g_camera->ctl460.anchorObject = 0;
                 }
             }
         }

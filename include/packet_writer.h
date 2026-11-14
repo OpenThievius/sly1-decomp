@@ -39,13 +39,13 @@ struct PacketWriter {
     s32 f14;                // 0x14: nonzero (set by func_001611B8): closing calls the virtual (func_00152D70)
     const PacketWriterVt* vt;     // 0x18
     union {
-        u32* f1C;           // 0x1C: the open packet's header word (func_00161278)
+        u32* openTag;       // 0x1C: the open packet's header word (func_00161278)
         u8* block;          // (func_001613C0)
         u64* last;          // (func_00161768)
         s32 mask;           // the VIF writer (D_0024A0E0): the mask func_001EE528 set, which func_001EE560 marks its unpacks with
     };
-    u32 f20;                // 0x20: the packet's element count (func_00161278's divisor)
-    u32 f24;                // 0x24: the words written
+    u32 registerCount;      // 0x20: the packet's element count (func_00161278's divisor)
+    u32 entryCount;         // 0x24: the words written
     u8 pad28[8];            // 0x28
 
     // The one virtual, through its table's entry 1 (func_00161958 calls it with 0).

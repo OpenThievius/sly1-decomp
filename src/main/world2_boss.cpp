@@ -99,14 +99,14 @@ void StartWorld2Boss(World2Boss* self)
     SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 3, D_00264928);
     CreateSixEntryBlend(self, (PlayerBlendItem*)((u8*)self + 0xC20), (BlendAnimationView**)((u8*)self + 0xE00));
-    self->f758[12].obj = (void*)self->fE00;
-    self->fE10 = CreateStateWalker((StateGraph*)self->fE0C, 0, 0x438, 0);
+    self->stateClips[12].obj = (void*)self->blendView;
+    self->walker = CreateStateWalker((StateGraph*)self->walkerGraph, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
-        self->fE30[n] = ResolveAgentClip(self, D_00264950[n]);
-    self->fE20 = 6;
-    self->fE24 = (GaugeTarget*)CopyToFrontMemory(0x48, D_00264960);
-    for (i = 0; i < self->fE20; i++) {
-        GaugeTarget* e = ((GaugeTarget*)self->fE24) + i;
+        self->phaseClips[n] = ResolveAgentClip(self, D_00264950[n]);
+    self->keyedCount = 6;
+    self->keyedObjects = (GaugeTarget*)CopyToFrontMemory(0x48, D_00264960);
+    for (i = 0; i < self->keyedCount; i++) {
+        GaugeTarget* e = ((GaugeTarget*)self->keyedObjects) + i;
         e->value = FindFirstObjectById(self->world, 1, e->key, self);
     }
 }
@@ -131,7 +131,7 @@ void DrawWorld2BossMarkerRing(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)agent + 0x140), 7, (Point2*)D_00275070, agent->fE20, (RingAnchor*)agent->fE24, &params, request);
+    DrawAngleSortedRing((Vec02*)((u8*)agent + 0x140), 7, (Point2*)D_00275070, agent->keyedCount, (RingAnchor*)agent->keyedObjects, &params, request);
 }
 
 // The static's guard (D_002649A8) is written out with the function above, so the data below
@@ -163,7 +163,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args, void* arg2)
 {
     DrawAgent(self, args, arg2);
-    if (self->fE2C) {
+    if (self->drawsRing) {
         DeferredRequest request;
         FillMemory(&request, 0, 0x80);
         request.group = 0xD;
@@ -319,7 +319,7 @@ s32 IsWorld2BossFree(World2Boss* self)
     if (self->f724 == 0x10) goto zero;
     if (self->f724 == 0xB) goto zero;
     if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
-    GetStateWalkerCurrentKey((StateWalker*)self->fE10, &out);
+    GetStateWalkerCurrentKey((StateWalker*)self->walker, &out);
     if (out == 0x43C) goto one;
     if (out < 0x43D) {
         if (out == 0x43A) goto one;
@@ -338,9 +338,9 @@ void EnterWorld2BossState(World2Boss* self, s32 evt, Animation* arg)
     s32 st = self->f724;
     if (st != 0xB) {
         if (st == 0x10) {
-            s32 n = self->fA68;
-            self->fC04 = 0;
-            self->fA68 = n + 1;
+            s32 n = self->hitsLeft;
+            self->contactsDisabled = 0;
+            self->hitsLeft = n + 1;
         }
     } else {
         MarkLevelDone(2);
@@ -352,7 +352,7 @@ s32 ChooseWorld2BossState(World2Boss* self)
 {
     if (self->f724 == 4) {
         s32 kind;
-        GetStateWalkerCurrentKey((StateWalker*)self->fE10, &kind);
+        GetStateWalkerCurrentKey((StateWalker*)self->walker, &kind);
         if (kind == 0x438) {
             if (GetAgentRosterState(self) == 0)
                 return 2;
@@ -364,11 +364,11 @@ s32 ChooseWorld2BossState(World2Boss* self)
 void AdvanceWorld2BossPhase(World2Boss* self)
 {
     DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
-    s32 idx = self->fE28;
-    ChangeAgentState(self, D_002649D8[idx], (void*)self->fE30[idx]);
-    s32 n = self->fE28;
-    self->fE3C = D_002649E8[n];
-    self->fE28 = n + 1;
+    s32 idx = self->phase;
+    ChangeAgentState(self, D_002649D8[idx], (void*)self->phaseClips[idx]);
+    s32 n = self->phase;
+    self->pendingWalkerTarget = D_002649E8[n];
+    self->phase = n + 1;
 }
 
 void UpdateWorld2Boss(World2Boss* self, f32 dt)
@@ -379,7 +379,7 @@ void UpdateWorld2Boss(World2Boss* self, f32 dt)
 void ShowWorld2BossBar(World2Boss* self)
 {
     s32 kind;
-    GetStateWalkerCurrentKey((StateWalker*)self->fE10, &kind);
+    GetStateWalkerCurrentKey((StateWalker*)self->walker, &kind);
     s32 pick = 0;
     switch (kind) {
     case 0x43A:
@@ -410,7 +410,7 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
             SetAgentGoalPoint(self, &pos);
         } else {
             s32 key;
-            GetStateWalkerCurrentKey((StateWalker*)self->fE10, &key);
+            GetStateWalkerCurrentKey((StateWalker*)self->walker, &key);
             switch (key) {
             case 0x438:
             case 0x439:
@@ -464,10 +464,10 @@ void UpdateWorld2BossState(World2Boss* self)
     UpdateAgentState(self);
     switch (self->f724) {
     case 12: {
-        if (self->f7E0 == 0) {
+        if (self->statePlayer == 0) {
             break;
         }
-        if (g_player != 0 && g_player->f275C != 0) {
+        if (g_player != 0 && g_player->animSeekValue != 0) {
             return;
         }
         Agent* tgt = ((GaugeTargetFn)((void**)self->desc)[0x198 / 4])(self);
@@ -486,27 +486,27 @@ void UpdateWorld2BossState(World2Boss* self)
         f32 heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
         f32 turn = __builtin_fabsf(WrapAngle(heading - self->f638));
         f32 k = g_unitRange.Clamp(((QuadraticCurve*)D_00264A20)->Eval(turn));
-        SetPlayerBlendWeights(self->f638, weight * k, self, (TurnBlendRecords*)((u8*)self + 0xC20), self->fE00);
+        SetPlayerBlendWeights(self->f638, weight * k, self, (TurnBlendRecords*)((u8*)self + 0xC20), self->blendView);
         // One mover and one sequence variable for both objects: set twice, they are left to
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
         PoseSource* m;
         CyclicRanges* a;
-        m = ((BlendSourceEntry*)FindEntryByObjectId(self->fE00, (BaseObject*)self->f610))->mover;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f610))->mover;
         a = *(CyclicRanges**)((u8*)m + 0x10);
-        s32 offFirst = FindCyclicRangeIndex(self->f7E0->time, self->fE00->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
-        m = ((BlendSourceEntry*)FindEntryByObjectId(self->fE00, (BaseObject*)self->f614))->mover;
+        s32 offFirst = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f614))->mover;
         a = *(CyclicRanges**)((u8*)m + 0x10);
-        s32 offSecond = FindCyclicRangeIndex(self->f7E0->time, self->fE00->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
-        if (offFirst && self->fE04 == 0) {
+        s32 offSecond = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        if (offFirst && self->firstInRange == 0) {
             RecordCameraTimestamp(g_camera);
             StartSoundEffect(0x1CC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
-        if (offSecond && self->fE08 == 0) {
+        if (offSecond && self->secondInRange == 0) {
             RecordCameraTimestamp(g_camera);
             StartSoundEffect(0x1CC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
-        self->fE04 = offFirst;
-        self->fE08 = offSecond;
+        self->firstInRange = offFirst;
+        self->secondInRange = offSecond;
         break;
     }
     case 14: {
@@ -524,8 +524,8 @@ void UpdateWorld2BossState(World2Boss* self)
             f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vec::Of(tgt->v140), Vec::Of(self->v140)).q,
                                                         Vu0::Sub(Vec::Of(tgt->v140), Vec::Of(self->v140)).q)));
             f32 t = g_unitRange.Clamp(((QuadraticCurve*)&curve)->Eval(dist));
-            ComputeObjectFrameAtTime(tgt, 0, &self->vE40, 0, 0, 0, t <? limit);
-            Vu0::Q(to) = Vu0::Sub(Vec::Of(self->vE40), Vec::Of(self->v140)).q;
+            ComputeObjectFrameAtTime(tgt, 0, &self->launchPoint, 0, 0, 0, t <? limit);
+            Vu0::Q(to) = Vu0::Sub(Vec::Of(self->launchPoint), Vec::Of(self->v140)).q;
             SetAgentFacingAngles(self, ArctangentOfRatio(to.y, to.x), 0.0f);
         }
         break;
@@ -537,35 +537,35 @@ void LeaveWorld2BossState(World2Boss* self, s32 mode)
 {
     LeaveAgentState(self, mode);
     if (self->f724 == 16) {
-        s32 token = self->fE3C;
+        s32 token = self->pendingWalkerTarget;
         if (token == -1) return;
-        SetStateWalkerTarget((StateWalker*)self->fE10, token);
-        self->fE3C = -1;
+        SetStateWalkerTarget((StateWalker*)self->walker, token);
+        self->pendingWalkerTarget = -1;
     }
 }
 
 void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
 {
-    if (a1 == 0x13 && key->sourceId == (s32)self->f7E0) {
+    if (a1 == 0x13 && key->sourceId == (s32)self->statePlayer) {
         switch (key->code) {
         case 0x442:
         case 0x443: {
             ObjectPool* obj;
             if (key->code == 0x442) {
-                obj = (ObjectPool*)self->fE18;
+                obj = (ObjectPool*)self->firstPool;
             } else {
-                obj = (ObjectPool*)self->fE1C;
+                obj = (ObjectPool*)self->secondPool;
             }
             s32 kind;
-            GetStateWalkerCurrentKey((StateWalker*)self->fE10, &kind);
+            GetStateWalkerCurrentKey((StateWalker*)self->walker, &kind);
             switch (kind) {
             case 0x43A:
             case 0x43C:
-                obj->fF0 = (*(Quad16*)&self->vE40);
+                obj->fF0 = (*(Quad16*)&self->launchPoint);
                 obj->posF0[2] = self->v140.z + D_00264A34;
                 break;
             case 0x43E:
-                obj->fF0 = (*(Quad16*)&self->vE40);
+                obj->fF0 = (*(Quad16*)&self->launchPoint);
                 obj->posF0[2] = obj->posF0[2] + D_00264A38;
                 break;
             }
@@ -573,10 +573,10 @@ void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
             return;
         }
         case 0x444:
-            self->fE2C = 1;
+            self->drawsRing = 1;
             break;
         case 0x445:
-            self->fE2C = 0;
+            self->drawsRing = 0;
             break;
         }
     }
@@ -587,7 +587,7 @@ void HandleWorld2BossNotification(World2Boss* self, s32 a1, MessageBody* key)
 void GetWorld2BossLevelFactor(World2Boss* a0, f32* a1)
 {
     s32 kind;
-    GetStateWalkerCurrentKey((StateWalker*)a0->fE10, &kind);
+    GetStateWalkerCurrentKey((StateWalker*)a0->walker, &kind);
     switch (kind) {
     case 0x43A:
         {

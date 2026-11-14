@@ -12,7 +12,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
     key = (BaseObject*)GetActiveSwitchedCollider();
     if (((Gl_eu_1F4808*)&g_timerCaption)->f570 == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
-            || (g_saveData->f19DC == 0 && (u8)GetEntryIdByKey(self->f2FC) == 1))) {
+            || (g_saveData->entryIndex == 0 && (u8)GetEntryIdByKey(self->levelEntry) == 1))) {
         FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);
         goto tail;
@@ -20,8 +20,8 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
     if (((Gl_eu_1F4808*)&g_timerCaption)->f570 >= 2) {
         SetBestTimeState(&g_timerCaption, 4);
     }
-    if (self->f2D8 != 0) {
-        BeginLevelExit(1, self->f318);
+    if (self->exitsLevel != 0) {
+        BeginLevelExit(1, self->exitTarget);
         SetObjectSubGroupState(self, 0);
         return;
     }
@@ -39,12 +39,12 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
         found = next;
     }
     if (found == 0) {
-        if (self->f324 > 0.0f) {
-            self->f31C = ((f32*)&g_gameTime)[0] + self->f324;
+        if (self->fadeDelay > 0.0f) {
+            self->fadeTime = ((f32*)&g_gameTime)[0] + self->fadeDelay;
         } else if (self->count > 0) {
-            self->f31C = ((f32*)&g_gameTime)[0] + ((Animation*)self->items[0])->length;
+            self->fadeTime = ((f32*)&g_gameTime)[0] + ((Animation*)self->items[0])->length;
         } else {
-            self->f31C = ((f32*)&g_gameTime)[0];
+            self->fadeTime = ((f32*)&g_gameTime)[0];
         }
     }
 tail:

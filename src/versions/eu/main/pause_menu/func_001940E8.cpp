@@ -13,7 +13,7 @@ void ChangePauseMenuPage(Obj_1940E8_eu* self, s32 a, s32 b);
 void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
     if (self->f56C == mode) return;
     if (mode != 0) {
-        s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+        s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             PauseStagedBankVoice();
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
@@ -32,7 +32,7 @@ void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
         SetPadSelectFlags((PadSelectBits)1);
         ResetPadStepRepeat(&g_padRecord);
     } else {
-        s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
+        s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             ResumeStagedBankVoice();
             SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);

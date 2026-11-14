@@ -18,8 +18,8 @@ struct BufferedStream {
     s32 mode;               // 0x04: -1 at set-up (func_00137398, func_001373D0)
     s32 end;                // 0x08: the buffer's end, aligned to 64
     s32 start;              // 0x0C: the base, moved back by the alignment
-    s32 f10;                // 0x10: func_001373D0
-    s32 f14;                // 0x14: func_001373D0
+    s32 totalSize;          // 0x10: func_001373D0
+    s32 bytesToRead;        // 0x14: func_001373D0
     union {
         u8* cur;            // 0x18: the readers (func_00137B90 .. func_00137DF8), func_001378A0
         s32 ptr;            // 0x18: func_00137290, func_00137398, func_00137A60
@@ -30,16 +30,16 @@ struct BufferedStream {
         s32 nextPtr;        // 0x20: func_00137290, func_00137A60
     };
     s32 nextCount;          // 0x24: func_00137290, func_001378A0, func_00137A60
-    s32 f28;                // 0x28: func_00137290, func_001378A0
-    s32 f2C;                // 0x2C: func_00137290, func_001378A0
+    s32 unpackFlags;        // 0x28: func_00137290, func_001378A0
+    s32 unpackCarry;        // 0x2C: func_00137290, func_001378A0
     union {
-        s32 f30;            // 0x30: func_00137290
+        s32 progress;       // 0x30: func_00137290
         void* owner;        // 0x30: func_001E4EA8 sets it
     };
-    s32 f34;                // 0x34: func_001373D0
+    s32 fileHandle;         // 0x34: func_001373D0
     s32 f38;                // 0x38
-    s32 f3C;                // 0x3C
-    s32 f40;                // 0x40: the bytes left of a sector stream (func_00137328; func_00137480 counts it down)
+    s32 discOpen;           // 0x3C
+    s32 bytesLeft;          // 0x40: the bytes left of a sector stream (func_00137328; func_00137480 counts it down)
     s32 f44;                // 0x44
     s32 sector;             // 0x48: the start sector of a sector stream (func_00137328)
     s32 chunkCount;         // 0x4C: the chunks of its ring, two or more

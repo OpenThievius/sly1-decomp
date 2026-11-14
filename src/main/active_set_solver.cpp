@@ -63,13 +63,13 @@ void ClearList(List01* node);
 struct PartDrawFrame {
     void* fn;
     u8 pad0[4];
-    s32 f08;
+    s32 kind;
     u8 pad1[0x10 - 0x0C];
     DrawTransform copy;
     u8 pad2[0x70 - 0x60];
-    TextureRenderObject* f70;
-    void* f74;
-    void* f78;
+    TextureRenderObject* object;
+    void* record;
+    void* part;
     u8 pad3[0x80 - 0x7C];
     Quad16 q80[4];
     Quad16 qC0[4];
@@ -95,15 +95,15 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     s32 i;
     u8* base = (u8*)&g_vifPacketWriter;
     TextureRenderObject* s1 = (TextureRenderObject*)self->arg;
-    AddDmaRefTag((PacketWriter*)base, s1->f2D4, s1->f2D8);
+    AddDmaRefTag((PacketWriter*)base, s1->firstPacket, s1->firstPacketSize);
     FillMemory(&f, 0, 0x80);
-    f.f08 = 3;
+    f.kind = 3;
     f.fn = (void*)DrawModelPart;
     f.copy = self->block;
-    f.f70 = s1;
-    f.f74 = s1->sub22C;
+    f.object = s1;
+    f.record = s1->sub22C;
     i = 0;
-    MultiplyMatrices(f.qC0, &D_00261F30, (u8*)s1->f2D0 + 0x70);
+    MultiplyMatrices(f.qC0, &D_00261F30, (u8*)s1->drawRange + 0x70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];
@@ -116,12 +116,12 @@ void DrawPlacedObjectParts(DeferredRequest* self)
         s32 off = 0;
         do {
             i++;
-            f.f78 = (u8*)s1->drawParts + off;
+            f.part = (u8*)s1->drawParts + off;
             DrawModelPart((Frame_166690*)&f);
             off += 0x70;
         } while (i < s1->drawPartCount);
     }
-    AddDmaRefTag((PacketWriter*)&g_vifPacketWriter, s1->f2DC, s1->f2E0);
+    AddDmaRefTag((PacketWriter*)&g_vifPacketWriter, s1->secondPacket, s1->secondPacketSize);
 }
 
 // A ListFrame (list_iter.h) as func_00153EC0 builds it, word by word.
@@ -206,8 +206,8 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
     Contact03* contact = (Contact03*)n->owner;
     for (s32 i = 0; i < 2; i++) {
         Collider* body = contact->end[i].body;
-        if (body != 0 && body->f4BC >= 0) {
-            s32 idx = body->f4BC << 2;
+        if (body != 0 && body->solverIndex >= 0) {
+            s32 idx = body->solverIndex << 2;
             s32* size = (s32*)(idx + a5);
             f32* r = (f32*)AllocateZeroedBackMemory(*size << 5);
             n->rows[i] = r;
@@ -222,7 +222,7 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
         ContactEnd03* e = *(ContactEnd03**)(i * 4 + a4);
         for (s32 j = 0; j < 2; j++) {
             Collider* body = e[j].body;
-            if (body == 0 || body->f4BC < 0) {
+            if (body == 0 || body->solverIndex < 0) {
                 Vu0::Q(out[j]) = Vu0::Zero();
             } else if (body == contact->end[0].body) {
                 Collider* part = e[j].part;
@@ -450,11 +450,11 @@ void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** 
                 continue;
             }
             Contact03* c = contacts[i];
-            if (c->f94 < 0.0001f) {
+            if (c->friction < 0.0001f) {
                 continue;
             }
             Vec02 acc;
-            Vu0::Q(acc) = Vu0::Q(c->vB0);
+            Vu0::Q(acc) = Vu0::Q(c->relativeVelocity);
             for (s32 k = 0; k < self->count; k++) {
                 ActiveSetItem* other = (ActiveSetItem*)(self->items + k * 0x60);
                 if (other->x != 0.0f) {
@@ -462,7 +462,7 @@ void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** 
                 }
             }
             u128 v = Vu0::Q(acc);
-            u128 normal = Vu0::Q(c->v80);
+            u128 normal = Vu0::Q(c->normal);
             u128 tangent = Vu0::Sub(v, Vu0::MulX(normal, Vu0::Dot(v, normal)));
             u128 len2 = Vu0::Dot(tangent, tangent);
             Vu0::Q(acc) = tangent;
@@ -488,7 +488,7 @@ void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, Contact03** 
         Vu0::Q(it->axis) = Vu0::MulX(Vu0::Q(best), Vu0::Scalar(1.0f / mag));
         it->kind = 1;
         it->bounded = 1;
-        it->limit = it->twin->x * bestContact->f94;
+        it->limit = it->twin->x * bestContact->friction;
         for (s32 j = 0; j < 2; j++) {
             Collider* h = FindHandlerForSlot(end[j].part, 0x108);
             if (h != 0) {
@@ -553,7 +553,7 @@ void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Colli
             if (body == 0) {
                 continue;
             }
-            s32 g = body->f4BC;
+            s32 g = body->solverIndex;
             if (g < 0) {
                 continue;
             }

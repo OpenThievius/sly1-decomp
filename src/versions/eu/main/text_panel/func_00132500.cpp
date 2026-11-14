@@ -43,9 +43,9 @@ void DrawTextPanelCenterFrame(Obj_eu_132500* self, PacketWriter* gs)
 
     pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     k = 3.0f;
-    if (0.0f < pad->f78) {
+    if (0.0f < pad->secondStickY) {
         k = 6.0f;
-    } else if (pad->f78 < 0.0f) {
+    } else if (pad->secondStickY < 0.0f) {
         k = -6.0f;
     }
     self->f598 = WrapAngle(self->f598 + g_frameDt * k);

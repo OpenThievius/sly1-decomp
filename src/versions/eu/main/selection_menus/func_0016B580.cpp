@@ -53,7 +53,7 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
     }
     ShowCurrentObjectCaptions(self);
     f32 delay = 0.3f;
-    if (self->f2D4 == 1 && (p->f28 == p->index || delay <= g_gameTime[0] - self->f2D8)) {
+    if (self->f2D4 == 1 && (p->currentEntry == p->index || delay <= g_gameTime[0] - self->f2D8)) {
         s32 idx = self->f2D0;
         if (idx == 0) {
             Obj_16B580_eu* g = (Obj_16B580_eu*)&D_0026FD00;
@@ -71,10 +71,10 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
         PushStackElement((ElementStack*)g_elementStack, &g_mapScreenList);
         return;
     }
-    if (p->f28 != p->index) {
+    if (p->currentEntry != p->index) {
         return;
     }
-    if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= g_gameTime[0])) {
+    if ((arg->flags & 0x800) || (arg->connectionMode == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(arg, 0x800);
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x17);
         return;

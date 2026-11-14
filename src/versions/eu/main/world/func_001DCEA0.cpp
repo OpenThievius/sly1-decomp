@@ -15,7 +15,7 @@ void LoadWorld(World* self, BufferedStream* s)
     ResetScatterController((ScatterController*)g_scatterController);
     InitScriptValuePools();
     D_00275714 = ReadBufferedU8(s);
-    self->f1D70 = ReadBufferedS16(s);
+    self->soundBank = ReadBufferedS16(s);
     SkipBufferedBlocks(s);
     LoadTextTable(s);
     g_camera = (Camera*)CreateTypedRecord(0x6D, self, 0, 4, -1);
@@ -29,27 +29,27 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, (u32*)&self->f2310);
-    ReadBufferedString(s, (u8**)&self->f2314);
-    ReadOptionalBufferedBlock(s, (u32*)&self->f1D74);
+    ReadOptionalBufferedBlock(s, (u32*)&self->commentaryRecord);
+    ReadBufferedString(s, (u8**)&self->creditsText);
+    ReadOptionalBufferedBlock(s, (u32*)&self->stagedBank);
     for (s32 k = 0; k < 14; k++) {
         ReadOptionalBufferedBlock(s, (u32*)&D_eu_0027EEA0[k]);
     }
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);
     ReadBufferedBlockBody(s);
-    if (self->f1D70 >= 0) {
-        EnsureSoundBankLoaded(self->f1D70);
+    if (self->soundBank >= 0) {
+        EnsureSoundBankLoaded(self->soundBank);
     }
-    if (self->f1D78 == 0) {
+    if (self->volumeChannel2On == 0) {
         SilenceVolumeChannel2();
     }
-    RequestStagedBank(self->f1D74);
+    RequestStagedBank(self->stagedBank);
     SendResidentImages();
     if (IsListEmpty(&self->list1BE8) != 0) {
         CreateConeVolumes(self);
     }
-    self->f1D67 = 0x80;
+    self->fillAlpha = 0x80;
     color = self->color1D64;
     FillScreenColor(D_002BDC20, &color, 0);
     self->f1D68 *= 0.003921569f;
@@ -80,11 +80,11 @@ void LoadWorld(World* self, BufferedStream* s)
     RunQueuedCalls(self);
     UpdateScatterLevelLimits((ScatterController*)g_scatterController);
     ResumeElementStackState(g_elementStack);
-    if (((MapScreen_eu*)&g_mapScreenList)->current == 0 && g_saveData->f19D8 != 0) {
+    if (((MapScreen_eu*)&g_mapScreenList)->current == 0 && g_saveData->levelIndex != 0) {
         AllocateZeroedFrontMemory(0x80000);
     }
     UpdateCameraLocation(g_camera);
     UpdateWorldContacts(self, 0);
-    PlayStagedBank(self->f1D74);
+    PlayStagedBank(self->stagedBank);
     StartWorldSoundEntries(self);
 }

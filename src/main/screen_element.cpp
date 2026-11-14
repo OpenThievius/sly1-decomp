@@ -40,14 +40,14 @@ extern void* const g_screenElements[];
 // A 28-byte text style the static initialiser (func_001AEA70) clears (func_001F5C0C with 0x1C)
 // and then fills.
 struct TextStyle {
-    void* f00;
+    void* font;
     u8 f04;
     u8 pad05[3];
     f32 f08;
     f32 f0C;
     f32 f10;
     f32 f14;
-    u32 f18;
+    u32 color;
 };
 
 // The font object's calls.
@@ -789,7 +789,7 @@ void InitCounterCaption(T217D_E30* self)
     self->rate = 6000.0f;
     switch (self->index) {
     case 3:
-        self->target = &g_saveData->f19E0;
+        self->target = &g_saveData->reserveCount;
         break;
     case 4:
         self->target = &g_currentEntry->count64;
@@ -799,7 +799,7 @@ void InitCounterCaption(T217D_E30* self)
         self->target = &g_currentLevelRecord->f438;
         break;
     case 6:
-        self->target = &g_saveData->f19E8;
+        self->target = &g_saveData->pickupCount;
         break;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 28: case 29:
@@ -907,7 +907,7 @@ void FormatCounterCaption(T217D_E30* self)
         }
         break;
     case 5:
-        if ((u32)(g_saveData->f19D8 - 1) < 4) {
+        if ((u32)(g_saveData->levelIndex - 1) < 4) {
             FormatToStringBounded(self->text, 0x200, "%d%c", self->shown, 0x4B);
         } else {
             self->text[0] = 0;
@@ -1213,9 +1213,9 @@ f32 D_002743BC = 340.0f;
 // Starts the gauge's count from its mode's segments and returns the number of cells.
 static inline s32 StartGaugeCount(T217D_2E0* g)
 {
-    s32 cells = g->f260 * g->f264;
-    g->f26C = g->f260;
-    g->f270 = g->f264;
+    s32 cells = g->segmentCount * g->cellsPerSegment;
+    g->segmentsLeft = g->segmentCount;
+    g->cellsLeft = g->cellsPerSegment;
     return cells;
 }
 
@@ -1227,28 +1227,28 @@ void InitGauge(T217D_2E0* self)
     self->scale = 1.0f;
     self->fillTarget = 1.0f;
     self->fill = 0;
-    switch (g_saveData->f19D8) {
+    switch (g_saveData->levelIndex) {
     case 1:
-        self->f260 = 4;
-        self->f264 = 1;
+        self->segmentCount = 4;
+        self->cellsPerSegment = 1;
         break;
     case 4:
-        self->f260 = 5;
-        self->f264 = 10;
+        self->segmentCount = 5;
+        self->cellsPerSegment = 10;
         break;
     case 2:
-        self->f260 = 3;
-        self->f264 = 1;
+        self->segmentCount = 3;
+        self->cellsPerSegment = 1;
         self->fill = 1.0f;
         break;
     case 3:
-        self->f260 = 4;
-        self->f264 = 1;
+        self->segmentCount = 4;
+        self->cellsPerSegment = 1;
         self->fill = 1.0f;
         break;
     case 5:
-        self->f260 = 4;
-        self->f264 = 5;
+        self->segmentCount = 4;
+        self->cellsPerSegment = 5;
         break;
     default:
         return;
@@ -1268,28 +1268,28 @@ void InitGauge(T217D_2E0* self)
     n = StartGaugeCount(self);
     self->letterX = h * 0.5f;
     self->letterY = w + pad + h2 * 0.5f;
-    self->f268 = n;
+    self->cellCount = n;
 }
 
 void DecrementGaugeCount(T217D_2E0* self)
 {
-    s32 n = self->f270 - 1;
-    self->f270 = n;
+    s32 n = self->cellsLeft - 1;
+    self->cellsLeft = n;
     if (n <= 0) {
-        n = self->f26C - 1;
-        self->f26C = n;
+        n = self->segmentsLeft - 1;
+        self->segmentsLeft = n;
         if (n <= 0) {
-            self->f270 = 0;
-            self->f26C = 0;
+            self->cellsLeft = 0;
+            self->segmentsLeft = 0;
         } else {
-            self->f270 = self->f264;
+            self->cellsLeft = self->cellsPerSegment;
         }
     }
 
-    s32 a = self->f264;
-    f32 d = (f32)self->f268;
-    s32 v0 = self->f26C - 1;
-    s32 b = self->f270;
+    s32 a = self->cellsPerSegment;
+    f32 d = (f32)self->cellCount;
+    s32 v0 = self->segmentsLeft - 1;
+    s32 b = self->cellsLeft;
     v0 = (-1 < v0) ? v0 : 0;
     self->fillTarget = (f32)(v0 * a + b) / d;
     self->changedAt = g_gameClock.time;
@@ -1856,12 +1856,12 @@ void SetElementModeFollowingFade(T217D_560* self, s32 newval)
                 newval = 0;
                 if ((*(s32*)D_00275B00 & 8) == 0) {
                     newval = 2;
-                    if (g_saveData->f19D8 != 0 && D_0027051C == 0) {
+                    if (g_saveData->levelIndex != 0 && D_0027051C == 0) {
                         g = &D_0026F138;
                         g->pending = 0;
                         g->vt->m16(g, 0);
                         gg = g_saveData;
-                        SetElementTextFromEntry(g, gg->f19D8, gg->f19DC);
+                        SetElementTextFromEntry(g, gg->levelIndex, gg->entryIndex);
                         g->announce = 1;
                         SetScreenElementHoldTime(g, 0.0f);
                         g->vt->m16(g, 2);
@@ -2253,31 +2253,31 @@ void ConstructScreenTextStyles(s32 initialize, s32 priority)
         D_002743D0.f08 = 2.0f;
         D_002743D0.f0C = 1.0f;
         D_002743D0.f14 = D_002743D0.f10 = 0.3f;
-        D_002743D0.f18 = 0xFF7D4B00;
+        D_002743D0.color = 0xFF7D4B00;
         FillMemory(&D_002743F0, 0, 0x1C);
         D_002743F0.f04 = 0x2D;
         D_002743F0.f08 = 2.0f;
         D_002743F0.f0C = -4.0f;
         D_002743F0.f14 = D_002743F0.f10 = 0.3f;
-        D_002743F0.f18 = 0xFF7D4B00;
+        D_002743F0.color = 0xFF7D4B00;
         FillMemory(&D_00274410, 0, 0x1C);
         D_00274410.f04 = 0x3D;
         D_00274410.f08 = 2.0f;
         D_00274410.f0C = -4.0f;
         D_00274410.f14 = D_00274410.f10 = 0.3f;
-        D_00274410.f18 = 0xFF7D4B00;
+        D_00274410.color = 0xFF7D4B00;
         FillMemory(&D_00274450, 0, 0x1C);
         D_00274450.f04 = 0x2D;
         D_00274450.f08 = 2.0f;
         D_00274450.f0C = -4.0f;
         D_00274450.f14 = D_00274450.f10 = 0.3f;
-        D_00274450.f18 = 0xFF7D4B00;
+        D_00274450.color = 0xFF7D4B00;
         FillMemory(&D_00274488, 0, 0x1C);
         D_00274488.f04 = 0x2D;
         D_00274488.f08 = 2.0f;
         D_00274488.f0C = -4.0f;
         D_00274488.f14 = D_00274488.f10 = 0.3f;
-        D_00274488.f18 = 0xFF7D4B00;
+        D_00274488.color = 0xFF7D4B00;
     }
 }
 

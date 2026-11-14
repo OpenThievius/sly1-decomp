@@ -299,13 +299,13 @@ void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 // The file's .data, in retail's order from 0x261090. The colours and the two styles are built
 // by the static initialiser (func_00136FE8); their bytes are zero until then.
 struct PanelStyle {
-    s32 f0;
+    s32 font;
     u8 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-    u32 f18;
+    f32 paddingX;
+    f32 paddingY;
+    f32 scaleX;
+    f32 scaleY;
+    u32 color;
     PanelStyle()
     {
     }
@@ -313,19 +313,19 @@ struct PanelStyle {
     {
         FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
-        f8 = w;
-        f10 = 0.3f;
-        f14 = 0.3f;
-        f18 = 0xFF7D4B00;
+        paddingX = w;
+        scaleX = 0.3f;
+        scaleY = 0.3f;
+        color = 0xFF7D4B00;
     }
     PanelStyle(s32 w, s32 h)
     {
         FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
-        f8 = w;
-        fC = h;
-        f14 = f10 = 0.3f;
-        f18 = 0xFF7D4B00;
+        paddingX = w;
+        paddingY = h;
+        scaleY = scaleX = 0.3f;
+        color = 0xFF7D4B00;
     }
 };
 
@@ -466,7 +466,7 @@ void ClearTextPanel(T217D_440* self)
     self->value = 0;
     self->stickX = 0;
     self->stickY = 0;
-    self->f314 = 0.4f;
+    self->tickScroll = 0.4f;
 }
 
 void SetupScreenElementText(ScreenElement* self);
@@ -490,8 +490,8 @@ void SetupTextPanel(T217D_440* self)
     f32 sy = 0.8f;
     Font* small = self->font->Clone(0.7f, sy);
     self->smallFont = small;
-    small->f30 = 1;
-    small->f38 = 0x3F001;
+    small->useTestWord = 1;
+    small->testWord = 0x3F001;
     self->font = self->font->Clone(0.75f, sy);
     if (IsFontLoaded(2) != 0) {
         self->frame = (Font**)&D_00261148;
@@ -590,7 +590,7 @@ void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
     BeginGifTag(gs, 0x84, 1, 4);
 
     for (i = 0; i < 11; i++) {
-        f32 x = left + ((f32)i - self->f314) * step * span;
+        f32 x = left + ((f32)i - self->tickScroll) * step * span;
         s32 x0 = CenterFrameMath::ScreenX(x);
         x += tick;
         AddGifXyzfNoDrawEntry(gs, x0, CenterFrameMath::ScreenY(top), 0, 0);
@@ -743,7 +743,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     L.w = 0.0f;
     L.h = 0.0f;
     f32 s = 0.4f;
-    if (self->open != 0 && pad->f48 != 0.0f) {
+    if (self->open != 0 && pad->stickMagnitude != 0.0f) {
         s = 0.5f;
     }
     PushFontScale(glyphs, s, s);
@@ -753,7 +753,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PopFontScale(glyphs);
     FormatToString(buf, D_00249CE0, 0x29);
     s = 0.4f;
-    if (self->open != 0 && pad->f7C != 0.0f) {
+    if (self->open != 0 && pad->secondStickMagnitude != 0.0f) {
         s = 0.5f;
     }
     PushFontScale(glyphs, s, s);
@@ -795,9 +795,9 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
 
     pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     k = 3.0f;
-    if (0.0f < pad->f78) {
+    if (0.0f < pad->secondStickY) {
         k = 6.0f;
-    } else if (pad->f78 < 0.0f) {
+    } else if (pad->secondStickY < 0.0f) {
         k = -6.0f;
     }
     self->spin = WrapAngle(self->spin + g_frameDt * k);
@@ -1107,7 +1107,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         TextPointObject* obj = objs[i];
         ConvertPositionToWorld(obj, &pos);
         Camera* cam = (Camera*)g_camera;
-        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(cam->f40));
+        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(cam->position));
         if (4000.0f < Vu0::ToFloat(Vu0::Length(d))) {
             continue;
         }
@@ -1168,10 +1168,10 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         layout.h = h;
         PanelStyle style(D_00261168);
         Font* font = GetFontById(2);
-        style.f0 = (s32)font;
-        ((u8*)&style.f18)[3] = (s32)(alpha * (f32)((u8*)&style.f18)[3]);
-        style.f8 *= obj->f58;
-        style.fC *= obj->f58;
+        style.font = (s32)font;
+        ((u8*)&style.color)[3] = (s32)(alpha * (f32)((u8*)&style.color)[3]);
+        style.paddingX *= obj->f58;
+        style.paddingY *= obj->f58;
         StyleDrawer::Draw((Font**)&style, &layout, q);
         ((u8*)&layout.color)[3] = (s32)(alpha * (f32)((u8*)&layout.color)[3]);
         DrawFontString(self->font, buf, (StringLayout*)&layout, 0, q);
@@ -1487,11 +1487,11 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
         Vec_136040 r;
         f32 lo = -1.0f;
         f32 hi = 1.0f;
-        f32 sum = p->f40 + p->f74;
+        f32 sum = p->stickX + p->secondStickX;
         StickLimits t0 = D_00249D00;
         StickLimits t1 = D_00249D10;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
-        f32 v = p->f44;
+        f32 v = p->stickY;
         f32 lo2 = -1.0f;
         f32 hi2 = 1.0f;
         if (v < lo2) {
@@ -1507,11 +1507,11 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
         vb.y = v * 50.0f;
         vb.z = 0;
         f32* g = ((f32*)g_gameClock);
-        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, g[2], (RampProfile*)((0.0001f < p->f48 + p->f7C) ? &t0 : &t1), 0);
-        self->f314 += u * -0.08f;
+        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, g[2], (RampProfile*)((0.0001f < p->stickMagnitude + p->secondStickMagnitude) ? &t0 : &t1), 0);
+        self->tickScroll += u * -0.08f;
         self->stickX = r.x;
         self->stickY = r.y;
-        self->f314 = WrapModulo(self->f314, 1.0f);
+        self->tickScroll = WrapModulo(self->tickScroll, 1.0f);
         break;
     }
     case 5:
@@ -1730,7 +1730,7 @@ void DrawTextPanel(T217D_440* self)
     Rgba4 color = *(Rgba4*)&self->highlight;
     Rgba4 frameColor;
     if (self->frame != 0) {
-        frameColor = *(Rgba4*)&((PanelStyle*)self->frame)->f18;
+        frameColor = *(Rgba4*)&((PanelStyle*)self->frame)->color;
     } else {
         *(u32*)&frameColor = 0;
     }
@@ -1772,10 +1772,10 @@ void DrawTextPanel(T217D_440* self)
     }
     if (self->state == 3 && self->frame != 0) {
         PanelStyle* style = (PanelStyle*)self->frame;
-        Rgba4 saved = *(Rgba4*)&style->f18;
-        *(Rgba4*)&style->f18 = frameColor;
+        Rgba4 saved = *(Rgba4*)&style->color;
+        *(Rgba4*)&style->color = frameColor;
         StyleDrawer::Draw(self->frame, &box, &g_gsPacketWriter);
-        *(Rgba4*)&((PanelStyle*)self->frame)->f18 = saved;
+        *(Rgba4*)&((PanelStyle*)self->frame)->color = saved;
     }
     if (self->text[0] != 0) {
         TextScratch all;
@@ -1822,8 +1822,8 @@ void DrawTextPanel(T217D_440* self)
         DrawAlignedText((TextReader*)&typed, &lines, (Vec4U*)&box, &g_gsPacketWriter);
     }
     PopFontScale(self->font);
-    if (self->f2F8 != 0) {
-        char glyph[2] = { self->f2F8, 0 };
+    if (self->buttonGlyph != 0) {
+        char glyph[2] = { self->buttonGlyph, 0 };
         f32 s = Cosine(WrapAngle(g_gameTime * 10.0f)) * 0.5f + 0.5f;
         f32 size = (1.0f - s) * 0.3f + s * 0.4f;
         Font* font = GetFontById(1);

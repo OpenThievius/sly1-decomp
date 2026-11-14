@@ -156,14 +156,14 @@ void SetTimerState(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : ScreenElement {
-    s32 f260;               // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
-    s32 f264;               // 0x264: copied into f270 then
-    s32 f268;               // 0x268
+    s32 segmentCount;       // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
+    s32 cellsPerSegment;    // 0x264: copied into f270 then
+    s32 cellCount;          // 0x268: the cells of the whole bar
     union {
         u8 letter;          // 0x26C: the glyph to show, from 'r'
-        s32 f26C;           // 0x26C: counted down by func_001AC060
+        s32 segmentsLeft;   // 0x26C: counted down by func_001AC060
     };
-    s32 f270;               // 0x270
+    s32 cellsLeft;          // 0x270: the cells left of the current segment
     f32 fill;                   // 0x274: the filled part of the bar
     f32 fillTarget;             // 0x278
     f32 changedAt;              // 0x27C: the clock when the value last changed, 0 for never
@@ -290,7 +290,7 @@ struct T217D_440 : ScreenElement {
     u8 pad2B0[0x2F0 - 0x2B0];
     f32 charsPerSecond;         // 0x2F0: 15.0 (func_001310F0), the typing speed (func_00136530)
     u32 highlight;              // 0x2F4: 0x80FFFFFF (func_001310F0)
-    char f2F8;              // 0x2F8: the button glyph drawn beside the text (0 none)
+    char buttonGlyph;       // 0x2F8: the button glyph drawn beside the text (0 none)
     u8 pad2F9[0x2FC - 0x2F9];
     BaseObject* f2FC;           // 0x2FC: the subject, set by func_001365A0
     f32 value;                  // 0x300: 0 to 1 (func_001365A8: a percent / 100)
@@ -298,7 +298,7 @@ struct T217D_440 : ScreenElement {
     f32 stickY;                 // 0x308
     f32 spin;                   // 0x30C: moves by the pad's stick (func_00132500)
     Font* smallFont;            // 0x310: a copy of the font at 0.7 by 0.8 (SetupTextPanel)
-    f32 f314;                   // 0x314
+    f32 tickScroll;             // 0x314: the scroll of the tick marks
     void* bands;                // 0x318: the GS packet of the bands behind the panel (SetupTextPanel)
     s32 bandsSize;              // 0x31C
     s32 palette;                // 0x320: 0 .. 2, the colour pair func_00132500 picks
@@ -369,7 +369,7 @@ struct T217D_BF0 : ScreenElement {
     f32 aim[4];                 // 0x270: the aim, x and y in -1..1, and the zoom (func_00181ED0); the sprite's place as a fraction of the screen (func_001821B0)
     void* target;               // 0x280: the class 0x75 object the aim chose last (func_00181ED0)
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
-    f32 f288;                   // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
+    f32 alphaScale;             // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.

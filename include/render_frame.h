@@ -20,16 +20,16 @@ struct RenderFrame {
     u8 pad08[0x0C - 0x08];
     u8* bufB;               // 0x0C: render_frame.cpp, func_0015E810, func_0015EE80
     union {
-        u8* f10;            // 0x10: render_frame.cpp, func_0015E810
-        s32 i10;            // 0x10: func_0015ED50
+        u8* frameData;      // 0x10: render_frame.cpp, func_0015E810
+        s32 frameDataWord;  // 0x10: func_0015ED50
     };
     u8 pad14[0x18 - 0x14];
     u32 flags;              // 0x18: func_0015E9F0
-    s32 f1C;                // 0x1C: func_0015ED50
-    List01 l20;             // 0x20: func_0015E810, func_0015EFE8
-    List01 l2C;             // 0x2C
-    List01 l38;             // 0x38
-    s32 f44;                // 0x44: func_0015E9F0, func_0015ED50
+    s32 hasMaskedImages;    // 0x1C: func_0015ED50
+    List01 releasedObjects; // 0x20: func_0015E810, func_0015EFE8
+    List01 detachedRecords; // 0x2C
+    List01 deferredReleases; // 0x38
+    s32 imageMask;          // 0x44: func_0015E9F0, func_0015ED50
 };
 
 typedef char check_RenderFrame[sizeof(RenderFrame) == 0x48 ? 1 : -1];

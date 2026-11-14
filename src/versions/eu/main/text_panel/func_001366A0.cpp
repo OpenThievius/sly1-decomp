@@ -122,7 +122,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     Rgba4 color = *(Rgba4*)&self->highlight;
     Rgba4 frameColor;
     if (self->frame != 0) {
-        frameColor = *(Rgba4*)&((PanelStyle*)self->frame)->f18;
+        frameColor = *(Rgba4*)&((PanelStyle*)self->frame)->color;
     } else {
         *(u32*)&frameColor = 0;
     }
@@ -164,10 +164,10 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     }
     if (self->state == 3 && self->frame != 0) {
         PanelStyle* style = (PanelStyle*)self->frame;
-        Rgba4 saved = *(Rgba4*)&style->f18;
-        *(Rgba4*)&style->f18 = frameColor;
+        Rgba4 saved = *(Rgba4*)&style->color;
+        *(Rgba4*)&style->color = frameColor;
         StyleDrawer::Draw(self->frame, &box, &g_gsPacketWriter);
-        *(Rgba4*)&((PanelStyle*)self->frame)->f18 = saved;
+        *(Rgba4*)&((PanelStyle*)self->frame)->color = saved;
     }
     if (self->text[0] != 0) {
         TextReader_eu_1367B8 all;

@@ -204,11 +204,11 @@ struct WeightIndices {
 };
 struct MeshBuildState {
     u8 pad00[0x40];
-    s32 f40;
+    s32 nweights;
 };
 struct StripMeshInfo {
     u8 pad00[0x10];
-    s32 f10;
+    s32 extraCount;
     s32 f14;
     s32 f18;
 };
@@ -219,18 +219,18 @@ struct CursorHook {
 };
 struct StripMeshOwner {
     u8 pad00[0x18];
-    s32 f18;
+    s32 lit;
     u8 pad1C[0x28 - 0x1C];
-    s32 f28;
+    s32 skinned;
     u8 pad2C[0x38 - 0x2C];
-    CursorHook* f38;
+    CursorHook* animator;
     u8 pad3C[0x40 - 0x3C];
-    f32 f40;
+    f32 fogBias;
     u8 pad44[0x54 - 0x44];
-    StripMeshInfo* f54;
+    StripMeshInfo* link;
 };
 struct StripExtra {
-    s32 f0;
+    s32 positions;
     s32 a4[4];
     s32 a14[4];
     s32 a24[4];
@@ -285,9 +285,9 @@ void ApplyLinkConstraint(PlacedObject* self);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
-struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* f38; u8 pad1[0x70 - 0x3C]; };
-struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
-struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
+struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* handler; u8 pad1[0x70 - 0x3C]; };
+struct AttachmentNode { u8 pad0[4]; void* attachment; s32 targetId; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
+struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* entries; u8* chainData; u8 pad1[0x4C - 0x18]; AttachmentNode* nodes; };
 
 void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
 void AttachNodeToOwner(NodeOwner* self, void* unused, NodeAttachment* ctx);
@@ -308,7 +308,7 @@ typedef void (*AnimatorStepFn)(void* self, f32 f);
 struct AnimatorStep {
     AnimatorStepFn* vtbl;
     u8 pad4[0x8];
-    void* f0C;
+    void* oscillator;
     u8 pad10[0x70];
     AnimatorStep* next80;
 };
@@ -325,10 +325,10 @@ void EvaluateOscillator(Oscillator* self);
 extern u8 D_00000010[];
 extern u8 D_000000F0[];
 
-struct PartPacketContext { u8 pad0[0x28]; s32 f28; };
+struct PartPacketContext { u8 pad0[0x28]; s32 skinned; };
 struct PartRange { u16 lo; u16 hi; };
-struct PartPacketSource { u8 pad0[0x18]; u8* f18; PartRange* f1C; };
-struct PartPackets { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
+struct PartPacketSource { u8 pad0[0x18]; u8* mesh; PartRange* unpack; };
+struct PartPackets { void* firstQwc; void* firstBuffer; void* firstUnpackCursor; void* secondQwc; void* secondBuffer; void* secondUnpackCursor; };
 
 PacketWriter* InitPacketWriter(PacketWriter* self);
 void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
@@ -458,7 +458,7 @@ struct ModelLink {
     ModelPart* part;        // 0x04
     s32 id;                 // 0x08
     u8 pad0C[4];
-    s32 f10;                // 0x10
+    s32 extraCount;         // 0x10
     s32 f14;                // 0x14
     s32 f18;                // 0x18
     u8 pad1C[4];
@@ -484,7 +484,7 @@ struct ModelAnimator { ModelAnimatorVt* vt; };
 struct ModelStrip {
     Vec3 pos;               // 0x00
     u8 pad0C[4];
-    f32 f10;                // 0x10
+    f32 radius;             // 0x10
     s32 f14;                // 0x14
     StripMesh* mesh;        // 0x18
     StripUnpack* unpack;    // 0x1C
@@ -532,12 +532,12 @@ struct __attribute__((aligned(16))) ModelPart {
 
 // A strip's packets (BuildPartVifPackets fills the first six words).
 struct StripPackets {
-    void* f0;
-    void* f4;
-    void* f8;
-    void* fC;
-    void* f10;
-    void* f14;
+    void* firstQwc;
+    void* firstBuffer;
+    void* firstUnpackCursor;
+    void* secondQwc;
+    void* secondBuffer;
+    void* secondUnpackCursor;
     u8 pad18[0x18];
 };
 
@@ -741,7 +741,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                 link->f30 = ReadBufferedFloat((BufferedStream*)stream);
                 ReadBufferedMatrix4((BufferedStream*)stream, link->matrix);
             }
-            link->f10 = ReadBufferedU8((BufferedStream*)stream);
+            link->extraCount = ReadBufferedU8((BufferedStream*)stream);
             link->f14 = ReadBufferedU8((BufferedStream*)stream);
             link->f18 = ReadBufferedU8((BufferedStream*)stream);
             part->link = link;
@@ -784,7 +784,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                 f32* weights;
                 PushBackMemoryMark();
                 ReadBufferedVector3((BufferedStream*)stream, strip);
-                strip->f10 = ReadBufferedFloat((BufferedStream*)stream);
+                strip->radius = ReadBufferedFloat((BufferedStream*)stream);
                 nvecs = ReadBufferedU8((BufferedStream*)stream);
                 nnrms = ReadBufferedU8((BufferedStream*)stream);
                 ntints = ReadBufferedU8((BufferedStream*)stream);
@@ -865,8 +865,8 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                         MovedPointer::Fix(outs.p[2], strip->qwc[n] * 16, starts[n], strip->addr[n]);
                         if (strip->extra != 0) {
                             StripExtra* e = strip->extra;
-                            MovedPointer::Fix(&e->f0, strip->qwc[n] * 16, starts[n], strip->addr[n]);
-                            for (s32 m = 0; m < part->link->f10; m++) {
+                            MovedPointer::Fix(&e->positions, strip->qwc[n] * 16, starts[n], strip->addr[n]);
+                            for (s32 m = 0; m < part->link->extraCount; m++) {
                                 MovedPointer::Fix(&e->a4[m], strip->qwc[n] * 16, starts[n], strip->addr[n]);
                                 MovedPointer::Fix(&e->a14[m], strip->qwc[n] * 16, starts[n], strip->addr[n]);
                                 MovedPointer::Fix(&e->a24[m], strip->qwc[n] * 16, starts[n], strip->addr[n]);
@@ -1008,11 +1008,11 @@ void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* h
         WriteVifStmask(pkt, 0);
     }
     s32 end = off + extra;
-    if (self->f40 != 0)
+    if (self->nweights != 0)
     {
         hdr->p[5] = off;
-        hdr->p[6] = self->f40 + off;
-        for (i = 0; i < self->f40; i++)
+        hdr->p[6] = self->nweights + off;
+        for (i = 0; i < self->nweights; i++)
         {
             CopyWordsToWriter(pkt, 0, 1, (u32*)&i, 0x1D);
             ReserveVifUnpack(pkt, 8, n, hdr->p[6], 0, (u8**)&out);
@@ -1061,7 +1061,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     s32 i;
     VertexRefs* r;
 
-    if (obj->f54 != 0) {
+    if (obj->link != 0) {
         BeginDmaTag(pkt);
     }
     ReserveVifUnpack(pkt, 0xD, 3, 0xB, 0, (u8**)&hdr->p);
@@ -1113,10 +1113,10 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     if (outs[2] != 0) {
         *outs[2] = (s32)uvOut;
     }
-    if (obj->f54 != 0) {
+    if (obj->link != 0) {
         StripExtra* e = (StripExtra*)AllocateZeroedFrontMemory(0x34);
         hdr->extra = e;
-        e->f0 = (s32)posOut;
+        e->positions = (s32)posOut;
     }
     for (i = 0; i < n; i++) {
         r = &recs[i];
@@ -1132,15 +1132,15 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
         }
         *(Vec3*)posOut = vecs[recs[i].pos];
         if (recs[i].flags >> 7) {
-            posOut[3] = obj->f40 + 32768.0f;
+            posOut[3] = obj->fogBias + 32768.0f;
         } else {
-            posOut[3] = obj->f40 + 28672.0f;
+            posOut[3] = obj->fogBias + 28672.0f;
         }
         posOut += 4;
     }
     node = 0;
-    if (obj->f38 != 0) {
-        node = obj->f38->vt[5](obj->f38, mesh);
+    if (obj->animator != 0) {
+        node = obj->animator->vt[5](obj->animator, mesh);
     }
     if (node == 0 && mesh->hook != 0) {
         node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
@@ -1169,11 +1169,11 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
         }
         WriteVifMscal(pkt, D_00002008);
     }
-    if (self->f40 != 0) {
+    if (self->nweights != 0) {
         hdr->p->off[3] = off;
-        off += self->f40;
+        off += self->nweights;
         hdr->p->strip[3] = off;
-        for (k = 0; k < self->f40; k++) {
+        for (k = 0; k < self->nweights; k++) {
             if (k > 0) {
                 WriteVifFlushE(pkt);
             }
@@ -1192,14 +1192,14 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     }
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
-        for (s32 i = 0; i < obj->f54->f10; i++) {
+        for (s32 i = 0; i < obj->link->extraCount; i++) {
             ReserveVifUnpack(pkt, 0xC, n, off, 0, (u8**)&e->a24[i]);
-            if (obj->f54->f18 != 0) {
+            if (obj->link->f18 != 0) {
                 WriteVifUnpack(pkt, 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(pkt, D_00003A80);
                 WriteVifFlushE(pkt);
             }
-            if (obj->f54->f14 != 0) {
+            if (obj->link->f14 != 0) {
                 WriteVifUnpack(pkt, 0xC, 4, 0, 0x16, &e->a4[i]);
                 WriteVifMscal(pkt, D_00003A90);
                 WriteVifFlushE(pkt);
@@ -1236,7 +1236,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
         off += s->stride;
     }
     WriteVifMscalf(pkt, head);
-    if (obj->f54 != 0) {
+    if (obj->link != 0) {
         CloseDmaTag(pkt);
         AddDmaReturnTag(pkt);
     }
@@ -1266,10 +1266,10 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     s32 i;
     VertexRefs* r;
 
-    if (obj->f54 != 0) {
+    if (obj->link != 0) {
         BeginDmaTag((PacketWriter*)&pkt[2]);
     }
-    obj->f18 = 1;
+    obj->lit = 1;
     ReserveVifUnpack((PacketWriter*)&pkt[0], 0xD, 3, 0xB, 0, (u8**)&hdr->p);
     off = 0x24;
     FillMemory(hdr->p, 0, 0x18);
@@ -1278,10 +1278,10 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     hdr->p->off[0] = off;
     off = n * 4 + 0x24;
     hdr->p->off[1] = off;
-    if (hdr->count != 0 || self->f40 != 0) {
-        obj->f28 = 1;
+    if (hdr->count != 0 || self->nweights != 0) {
+        obj->skinned = 1;
     }
-    if (obj->f28 != 0) {
+    if (obj->skinned != 0) {
         off += (((n + 3) & ~3) - n) * 4;
     }
     hdr->p->strip[3] = off;
@@ -1295,18 +1295,18 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     if (outs[1] != 0) {
         *outs[1] = (s32)posOut;
     }
-    if (obj->f54 != 0) {
+    if (obj->link != 0) {
         StripExtra* e = (StripExtra*)AllocateZeroedFrontMemory(0x34);
         hdr->extra = e;
-        e->f0 = (s32)posOut;
+        e->positions = (s32)posOut;
     }
     for (i = 0; i < n; i++) {
         r = &recs[i];
         *(Vec3*)posOut = vecs[r->pos];
         if (r->flags >> 7) {
-            posOut[3] = obj->f40 + 32768.0f;
+            posOut[3] = obj->fogBias + 32768.0f;
         } else {
-            posOut[3] = obj->f40 + 28672.0f;
+            posOut[3] = obj->fogBias + 28672.0f;
         }
         posOut += 4;
     }
@@ -1329,10 +1329,10 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         }
         WriteVifMscal(&pkt[0], D_00002008);
     }
-    if (self->f40 != 0) {
+    if (self->nweights != 0) {
         hdr->p->off[3] = off;
-        off += self->f40;
-        for (k = 0; k < self->f40; k++) {
+        off += self->nweights;
+        for (k = 0; k < self->nweights; k++) {
             CopyWordsToWriter((PacketWriter*)&pkt[0], 0, 1, (u32*)&k, 0x16);
             ReserveVifUnpack((PacketWriter*)&pkt[0], 8, n, hdr->p->strip[3], 0, (u8**)&dOut);
             u16* idx = ents[k].pos;
@@ -1348,7 +1348,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         }
     }
     WriteVifStcycl((PacketWriter*)&pkt[1], 1, 4);
-    if (obj->f28 != 0 && hdr->count == 0 && self->f40 == 0) {
+    if (obj->skinned != 0 && hdr->count == 0 && self->nweights == 0) {
         ReserveVifUnpack((PacketWriter*)&pkt[1], 0xC, (n + 3) & ~3, hdr->p->off[0], 0, (u8**)&quads);
         nOut = 0;
     } else {
@@ -1360,8 +1360,8 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     if (hdr->count > 0) {
         WriteVifMscal(&pkt[1], D_00002088);
     }
-    if (self->f40 > 0) {
-        for (s32 m = 0; m < self->f40; m++) {
+    if (self->nweights > 0) {
+        for (s32 m = 0; m < self->nweights; m++) {
             if (m > 0) {
                 WriteVifFlushE((PacketWriter*)&pkt[1]);
             }
@@ -1435,8 +1435,8 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         uvOut += 3;
     }
     node = 0;
-    if (obj->f38 != 0) {
-        node = obj->f38->vt[5](obj->f38, mesh);
+    if (obj->animator != 0) {
+        node = obj->animator->vt[5](obj->animator, mesh);
     }
     if (node == 0 && mesh->hook != 0) {
         node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
@@ -1448,14 +1448,14 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     }
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
-        for (s32 i = 0; i < obj->f54->f10; i++) {
+        for (s32 i = 0; i < obj->link->extraCount; i++) {
             ReserveVifUnpack((PacketWriter*)&pkt[2], 0xC, n, off, 0, (u8**)&e->a24[i]);
-            if (obj->f54->f18 != 0) {
+            if (obj->link->f18 != 0) {
                 WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a14[i]);
                 WriteVifMscal(&pkt[2], D_00003A80);
                 WriteVifFlushE((PacketWriter*)&pkt[2]);
             }
-            if (obj->f54->f14 != 0) {
+            if (obj->link->f14 != 0) {
                 WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a4[i]);
                 WriteVifMscal(&pkt[2], D_00003AA0);
                 WriteVifFlushE((PacketWriter*)&pkt[2]);
@@ -1473,7 +1473,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         hdr->p->strip[slot++] = off;
         off += s->stride;
     }
-    if (obj->f54 != 0) {
+    if (obj->link != 0) {
         CloseDmaTag((PacketWriter*)&pkt[2]);
         AddDmaReturnTag((PacketWriter*)&pkt[2]);
     }
@@ -1484,46 +1484,46 @@ void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets*
     u8 buf[0x30];
     s32 s0;
 
-    if (*b->f18 != 0) return;
-    if (a->f28 != 0) return;
+    if (*b->mesh != 0) return;
+    if (a->skinned != 0) return;
     InitPacketWriter((PacketWriter*)buf);
-    s0 = (b->f1C->hi - b->f1C->lo) / 4;
+    s0 = (b->unpack->hi - b->unpack->lo) / 4;
     AllocateQuadwordBuffer((PacketWriter*)buf, (u32)((s0 + 7) / 4), 0x1A);
     WriteVifStcycl((PacketWriter*)buf, 1, 4);
-    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->f1C->lo + 1, 0, (u8**)&c->f8);
+    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->lo + 1, 0, (u8**)&c->firstUnpackCursor);
     WriteVifStcycl((PacketWriter*)buf, 1, 1);
     WriteVifMscal(buf, D_00000010);
-    DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->f0, (u8**)&c->f4);
+    DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->firstQwc, (u8**)&c->firstBuffer);
     AllocateQuadwordBuffer((PacketWriter*)buf, (u32)((s0 + 4) / 2), 0x1A);
     WriteVifStcycl((PacketWriter*)buf, 1, 4);
-    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->f1C->lo + 2, 0, (u8**)&c->f14);
+    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->lo + 2, 0, (u8**)&c->secondUnpackCursor);
     WriteVifStcycl((PacketWriter*)buf, 1, 1);
-    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->f1C->hi, 0, 0);
+    ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->hi, 0, 0);
     WriteVifMscal(buf, D_000000F0);
-    DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->fC, (u8**)&c->f10);
+    DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->secondQwc, (u8**)&c->secondBuffer);
 }
 
 void StartAttachments(AttachmentBlock* self, PlacedObject* ctx)
 {
     for (s32 i = 0; i < self->count0C; i++)
     {
-        AttachmentEntry* e = self->f10 + i;
-        AttachmentHandler* o = e->f38;
+        AttachmentEntry* e = self->entries + i;
+        AttachmentHandler* o = e->handler;
         if (o != 0)
         {
             o->vtbl[1](o);
         }
-        BuildAttachmentDmaChain(self, e, self->f14 + i * 0x28, ctx);
+        BuildAttachmentDmaChain(self, e, self->chainData + i * 0x28, ctx);
     }
-    AttachmentNode* n = self->f4C;
+    AttachmentNode* n = self->nodes;
     if (n != 0)
     {
         do
         {
-            void* v = FindFirstObjectById(ctx->world, 0x104, n->f8, ctx);
+            void* v = FindFirstObjectById(ctx->world, 0x104, n->targetId, ctx);
             if (v != 0)
             {
-                AttachNodeToOwner((NodeOwner*)v, ctx, (NodeAttachment*)n->f4);
+                AttachNodeToOwner((NodeOwner*)v, ctx, (NodeAttachment*)n->attachment);
             }
             n = n->next80;
         } while (n != 0);
@@ -1603,7 +1603,7 @@ void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src)
 // into its three buffers, the buffers' sizes and the buffers) and the 0x28-byte record built
 // for the part.
 struct PartPointers {
-    void* f00;              // 0x00
+    void* positions;        // 0x00
     void* a[4];             // 0x04
     void* b[4];             // 0x14
     void* c[4];             // 0x24
@@ -1622,7 +1622,7 @@ struct CopiedPart {
     u8 pad00[0x38];
     CursorAnimator* animator;   // 0x38
     u8 pad3C[0x54 - 0x3C];
-    void* f54;              // 0x54
+    void* link;             // 0x54
     s32 count;              // 0x58
     PartEntry* entries;     // 0x5C
 };
@@ -1656,7 +1656,7 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
         owner->f50++;
     }
     s32 animated = part->animator != 0 && (part->animator->cursor.flags & 4) != 0;
-    s32 linked = part->f54 != 0;
+    s32 linked = part->link != 0;
     s32 first;
     if (animated || linked) {
         first = g_meshQueueCount;
@@ -1714,7 +1714,7 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
                     RemapMeshQueueValues(first, size, (u32)old, (u32)e->buffers[j]);
                     if (linked) {
                         e->pointers = (PartPointers*)CopyToFrontMemory(0x34, e->pointers);
-                        MovePointerInto(&e->pointers->f00, old, e->sizes[j] << 4, (u8*)e->buffers[j]);
+                        MovePointerInto(&e->pointers->positions, old, e->sizes[j] << 4, (u8*)e->buffers[j]);
                         for (s32 k = 0; k < 4; k++) {
                             MovePointerInto(&e->pointers->a[k], old, e->sizes[j] << 4, (u8*)e->buffers[j]);
                             MovePointerInto(&e->pointers->b[k], old, e->sizes[j] << 4, (u8*)e->buffers[j]);
@@ -1743,13 +1743,13 @@ void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f)
         }
     }
     for (e = self->head4C; e != 0; e = e->next80) {
-        EvaluateOscillator((Oscillator*)e->f0C);
+        EvaluateOscillator((Oscillator*)e->oscillator);
     }
 }
 
 void UpdateLinkConstraint(PlacedObject* self)
 {
-    u8* p=(u8*)self->f224;
+    u8* p=(u8*)self->linkRecord;
     if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) ApplyLinkConstraint((PlacedObject*)((PlacedObject*)(*(void**)(p+0x60))));
 }
 
@@ -1790,16 +1790,16 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
 struct Buf_1662A8 { u8 pad[0x30]; };
 struct Q_1662A8 { u64 a; u64 b; };
 struct Cmd_1662A8 {
-    u8 pad0[0x18]; u8* f18; u8 pad1C[0x24 - 0x1C]; s32 f24; u8 pad28[0x38 - 0x28];
-    s32 f38; u8 pad3C[4]; s32 f40; s32 f44; u8 pad48[4]; s32 f4C;
+    u8 pad0[0x18]; u8* f18; u8 pad1C[0x24 - 0x1C]; s32 nkeys; u8 pad28[0x38 - 0x28];
+    s32 qwc0; u8 pad3C[4]; s32 qwc2; s32 addr0; u8 pad48[4]; s32 addr2;
 };
-struct Row_1662A8 { s32 f0, f4, f8, fC, f10; u8 pad14[0x30 - 0x14]; };
-struct Spr_1662A8 { u8 pad0[4]; s32 f4; u8 pad8[0x18 - 8]; s32 f18, f1C; };
+struct Row_1662A8 { s32 f0, f4, f8, fC, secondBuffer; u8 pad14[0x30 - 0x14]; };
+struct Spr_1662A8 { u8 pad0[4]; s32 nkeys; u8 pad8[0x18 - 8]; s32 f18, addr; };
 struct Cfg_1662A8 {
-    u8 pad0[0x28]; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 f54; s32 f58; Cmd_1662A8* f5C; s32 f60; Spr_1662A8* f64;
+    u8 pad0[0x28]; s32 skinned; u8 pad2C[0x54 - 0x2C]; s32 link; s32 nstrips; Cmd_1662A8* strips; s32 nmorphs; Spr_1662A8* morphs;
 };
-struct Out_1662A8 { u8 pad0[4]; Row_1662A8* f4; u8 pad8[0x18 - 8]; s32 f18[2]; s32 f20[2]; };
-struct Self_1662A8 { u8 pad[0x40]; s32 f40; };
+struct Out_1662A8 { u8 pad0[4]; Row_1662A8* packets; u8 pad8[0x18 - 8]; s32 qwc[2]; s32 addr[2]; };
+struct Self_1662A8 { u8 pad[0x40]; s32 nweights; };
 
 PacketWriter* InitPacketWriter(PacketWriter* self);
 void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
@@ -1825,14 +1825,14 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
     s32 sz;
 
     InitPacketWriter((PacketWriter*)&buf);
-    if (cfg->f28) return;
+    if (cfg->skinned) return;
     if (!out) return;
-    if (self->f40) return;
-    for (i = 0; i < cfg->f58; i++) {
-        if (cfg->f5C[i].f24) return;
+    if (self->nweights) return;
+    for (i = 0; i < cfg->nstrips; i++) {
+        if (cfg->strips[i].nkeys) return;
     }
-    for (k = 0; k < cfg->f60; k++) {
-        if (cfg->f64[k].f4) return;
+    for (k = 0; k < cfg->nmorphs; k++) {
+        if (cfg->morphs[k].nkeys) return;
     }
     for (pass = 0; pass < 2; pass++) {
         s32 total = 0x23C;
@@ -1843,14 +1843,14 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
         if (pass == 0) sz = 0x28;
         s32 co, ro;
         i = 0;
-        if (i < cfg->f58) {
+        if (i < cfg->nstrips) {
         ro = 0; co = 0;
         do {
             Cmd_1662A8* c;
             Row_1662A8* r;
             s32 prev;
-            c = (Cmd_1662A8*)((u8*)cfg->f5C + co);
-            r = (Row_1662A8*)((u8*)out->f4 + ro);
+            c = (Cmd_1662A8*)((u8*)cfg->strips + co);
+            r = (Row_1662A8*)((u8*)out->packets + ro);
             sz = total - sz;
             if (n++ > 0) {
                 BeginDmaTag((PacketWriter*)&buf);
@@ -1859,29 +1859,29 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             }
             switch (*c->f18) {
             case 0:
-                AddDmaRefTag(&buf, c->f38, c->f44);
-                if (cfg->f54) {
-                    AddDmaCallTag((PacketWriter*)&buf, c->f4C);
+                AddDmaRefTag(&buf, c->qwc0, c->addr0);
+                if (cfg->link) {
+                    AddDmaCallTag((PacketWriter*)&buf, c->addr2);
                 } else {
-                    AddDmaRefTag(&buf, c->f40, c->f4C);
+                    AddDmaRefTag(&buf, c->qwc2, c->addr2);
                 }
                 AddDmaRefTag(&buf, r->f0, r->f4);
-                AddDmaRefTag(&buf, r->fC, r->f10);
+                AddDmaRefTag(&buf, r->fC, r->secondBuffer);
                 break;
             case 1:
             case 4: case 5: case 6: case 7: case 8: case 9: case 10:
-                if (cfg->f54) {
-                    AddDmaCallTag((PacketWriter*)&buf, c->f44);
+                if (cfg->link) {
+                    AddDmaCallTag((PacketWriter*)&buf, c->addr0);
                 } else {
-                    AddDmaRefTag(&buf, c->f38, c->f44);
+                    AddDmaRefTag(&buf, c->qwc0, c->addr0);
                 }
                 break;
             }
             i++; ro += sizeof(Row_1662A8); co += sizeof(Cmd_1662A8);
-        } while (i < cfg->f58);
+        } while (i < cfg->nstrips);
         }
-        for (k = 0; k < cfg->f60; k++) {
-            Spr_1662A8* s = &cfg->f64[k];
+        for (k = 0; k < cfg->nmorphs; k++) {
+            Spr_1662A8* s = &cfg->morphs[k];
             sz = total - sz;
             BeginDmaTag((PacketWriter*)&buf);
             if (n++ > 0) WriteVifBaseOffset((PacketWriter*)&buf, sz, 0);
@@ -1889,14 +1889,14 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             q.a = (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16) | ((u64)D_002623E0.a << 24) | ((u64)1 << 32);
             CopyWordsToWriter((PacketWriter*)&buf, 0xC, 1, (u32*)&q, 0x1A);
             CloseDmaTag((PacketWriter*)&buf);
-            AddDmaRefTag(&buf, s->f18, s->f1C);
+            AddDmaRefTag(&buf, s->f18, s->addr);
         }
         AddDmaReturnTag((PacketWriter*)&buf);
-        DetachPacketBufferCopy((PacketWriter*)&buf, &out->f18[pass], 0, &out->f20[pass], 0x19);
+        DetachPacketBufferCopy((PacketWriter*)&buf, &out->qwc[pass], 0, &out->addr[pass], 0x19);
         PopBackMemoryMark();
         if (n < 2) {
-            out->f18[1] = out->f18[0];
-            out->f20[1] = out->f20[0];
+            out->qwc[1] = out->qwc[0];
+            out->addr[1] = out->addr[0];
             return;
         }
     }
@@ -1921,43 +1921,43 @@ struct Skin_166690 {
     s32 count;              // 0x40
     s32* words;             // 0x44
 };
-struct Slots_166690 { u16 f0; u16 f2; u16 f4; u16 f6; u16 f8; u16 fA; u16 fC; u16 fE; };
+struct Slots_166690 { u16 f0; u16 f2; u16 meshBoneSlot; u16 meshSkinSlot; u16 stripBoneSlot; u16 stripSkinSlot; u16 fC; u16 fE; };
 struct Mesh_166690 {
     Quad16 pos;             // 0x00
-    f32 f10;                // 0x10
+    f32 radius;             // 0x10
     u8 pad14[4];
     u8* kind;               // 0x18
     Slots_166690* slots;    // 0x1C
     u8 pad20[4];
     s32 nbones;             // 0x24
     s32 bones[4];           // 0x28
-    s32 f38;                // 0x38
-    s32 f3C;                // 0x3C
-    s32 f40;                // 0x40
-    s32 f44;                // 0x44
-    s32 f48;                // 0x48
-    s32 f4C;                // 0x4C
+    s32 qwc0;               // 0x38
+    s32 qwc1;               // 0x3C
+    s32 qwc2;               // 0x40
+    s32 addr0;              // 0x44
+    s32 addr1;              // 0x48
+    s32 addr2;              // 0x4C
 };
 struct Strip_166690 {
     Slots_166690* slots;    // 0x00
     s32 nbones;             // 0x04
     s32 bones[4];           // 0x08
-    s32 f18;                // 0x18
-    s32 f1C;                // 0x1C
+    s32 qwc;                // 0x18
+    s32 addr;               // 0x1C
 };
 struct Light_166690 { u8 pad0[0x27C]; void* f27C; };
 struct Part_166690 {
     u8 pad0[0x10];
-    f32 f10;                // 0x10
+    f32 radius;             // 0x10
     u8 pad14[4];
-    s32 f18;                // 0x18
+    s32 lit;                // 0x18
     u8 pad1C[0x28 - 0x1C];
-    s32 f28;                // 0x28
+    s32 skinned;            // 0x28
     u32 flags;              // 0x2C
     u8 pad30[0x40 - 0x30];
-    QuadP f40;              // 0x40
-    f32 f50;                // 0x50
-    s32 f54;                // 0x54
+    QuadP fog;              // 0x40
+    f32 radiusScale;        // 0x50
+    s32 link;               // 0x54
     s32 nmeshes;            // 0x58
     Mesh_166690* meshes;    // 0x5C
     s32 nstrips;            // 0x60
@@ -1972,15 +1972,15 @@ struct Cache_166690 {
     s32 f0C;                // 0x0C
     s32 f10;                // 0x10
     u8 pad14[4];
-    f32 f18;                // 0x18
+    f32 lastTime;           // 0x18
     s32 count;              // 0x1C
     void* nodes[4];         // 0x20
 };
 struct CacheSet_166690 {
     u8 pad0[4];
     Cache_166690* items;    // 0x04
-    s32 f8;                 // 0x08
-    s32 fC;                 // 0x0C
+    s32 lightFrame;         // 0x08
+    s32 lightCount;         // 0x0C
     u8 pad10[0x18 - 0x10];
     s32 f18;                // 0x18
     u8 pad1C[0x20 - 0x1C];
@@ -1992,9 +1992,9 @@ struct Frame_166690 {
     u8 pad0[0x10];
     Mat4A m;                // 0x10
     f32 f50;                // 0x50
-    f32 f54;                // 0x54
+    f32 alpha;              // 0x54
     u8 pad58[8];
-    Quad16 f60;             // 0x60
+    Quad16 center;          // 0x60
     Owner_166690* owner;    // 0x70
     Skin_166690* skin;      // 0x74
     Part_166690* part;      // 0x78
@@ -2003,13 +2003,13 @@ struct Frame_166690 {
 struct Batch_166690 {
     Mat4A m;                // 0x00
     Mat4A m40;              // 0x40
-    QuadP f80;              // 0x80
+    QuadP fog;              // 0x80
     f32 f90;                // 0x90
     s32 mode;               // 0x94
     s32 f98;                // 0x98
-    s32 f9C;                // 0x9C
+    s32 lightCount;         // 0x9C
     union {
-        Quad16 fA0;         // 0xA0
+        Quad16 center;      // 0xA0
         struct { f32 pad[3]; f32 fAC; } w;
     };
 };
@@ -2132,56 +2132,56 @@ void DrawModelPart(Frame_166690* self)
 
     b.m = self->m;
     InvertRigidTransform(&self->m.m[3], &self->m, (Quad16*)&b.m40);
-    b.f80 = part->f40;
+    b.fog = part->fog;
     n300 = 0;
     n304 = 0;
-    if (part->f18 != 0) {
+    if (part->lit != 0) {
         if (part->light != 0) {
             n304 = 1;
             n300 = 1;
             lights[0] = part->light->f27C;
-            b.fA0 = self->f60;
+            b.center = self->center;
             b.mode = 4;
-            b.f9C = 2;
-        } else if (part->f28 != 0) {
-            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 1, 0x80, &n300, &n304, (LightObject**)lights);
-            b.fA0 = self->f60;
+            b.lightCount = 2;
+        } else if (part->skinned != 0) {
+            b.lightCount = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->center, part->radius, 1, 0x80, &n300, &n304, (LightObject**)lights);
+            b.center = self->center;
             b.mode = 4;
         } else if (cache == 0) {
-            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 3, 0x80, &n300, &n304, (LightObject**)lights);
+            b.lightCount = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->center, part->radius, 3, 0x80, &n300, &n304, (LightObject**)lights);
             b.mode = 2;
-        } else if (cache->f8 >= g_lightingChangeFrame) {
+        } else if (cache->lightFrame >= g_lightingChangeFrame) {
             if (g_lightCount != 0) {
-                b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 2, 0x80, 0, &n304, (LightObject**)lights);
+                b.lightCount = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->center, part->radius, 2, 0x80, 0, &n304, (LightObject**)lights);
             }
             if (n304 != 0) {
                 b.mode = 1;
-                if (b.f9C < cache->fC) {
-                    b.f9C = cache->fC;
+                if (b.lightCount < cache->lightCount) {
+                    b.lightCount = cache->lightCount;
                 }
             } else {
                 b.mode = 0;
-                b.f9C = cache->fC;
+                b.lightCount = cache->lightCount;
             }
         } else {
-            b.f9C = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->f60, part->f10, 7, 0x80, &n300, &n304, (LightObject**)lights);
+            b.lightCount = CollectLightsForSphere(g_currentWorld, (const Vec02*)&self->center, part->radius, 7, 0x80, &n300, &n304, (LightObject**)lights);
             if (n300 == 0 && n304 > 0) {
                 b.mode = 2;
             } else {
                 b.mode = 3;
-                cache->f8 = g_frameCount;
+                cache->lightFrame = g_frameCount;
             }
-            cache->fC = b.f9C;
+            cache->lightCount = b.lightCount;
         }
     } else {
         b.mode = -1;
-        b.f9C = 2;
+        b.lightCount = 2;
     }
 
     useCache = cache != 0 && (owner->cls->flags & 2) && owner->f410 != 0;
     n308 = 0;
     if (!useCache && (part->flags & 3)) {
-        CollectRangeRecordsInReach(g_currentWorld, &self->f60, 0x10, &n308, (RangeRecord**)nodes, part->f10);
+        CollectRangeRecordsInReach(g_currentWorld, &self->center, 0x10, &n308, (RangeRecord**)nodes, part->radius);
     }
     b.f90 = self->f50;
     b.f98 = 1;
@@ -2197,7 +2197,7 @@ void DrawModelPart(Frame_166690* self)
         if (useCache) {
             for (i = 0; i < part->nmeshes; i++) {
                 Cache_166690* t = &cache->items[i];
-                if (t->count != 0 && t->f18 == g_gameClock[1]) {
+                if (t->count != 0 && t->lastTime == g_gameClock[1]) {
                     goto slow;
                 }
             }
@@ -2239,7 +2239,7 @@ slow:
             Vif_166690::UnpackV4(&g_vifPacketWriter, &b, 0xB, 0);
         }
         if (e->nbones > 0) {
-            u32 addr = e->slots->f4;
+            u32 addr = e->slots->meshBoneSlot;
             for (k = 0; k < e->nbones; k++) {
                 Vif_166690::UnpackAt(&g_vifPacketWriter, &skin->bones[e->bones[k]].m, 0x40, 0x6C04C000, addr);
                 addr += 4;
@@ -2247,27 +2247,27 @@ slow:
         }
         n = skin->count;
         if (n > 0) {
-            Vif_166690::UnpackAt(&g_vifPacketWriter, skin->words, n << 2, (n << 16) | 0x6000C000, e->slots->f6);
+            Vif_166690::UnpackAt(&g_vifPacketWriter, skin->words, n << 2, (n << 16) | 0x6000C000, e->slots->meshSkinSlot);
         }
         Vif_166690::Pad(&g_vifPacketWriter);
         Vif_166690::Close(&g_vifPacketWriter, tag);
 
         switch (*e->kind) {
         case 0:
-            Vif_166690::Refs(&g_vifPacketWriter, e->f38, e->f44);
+            Vif_166690::Refs(&g_vifPacketWriter, e->qwc0, e->addr0);
             switch (b.mode) {
             case 0:
-                if (part->f54) {
-                    Vif_166690::Call(&g_vifPacketWriter, e->f4C);
+                if (part->link) {
+                    Vif_166690::Call(&g_vifPacketWriter, e->addr2);
                 } else {
-                    Vif_166690::Refs(&g_vifPacketWriter, e->f40, e->f4C);
+                    Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Refs(&g_vifPacketWriter, c->f00, c->f04);
                 Vif_166690::Refs(&g_vifPacketWriter, c->f0C, c->f10);
                 break;
             case 1:
                 Vif_166690::Refs(&g_vifPacketWriter, c->f0C, c->f10);
-                Vif_166690::Refs(&g_vifPacketWriter, e->f3C, e->f48);
+                Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
                     u8* l = (u8*)lights[k];
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
@@ -2277,10 +2277,10 @@ slow:
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
-                if (part->f54) {
-                    Vif_166690::Call(&g_vifPacketWriter, e->f4C);
+                if (part->link) {
+                    Vif_166690::Call(&g_vifPacketWriter, e->addr2);
                 } else {
-                    Vif_166690::Refs(&g_vifPacketWriter, e->f40, e->f4C);
+                    Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscal(&g_vifPacketWriter, D_00000010);
@@ -2290,7 +2290,7 @@ slow:
                 break;
             case 2:
             case 4:
-                Vif_166690::Refs(&g_vifPacketWriter, e->f3C, e->f48);
+                Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
                     u8* l = (u8*)lights[k];
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
@@ -2300,10 +2300,10 @@ slow:
                 Vif_166690::Word(&g_vifPacketWriter, 0x10000000);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 Vif_166690::Word(&g_vifPacketWriter, 0);
-                if (part->f54) {
-                    Vif_166690::Call(&g_vifPacketWriter, e->f4C);
+                if (part->link) {
+                    Vif_166690::Call(&g_vifPacketWriter, e->addr2);
                 } else {
-                    Vif_166690::Refs(&g_vifPacketWriter, e->f40, e->f4C);
+                    Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscalf(&g_vifPacketWriter, D_00000010);
@@ -2312,7 +2312,7 @@ slow:
                 Vif_166690::Word(&g_vifPacketWriter, 0);
                 break;
             case 3: {
-                Vif_166690::Refs(&g_vifPacketWriter, e->f3C, e->f48);
+                Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n300; k++) {
                     u8* l = (u8*)lights[k];
                     Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
@@ -2331,7 +2331,7 @@ slow:
                     p[3] = (u32)c;
                 }
                 if (k < n304) {
-                    Vif_166690::Refs(&g_vifPacketWriter, e->f3C, e->f48);
+                    Vif_166690::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                     for (k = 0; k < n304; k++) {
                         u8* l = (u8*)lights[k];
                         Vif_166690::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
@@ -2342,10 +2342,10 @@ slow:
                     Vif_166690::Word(&g_vifPacketWriter, 0);
                     Vif_166690::Word(&g_vifPacketWriter, 0);
                 }
-                if (part->f54) {
-                    Vif_166690::Call(&g_vifPacketWriter, e->f4C);
+                if (part->link) {
+                    Vif_166690::Call(&g_vifPacketWriter, e->addr2);
                 } else {
-                    Vif_166690::Refs(&g_vifPacketWriter, e->f40, e->f4C);
+                    Vif_166690::Refs(&g_vifPacketWriter, e->qwc2, e->addr2);
                 }
                 Vif_166690::Cnt1(&g_vifPacketWriter);
                 Vif_166690::Mscalf(&g_vifPacketWriter, D_00000010);
@@ -2362,24 +2362,24 @@ slow:
         case 8:
         case 9:
         case 10:
-            if (part->f54) {
-                Vif_166690::Call(&g_vifPacketWriter, e->f44);
+            if (part->link) {
+                Vif_166690::Call(&g_vifPacketWriter, e->addr0);
             } else {
-                Vif_166690::Refs(&g_vifPacketWriter, e->f38, e->f44);
+                Vif_166690::Refs(&g_vifPacketWriter, e->qwc0, e->addr0);
             }
             break;
         case 4:
-            if (part->f54) {
-                Vif_166690::Call(&g_vifPacketWriter, e->f44);
+            if (part->link) {
+                Vif_166690::Call(&g_vifPacketWriter, e->addr0);
             } else {
-                Vif_166690::Refs(&g_vifPacketWriter, e->f38, e->f44);
+                Vif_166690::Refs(&g_vifPacketWriter, e->qwc0, e->addr0);
             }
             continue;
         case 5:
-            if (part->f54) {
-                Vif_166690::Call(&g_vifPacketWriter, e->f44);
+            if (part->link) {
+                Vif_166690::Call(&g_vifPacketWriter, e->addr0);
             } else {
-                Vif_166690::Refs(&g_vifPacketWriter, e->f38, e->f44);
+                Vif_166690::Refs(&g_vifPacketWriter, e->qwc0, e->addr0);
             }
             continue;
         default:
@@ -2387,7 +2387,7 @@ slow:
         }
 
         if (useCache) {
-            if (c->f18 == g_gameTime) {
+            if (c->lastTime == g_gameTime) {
                 n308 = c->count;
             } else {
                 n308 = 0;
@@ -2395,7 +2395,7 @@ slow:
         }
         if (n308 != 0) {
             TransformByMatrixWithW((const Quad16*)&b, (const Vec02*)e, 1.0f, (Vec02*)&q);
-            r = e->f10 * part->f50;
+            r = e->radius * part->radiusScale;
         }
         for (j = 0; j < n308; j++) {
             void* node;
@@ -2416,18 +2416,18 @@ slow:
     if (skin != 0 && (skin->flags & 1)) {
         return;
     }
-    if (self->f54 <= 0.0f) {
+    if (self->alpha <= 0.0f) {
         return;
     }
     for (t = 0; t < part->nstrips; t++) {
         Strip_166690* s = &part->strips[t];
         s32 n;
         if (skin != 0 && (skin->flags & 2)) {
-            u8 a = Alpha_166690((s32)(skin->a * self->f54));
+            u8 a = Alpha_166690((s32)(skin->a * self->alpha));
             q.hi = 1;
             q.lo = Rgbaq_166690(a, skin->r, skin->g, skin->b);
         } else {
-            q.lo = Rgbaq_166690(Alpha_166690((s32)(D_002623E0.a * self->f54)), D_002623E0.r, D_002623E0.g, D_002623E0.b);
+            q.lo = Rgbaq_166690(Alpha_166690((s32)(D_002623E0.a * self->alpha)), D_002623E0.r, D_002623E0.g, D_002623E0.b);
             q.hi = 1;
         }
         D_00262474 = 0x23C - D_00262474;
@@ -2439,7 +2439,7 @@ slow:
             Vif_166690::UnpackV4(&g_vifPacketWriter, &b, 0xB, 0);
         }
         if (s->nbones > 0) {
-            u32 addr = s->slots->f8;
+            u32 addr = s->slots->stripBoneSlot;
             s32 k;
             for (k = 0; k < s->nbones; k++) {
                 Vif_166690::UnpackAt(&g_vifPacketWriter, &skin->bones[s->bones[k]].m, 0x40, 0x6C04C000, addr);
@@ -2448,11 +2448,11 @@ slow:
         }
         n = skin->count;
         if (n > 0) {
-            Vif_166690::UnpackAt(&g_vifPacketWriter, skin->words, n << 2, (n << 16) | 0x6000C000, s->slots->fA);
+            Vif_166690::UnpackAt(&g_vifPacketWriter, skin->words, n << 2, (n << 16) | 0x6000C000, s->slots->stripSkinSlot);
         }
         Vif_166690::UnpackV4(&g_vifPacketWriter, &q, 1, 0x1A);
         Vif_166690::Pad(&g_vifPacketWriter);
         Vif_166690::Close(&g_vifPacketWriter, tag);
-        Vif_166690::Refs(&g_vifPacketWriter, s->f18, s->f1C);
+        Vif_166690::Refs(&g_vifPacketWriter, s->qwc, s->addr);
     }
 }

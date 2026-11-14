@@ -69,10 +69,10 @@ struct Animation : BaseObject {
     s32 trackCount;         // 0x38
     Track83* tracks;        // 0x3C
     s32 id;                 // 0x40
-    s32 f44;                // 0x44
+    s32 endMode;            // 0x44
     s32 enabled;            // 0x48: func_0012C160 queues its callback while set
-    s32 f4C;                // 0x4C
-    s32 f50;                // 0x50
+    s32 padSelect;          // 0x4C
+    s32 listedInWorld;      // 0x50
     s32 startCount;         // 0x54: the list that runs when it starts
     AnimEvent* startList;   // 0x58
     s32 timedCount;         // 0x5C: the timed list
@@ -85,7 +85,7 @@ struct Animation : BaseObject {
     f32 lo;                 // 0x90
     f32 hi;                 // 0x94
     f32 out;                // 0x98
-    Track83* f9C;           // 0x9C: the track func_0012D2A8 moved to the end (func_0012D398 tests it)
+    Track83* movedTrack;    // 0x9C: the track func_0012D2A8 moved to the end (func_0012D398 tests it)
     s32 targetCount;        // 0xA0
     s32* targets;           // 0xA4
     u8 padA8[0xB0 - 0xA8];

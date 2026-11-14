@@ -35,7 +35,7 @@ void SetPairControllerState(PairController* self, s32 state)
         break;
     }
     case 2: {
-        ((Tab_1A4EF0_eu*)&D_0026D0C8)->f574 = &self->f3C4;
+        ((Tab_1A4EF0_eu*)&D_0026D0C8)->f574 = &self->finishedCount;
         ((Tab_1A4EF0_eu*)&D_0026D0C8)->f578 = &self->limit3B8;
         SetWorldActiveFollower(self->world, self);
         break;

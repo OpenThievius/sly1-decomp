@@ -61,7 +61,7 @@ struct BestTimeTextStyle {
     f32 fC;
     f32 f10;
     f32 f14;
-    s32 f18;
+    s32 color;
     BestTimeTextStyle(s32 a, s32 b)
     {
         FillMemory(this, 0, 0x1C);
@@ -69,7 +69,7 @@ struct BestTimeTextStyle {
         f8 = a;
         fC = b;
         f14 = f10 = 0.3f;
-        f18 = (s32)0xFF7D4B00;
+        color = (s32)0xFF7D4B00;
     }
 };
 BestTimeTextStyle g_commentaryFrameStyle(2, 1);
@@ -91,7 +91,7 @@ void* FindLevelEntry(s32 key)
     return 0;
 }
 
-// The record a level entry keeps at +8 (World::f2310 points to it; func_001E00B0 streams it):
+// The record a level entry keeps at +8 (World::commentaryRecord points to it; func_001E00B0 streams it):
 // its two words at +4 and +0x1C differ while there is commentary to play.
 struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
 
@@ -108,16 +108,16 @@ void InitCommentaryPromptElement(T217D_1380* self)
     const LevelEntry* e;
 
     SetupScreenElementText(self);
-    e = (const LevelEntry*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    e = (const LevelEntry*)FindLevelEntry((g_saveData->levelIndex << 8) | g_saveData->entryIndex);
     if (e) {
-        if (e->f04 != 0.0f) {
-            g_currentWorld->f230C = e->f04;
+        if (e->timerDuration != 0.0f) {
+            g_currentWorld->timerDuration = e->timerDuration;
         }
-        if (!(((CommentaryRecord*)g_currentWorld->f2310)->differs())) {
-            g_currentWorld->f2310 = (CommentaryRecord*)e->record;
+        if (!(((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs())) {
+            g_currentWorld->commentaryRecord = (CommentaryRecord*)e->record;
         }
-        if (g_currentWorld->f2314 == 0 || !GetStringLength((const char*)g_currentWorld->f2314)) {
-            g_currentWorld->f2314 = (void*)e->credits;
+        if (g_currentWorld->creditsText == 0 || !GetStringLength((const char*)g_currentWorld->creditsText)) {
+            g_currentWorld->creditsText = (void*)e->credits;
         }
     }
     if (IsFontLoaded(2)) {
@@ -126,13 +126,13 @@ void InitCommentaryPromptElement(T217D_1380* self)
     }
     SetScreenElementScale(self, 0.6f);
     *(s32*)((u8*)self + 0x208) = (s32)0xDF7F7F7Fu;
-    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->f19D8 << 8) | g_saveData->f19DC)) {
+    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->levelIndex << 8) | g_saveData->entryIndex)) {
         SetBestTimeState(self, 1);
     } else {
         SetBestTimeState(self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((CommentaryRecord*)g_currentWorld->f2310)->differs()) {
+        if (((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs()) {
             self->vt->m08(self, "Press &2L&. for Bonus Commentary");
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->m14(self);
@@ -172,10 +172,10 @@ void UpdateBestTimeState(T217D_1380* self)
         if (self->pressed != 0) {
         if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice((KeyRecord*)g_currentWorld->f2310);
-            if (g_currentWorld->f2314 != 0) {
+            StartLockedStreamVoice((KeyRecord*)g_currentWorld->commentaryRecord);
+            if (g_currentWorld->creditsText != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
-                self->vt->m08(self, (const char*)g_currentWorld->f2314);
+                self->vt->m08(self, (const char*)g_currentWorld->creditsText);
             } else {
                 self->vt->m15(self);
             }
@@ -253,7 +253,7 @@ void SetBestTimeState(T217D_1380* self, s32 n)
         StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
         SetSpareCount(0);
         PopActiveSequenceElement(g_currentWorld);
-        StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
+        StartTimer(&g_timerElement, g_currentWorld->timerDuration + 0.99f);
         SetTimerRate(&g_timerElement, -Power(2.0f, (f32)D_002623DC));
         SetTimerLimit(&g_timerElement, zero, 0);
         StartTimerCounting(&g_timerElement);

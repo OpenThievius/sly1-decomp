@@ -57,7 +57,7 @@ ObjectLink g_sequencedObjectLinks[2] = {
 };
 void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
-// The record at PlacedObject::f200 of these objects: its word at 0x44 is cleared at start and
+// The record at PlacedObject::aimAttachment of these objects: its word at 0x44 is cleared at start and
 // set to 4 or 0 as the sequence enters state 0 or 2.
 struct Record200 {
     u8 pad0[0x44];
@@ -86,7 +86,7 @@ void SetBlinkObjectFrame(BlinkObject* self);
 
 void InitTimedObject(TimedObject* a0) {
     InitCollider(a0);
-    a0->f554 = 0;
+    a0->repeating = 0;
     a0->state = -1;
 }
 
@@ -106,13 +106,13 @@ void EnterTimedObjectState(TimedObject* self, s32 state)
         TriggerScriptEvent(self, 2, 0, 0);
     }
     self->state = state;
-    self->f55C = g_gameTime[0];
+    self->stateStartTime = g_gameTime[0];
 }
 
 s32 IsObjectInAcceptLists(TimedObject* self, void* value)
 {
 
-    if (self->f5B4 != 0) {
+    if (self->acceptsAll != 0) {
         return 1;
     }
     if (IsObjectExcluded(self, value) != 0) {
@@ -149,7 +149,7 @@ s32 IsObjectExcluded(TimedObject* self, void* key)
 s32 IsSoleAcceptedObject(TimedObject* o, void* p)
 {
     if (p == 0) return 0;
-    if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && MatchesObjectId((BaseObject*)p, o->ids564.items[0]) != 0) return 1;
+    if (o->acceptsAll == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && MatchesObjectId((BaseObject*)p, o->ids564.items[0]) != 0) return 1;
     return 0;
 }
 
@@ -158,23 +158,23 @@ void StopTrackPlayer(TimedObject* self)
     TrackPlayer* node = FindTrackPlayer(self);
 
     if (node != 0) {
-        self->f5CC = node->f18.f;
+        self->heldValue = node->f18.f;
         node->f18.w = 0;
-        self->f5C8 = node;
+        self->heldTrack = node;
     }
 }
 
 void UpdateTimedObject(TimedObject* self, f32 dt)
 {
     UpdateCollider(self, dt);
-    TrackPlayer* sink = self->f5C8;
+    TrackPlayer* sink = self->heldTrack;
     if (sink != 0) {
         Player* g = g_player;
         if (g != 0) {
             if (g->f2220 != 4) {
-                sink->f18.f = self->f5CC;
-                self->f5C8 = 0;
-                *(s32*)&self->f5CC = 0;
+                sink->f18.f = self->heldValue;
+                self->heldTrack = 0;
+                *(s32*)&self->heldValue = 0;
             }
         }
     }
@@ -219,7 +219,7 @@ void AddTimedObjectExcludedClassId(TimedObject* q, u32 value)
 void InitTimedGroup(TimedGroup* self)
 {
     InitTimedObject(self);
-    self->fB04 = 1.0f;
+    self->fade = 1.0f;
 }
 
 void LoadTimedGroup(TimedGroup* self, BufferedStream* stream)
@@ -291,8 +291,8 @@ void PostLoadTimedGroup(TimedGroup* self)
                     for (s32 i = 0; i < curve->count; i++) {
                         TransformPointBetweenFrames(self, 0, (Vec02*)((u8*)curve->points + i * 16), &point);
                         f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(point))));
-                        if (self->f2A8 < d) {
-                            self->f2A8 = d;
+                        if (self->boundRadius < d) {
+                            self->boundRadius = d;
                         }
                     }
                 }
@@ -307,17 +307,17 @@ void PostLoadTimedGroup(TimedGroup* self)
         }
     }
     if ((self->flags & 0x3000000) != 0x2000000) {
-        QueryValueListMask((ValueListObject*)(*(void**)((u8*)self->world + 0x1EC4)), self->f2A8, (Bits128*)&self->v140, (s32*)((u8*)self + 0x88));
+        QueryValueListMask((ValueListObject*)(*(void**)((u8*)self->world + 0x1EC4)), self->boundRadius, (Bits128*)&self->v140, (s32*)((u8*)self + 0x88));
     }
     PlacedObject* o = self;
     if (o->parent != 0) {
         do {
-            f32 reach = Vu0::ToFloat(Vu0::Length(Vu0::Q(o->pos))) + o->f2A8;
+            f32 reach = Vu0::ToFloat(Vu0::Length(Vu0::Q(o->pos))) + o->boundRadius;
             PlacedObject* up = (PlacedObject*)o->parent;
-            if (reach <= up->f2A8) {
+            if (reach <= up->boundRadius) {
                 break;
             }
-            up->f2A8 = reach;
+            up->boundRadius = reach;
             if ((up->flags & 0x3000000) != 0x2000000) {
                 QueryValueListMask((ValueListObject*)(*(void**)((u8*)up->world + 0x1EC4)), reach, (Bits128*)&up->v140, (s32*)((u8*)up + 0x88));
             }
@@ -354,8 +354,8 @@ void CloneTimedGroupEntries(TimedGroup* self)
             g->count = src->count;
         }
     }
-    self->fB00 = IsSoleAcceptedObject(self, (void*)g_player);
-    self->desc30()->m4D(self, self->f560);
+    self->playerAccepted = IsSoleAcceptedObject(self, (void*)g_player);
+    self->desc30()->m4D(self, self->initialState);
 }
 
 void StaggerGroupOffsets()
@@ -373,7 +373,7 @@ void StaggerGroupOffsets()
         n = (TimedGroup*)g_currentWorld->list1CA8.head;
         while (n != 0) {
             if (n->state != 8) {
-                n->fAFC = g_gameClock[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
+                n->nextStepTime = g_gameClock[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
                 idx++;
             }
             n = n->listNext;
@@ -390,20 +390,20 @@ void UpdateTimedGroup(TimedGroup* self, f32 amount)
     f32 lo;
 
     UpdateTimedObject(self, amount);
-    v = self->fB04 + amount * self->fB08;
+    v = self->fade + amount * self->fadeRate;
     hi = 1.0f;
     lo = 0.0f;
     if (v < lo)
         v = lo;
     else if (hi < v)
         v = hi;
-    self->fB04 = v;
+    self->fade = v;
     if (g_groupStaggerDirty)
         StaggerGroupOffsets();
     cmd = self->state;
     switch (cmd) {
     case 0:
-        if (self->f5B8 < g_gameTime[0] - self->f55C)
+        if (self->beginDuration < g_gameTime[0] - self->stateStartTime)
             cmd = 1;
         if (self->desc30()->m48)
             self->desc30()->m48(self, &cmd);
@@ -414,12 +414,12 @@ void UpdateTimedGroup(TimedGroup* self, f32 amount)
             self->desc30()->m48(self, &cmd);
         break;
     case 3:
-        if (self->f5BC < g_gameTime[0] - self->f55C) {
-            if (self->f554 == 0) {
+        if (self->endDuration < g_gameTime[0] - self->stateStartTime) {
+            if (self->repeating == 0) {
                 cmd = 8;
                 break;
             }
-            if (self->f554 != 1)
+            if (self->repeating != 1)
                 break;
             cmd = 4;
             if (self->desc30()->m48)
@@ -430,7 +430,7 @@ void UpdateTimedGroup(TimedGroup* self, f32 amount)
             self->desc30()->m48(self, &cmd);
         break;
     case 4:
-        if (self->f5B8 < g_gameTime[0] - self->f55C)
+        if (self->beginDuration < g_gameTime[0] - self->stateStartTime)
             cmd = 5;
         if (self->desc30()->m48)
             self->desc30()->m48(self, &cmd);
@@ -442,7 +442,7 @@ void UpdateTimedGroup(TimedGroup* self, f32 amount)
             self->desc30()->m48(self, &cmd);
         break;
     case 7:
-        if (self->fAEC < g_gameTime[0] - self->f55C)
+        if (self->repeatEndDuration < g_gameTime[0] - self->stateStartTime)
             cmd = 8;
         else if (self->desc30()->m48)
             self->desc30()->m48(self, &cmd);
@@ -558,7 +558,7 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
     if ((a1->flags538 & m) != 0 || a1->root == a0->root || IsObjectExcluded(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)g_player && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->f239C == 3) {
+    if ((void*)a1 == (void*)g_player && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->targetMode == 3) {
         if ((MaskWorldBitsBySave() & 0x12000) != 0) {
             return 0;
         }
@@ -585,11 +585,11 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
     Vec02 p0;
     Vec02 p1;
     Vec02 mid;
-    if (g_gameTime[0] < self->fAFC) {
+    if (g_gameTime[0] < self->nextStepTime) {
         return;
     }
     s32 i = 0;
-    self->fAFC = g_gameTime[0] + 0.033333335f;
+    self->nextStepTime = g_gameTime[0] + 0.033333335f;
     PushBackMemoryMark();
     Vec02* pts = AllocateBackMemory(*(s32*)((u8*)self + 0xAE0) << 4);
     while (i < self->groupCount) {
@@ -613,14 +613,14 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             Vu0::Q(mid) = Vu0::MulXSum(Vu0::Q(p0), Vu0::Scalar(0.5f), Vu0::Q(p1), Vu0::Scalar(0.5f));
             f32 len = Vu0::Distance(p0, p1);
             f32 radius = len * 0.5f;
-            if (self->fB00 != 0) {
+            if (self->playerAccepted != 0) {
                 Camera* cam = g_camera;
                 u128 ones = Vu0::Ones();
-                u128 v = Vu0::Sub(Vu0::Q(mid), Vu0::Q(cam->f40));
+                u128 v = Vu0::Sub(Vu0::Q(mid), Vu0::Q(cam->position));
                 u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), v, ones, Vu0::Scalar(radius)) ^ 0xF0;
                 look = signs == 0;
                 if (look && g_player != 0 && *(s32*)((u8*)self + 0x5D0) == 1) {
-                    if (g_player->f2220 != 6 || g_player->f239C != 3 || (MaskWorldBitsBySave() & 0x12000) == 0) {
+                    if (g_player->f2220 != 6 || g_player->targetMode != 3 || (MaskWorldBitsBySave() & 0x12000) == 0) {
                         hit = (Collider*)FindNearestSpanObject(0, &p0, &p1, 1, (Collider**)&g_player, &span);
                         look = 0;
                     }
@@ -695,7 +695,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
 void SetTimedGroupMode(TimedGroup* self, s32 flag)
 {
     s32 m = 5;
-    self->f554 = flag;
+    self->repeating = flag;
     if (!flag) {
         m = 1;
     }
@@ -708,7 +708,7 @@ void RequestTimedGroupEnd(TimedGroup* self)
         return;
     }
     s32 m = 7;
-    if (!self->f554) {
+    if (!self->repeating) {
         m = 3;
     }
     self->desc30()->m4D(self, m);
@@ -721,7 +721,7 @@ void FinishTimedGroup(TimedGroup* self)
             self->desc30()->m4D(self, 3);
         }
     }
-    self->f554 = 1;
+    self->repeating = 1;
 }
 
 void EnterTimedGroupState(TimedGroup* self, s32 s)
@@ -743,7 +743,7 @@ void EnterTimedGroupState(TimedGroup* self, s32 s)
         break;
     case 8: {
         f32 v;
-        if (self->f554 == 0) v = self->f5BC; else v = self->fAEC;
+        if (self->repeating == 0) v = self->endDuration; else v = self->repeatEndDuration;
         StopSoundRecord((PlayingSound*)self->f5C4, (s32)v * 1000);
         self->desc->m03(self);
         g_groupStaggerDirty = 1;
@@ -764,12 +764,12 @@ f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c)
     switch (o->state) {
     case 0:
     case 4: {
-        f32 t0 = o->f5B8;
+        f32 t0 = o->beginDuration;
         if (t0 == 0.0f) {
-            r = o->fB04;
+            r = o->fade;
         } else {
-            f32 q = (g_gameTime[0] - o->f55C) / t0;
-            m = o->fB04;
+            f32 q = (g_gameTime[0] - o->stateStartTime) / t0;
+            m = o->fade;
             if (q < 0.0f)
                 r = 0.0f;
             else if (m < q)
@@ -783,16 +783,16 @@ f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c)
     case 2:
     case 5:
     case 6:
-        r = o->fB04;
+        r = o->fade;
         break;
     case 3:
     case 7:
-        t = o->f554 == 0 ? o->f5BC : o->fAEC;
+        t = o->repeating == 0 ? o->endDuration : o->repeatEndDuration;
         if (t == 0.0f) {
             r = 0.0f;
         } else {
-            f32 m = o->fB04;
-            r = 1.0f - (g_gameTime[0] - o->f55C) / t;
+            f32 m = o->fade;
+            r = 1.0f - (g_gameTime[0] - o->stateStartTime) / t;
             if (r < 0.0f)
                 r = 0.0f;
             else if (m < r)
@@ -809,10 +809,10 @@ f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c)
 
 void SetTimedGroupFadeOutTime(TimedGroup* self, f32 x)
 {
-    self->fB08 = -1.0f / x;
+    self->fadeRate = -1.0f / x;
 }
 
-void SetTimedGroupFadeInTime(TimedGroup* p, f32 x) { p->fB08 = 1.0f / x; }
+void SetTimedGroupFadeInTime(TimedGroup* p, f32 x) { p->fadeRate = 1.0f / x; }
 
 void InitSequencedObject(SequencedObject* o)
 {
@@ -824,20 +824,20 @@ void SetupSequencedObject(SequencedObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 2, g_sequencedObjectLinks);
-    if (self->f5D0 == 0) {
-        self->f5D0 = self;
+    if (self->phaseObject == 0) {
+        self->phaseObject = self;
     }
-    if (self->f5D4 == 0) {
-        self->f5D4 = self->world->f1D14;
+    if (self->beamObject == 0) {
+        self->beamObject = self->world->f1D14;
     }
-    if (self->f200 != 0) {
-        ((Record200*)self->f200)->f44 = 0;
+    if (self->aimAttachment != 0) {
+        ((Record200*)self->aimAttachment)->f44 = 0;
     }
     u64 m = 0x8000;
     m <<= 28;
     self->flags538 |= m;
     SetColliderAnchors(self, 3, 0, 3, 0);
-    self->desc30()->m4D(self, self->f560);
+    self->desc30()->m4D(self, self->initialState);
 }
 
 void UpdateSequencedObject(SequencedObject* self, f32 dt) {
@@ -847,16 +847,16 @@ void UpdateSequencedObject(SequencedObject* self, f32 dt) {
     st = self->state;
     switch (self->state) {
     case 0:
-        if (self->f5B8 < g_gameTime[0] - self->f55C) st = 1;
+        if (self->beginDuration < g_gameTime[0] - self->stateStartTime) st = 1;
         break;
     case 2:
         st = 3;
         break;
     case 3:
-        if (self->f5BC < g_gameTime[0] - self->f55C) st = 8;
+        if (self->endDuration < g_gameTime[0] - self->stateStartTime) st = 8;
         break;
     case 4:
-        if (self->f5B8 < g_gameTime[0] - self->f55C) st = 5;
+        if (self->beginDuration < g_gameTime[0] - self->stateStartTime) st = 5;
         break;
     case 1:
     case 5:
@@ -870,7 +870,7 @@ void UpdateSequencedObject(SequencedObject* self, f32 dt) {
         case 0:
             if (g_player && g_player->desc06()->m4B(g_player, 2)) {
                 s1 = 2;
-            } else if (self->f5E0 < g_gameTime[0] - self->f5DC) {
+            } else if (self->substate0Duration < g_gameTime[0] - self->substateStartTime) {
                 if (g_player) {
                     u8 buf[16];
                     InitOwnerMessage((OwnerMessage*)buf, 2, self);
@@ -884,10 +884,10 @@ void UpdateSequencedObject(SequencedObject* self, f32 dt) {
             }
             break;
         case 1:
-            if (self->f5E4 < g_gameTime[0] - self->f5DC) s1 = 2;
+            if (self->substate1Duration < g_gameTime[0] - self->substateStartTime) s1 = 2;
             break;
         case 2:
-            if (self->f5E8 < g_gameTime[0] - self->f5DC) {
+            if (self->substate2Duration < g_gameTime[0] - self->substateStartTime) {
                 s1 = -1;
                 st = 5;
             }
@@ -896,11 +896,11 @@ void UpdateSequencedObject(SequencedObject* self, f32 dt) {
         EnterSequencedSubstate(self, s1);
         goto tail;
     case 7:
-        if (self->f5BC < g_gameTime[0] - self->f55C) st = 8;
+        if (self->endDuration < g_gameTime[0] - self->stateStartTime) st = 8;
         break;
     case 8:
-        if (self->f5C0 == 0) {
-            switch (self->f554) {
+        if (self->triggerHeld == 0) {
+            switch (self->repeating) {
             case 0: st = 0; break;
             case 1: st = 4; break;
             }
@@ -913,8 +913,8 @@ tail:
 
 struct SequencedTransform {
     Quad16 rows[4];
-    f32 f40;
-    f32 f44;
+    f32 outerFade;
+    f32 innerFade;
     u8 pad48[8];
 };
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
@@ -943,10 +943,10 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
         case 0:
         case 4: {
             f32 t;
-            if (self->f5B8 == 0.0f) {
+            if (self->beginDuration == 0.0f) {
                 t = 1.0f;
             } else {
-                t = (g_gameTime[0] - self->f55C) / self->f5B8;
+                t = (g_gameTime[0] - self->stateStartTime) / self->beginDuration;
                 t = ClampRange(t, 0.0f, 1.0f);
             }
             Vu0::Q(scale) = Vu0::Splat(t);
@@ -956,10 +956,10 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
         case 3:
         case 7: {
             f32 t;
-            if (self->f5BC == 0.0f) {
+            if (self->endDuration == 0.0f) {
                 t = 0.0f;
             } else {
-                t = 1.0f - (g_gameTime[0] - self->f55C) / self->f5BC;
+                t = 1.0f - (g_gameTime[0] - self->stateStartTime) / self->endDuration;
                 t = ClampRange(t, 0.0f, 1.0f);
             }
             Vu0::Q(scale) = Vu0::Splat(t);
@@ -976,10 +976,10 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
             scale.x = 1.0f;
             switch (self->state5D8) {
             case 0:
-                if (self->f5E0 == 0.0f) {
+                if (self->substate0Duration == 0.0f) {
                     r = 0.1f;
                 } else {
-                    r = 1.0f - (g_gameTime[0] - self->f5DC) / self->f5E0;
+                    r = 1.0f - (g_gameTime[0] - self->substateStartTime) / self->substate0Duration;
                     if (r < 0.1f) {
                         r = 0.1f;
                         scale.z = scale.y = r;
@@ -990,25 +990,25 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
                 scale.z = scale.y = r;
                 break;
             case 1:
-                if (g_player != 0 && self->f5D4 != 0) {
+                if (g_player != 0 && self->beamObject != 0) {
                     f32 w;
-                    if (self->f5E4 == 0.0f) {
+                    if (self->substate1Duration == 0.0f) {
                         w = 1.0f;
                     } else {
-                        w = ClampRange((g_gameTime[0] - self->f5DC) / self->f5E4, 0.0f, 1.0f);
+                        w = ClampRange((g_gameTime[0] - self->substateStartTime) / self->substate1Duration, 0.0f, 1.0f);
                     }
                     Vec02 blend;
                     Vu0::Q(blend) = Vu0::MulXSum(Vu0::Q(self->v140), Vu0::Scalar(1.0f - w), Vu0::Q(((Collider*)g_player)->v140), Vu0::Scalar(w));
-                    DrawBeamBetweenPoints((PlacedObject*)self->f5D4, (PlacedObject*)a1, &blend, &(g_player)->v140, 10.0f, tmp.f40);
+                    DrawBeamBetweenPoints((PlacedObject*)self->beamObject, (PlacedObject*)a1, &blend, &(g_player)->v140, 10.0f, tmp.outerFade);
                 }
                 r = 0.1f;
                 scale.z = scale.y = r;
                 break;
             case 2:
-                if (self->f5E8 == 0.0f) {
+                if (self->substate2Duration == 0.0f) {
                     r = 1.0f;
                 } else {
-                    r = (g_gameTime[0] - self->f5DC) / self->f5E8;
+                    r = (g_gameTime[0] - self->substateStartTime) / self->substate2Duration;
                     r = ClampRange(r, 0.1f, 1.0f);
                 }
                 scale.z = scale.y = r;
@@ -1021,7 +1021,7 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
             if (self->state < 4) {
                 tgt = self;
             } else if (self->state < 8) {
-                tgt = self->f5D0;
+                tgt = self->phaseObject;
             }
         }
         BuildScaledTransformMatrix((f32*)&self->v140, (f32 (*)[4])&self->m110, (f32*)&scale, (f32 (*)[4])&tmp);
@@ -1068,7 +1068,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(pl->v140), Vu0::Q(self->v140));
         delta.z = 0.0f;
         Vu0::Q(delta) = Vu0::NormalizeOr(Vu0::Q(delta), Vu0::Q(g_unitXVector));
-        switch (g_player->f239C) {
+        switch (g_player->targetMode) {
         case 3:
             return;
         case 0:
@@ -1082,7 +1082,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
             }
             break;
         case 2:
-            if (g_player->f2228 == 0x10) {
+            if (g_player->subState == 0x10) {
                 return;
             }
             break;
@@ -1092,7 +1092,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
     Vec02* at = &pl->v140;
     GatherCollidersInBox(self->world, 0, at, &self->root->v140, IsSequencedObjectCandidate, self, &count, &list);
     if (FindNearestSpanObject(1, &self->v140, at, count, list, 0) == 0) {
-        *state = self->f554 == 0 ? 2 : 6;
+        *state = self->repeating == 0 ? 2 : 6;
     }
     PopBackMemoryMark();
 }
@@ -1100,7 +1100,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
 void SetSequencedObjectMode(SequencedObject* self, s32 value)
 {
     s32 m = 5;
-    self->f554 = value;
+    self->repeating = value;
     if (!value) {
         m = 1;
     }
@@ -1110,13 +1110,13 @@ void SetSequencedObjectMode(SequencedObject* self, s32 value)
 void RequestSequencedObjectEnd(SequencedObject* self)
 {
     if (self->state != 8) {
-        self->desc30()->m4D(self, self->f554 == 0 ? 3 : 7);
+        self->desc30()->m4D(self, self->repeating == 0 ? 3 : 7);
     }
     StateTrigger* r = self->trigger;
     if (r != 0) {
         if (r->state == 1) {
             if (__builtin_fabsf(g_gameTime[0] - r->stateTime) < 0.2f) {
-                self->f5C0 = r->state;
+                self->triggerHeld = r->state;
             }
         }
     }
@@ -1124,8 +1124,8 @@ void RequestSequencedObjectEnd(SequencedObject* self)
 
 void FinishSequencedObject(SequencedObject* o)
 {
-    if (o->f554 == 0) {
-        o->f554 = 1;
+    if (o->repeating == 0) {
+        o->repeating = 1;
         if (o->state != 8) {
             o->desc30()->m4D(o, 3);
         }
@@ -1142,7 +1142,7 @@ void EnterSequencedObjectState(SequencedObject* self, s32 s)
             EnterSequencedSubstate(self, -1);
             break;
         case 8:
-            self->f5C0 = 0;
+            self->triggerHeld = 0;
             break;
         }
         switch (s) {
@@ -1174,21 +1174,21 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
     case -1:
         break;
     case 0:
-        if (self->f200 != 0) {
-            ((Record200*)self->f200)->f44 = 4;
+        if (self->aimAttachment != 0) {
+            ((Record200*)self->aimAttachment)->f44 = 4;
         }
         break;
     case 1:
         StartSoundEffect(0x1B, (PlayingSound**)&self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
-        if (self->f200 != 0) {
-            ((Record200*)self->f200)->f44 = 0;
+        if (self->aimAttachment != 0) {
+            ((Record200*)self->aimAttachment)->f44 = 0;
         }
         break;
     }
     self->state5D8 = arg;
-    self->f5DC = g_gameTime[0];
+    self->substateStartTime = g_gameTime[0];
 }
 
 void InitBlinkObject(BlinkObject* self)
@@ -1209,11 +1209,11 @@ void SetupBlinkObject(BlinkObject* self)
     for (s32 i = 0; i < self->elemCount; i++) {
         Elem02* it = self->elems[i];
         if (it->kind == 1 && it->f14 != 0) {
-            self->f610 = it;
+            self->blinkElem = it;
             break;
         }
     }
-    self->desc30()->m4D(self, self->f560);
+    self->desc30()->m4D(self, self->initialState);
 }
 
 void UpdateBlinkObject(BlinkObject* self, f32 dt)
@@ -1224,13 +1224,13 @@ void UpdateBlinkObject(BlinkObject* self, f32 dt)
     state = self->state;
     switch (state) {
     case 0:
-        if (self->f5B8 < g_gameTime[0] - self->f55C) {
+        if (self->beginDuration < g_gameTime[0] - self->stateStartTime) {
             state = 1;
         }
         break;
     case 1:
-        if (0.0f <= self->f608) {
-            if (self->f608 < g_gameTime[0] - self->f55C) {
+        if (0.0f <= self->blinkDuration) {
+            if (self->blinkDuration < g_gameTime[0] - self->stateStartTime) {
                 state = 3;
                 break;
             }
@@ -1240,18 +1240,18 @@ void UpdateBlinkObject(BlinkObject* self, f32 dt)
         }
         break;
     case 3:
-        if (self->f5BC < g_gameTime[0] - self->f55C) {
+        if (self->endDuration < g_gameTime[0] - self->stateStartTime) {
             state = 8;
         }
         break;
     case 4:
-        if (self->f5B8 < g_gameTime[0] - self->f55C) {
+        if (self->beginDuration < g_gameTime[0] - self->stateStartTime) {
             state = 5;
         }
         break;
     case 5:
-        if (0.0f <= self->f608) {
-            if (self->f608 < g_gameTime[0] - self->f55C) {
+        if (0.0f <= self->blinkDuration) {
+            if (self->blinkDuration < g_gameTime[0] - self->stateStartTime) {
                 state = 7;
                 break;
             }
@@ -1261,14 +1261,14 @@ void UpdateBlinkObject(BlinkObject* self, f32 dt)
         }
         break;
     case 7:
-        if (self->f5BC < g_gameTime[0] - self->f55C) {
+        if (self->endDuration < g_gameTime[0] - self->stateStartTime) {
             state = 8;
         }
         break;
     case 8:
-        if (self->f5C0 == 0) {
-            if (self->f60C < g_gameTime[0] - self->f55C) {
-                switch (self->f554) {
+        if (self->triggerHeld == 0) {
+            if (self->restartDelay < g_gameTime[0] - self->stateStartTime) {
+                switch (self->repeating) {
                 case 0:
                     state = 0;
                     break;
@@ -1327,8 +1327,8 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
                     ContactEnd03* a = &n->end[x];
                     Collider* o = b->body;
                     if (a->part == self && IsObjectInAcceptLists(self, o) != 0) {
-                        if (self->f618 == 0) {
-                            *out = self->f554 == 0 ? 2 : 6;
+                        if (self->resuming == 0) {
+                            *out = self->repeating == 0 ? 2 : 6;
                         }
                         if ((u32)(*out - 5) < 2) {
                             if (o == g_player) {
@@ -1352,20 +1352,20 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
 
 void SetBlinkObjectMode(BlinkObject* self, s32 mode)
 {
-    self->f554 = mode;
+    self->repeating = mode;
     self->desc30()->m4D(self, mode == 0 ? 1 : 5);
 }
 
 void RequestBlinkObjectEnd(BlinkObject* self)
 {
     if (self->state != 8) {
-        self->desc30()->m4D(self, self->f554 == 0 ? 3 : 7);
+        self->desc30()->m4D(self, self->repeating == 0 ? 3 : 7);
     }
     StateTrigger* r = self->trigger;
     if (r != 0) {
         if (r->state == 1) {
             if (__builtin_fabsf(g_gameTime[0] - r->stateTime) < 0.2f) {
-                self->f5C0 = r->state;
+                self->triggerHeld = r->state;
             }
         }
     }
@@ -1373,9 +1373,9 @@ void RequestBlinkObjectEnd(BlinkObject* self)
 
 void FinishBlinkObject(BlinkObject* self)
 {
-    self->f554 = 1;
-    if (self->f608 < 0.0f) {
-        self->f618 = 0;
+    self->repeating = 1;
+    if (self->blinkDuration < 0.0f) {
+        self->resuming = 0;
         switch (self->state) {
         case 1:
             self->desc30()->m4D(self, 3);
@@ -1394,11 +1394,11 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     case 1:
     case 5:
         StopSoundRecord((PlayingSound*)self->f5C4, 0);
-        self->f614 = self->f55C;
+        self->savedStartTime = self->stateStartTime;
         break;
     case 8:
-        self->f5C0 = 0;
-        self->f618 = 0;
+        self->triggerHeld = 0;
+        self->resuming = 0;
         break;
     }
     switch (n) {
@@ -1407,7 +1407,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
         break;
     case 2:
     case 6:
-        self->f618 = 1;
+        self->resuming = 1;
         break;
     case 3:
     case 4:
@@ -1418,9 +1418,9 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
         break;
     }
     EnterTimedObjectState(self, n);
-    if (self->f618 != 0 && (n == 2 || n == 6)) {
+    if (self->resuming != 0 && (n == 2 || n == 6)) {
         self->state = (n == 2) ? 1 : 5;
-        self->f55C = self->f614;
+        self->stateStartTime = self->savedStartTime;
     }
 }
 
@@ -1437,36 +1437,36 @@ void SetBlinkObjectFrame(BlinkObject* self)
         last = self->animA.last;
         duration = self->animA.duration;
         mode = self->animA.mode;
-        start = self->f55C;
+        start = self->stateStartTime;
         break;
     case 1:
         first = self->animB.first;
         last = self->animB.last;
         duration = self->animB.duration;
         mode = self->animB.mode;
-        start = self->f55C;
+        start = self->stateStartTime;
         break;
     case 3:
-        frame = (s32)((g_gameTime[0] - self->f55C) / (1.0f / self->blinkRate)) % 2;
+        frame = (s32)((g_gameTime[0] - self->stateStartTime) / (1.0f / self->blinkRate)) % 2;
         if (frame != 0) {
             first = self->animB.first;
             last = self->animB.last;
             duration = self->animB.duration;
             mode = self->animB.mode;
-            start = self->f614;
+            start = self->savedStartTime;
         } else {
             first = self->blinkFrame;
             last = first;
         }
         break;
     case 7:
-        frame = (s32)((g_gameTime[0] - self->f55C) / (1.0f / self->blinkRate)) % 2;
+        frame = (s32)((g_gameTime[0] - self->stateStartTime) / (1.0f / self->blinkRate)) % 2;
         if (frame != 0) {
             first = self->animC.first;
             last = self->animC.last;
             duration = self->animC.duration;
             mode = self->animC.mode;
-            start = self->f614;
+            start = self->savedStartTime;
         } else {
             first = self->blinkFrame;
             last = first;
@@ -1477,7 +1477,7 @@ void SetBlinkObjectFrame(BlinkObject* self)
         last = self->animC.last;
         duration = self->animC.duration;
         mode = self->animC.mode;
-        start = self->f55C;
+        start = self->stateStartTime;
         break;
     }
 
@@ -1499,5 +1499,5 @@ void SetBlinkObjectFrame(BlinkObject* self)
         }
         frame += first;
     }
-    SetCursorFrame((AnimCursor*)((u8*)self->f610 + 0x10), frame);
+    SetCursorFrame((AnimCursor*)((u8*)self->blinkElem + 0x10), frame);
 }

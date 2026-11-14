@@ -130,13 +130,13 @@ void InitPadRecord(PadRecord* self, s32 a, s32 b)
 {
     FillMemory(self, 0, 0xC4);
     SetPadConnectionState(self, 1, 0);
-    self->f04 = a;
-    self->f08 = b;
+    self->port = a;
+    self->slot = b;
     u8* buffer = (u8*)(((s32)ReservePermanentMemory(0x140) + 0x3F) & -0x40);
     self->f0C = buffer;
-    OpenPadPort(self->f04, self->f08, buffer);
-    self->fBC = ReservePermanentMemory(0x20);
-    self->fC0 = 1;
+    OpenPadPort(self->port, self->slot, buffer);
+    self->patternPlayer = ReservePermanentMemory(0x20);
+    self->patternsEnabled = 1;
 }
 
 extern "C" s32 GetPadSlotState(s32 port, s32 slot);
@@ -155,18 +155,18 @@ void SetPadConnectionState(PadRecord* self, s32 mode, s32 n);
 void UpdatePadConnection(PadRecord* self)
 {
     u8 buf[16];
-    if (self->f14 == 0)
+    if (self->connectionMode == 0)
     {
         return;
     }
     s32 ready = 0;
-    s32 r = GetPadSlotState(self->f04, self->f08);
+    s32 r = GetPadSlotState(self->port, self->slot);
     if (r == 6 || r == 2)
     {
         ready = 1;
     }
-    s32 cur = self->f18;
-    if (self->f14 != 3 && cur != 0 && 2.0f <= g_gameClock.elapsed - self->f1C)
+    s32 cur = self->connectionStep;
+    if (self->connectionMode != 3 && cur != 0 && 2.0f <= g_gameClock.elapsed - self->connectionChangeTime)
     {
         r = 0;
     }
@@ -179,8 +179,8 @@ void UpdatePadConnection(PadRecord* self)
         return;
     }
     s32 two = 2;
-    s32 mode = self->f14;
-    s32 n = self->f18;
+    s32 mode = self->connectionMode;
+    s32 n = self->connectionStep;
     switch (mode)
     {
     case 1:
@@ -188,10 +188,10 @@ void UpdatePadConnection(PadRecord* self)
         {
         case 0:
         {
-            s32 a = GetPadReplyListValue(self->f04, self->f08, 1, 0);
+            s32 a = GetPadReplyListValue(self->port, self->slot, 1, 0);
             if (a != 0)
             {
-                s32 b = GetPadReplyListValue(self->f04, self->f08, 2, 0);
+                s32 b = GetPadReplyListValue(self->port, self->slot, 2, 0);
                 if (b > 0)
                 {
                     a = b;
@@ -209,18 +209,18 @@ void UpdatePadConnection(PadRecord* self)
             break;
         }
         case 1:
-            mode = (SendPadTwoWordRequest(self->f04, self->f08, 1, 3) == 1) ? two : n;
+            mode = (SendPadTwoWordRequest(self->port, self->slot, 1, 3) == 1) ? two : n;
             break;
         case 2:
         {
-            s32 count = GetPadReplyTableByte(self->f04, self->f08, -1, 0);
+            s32 count = GetPadReplyTableByte(self->port, self->slot, -1, 0);
             if (count != n
-                || GetPadReplyTableByte(self->f04, self->f08, 0, 1) != mode
-                || GetPadReplyTableByte(self->f04, self->f08, 0, 2) != n
-                || GetPadReplyTableByte(self->f04, self->f08, 0, 3) != 0
-                || GetPadReplyTableByte(self->f04, self->f08, 1, 1) != mode
-                || GetPadReplyTableByte(self->f04, self->f08, 1, 2) != mode
-                || GetPadReplyTableByte(self->f04, self->f08, 1, 3) != mode)
+                || GetPadReplyTableByte(self->port, self->slot, 0, 1) != mode
+                || GetPadReplyTableByte(self->port, self->slot, 0, 2) != n
+                || GetPadReplyTableByte(self->port, self->slot, 0, 3) != 0
+                || GetPadReplyTableByte(self->port, self->slot, 1, 1) != mode
+                || GetPadReplyTableByte(self->port, self->slot, 1, 2) != mode
+                || GetPadReplyTableByte(self->port, self->slot, 1, 3) != mode)
             {
                 mode = 3;
                 break;
@@ -230,19 +230,19 @@ void UpdatePadConnection(PadRecord* self)
             {
                 buf[i] = i;
             }
-            if (SendPadSixByteRequest(self->f04, self->f08, buf) == 1)
+            if (SendPadSixByteRequest(self->port, self->slot, buf) == 1)
             {
                 mode = 2;
             }
             break;
         }
         case 3:
-            if (HasFullPadMask(self->f04, self->f08) != mode)
+            if (HasFullPadMask(self->port, self->slot) != mode)
             {
                 mode = 3;
                 break;
             }
-            if (SendFullPadMask(self->f04, self->f08) == 1)
+            if (SendFullPadMask(self->port, self->slot) == 1)
             {
                 mode = two;
             }
@@ -250,10 +250,10 @@ void UpdatePadConnection(PadRecord* self)
         }
         break;
     case 2:
-        switch (GetPadRequestMode(self->f04, self->f08))
+        switch (GetPadRequestMode(self->port, self->slot))
         {
         case 0:
-            switch (self->f18)
+            switch (self->connectionStep)
             {
             case 1:
                 n = 2;
@@ -285,9 +285,9 @@ void UpdatePadConnection(PadRecord* self)
     case 3:
         if (PollPadInput(self) != 0)
         {
-            if (self->fC0 != 0 && self->f18 >= 3)
+            if (self->patternsEnabled != 0 && self->connectionStep >= 3)
             {
-                UpdatePadPattern((PadPatternPlayer*)self->fBC);
+                UpdatePadPattern((PadPatternPlayer*)self->patternPlayer);
             }
         }
         else
@@ -305,39 +305,39 @@ void RequestPadPattern(PadPatternPlayer* self, s32 a1, s32 a2);
 void SetPadConnectionState(PadRecord* self, s32 mode, s32 n)
 {
     s32 next = mode;
-    if (mode == self->f14)
+    if (mode == self->connectionMode)
     {
-        if (n == self->f18)
+        if (n == self->connectionStep)
         {
             return;
         }
     }
     if (n == 0)
     {
-        self->f10 = 0;
+        self->deviceType = 0;
         next = 1;
     }
-    if (self->f18 < 3 && n >= 3)
+    if (self->connectionStep < 3 && n >= 3)
     {
-        RequestPadPattern((PadPatternPlayer*)self->fBC, self->f04, self->f08);
+        RequestPadPattern((PadPatternPlayer*)self->patternPlayer, self->port, self->slot);
     }
     if (next == 3)
     {
         self->f20 = 0;
-        self->f84 = 0;
-        self->f50 = 0;
+        self->secondStickActive = 0;
+        self->stickActive = 0;
         self->fA8 = 0;
         for (u32 i = 0; i < 4; i++)
         {
-            self->a88[i].lo = -0.75f;
-            self->a54[i].lo = -0.75f;
-            self->a88[i].hi = 0.75f;
-            self->a54[i].hi = 0.75f;
+            self->secondStickRanges[i].lo = -0.75f;
+            self->stickRanges[i].lo = -0.75f;
+            self->secondStickRanges[i].hi = 0.75f;
+            self->stickRanges[i].hi = 0.75f;
         }
     }
-    self->f14 = next;
-    self->f18 = n;
-    self->f1C = g_gameClock.elapsed;
+    self->connectionMode = next;
+    self->connectionStep = n;
+    self->connectionChangeTime = g_gameClock.elapsed;
 }
 
 // The stick's response clamp, 0 to 1.
@@ -356,7 +356,7 @@ void ReadAnalogStick(PadRecord* p, u8 x, u8 y, f32* outX, f32* outY, f32* outMag
     f32 nx, ny;
     if (*latch == 0) {
         s32 moved = 0;
-        if (p->x20 != 0.0f
+        if (p->lastReadTime != 0.0f
             && (x != *prevX || y != *prevY || x < 0x60 || x > 0xA0 || y < 0x60 || y > 0xA0)) {
             moved = 1;
         }
@@ -415,52 +415,52 @@ s32 PollPadInput(PadRecord* self)
     u8* b = buf;
     FillMemory(b, 0, 0x40);
     res = 1;
-    if (ReadPadFrame(self->f04, self->f08, b) > 0) {
-        old = self->keyA8;
-        self->keyA8 = ~((buf[2] << 8) | buf[3]);
-        if (self->f10 != 0) {
-            if (self->f10 != buf[1]) res = 0;
+    if (ReadPadFrame(self->port, self->slot, b) > 0) {
+        old = self->buttons;
+        self->buttons = ~((buf[2] << 8) | buf[3]);
+        if (self->deviceType != 0) {
+            if (self->deviceType != buf[1]) res = 0;
         }
-        self->f10 = buf[1];
-        if (self->f18 == 4) {
-            CopyMemory(self->fAE, buf + 8, 0xC);
+        self->deviceType = buf[1];
+        if (self->connectionStep == 4) {
+            CopyMemory(self->pressure, buf + 8, 0xC);
         }
-        cur = self->keyA8;
+        cur = self->buttons;
         self->flags = cur & ~old;
-        self->hAC = old & ~cur;
-        if (self->f18 >= 2) {
-            ReadAnalogStick(self, buf[6], buf[7], &self->f40, &self->f44, &self->f48, &self->f4C, &self->f4D, &self->f50, self->a54);
-            ReadAnalogStick(self, buf[4], buf[5], &self->f74, &self->f78, &self->f7C, &self->f80, &self->f81, &self->f84, self->a88);
+        self->released = old & ~cur;
+        if (self->connectionStep >= 2) {
+            ReadAnalogStick(self, buf[6], buf[7], &self->stickX, &self->stickY, &self->stickMagnitude, &self->stickPrevRawX, &self->stickPrevRawY, &self->stickActive, self->stickRanges);
+            ReadAnalogStick(self, buf[4], buf[5], &self->secondStickX, &self->secondStickY, &self->secondStickMagnitude, &self->secondStickPrevRawX, &self->secondStickPrevRawY, &self->secondStickActive, self->secondStickRanges);
         } else {
-            self->f74 = self->f78 = self->f7C = self->f40 = self->f44 = self->f48 = 0.0f;
+            self->secondStickX = self->secondStickY = self->secondStickMagnitude = self->stickX = self->stickY = self->stickMagnitude = 0.0f;
         }
         if (g_camera == 0 || g_camera->stackCount == 0 || g_camera->stack[0].ctl != &g_camera->ctl454) {
-            if ((self->keyA8 & 0xF000) != 0) {
-                self->f40 = self->f44 = self->f48 = 0.0f;
-                if ((self->keyA8 & 0x8000) != 0) {
-                    self->f40 = -1.0f;
-                } else if ((self->keyA8 & 0x2000) != 0) {
-                    self->f40 = 1.0f;
+            if ((self->buttons & 0xF000) != 0) {
+                self->stickX = self->stickY = self->stickMagnitude = 0.0f;
+                if ((self->buttons & 0x8000) != 0) {
+                    self->stickX = -1.0f;
+                } else if ((self->buttons & 0x2000) != 0) {
+                    self->stickX = 1.0f;
                 }
-                if ((self->keyA8 & 0x1000) != 0) {
-                    self->f44 = 1.0f;
-                } else if ((self->keyA8 & 0x4000) != 0) {
-                    self->f44 = -1.0f;
+                if ((self->buttons & 0x1000) != 0) {
+                    self->stickY = 1.0f;
+                } else if ((self->buttons & 0x4000) != 0) {
+                    self->stickY = -1.0f;
                 }
-                if (self->f40 * self->f44 != 0.0f) {
-                    self->f40 = self->f40 * 0.8f;
-                    self->f44 = self->f44 * 0.8f;
+                if (self->stickX * self->stickY != 0.0f) {
+                    self->stickX = self->stickX * 0.8f;
+                    self->stickY = self->stickY * 0.8f;
                 }
-                self->f48 = 1.0f;
+                self->stickMagnitude = 1.0f;
             }
         }
         AdvanceButtonCodes(self, old);
-        self->x20 = g_gameClock.elapsed;
-        if (self->keyA8 != 0 || self->f48 != 0.0f || self->f7C != 0.0f) {
-            self->f24 = g_gameClock.elapsed;
+        self->lastReadTime = g_gameClock.elapsed;
+        if (self->buttons != 0 || self->stickMagnitude != 0.0f || self->secondStickMagnitude != 0.0f) {
+            self->lastActiveTime = g_gameClock.elapsed;
         }
     } else {
-        if (g_elapsedTime[0] - self->x20 >= 2.0f) res = 0;
+        if (g_elapsedTime[0] - self->lastReadTime >= 2.0f) res = 0;
     }
     return res;
 }
@@ -477,14 +477,14 @@ void StartPadPatternFromTable(PadPatternPlayer* self, s32 index, f32 time);
 void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration)
 {
     if (self->pC0 == 0) return;
-    if (self->f18 < 3) return;
-    if (self->f14 != 3) return;
-    StartPadPatternFromTable((PadPatternPlayer*)self->fBC, pattern, duration);
+    if (self->connectionStep < 3) return;
+    if (self->connectionMode != 3) return;
+    StartPadPatternFromTable((PadPatternPlayer*)self->patternPlayer, pattern, duration);
 }
 
 LINKER_REMNANT(func_0016EC80);
 
-void ResetPadStepRepeat(PadRecord* p) { p->f28 = 0; p->f2C = 0; }
+void ResetPadStepRepeat(PadRecord* p) { p->stepX = 0; p->stepY = 0; }
 
 extern f32 g_elapsedTime[];
 
@@ -492,62 +492,62 @@ s32 GetPadHorizontalStep(PadRecord* self)
 {
     f32 c;
     f32 base;
-    if (self->f28 == 0) {
+    if (self->stepX == 0) {
         u16 fl = self->flags;
         if (fl & 0x8000) {
             ClearPadPressedBits(self, 0x8000);
-            self->f28 = -1;
+            self->stepX = -1;
         } else if (fl & 0x2000) {
             ClearPadPressedBits(self, 0x2000);
-            self->f28 = 1;
-        } else if (0.8f <= self->f48) {
-            f32 a = fabsf(self->f40);
-            f32 b = fabsf(self->f44);
+            self->stepX = 1;
+        } else if (0.8f <= self->stickMagnitude) {
+            f32 a = fabsf(self->stickX);
+            f32 b = fabsf(self->stickY);
             if (b < a) {
-                if (self->f40 < 0.0f) {
-                    self->f28 = -1;
+                if (self->stickX < 0.0f) {
+                    self->stepX = -1;
                 } else {
-                    self->f28 = 1;
+                    self->stepX = 1;
                 }
             }
         }
-        if (self->f28 == 0) {
+        if (self->stepX == 0) {
             goto done;
         }
         c = 0.33329999446868896f;
-        self->f34 = c;
+        self->stepDelayX = c;
         base = g_elapsedTime[0];
     } else {
         s32 v1 = 0;
-        if (self->f28 < 0) {
-            if (self->keyA8 & 0x8000) {
+        if (self->stepX < 0) {
+            if (self->buttons & 0x8000) {
                 v1 = 1;
-            } else if (0.25f <= self->f48) {
-                f32 a = fabsf(self->f40);
-                f32 b = fabsf(self->f44);
+            } else if (0.25f <= self->stickMagnitude) {
+                f32 a = fabsf(self->stickX);
+                f32 b = fabsf(self->stickY);
                 if (b < a) {
-                    if (self->f40 < 0.0f) v1 = 1;
+                    if (self->stickX < 0.0f) v1 = 1;
                 }
             }
         } else {
-            if (self->keyA8 & 0x2000) {
+            if (self->buttons & 0x2000) {
                 v1 = 1;
-            } else if (0.25f <= self->f48) {
-                f32 a = fabsf(self->f40);
-                f32 b = fabsf(self->f44);
+            } else if (0.25f <= self->stickMagnitude) {
+                f32 a = fabsf(self->stickX);
+                f32 b = fabsf(self->stickY);
                 if (b < a) {
-                    if (0.0f < self->f40) v1 = 1;
+                    if (0.0f < self->stickX) v1 = 1;
                 }
             }
         }
         if (v1 == 0) {
-            self->f28 = 0;
+            self->stepX = 0;
             goto done;
         }
-        if (self->f30 <= g_gameClock.elapsed) {
+        if (self->nextStepTimeX <= g_gameClock.elapsed) {
             f32 lo = 0.1f;
             f32 hi = 0.33329999446868896f;
-            f32 t = (self->f34 + self->f34) * 0.33333334f;
+            f32 t = (self->stepDelayX + self->stepDelayX) * 0.33333334f;
             if (t < lo) {
                 c = lo;
             } else if (hi < t) {
@@ -555,15 +555,15 @@ s32 GetPadHorizontalStep(PadRecord* self)
             } else {
                 c = t;
             }
-            self->f34 = c;
+            self->stepDelayX = c;
             base = g_gameClock.elapsed;
         } else {
             return 0;
         }
     }
-    self->f30 = base + c;
+    self->nextStepTimeX = base + c;
 done:
-    return self->f28;
+    return self->stepX;
 }
 
 void ClearPadPressedBits(PadRecord* self, u32 mask);
@@ -572,62 +572,62 @@ s32 GetPadVerticalStep(PadRecord* self)
 {
     f32 c;
     f32 base;
-    if (self->f2C == 0) {
+    if (self->stepY == 0) {
         u16 fl = self->flags;
         if (fl & 0x1000) {
             ClearPadPressedBits(self, 0x1000);
-            self->f2C = -1;
+            self->stepY = -1;
         } else if (fl & 0x4000) {
             ClearPadPressedBits(self, 0x4000);
-            self->f2C = 1;
-        } else if (0.8f <= self->f48) {
-            f32 a = fabsf(self->f44);
-            f32 b = fabsf(self->f40);
+            self->stepY = 1;
+        } else if (0.8f <= self->stickMagnitude) {
+            f32 a = fabsf(self->stickY);
+            f32 b = fabsf(self->stickX);
             if (b < a) {
-                if (0.0f < self->f44) {
-                    self->f2C = -1;
+                if (0.0f < self->stickY) {
+                    self->stepY = -1;
                 } else {
-                    self->f2C = 1;
+                    self->stepY = 1;
                 }
             }
         }
-        if (self->f2C == 0) {
+        if (self->stepY == 0) {
             goto done;
         }
         c = 0.33329999446868896f;
-        self->f3C = c;
+        self->stepDelayY = c;
         base = g_elapsedTime[0];
     } else {
         s32 v1 = 0;
-        if (self->f2C < 0) {
-            if (self->keyA8 & 0x1000) {
+        if (self->stepY < 0) {
+            if (self->buttons & 0x1000) {
                 v1 = 1;
-            } else if (0.25f <= self->f48) {
-                f32 a = fabsf(self->f44);
-                f32 b = fabsf(self->f40);
+            } else if (0.25f <= self->stickMagnitude) {
+                f32 a = fabsf(self->stickY);
+                f32 b = fabsf(self->stickX);
                 if (b < a) {
-                    if (0.0f < self->f44) v1 = 1;
+                    if (0.0f < self->stickY) v1 = 1;
                 }
             }
         } else {
-            if (self->keyA8 & 0x4000) {
+            if (self->buttons & 0x4000) {
                 v1 = 1;
-            } else if (0.25f <= self->f48) {
-                f32 a = fabsf(self->f44);
-                f32 b = fabsf(self->f40);
+            } else if (0.25f <= self->stickMagnitude) {
+                f32 a = fabsf(self->stickY);
+                f32 b = fabsf(self->stickX);
                 if (b < a) {
-                    if (self->f44 < 0.0f) v1 = 1;
+                    if (self->stickY < 0.0f) v1 = 1;
                 }
             }
         }
         if (v1 == 0) {
-            self->f2C = 0;
+            self->stepY = 0;
             goto done;
         }
-        if (self->f38 <= g_gameClock.elapsed) {
+        if (self->nextStepTimeY <= g_gameClock.elapsed) {
             f32 lo = 0.1f;
             f32 hi = 0.33329999446868896f;
-            f32 t = (self->f3C + self->f3C) * 0.33333334f;
+            f32 t = (self->stepDelayY + self->stepDelayY) * 0.33333334f;
             if (t < lo) {
                 c = lo;
             } else if (hi < t) {
@@ -635,23 +635,23 @@ s32 GetPadVerticalStep(PadRecord* self)
             } else {
                 c = t;
             }
-            self->f3C = c;
+            self->stepDelayY = c;
             base = g_gameClock.elapsed;
         } else {
             return 0;
         }
     }
-    self->f38 = base + c;
+    self->nextStepTimeY = base + c;
 done:
-    return self->f2C;
+    return self->stepY;
 }
 
 f32 GetPadButtonAnalog(PadRecord* self, s32 idx)
 {
-    if (self->keyA8 & g_padButtonMasks[idx]) {
-        if (self->f18 >= 4) {
+    if (self->buttons & g_padButtonMasks[idx]) {
+        if (self->connectionStep >= 4) {
             s32 v = 1;
-            s32 b = self->fAE[idx];
+            s32 b = self->pressure[idx];
             if (v < b) {
                 v = b;
             }
@@ -703,7 +703,7 @@ struct ButtonCodeAdvance {
         do {
             s32 index = node->pos;
             if (index < node->length) {
-                if (g_padRecord.keyA8 == node->buttons[index])
+                if (g_padRecord.buttons == node->buttons[index])
                     node->pos = index + 1;
                 else
                     node->pos = 0;
@@ -719,7 +719,7 @@ void AdvanceButtonCodes(PadRecord* self, s32 value)
     ButtonCode* head = g_buttonCodes;
     if (head == 0) return;
     if (self != &g_padRecord) return;
-    u16 previous = self->keyA8;
+    u16 previous = self->buttons;
     if (id == previous || previous == 0) return;
     ButtonCodeAdvance::Of(head);
     GameClock* clock = &g_gameClock;
@@ -802,9 +802,9 @@ void ShowPasswordMessage(void)
     char text[0x40];
     char buf[0x10];
 
-    if ((g_saveData->f19D8 << 8 | g_saveData->f19DC) == 0x400) {
+    if ((g_saveData->levelIndex << 8 | g_saveData->entryIndex) == 0x400) {
         if ((ComputeCompletionMask() & 6) == 6) {
-            if (g_saveData->f19E8 == 99 && g_saveData->f19E0 == 0) {
+            if (g_saveData->pickupCount == 99 && g_saveData->reserveCount == 0) {
                 char* p = buf;
                 CopyString(p, (const char*)D_002483B8);
                 while (*p != 0) {

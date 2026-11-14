@@ -124,9 +124,9 @@ struct PlacedObject : BaseObject {
     List01 list60;          // 0x60: offset 0x58
     s32 count6C;            // 0x6C
     FoundList* items70[4];  // 0x70: count6C of the groups it is in (func_0015F8B0)
-    f32 f80;                // 0x80: FLT_MAX at set-up
-    f32 f84;                // 0x84: FLT_MAX at set-up
-    s32 f88;                // 0x88: 0x0FFFFFFF at set-up
+    f32 fadeDistanceFar;    // 0x80: FLT_MAX at set-up
+    f32 fadeDistanceNear;   // 0x84: FLT_MAX at set-up
+    s32 visibilityMask;     // 0x88: 0x0FFFFFFF at set-up
     void* f8C;              // 0x8C
     s32 save90;             // 0x90: Collider::mode450 kept by func_001BD790
     s32 save94;             // 0x94: Collider::mode470 kept by func_001BD790
@@ -148,13 +148,13 @@ struct PlacedObject : BaseObject {
     Mat02 m1A0;             // 0x1A0
     Vec02 v1D0;             // 0x1D0
     List01 list1E0;         // 0x1E0: the attachments (Attachment records), linked at Attachment::link (offset 8)
-    Attachment* f1EC;            // 0x1EC: the attachment that gives the position (slot 4)
-    Attachment* f1F0;            // 0x1F0: the one that gives the orientation (slot 5)
-    void* f1F4;             // 0x1F4
-    void** f1F8;            // 0x1F8: f26C entries
-    Attachment* f1FC;       // 0x1FC: the base attachment (func_001296E0, table D_00219560)
-    T2195_790* f200;        // 0x200: the aim attachment (func_00129730)
-    T2195_600* f204;        // 0x204: the own-value attachment (func_0012A8D8)
+    Attachment* positionAttachment; // 0x1EC: the attachment that gives the position (slot 4)
+    Attachment* orientationAttachment; // 0x1F0: the one that gives the orientation (slot 5)
+    void* matrixAttachment; // 0x1F4
+    void** indexedAttachments; // 0x1F8: f26C entries
+    Attachment* baseAttachment; // 0x1FC: the base attachment (func_001296E0, table D_00219560)
+    T2195_790* aimAttachment; // 0x200: the aim attachment (func_00129730)
+    T2195_600* ownValueAttachment; // 0x204: the own-value attachment (func_0012A8D8)
     u8 pad208[0x20C - 0x208];
     u8* p20C;               // 0x20C: D_00260E70 until slot 9 copies it
     u8* p210;               // 0x210: D_00260E80
@@ -162,7 +162,7 @@ struct PlacedObject : BaseObject {
     u8* p218;               // 0x218: D_00260EA0
     u8* p21C;               // 0x21C: D_00260EB0
     u8* p220;               // 0x220: D_00260EC0
-    Rec2195_224* f224;      // 0x224: a 0xC0-byte record (t2195.h)
+    Rec2195_224* linkRecord; // 0x224: a 0xC0-byte record (t2195.h)
     s32 tries;              // 0x228: as Actor6C::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
     union {
         u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
@@ -173,33 +173,33 @@ struct PlacedObject : BaseObject {
             void* partStates;       // 0x240: drawPartCount entries of 0x28 bytes (func_001250C8 clears their +8 to -1)
         };
     };
-    s32 f26C;               // 0x26C: the number of f1F8 entries
+    s32 valueCount;         // 0x26C: the number of f1F8 entries
     f32* f270;              // 0x270
     u8 pad274[0x278 - 0x274];
     s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them
-    RangeRecord* f284;          // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
-    ColorRecord* f288;      // 0x288: a 0x40-byte record
-    f32 f28C;               // 0x28C
-    f32 f290;               // 0x290
-    s32 f294;               // 0x294: in the world's list at 0x78 instead of 0x54
-    WorldObjectNode* f298;  // 0x298: its node in the world's list (func_00126C58)
+    RangeRecord* rangeRecord;   // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
+    ColorRecord* colorRecord; // 0x288: a 0x40-byte record
+    f32 xyScale;            // 0x28C
+    f32 zScale;             // 0x290
+    s32 frameStepClock;     // 0x294: in the world's list at 0x78 instead of 0x54
+    WorldObjectNode* rampNode; // 0x298: its node in the world's list (func_00126C58)
     union {
         s32 f29C;           // 0x29C: cleared by func_0015FBB8 (slot 20)
         f32 eventTimer;     // 0x29C: a timer SuppressScriptEvent (func_00183668) drops events by;
                             // the script builtin func_00117880 sets it
     };
-    AnimationStart* f2A0;   // 0x2A0
+    AnimationStart* animationStart; // 0x2A0
     f32 f2A4;               // 0x2A4: a radius (func_0019E220 sets it with radius3CC, radius3D0 and f2A8)
-    f32 f2A8;               // 0x2A8
-    SoundRecord* f2AC;          // 0x2AC: a 0x24-byte record
+    f32 boundRadius;        // 0x2A8: the radius for culling and ranges
+    SoundRecord* soundRecord;   // 0x2AC: a 0x24-byte record
     u8 tint[4];             // 0x2B0: four bytes, set to 0x10 by func_00146340
-    u8 f2B4;                // 0x2B4
+    u8 tintByte4;           // 0x2B4
     u8 pad2B5[0x2B8 - 0x2B5];
-    s32 f2B8;               // 0x2B8
-    void* f2BC;             // 0x2BC
-    T2195_5B0* f2C0;        // 0x2C0: the attachment func_0012B2F8 points at the values of a key of f2BC
+    s32 keyedValueCount;    // 0x2B8
+    void* keyedValues;      // 0x2BC
+    T2195_5B0* keyedValueAttachment; // 0x2C0: the attachment func_0012B2F8 points at the values of a key of f2BC
     Key02* keys;            // 0x2C4: slot 16 resolves each and empties the list
     union {
         u64 flags;          // 0x2C8

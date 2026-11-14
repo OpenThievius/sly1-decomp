@@ -259,7 +259,7 @@ void PrepareFlushedGroup(void)
     void* self = &g_vifPacketWriter;
     AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
     D_00604780 = 1;
-    g_buildFrame->f1C = 1;
+    g_buildFrame->hasMaskedImages = 1;
     BeginDmaTag((PacketWriter*)self);
     WriteVifFlushA((PacketWriter*)self);
     CloseDmaTag((PacketWriter*)self);
@@ -306,12 +306,12 @@ void PrepareUnzoomedGroup(void)
 
     {
         Camera* o = g_camera;
-        f32 keep20 = o->f1C4;
-        f32 keep21 = o->f1C8;
+        f32 keep20 = o->zoom;
+        f32 keep21 = o->zoomGoal;
         SnapCameraZoom(o, 1.0f);
         WriteCameraMatricesPacket(g_camera);
         SnapCameraZoom(g_camera, keep20);
-        g_camera->f1C8 = keep21;
+        g_camera->zoomGoal = keep21;
     }
 }
 
@@ -331,7 +331,7 @@ void SubmitDeferredRequests(World* world, void* camera)
     *(u32*)D_0060478C = 0;
     D_00262474 = 0x214;
     s32 count = BucketDeferredRequests(n, g_deferredRequests, (void**)list);
-    g_vifPacketWriter.f20 = 1;
+    g_vifPacketWriter.registerCount = 1;
     CloseDmaTag(&g_vifPacketWriter);
     for (s32 i = 0; i < count; i++) {
         ((void (*)(DeferredRequest*))list[i]->callback)(list[i]);

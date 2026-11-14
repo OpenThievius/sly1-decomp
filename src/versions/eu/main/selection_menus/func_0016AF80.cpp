@@ -17,7 +17,7 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
     s32 s1 = 0;
     StateWalker* p = self->walkers[0].walker;
 
-    if (p->f28 != p->index) {
+    if (p->currentEntry != p->index) {
         SetScreenElementByteText((&D_0026F138), D_eu_0024CC20);
     } else if (self->choice == 0) {
         void** vt = *(void***)(&D_0026F138);

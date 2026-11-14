@@ -111,7 +111,7 @@ struct PlayingSound {
     f32 volume;             // 0x50
     f32 pan;                // 0x54
     f32 pitch;              // 0x58: in octaves, 1524 units each (SetSoundRecordPitch)
-    f32 f5C;                // 0x5C
+    f32 dopplerScale;       // 0x5C: how strongly the object's motion shifts the sound's pitch
     s32 pitchOffset;        // 0x60: added to the pitch (SetSoundRecordPitch)
     U64P link;              // 0x64: kept when InitSoundRecord clears the record
     s32 pitchBaseValid;     // 0x6C
@@ -420,14 +420,14 @@ s32 EnsureSoundEntryBankLoaded(s32 idx)
 void InitSoundParams(SoundRecord** self)
 {
     *self = (SoundRecord*)AllocateZeroedFrontMemory(0x24);
-    (*self)->f00 = -1;
-    (*self)->f04 = 3000.0f;
-    (*self)->f08 = 300.0f;
-    (*self)->f0C = 1.0f;
-    (*self)->f10 = 0;
-    (*self)->f1C = 0;
+    (*self)->soundId = -1;
+    (*self)->outerRange = 3000.0f;
+    (*self)->innerRange = 300.0f;
+    (*self)->baseVolume = 1.0f;
+    (*self)->pitch = 0;
+    (*self)->soundWord = 0;
     (*self)->f14 = -1.0f;
-    (*self)->f20 = 0;
+    (*self)->startParam = 0;
 }
 
 s32 IsSoundEntryAvailable(s32 idx)
@@ -863,7 +863,7 @@ f32 MeasureCameraWeightedDistance(Vec02* a, Vec02* b)
     Vec02 k;
     Camera* cam = g_camera;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(*b), Vu0::Q(*a));
-    f32 w = cam->ctl460.g18;
+    f32 w = cam->ctl460.zoomFraction;
     u128 side = Vu0::Sub(Vu0::Q(d), Vu0::MulX(Vu0::Q(cam->g80), Vu0::Dot(Vu0::Q(d), Vu0::Q(cam->g80))));
     Vu0::Q(k) = Vu0::FromFloat(1.0f / ((1.0f - w) + w * 10.0f));
     u128 along = Vu0::MulX(Vu0::Q(cam->g80), Vu0::Dot(Vu0::Q(d), Vu0::Q(cam->g80)));
@@ -890,7 +890,7 @@ s32 ConvertSpeedToPitchOffset(s32 speed);
 void ComputeSoundRecordDoppler(PlayingSound* self)
 {
     PlacedObject* source = (PlacedObject*)self->object;
-    if (source == 0 || self->f5C <= 0.0001f) {
+    if (source == 0 || self->dopplerScale <= 0.0001f) {
         self->pitchOffset = 0;
         return;
     }
@@ -903,7 +903,7 @@ void ComputeSoundRecordDoppler(PlayingSound* self)
         ComputeObjectMotionInFrame(source, 0, &source->v140, &sourceVel, 0, 0, 0);
         ComputeObjectMotionInFrame(listener, 0, &listener->v140, &listenerVel, 0, 0, 0);
         Vu0::Q(rel) = Vu0::Sub(Vu0::Q(sourceVel), Vu0::Q(listenerVel));
-        f32 scale = self->f5C * 3600.0f;
+        f32 scale = self->dopplerScale * 3600.0f;
         Vu0::Q(away) = Vu0::Sub(Vu0::Q(listener->v140), Vu0::Q(source->v140));
         u128 unit = Vu0::DivX(Vu0::Q(away), Vu0::Length(Vu0::Q(away)));
         self->pitchOffset = ConvertSpeedToPitchOffset((s32)(Vu0::ToFloat(Vu0::Dot(unit, Vu0::Q(rel))) * scale * 6.24999984e-06f));
@@ -989,7 +989,7 @@ void SetSoundRecordPitch(PlayingSound* p, f32 a)
         if (p->object == 0) {
             return;
         }
-        if (!(0.0001f < p->f5C)) {
+        if (!(0.0001f < p->dopplerScale)) {
             return;
         }
     }
@@ -1023,7 +1023,7 @@ void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, 
     self->owner = owner;
     if (owner) *owner = self;
     self->pitch = pitch;
-    self->f5C = f16;
+    self->dopplerScale = f16;
     s32 id = g_nextSoundRecordId;
     self->serial = id++;
     self->keepWhenFar = keepWhenFar;
@@ -1093,7 +1093,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
     if (id == -1) return;
     if (id != -2) {
         s32 a1 = g_soundEntries[id].bank;
-        if (a1 > 0 && a1 != g_currentWorld->f1D70) return;
+        if (a1 > 0 && a1 != g_currentWorld->soundBank) return;
         s0 = IsSoundEntryAvailable(id);
     } else {
         s0 = 0;
@@ -1327,8 +1327,8 @@ void ResetVolumeChannelFactors(void)
     for (s32 i = 0; i < 4; i++) {
         ApplyVolumeChannelFactors(i);
     }
-    SilenceVolumeChannel3(g_saveData->f19EC & 0x80);
-    ApplySoundOptionFlag(g_saveData->f19EC & 0x40);
+    SilenceVolumeChannel3(g_saveData->optionFlags & 0x80);
+    ApplySoundOptionFlag(g_saveData->optionFlags & 0x40);
 }
 
 void SilenceVolumeChannel3(s32 flag)

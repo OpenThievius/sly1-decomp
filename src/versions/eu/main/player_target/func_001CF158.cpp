@@ -118,7 +118,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (keep != 0) {
                 continue;
             }
-            if (o == self->f2210) {
+            if (o == self->lastAimObject) {
                 continue;
             }
             if ((o->flags88 & 1) == 0) {
@@ -311,42 +311,42 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestCurveT = tCurveBest;
     }
     if (g_codeChecksumFailed != 0 && RandomIntInRange(0, 100) > 20) {
-        return self->f2228;
+        return self->subState;
     }
     s32 state;
     switch (kind) {
     case 3:
-        self->f23B8 = bestObject;
+        self->targetObject = bestObject;
         state = 0xA;
         break;
     case 4:
-        self->f23BC = bestPath;
-        self->f23C0 = bestPathT;
+        self->targetPath = bestPath;
+        self->targetPathPlace = bestPathT;
         self->f23C4 = bestPath->shape->desc->m5(bestPath->shape, bestPathT);
         state = 0xB;
         break;
     case 1:
-        self->f23A8 = bestPoint;
-        self->f23AC = bestPointT;
+        self->targetPoint = bestPoint;
+        self->targetPointPlace = bestPointT;
         state = 0xD;
         break;
     case 0:
-        self->f23A0 = bestCurve;
-        self->f23A4 = bestCurveT;
+        self->targetCurve = bestCurve;
+        self->targetCurvePlace = bestCurveT;
         state = 0xC;
         break;
     case 6:
-        self->f2208 = 0;
-        self->f2204 = bestClass75;
+        self->aimVector = 0;
+        self->aimObject = bestClass75;
         self->f2200 = bestClass75;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
         state = 0xE;
         break;
     case 7:
-        self->f2208 = bestVector;
-        self->f220C = bestVectorT;
-        self->f2204 = 0;
+        self->aimVector = bestVector;
+        self->aimVectorPlace = bestVectorT;
+        self->aimObject = 0;
         self->f2200 = 0;
         SetPlayerAimMode((Player*)self, 0);
         UpdatePlayerAimTarget((Player*)self);
@@ -354,13 +354,13 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         break;
     default:
         StartSoundEffect(0x7E, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E24, 0.0f, 0.0f, 0, 0);
-        state = self->f2228;
+        state = self->subState;
         break;
     }
-    TargetRecord* r = self->f2514;
+    TargetRecord* r = self->aimRecord;
     r->time = g_gameClock.time + bestT;
-    self->f2514->a = best0;
-    self->f2514->a.z += 75.0f;
-    self->f2514->b = best1;
+    self->aimRecord->a = best0;
+    self->aimRecord->a.z += 75.0f;
+    self->aimRecord->b = best1;
     return state;
 }

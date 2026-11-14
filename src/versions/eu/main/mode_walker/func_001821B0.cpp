@@ -17,7 +17,7 @@ void DrawSpinningSpriteElement(SpinningSprite_eu* self)
         return;
     }
     f32 target = AreMenusAndFadeClear() != 0 ? 1.0f : 0.0f;
-    if (g_camera->f224 != 0) {
+    if (g_camera->snapping != 0) {
         self->f288 = target;
     } else {
         self->f288 = ApproachValueWithRamp((RampProfile*)D_002641B8, 0, self->f288, target, g_frameStep);

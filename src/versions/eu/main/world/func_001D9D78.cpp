@@ -7,23 +7,23 @@ struct Counter_1D9D78_eu { u8 pad[0x58C]; s32 count; };
 // button 0x80, then by kind the race places (0) or the end of the round (1).
 void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
 {
-    if (self->fB34 != 1) {
-        if (0.0f < pad->f48) {
-            ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f694);
+    if (self->mode != 1) {
+        if (0.0f < pad->stickMagnitude) {
+            ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->targetHeading);
         } else {
-            self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+            self->targetHeading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
         }
     }
-    if (self->fB34 == 2) {
-        self->f698 = self->f618 * pad->f48;
+    if (self->mode == 2) {
+        self->targetSpeed = self->maxSpeed * pad->stickMagnitude;
         if (g_movieChecksumFailed != 0) {
-            self->f698 = self->f698 * 0.4f;
+            self->targetSpeed = self->targetSpeed * 0.4f;
         }
         if ((pad->flags & 0x80) != 0) {
             ClearPadPressedBits(pad, 0x80);
-            switch (self->fB30) {
+            switch (self->kind) {
             case 0:
-                if (self->f858 > 0 && D_002751DC < g_gameTime - self->f854) {
+                if (self->lapsLeft > 0 && D_002751DC < g_gameTime - self->lapTime) {
                     CountDownPathFollowerLap(self);
                     StartSoundEffect(0x5A, 0, 0, 0, 0.0f, 0.0f, 2.0f, -0.25f, 0.0f, 0, 0);
                 } else {
@@ -31,7 +31,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 }
                 break;
             case 1:
-                if (self->fB44 != 0) {
+                if (self->walkerGraph != 0) {
                     SetStateWalkerTarget((StateWalker*)self->fB48, 0x485);
                     self->pushedCount = 0;
                 }
@@ -42,21 +42,21 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
         }
     }
     HandleStepSequenceSkipButtons(self, pad);
-    if (self->fAFC != 0) {
-        self->f698 = self->fAFC->f1C <? self->f698;
+    if (self->activeZone != 0) {
+        self->targetSpeed = self->activeZone->maxSpeed <? self->targetSpeed;
     }
-    switch (self->fB30) {
+    switch (self->kind) {
     case 0: {
         WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
         if (r != 0) {
-            void* dev = r->f48;
+            void* dev = r->walker;
             s32 code;
             GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
                 GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
-                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->fB10 && self->f830 != 0) {
+                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->placeChangeTime && self->f830 != 0) {
                     PathFollower* found[16];
                     s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, found);
                     s32 place = 1;
@@ -65,10 +65,10 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                             place++;
                         }
                     }
-                    if (place != self->fB08 || n != self->fB0C) {
+                    if (place != self->fB08 || n != self->placeCount) {
                         self->fB08 = place;
-                        self->fB0C = n;
-                        self->fB10 = g_gameClock[1];
+                        self->placeCount = n;
+                        self->placeChangeTime = g_gameClock[1];
                     }
                 }
             }
@@ -78,7 +78,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
     case 1: {
         WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
         if (r != 0) {
-            void* dev = r->f48;
+            void* dev = r->walker;
             s32 code;
             GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {

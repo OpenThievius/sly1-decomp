@@ -5,7 +5,7 @@ struct Tbl_1F0660_eu { u8 pad0[0x574]; void* f574[1]; };
 void StartWarpPage(WarpPage* o) {
     StartPlacedObject(o);
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
-    if (g_saveData->f19D8) {
+    if (g_saveData->levelIndex) {
         u8* t = (u8*)&g_mapScreenList;
         ((U32P*)(t + 0x570))->v = (u32)o;
     }
@@ -15,7 +15,7 @@ void StartWarpPage(WarpPage* o) {
     case 0x1C9: o->slot = 3; break;
     case 0x1C6: o->slot = 4; break;
     case 0x1CA: o->slot = 5; break;
-    default: o->slot = g_saveData->f19D8; break;
+    default: o->slot = g_saveData->levelIndex; break;
     }
     ((Tbl_1F0660_eu*)&g_mapScreenList)->f574[o->slot] = o;
 }

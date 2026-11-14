@@ -15,5 +15,5 @@ void FormatGameSummary(GameProgress* self, u16* dst)
     s32 percent = ComputeCompletionPercent(self);
     FormatToString(pct, D_eu_0024D940, percent);
     CopyStringToWide(dst, pct);
-    AppendWideString(dst, (u16*)GetEntryName((self->f19D8 << 8) | self->f19DC));
+    AppendWideString(dst, (u16*)GetEntryName((self->levelIndex << 8) | self->entryIndex));
 }

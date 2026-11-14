@@ -155,13 +155,13 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
     SetFollowObjects((PlacedObject*)self->f6E8, self->f680, self->f680);
     ((World5ModeColliderLinked*)self->f650)->frame = self->f660;
-    self->f658 = CreateStateWalker((StateGraph*)self->f654, self, -1, 0);
-    BuildCombinedBlendAnimation(self, 0xC, 5, (u8*)&self->f684, 0, 0, 0, (BlendAnimation**)&self->f6C0);
-    self->f684 = 1.0f;
-    SetBlendItemWeights((BlendAnimationView*)self->f6C0, 0xC, 5, &self->f684);
+    self->stateWalker = CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 0);
+    BuildCombinedBlendAnimation(self, 0xC, 5, (u8*)&self->restWeight, 0, 0, 0, (BlendAnimation**)&self->weightBlend);
+    self->restWeight = 1.0f;
+    SetBlendItemWeights((BlendAnimationView*)self->weightBlend, 0xC, 5, &self->restWeight);
     SetWorld5ModeColliderMode(self, 2);
     T217D_BF0* base = &D_00270650;
-    ((T217D_Float*)&base->f288)->v = 0.0f;
+    ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
 
@@ -252,14 +252,14 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
     f32 wx;
     f32 wy;
     UpdateSwitchedCollider(self, dt);
-    if (self->f70C != 0) {
-        self->f70C = 0;
+    if (self->releasePending != 0) {
+        self->releasePending = 0;
         if (g_player != 0) {
             g_player->desc->m02(g_player);
             SetSwitchedColliderEnabled(g_player, 1);
             SetPlayerState(g_player, 2, 2);
             g_player->desc02()->m1F(g_player, (PlacedObject*)self->f6E4);
-            g_player->v560 = g_player->v140;
+            g_player->focusPoint = g_player->v140;
             ActivateSwitchedCollider(g_player);
             InitOwnerMessage((OwnerMessage*)&a, 5, self);
             g_player->desc05()->m4C(g_player, &a);
@@ -268,9 +268,9 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
         self->flags538 = self->flags538 | (0x8000ULL << 27);
         ClearRootObjectStateBits(self->world, self, 7);
     }
-    if (self->f6D0 != 0 && self->f610 != 3) {
-        if (g_gameTime - self->f6D8 > 2.0f) {
-            self->f6D0 = 0;
+    if (self->pulseActive != 0 && self->f610 != 3) {
+        if (g_gameTime - self->pulseFadeStart > 2.0f) {
+            self->pulseActive = 0;
         }
     }
     if (self == GetActiveSwitchedCollider() && (g_padSelectFlags & 2) == 0) {
@@ -285,8 +285,8 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
     wy = d.z * -0.0033333334f;
     f32 k = D_00263C4C;
     f32 m = 1.0f - k;
-    wx = k * wx + m * self->f704;
-    wy = k * wy + m * self->f708;
+    wx = k * wx + m * self->poseRateX;
+    wy = k * wy + m * self->poseRateY;
     TransformPointBetweenFrames(0, (PlacedObject*)self->f668, (Vec02*)((u8*)self->f660 + 0x140), &tmp);
     if (tmp.x < 0.0f) {
         wx = -wx;
@@ -296,15 +296,15 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
         wx = wx / sum;
         wy = wy / sum;
     }
-    self->f690 = ClampBetween(-wx, 0.0f, 1.0f);
-    self->f69C = ClampBetween(wx, 0.0f, 1.0f);
-    self->f6A8 = ClampBetween(-wy, 0.0f, 1.0f);
-    self->f6B4 = ClampBetween(wy, 0.0f, 1.0f);
-    self->f684 = 1.0f - self->f690 - self->f69C - self->f6A8 - self->f6B4;
-    SetBlendItemWeights((BlendAnimationView*)self->f6C0, 0xC, 5, &self->f684);
+    self->negXWeight = ClampBetween(-wx, 0.0f, 1.0f);
+    self->posXWeight = ClampBetween(wx, 0.0f, 1.0f);
+    self->negYWeight = ClampBetween(-wy, 0.0f, 1.0f);
+    self->posYWeight = ClampBetween(wy, 0.0f, 1.0f);
+    self->restWeight = 1.0f - self->negXWeight - self->posXWeight - self->negYWeight - self->posYWeight;
+    SetBlendItemWeights((BlendAnimationView*)self->weightBlend, 0xC, 5, &self->restWeight);
 }
 
-// The record World5ModeCollider::f618 points at in mode 3: a value tested against zero and an object
+// The record World5ModeCollider::modeAnimPlayer points at in mode 3: a value tested against zero and an object
 // whose 0x34 is the mode's length.
 struct World5ModeColliderLength {
     u8 pad00[0x34];
@@ -312,7 +312,7 @@ struct World5ModeColliderLength {
 };
 struct World5ModeColliderSource {
     u8 pad00[0x08];
-    World5ModeColliderLength* f08; // 0x08
+    World5ModeColliderLength* lengthRecord; // 0x08: the record whose word at 0x34 is the mode's length
     u8 pad0C[0x18 - 0x0C];
     f32 f18;                // 0x18: 0.0 ends the mode at once
 };
@@ -374,21 +374,21 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     f32 loY;
 
     if (self->f610 == 3 && HasSpareCount() != 0) {
-        World5ModeColliderSource* src = (World5ModeColliderSource*)self->f618;
+        World5ModeColliderSource* src = (World5ModeColliderSource*)self->modeAnimPlayer;
         if (src == 0 || src->f18 == 0.0f) {
             self->desc05()->m50(self);
         } else {
             if (pad->flags & 0x40) {
                 ClearPadPressedBits(pad, 0x40);
-                self->f6DC = g_gameTime;
+                self->buttonPressTime = g_gameTime;
             }
-            if (self->f6E0 != 0 && g_gameTime - self->f6DC < D_00263C50[0]) {
+            if (self->f6E0 != 0 && g_gameTime - self->buttonPressTime < D_00263C50[0]) {
                 self->desc05()->m50(self);
             }
         }
     }
-    if (pad->keyA8 & 0x80) {
-        GetStateWalkerCurrentKey((StateWalker*)self->f658, &key);
+    if (pad->buttons & 0x80) {
+        GetStateWalkerCurrentKey((StateWalker*)self->stateWalker, &key);
         if (key >= 0x44F) {
             if (key < 0x451) {
                 key = 0x451;
@@ -396,7 +396,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
                 key = 0x44F;
             }
         }
-        SetStateWalkerTarget((StateWalker*)self->f658, key);
+        SetStateWalkerTarget((StateWalker*)self->stateWalker, key);
     }
     switch (self->f610) {
     case 2:
@@ -407,29 +407,29 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &self->f664->v140, &at);
         f32 u = (at.y - D_00263CA0[0]) / D_00263CA0[1];
         f32 v = (at.z - D_00263CB0[0]) / D_00263CB0[1];
-        ApproachValueWithRamp(self->f6EC, u + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
-        ApproachValueWithRamp(self->f6EC, u + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loX);
-        ApproachValueWithRamp(self->f6F0, v + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
-        ApproachValueWithRamp(self->f6F0, v + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loY);
-        f32 stickY = pad->f44;
-        if (g_saveData->f19EC & 0x800) {
+        ApproachValueWithRamp(self->aimX, u + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
+        ApproachValueWithRamp(self->aimX, u + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loX);
+        ApproachValueWithRamp(self->aimY, v + D_00263C78[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
+        ApproachValueWithRamp(self->aimY, v + D_00263C78[0], 0.0f, (RampProfile*)D_00263C58, &loY);
+        f32 stickY = pad->stickY;
+        if (g_saveData->optionFlags & 0x800) {
             stickY = -stickY;
         }
         f32 tx;
         f32 ty;
         if (self->f610 == 2) {
-            tx = loX + (pad->f40 + 1.0f) * ((hiX - loX) * 0.5f);
+            tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
             tx = (loX + hiX) * 0.5f;
             ty = (loY + hiY) * 0.5f;
         }
-        self->f6F4 = ApproachValueWithRamp(self->f6F4, tx, dt, (RampProfile*)D_00263C68, 0);
-        self->f6F8 = ApproachValueWithRamp(self->f6F8, ty, dt, (RampProfile*)D_00263C68, 0);
-        self->f6EC = ClampBetween(self->f6EC + dt * self->f6F4, u + D_00263C78[0], u + D_00263C78[1]);
-        f32 w = ClampBetween(self->f6F0 + dt * self->f6F8, v + D_00263C78[0], v + D_00263C78[1]);
-        self->f6F0 = w;
-        f32 h = self->f6EC;
+        self->aimRateX = ApproachValueWithRamp(self->aimRateX, tx, dt, (RampProfile*)D_00263C68, 0);
+        self->aimRateY = ApproachValueWithRamp(self->aimRateY, ty, dt, (RampProfile*)D_00263C68, 0);
+        self->aimX = ClampBetween(self->aimX + dt * self->aimRateX, u + D_00263C78[0], u + D_00263C78[1]);
+        f32 w = ClampBetween(self->aimY + dt * self->aimRateY, v + D_00263C78[0], v + D_00263C78[1]);
+        self->aimY = w;
+        f32 h = self->aimX;
         Vu0::Q(pos) = Vu0::FromFloats(at.x, D_00263CA0[0] + h * (D_00263CA0[1] + h * D_00263CA0[2]),
                                       D_00263CB0[0] + w * (D_00263CB0[1] + w * D_00263CB0[2]));
         TransformPointBetweenFrames((PlacedObject*)self->f660, 0, &pos, &pos);
@@ -441,16 +441,16 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
             BuildBasisFromXAndZHint(&dir, &g_unitZVector, &mats[i]);
             TransformRotationBetweenFrames(0, (PlacedObject*)self->f674[i]->parent, &mats[i], &mats[i]);
         }
-        ApproachValueWithRamp(self->f6FC, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
-        ApproachValueWithRamp(self->f6FC, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loX);
-        ApproachValueWithRamp(self->f700, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
-        ApproachValueWithRamp(self->f700, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loY);
+        ApproachValueWithRamp(self->poseX, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiX);
+        ApproachValueWithRamp(self->poseX, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loX);
+        ApproachValueWithRamp(self->poseY, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
+        ApproachValueWithRamp(self->poseY, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loY);
         RampProfile3 prof = *(RampProfile3*)D_00263C80;
         if (self->f610 == 2) {
-            tx = loX + (pad->f40 + 1.0f) * ((hiX - loX) * 0.5f);
+            tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
-            f32 k = (g_gameTime - self->f614) / ((World5ModeColliderSource*)self->f618)->f08->length;
+            f32 k = (g_gameTime - self->modeStartTime) / ((World5ModeColliderSource*)self->modeAnimPlayer)->lengthRecord->length;
             f32 s = D_00263CC0[0] + k * (D_00263CC0[1] + k * D_00263CC0[2]);
             tx = (loX + hiX) * 0.5f;
             ty = hiY;
@@ -458,10 +458,10 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
             prof.maxSpeed *= s;
             prof.endSpeed *= s;
         }
-        self->f704 = ApproachValueWithRamp(self->f704, tx, dt, (RampProfile*)&prof, 0);
-        self->f708 = ApproachValueWithRamp(self->f708, ty, dt, (RampProfile*)&prof, 0);
-        self->f6FC = ClampBetween(self->f6FC + dt * self->f704, D_00263C90[0], D_00263C90[1]);
-        self->f700 = ClampBetween(self->f700 + dt * self->f708, D_00263C90[0], D_00263C90[1]);
+        self->poseRateX = ApproachValueWithRamp(self->poseRateX, tx, dt, (RampProfile*)&prof, 0);
+        self->poseRateY = ApproachValueWithRamp(self->poseRateY, ty, dt, (RampProfile*)&prof, 0);
+        self->poseX = ClampBetween(self->poseX + dt * self->poseRateX, D_00263C90[0], D_00263C90[1]);
+        self->poseY = ClampBetween(self->poseY + dt * self->poseRateY, D_00263C90[0], D_00263C90[1]);
 
         Mat02 pitch;
         Mat02 yaw;
@@ -471,12 +471,12 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         Mat02 tilt;
         Vec02 axis;
         TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->f660)->v140, &rel);
-        f32 sx = pad->f40;
+        f32 sx = pad->stickX;
         if (rel.x < 0.0f) {
             sx = -sx;
         }
         BuildAxisAngleMatrix(&g_unitXVector, &pitch, D_00263CD0[0] + sx * (D_00263CD0[1] + sx * D_00263CD0[2]));
-        f32 sy = pad->f44;
+        f32 sy = pad->stickY;
         BuildAxisAngleMatrix(&g_unitYVector, &yaw, D_00263CE0[0] + sy * (D_00263CE0[1] + sy * D_00263CE0[2]));
         *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->f660)->v140), Vu0::Vec::Of(self->v140));
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &face);
@@ -496,11 +496,11 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         self->m620 = m3;
         Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f67C->v140)).q;
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &aim);
-        TransformRotationBetweenFrames(0, (PlacedObject*)self->f67C->f224->p60, &aim, &aim);
+        TransformRotationBetweenFrames(0, (PlacedObject*)self->f67C->linkRecord->p60, &aim, &aim);
         break;
     }
     default:
-        BuildAxisAngleMatrix(&g_unitZVector, &self->m620, self->f61C);
+        BuildAxisAngleMatrix(&g_unitZVector, &self->m620, self->heading);
         for (i = 0; i < 2; i++) {
             mats[i] = self->f674[i]->m1A0;
         }
@@ -512,7 +512,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], (RampProfile*)D_00263D08, dt, &rot, 0);
         self->f674[i]->desc02()->m1E(self->f674[i], &rot);
     }
-    if (self->f67C->f1F0 == 0) {
+    if (self->f67C->orientationAttachment == 0) {
         MulRotationRowsIndexed(&aim, aim, self->f67C->m1A0);
         ApproachRotationWithRamp(&self->f67C->rot, &aim, (RampProfile*)D_00263D18, dt, &rot, 0);
         self->f67C->desc02()->m1E(self->f67C, &rot);
@@ -538,7 +538,7 @@ void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
         Vu0::Q(D_00270650.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
         D_00270650.vt->m16(&D_00270650, 0);
-        self->f6D0 = 0;
+        self->pulseActive = 0;
     }
 }
 extern Rgba4 D_002623E0;
@@ -562,13 +562,13 @@ void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
 
     if ((self->flags & 0x100000000ULL) != 0) return;
     *(u32*)col = 0x800000A0;
-    if (self->f6D0 != 0) {
+    if (self->pulseActive != 0) {
         if (self->f610 != 3) {
-            t = (g_gameClock[1] - self->f6D8) * 0.5f;
+            t = (g_gameClock[1] - self->pulseFadeStart) * 0.5f;
         } else {
             t = 0.0f;
         }
-        u = Cosine((g_gameClock[1] - self->f6D4) * 10.0f);
+        u = Cosine((g_gameClock[1] - self->pulseStartTime) * 10.0f);
         a = D_00263D30[0] + t * (D_00263D30[1] + t * D_00263D30[2]);
         hi = g_unitRange.hi;
         if (a < g_unitRange.lo) {
@@ -607,7 +607,7 @@ s32 IsWorld5ModeColliderRequestBlocked(World5ModeCollider* self, s32 a1)
     if (self->f610 == 3) goto one;
     if (self->f610 == 0) goto one;
     if (self->f610 == 4) goto one;
-    if (self->f6D0 != 0) goto one;
+    if (self->pulseActive != 0) goto one;
     if (IsPadSelectFlagHeld(self->world) == 0) goto zero;
 one:
     return 1;
@@ -639,12 +639,12 @@ s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
         return 0;
     }
     if (HasSpareCount() != 0) {
-        self->f6D0 = 1;
-        self->f6D4 = *(f32*)&g_gameTime;
+        self->pulseActive = 1;
+        self->pulseStartTime = *(f32*)&g_gameTime;
     }
-    if (self->f6D0 != 0) {
-        self->f704 = 0.0f;
-        self->f708 = 3.0f;
+    if (self->pulseActive != 0) {
+        self->poseRateX = 0.0f;
+        self->poseRateY = 3.0f;
         ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
         TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec02*)bufA, 0, (Vec02*)bufB, 0);
         self->desc02()->m20(self, (Vec02*)bufB);
@@ -667,7 +667,7 @@ void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* 
 
 void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, MessageBody* rec)
 {
-    if (kind == 0x13 && rec->sourceId == self->f618) {
+    if (kind == 0x13 && rec->sourceId == self->modeAnimPlayer) {
         switch (rec->code) {
         case 0x15E:
             self->f6E0 = 1;
@@ -676,7 +676,7 @@ void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, Me
             self->f6E0 = 0;
             break;
         case 0x467:
-            self->f70C = 1;
+            self->releasePending = 1;
             break;
         }
     }
@@ -685,7 +685,7 @@ void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, Me
 
 s32 HasWorld5ModeColliderAcceptedRequest(World5ModeCollider* self)
 {
-    return self->f6D0 != 0;
+    return self->pulseActive != 0;
 }
 
 void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
@@ -697,7 +697,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     switch (old) {
     case 3:
     case 4:
-        self->f6D8 = g_gameClock[1];
+        self->pulseFadeStart = g_gameClock[1];
         break;
     }
     void* anim = 0;
@@ -706,25 +706,25 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
         Vu0::Q(D_00270650.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
         *(Vec02*)&D_00270650.rateX = D_00248D30;
         D_00270650.vt->m16(&D_00270650, 2);
-        anim = self->f6C0;
+        anim = self->weightBlend;
         break;
     }
     case 1:
-        anim = self->f6C4;
+        anim = self->mode1Anim;
         break;
     case 3:
-        anim = self->f6C8;
-        self->f6D8 = 3.4028235e+38f;
+        anim = self->mode3Anim;
+        self->pulseFadeStart = 3.4028235e+38f;
         break;
     case 4:
-        anim = self->f6CC;
-        self->f6D8 = 3.4028235e+38f;
+        anim = self->mode4Anim;
+        self->pulseFadeStart = 3.4028235e+38f;
         SetFollowObjects((PlacedObject*)self->f6E8, self, self);
         break;
     }
     self->f610 = mode;
-    self->f614 = g_gameClock[1];
-    ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->f618, 0.0f, 1.0f);
+    self->modeStartTime = g_gameClock[1];
+    ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->modeAnimPlayer, 0.0f, 1.0f);
 }
 
 void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
@@ -885,7 +885,7 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 s32 HandleWorld5BossEvent(World5Boss* self, ObjectEvent* msg)
 {
     if (msg->extraFlags & 0x10) {
-        if (msg->id == self->f608) {
+        if (msg->id == self->eventId) {
             DecrementGaugeCount(&g_gaugeBarElement);
             PlayWorld5BossTarget(self);
             TriggerScriptEvent(self, 2, 0, 0);
@@ -917,8 +917,8 @@ void SetWorld5BossMode(World5Boss* self, s32 mode)
         if (mode < 2) {
             T217D_2E0* sys = &g_gaugeBarElement;
             sys->fillTarget = 1.0f;
-            sys->f26C = sys->f260;
-            sys->f270 = sys->f264;
+            sys->segmentsLeft = sys->segmentCount;
+            sys->cellsLeft = sys->cellsPerSegment;
             sys->fill = 0.0f;
             SetWorldActiveFollower(self->world, self);
         } else if (mode < 4) {
@@ -1049,7 +1049,7 @@ s32 HandleWorld5CountdownObjectEvent(World5Countdown* self, ObjectEvent* msg)
                 if (g_player == 0) {
                     p = self->f55C;
                 } else {
-                    s32 t = g_player->f223C;
+                    s32 t = g_player->aimMode;
                     if (t == 4 || t == 6) {
                         p = self->f55C;
                     } else {
@@ -1082,9 +1082,9 @@ void SetWorld5CountdownState(World5Countdown* self, s32 state)
     case 1:
         {
             T217D_2E0* bar = &g_gaugeBarElement;
-            bar->f26C = bar->f260 = 4;
-            bar->f270 = bar->f264 = 4;
-            bar->f268 = 0x10;
+            bar->segmentsLeft = bar->segmentCount = 4;
+            bar->cellsLeft = bar->cellsPerSegment = 4;
+            bar->cellCount = 0x10;
             bar->fillTarget = 1.0f;
             bar->fill = 0.0f;
             bar->changedAt = -1.0f;

@@ -66,8 +66,8 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
         return;
     }
     if (((Cap_eu_1E7C60*)&g_typedTextCaptionBox)->state != 4) {
-        zoom = g_camera->f1C4;
-        zoomY = g_camera->f1C8;
+        zoom = g_camera->zoom;
+        zoomY = g_camera->zoomGoal;
         SnapCameraZoom(g_camera, ((ArcHeld*)self->current)->zoom);
     }
     {
@@ -83,11 +83,11 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
         switch (((Cap_eu_1E7C60*)&g_typedTextCaptionBox)->state) {
         case 2:
             if (self->index == 0x1A) {
-                dist = __builtin_fabsf(g_padRecord.f40) * g_padRecord.f40 * 150.0f + dist;
-                height = __builtin_fabsf(g_padRecord.f44) * g_padRecord.f44 * 150.0f + height;
+                dist = __builtin_fabsf(g_padRecord.stickX) * g_padRecord.stickX * 150.0f + dist;
+                height = __builtin_fabsf(g_padRecord.stickY) * g_padRecord.stickY * 150.0f + height;
             } else {
-                dist = __builtin_fabsf(g_padRecord.f74) * g_padRecord.f74 * -150.0f + dist;
-                height = __builtin_fabsf(g_padRecord.f78) * g_padRecord.f78 * 150.0f + height;
+                dist = __builtin_fabsf(g_padRecord.secondStickX) * g_padRecord.secondStickX * -150.0f + dist;
+                height = __builtin_fabsf(g_padRecord.secondStickY) * g_padRecord.secondStickY * 150.0f + height;
             }
         case 3: {
             Camera* cam;
@@ -95,7 +95,7 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
                 dist = -dist;
             }
             cam = g_camera;
-            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->f40).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
             Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
             BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
@@ -141,6 +141,6 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
 done:
     if (((Cap_eu_1E7C60*)&g_typedTextCaptionBox)->state != 4) {
         SnapCameraZoom(g_camera, zoom);
-        g_camera->f1C8 = zoomY;
+        g_camera->zoomGoal = zoomY;
     }
 }

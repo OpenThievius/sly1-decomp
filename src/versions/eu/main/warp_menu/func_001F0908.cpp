@@ -18,12 +18,12 @@ struct Eng_eu_1F0908 {
 void AnnouncePendingWarpEntry(WarpPage* self)
 {
     if (D_00276250 == -1) return;
-    SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);
+    SetScreenElementHoldTime(&D_002721D0, ((g_saveData->levelIndex << 8) | g_saveData->entryIndex) == 4 ? 0.5f : 2.0f);
     D_002721D0.vt->m16(&D_002721D0, 2);
     Eng_eu_1F0908* e = ((Eng_eu_1F0908*)&D_0026F138);
     e->i570 = 0;
     e->vt->set((Eng_1F0908*)e, 0);
-    SetElementTextFromEntry((Eng_1F0908*)e, g_saveData->f19D8, g_saveData->f19DC);
+    SetElementTextFromEntry((Eng_1F0908*)e, g_saveData->levelIndex, g_saveData->entryIndex);
     e->i974 = 1;
     SetScreenElementHoldTime((Eng_1F0908*)e, 0.0f);
     e->vt->set((Eng_1F0908*)e, 2);
@@ -31,11 +31,11 @@ void AnnouncePendingWarpEntry(WarpPage* self)
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->length;
-        ReplaceAnimationPlayer(sl, self, 0, (AnimationPlayer**)&self->f2F0, f, 0.0f);
+        ReplaceAnimationPlayer(sl, self, 0, (AnimationPlayer**)&self->entryPlayer, f, 0.0f);
     }
-    if (self->f2E8 != 0) {
-        for (s32 i = 0; i < self->f2E8->startCount; i++) {
-            AnimEvent* en = &self->f2E8->startList[i];
+    if (self->closeAnimation != 0) {
+        for (s32 i = 0; i < self->closeAnimation->startCount; i++) {
+            AnimEvent* en = &self->closeAnimation->startList[i];
             if (en->kind == 10) {
                 BaseObject* n = FindFirstObjectById(self->world, 0x104, en->a8.i, self);
                 if (n != 0) n->desc->m02(n);

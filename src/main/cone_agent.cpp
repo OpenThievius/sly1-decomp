@@ -48,17 +48,17 @@ void* IsObjectOfKind(BaseObject* list, s32 key);
 void InitConeAgent(ConeAgent* self)
 {
     InitAgent(self);
-    self->fC20 = 1000.0f;
-    self->fC24 = 1500.0f;
-    self->fC28 = 0.78539816f;
-    self->fC2C = 3.14159265f;
-    self->fC10 = 2000.0f;
-    self->fC30 = -1;
-    self->fC14 = 300.0f;
-    self->fC18 = -1;
-    self->f73C = 300.0f;
-    self->f738 = 0;
-    self->f74C = 1.04719755f;
+    self->nearRange = 1000.0f;
+    self->farRange = 1500.0f;
+    self->farAngle = 0.78539816f;
+    self->nearAngle = 3.14159265f;
+    self->leashDistance = 2000.0f;
+    self->sightZoneId = -1;
+    self->leashHeight = 300.0f;
+    self->zoneId = -1;
+    self->targetRangeMax = 300.0f;
+    self->targetRangeMin = 0;
+    self->targetAngleLimit = 1.04719755f;
 }
 
 void StartConeAgent(ConeAgent* self)
@@ -67,15 +67,15 @@ void StartConeAgent(ConeAgent* self)
     s32 i;
 
     StartAgent(self);
-    if (self->fC18 != -1) {
-        self->fC1C = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->fC18, self);
+    if (self->zoneId != -1) {
+        self->fC1C = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->zoneId, self);
     }
-    if (self->fC30 != -1) {
-        self->fC34 = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->fC30, self);
+    if (self->sightZoneId != -1) {
+        self->sightZone = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->sightZoneId, self);
     }
-    if (self->f750 != 0) {
+    if (self->mainClip != 0) {
         PushBackMemoryMark();
-        GatherAnimationEventObjects((Animation*)self->f750, self, &out.count, (BaseObject***)&out.items);
+        GatherAnimationEventObjects((Animation*)self->mainClip, self, &out.count, (BaseObject***)&out.items);
         for (i = 0; i < out.count; i++) {
             GatheredEventObject* e = out.items[i];
             if (e->f328 == 0) {
@@ -113,38 +113,38 @@ s32 IsConeAgentFree(ConeAgent* self)
     }
     Collider* target = (Collider*)self->desc08()->m62(self);
     s32 inside;
-    if (self->fC40 != 0 || target == 0) {
+    if (self->disabled != 0 || target == 0) {
         inside = 1;
     } else if (IsObjectOfKind(target, 5) != 0 && ((SlotFnRet*)target->desc)[81](target) == 2) {
         inside = 1;
     } else if (self->fC1C != 0) {
         inside = TestPointAgainstObjectShape(self->fC1C, &target->v140) == 0;
-    } else if (__builtin_fabsf(target->v140.z - self->v190.z) > self->fC14) {
+    } else if (__builtin_fabsf(target->v140.z - self->v190.z) > self->leashHeight) {
         inside = 1;
     } else {
         u128 d = Vu0::Sub(Vu0::Q(target->v140), Vu0::Q(self->v190));
         f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
-        inside = self->fC10 < len;
+        inside = self->leashDistance < len;
     }
     if (inside != 0) {
-        self->fC38 = 0;
+        self->engaged = 0;
         return 0;
     }
-    if (self->fC38q != 0) {
+    if (self->engagedQuad != 0) {
         return 1;
     }
-    if (self->fC34 == 0 || TestPointAgainstObjectShape(self->fC34, &target->v140) == 0) {
+    if (self->sightZone == 0 || TestPointAgainstObjectShape(self->sightZone, &target->v140) == 0) {
         u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(target->v140));
         f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
-        if (!(len < self->fC24)) {
+        if (!(len < self->farRange)) {
             return 0;
         }
         f32 limit;
-        if (len < self->fC20) {
-            limit = self->fC2C;
+        if (len < self->nearRange) {
+            limit = self->nearAngle;
         } else {
-            f32 t = (len - self->fC20) / (self->fC24 - self->fC20);
-            limit = t * self->fC28 + (1.0f - t) * self->fC2C;
+            f32 t = (len - self->nearRange) / (self->farRange - self->nearRange);
+            limit = t * self->farAngle + (1.0f - t) * self->nearAngle;
         }
         if (!(__builtin_fabsf(ComputeAgentTargetBearing(self)) <= limit)) {
             return 0;
@@ -153,6 +153,6 @@ s32 IsConeAgentFree(ConeAgent* self)
     if (IsPlayerUntargetableByAgent(self) != 0) {
         return 0;
     }
-    self->fC38 = 1;
+    self->engaged = 1;
     return 1;
 }

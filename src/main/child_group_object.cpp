@@ -46,20 +46,20 @@ void InitCollider(Collider* self);
 void InitChildGroupObject(ChildGroupObject* self)
 {
     InitCollider(self);
-    self->f554 = 3.4028235e+38f;
-    self->f55C = 200.0f;
-    self->f560 = 200.0f;
-    self->f550 = 0;
-    self->f56C = *(Pair3B*)&D_00261320;
-    self->f568 = 800.0f;
-    self->f574 = 5000.0f;
-    self->f5D0 = *(Quad3B*)&D_00261330;
-    self->f5E0 = *(Pair3B*)&D_00261350;
-    self->f5F0 = *(Quad3B*)&D_00261340;
-    self->f600 = *(Pair3B*)&D_00261358;
-    self->f674 = 1;
+    self->blastTime = 3.4028235e+38f;
+    self->blastRadius = 200.0f;
+    self->playerBlastRadius = 200.0f;
+    self->contactMode = 0;
+    self->massRange = *(Pair3B*)&D_00261320;
+    self->pushStrength = 800.0f;
+    self->maxMass = 5000.0f;
+    self->speedCurve = *(Quad3B*)&D_00261330;
+    self->speedRange = *(Pair3B*)&D_00261350;
+    self->spinCurve = *(Quad3B*)&D_00261340;
+    self->spinRange = *(Pair3B*)&D_00261358;
+    self->announceBlast = 1;
     self->f678 = 1;
-    self->f67C = 0;
+    self->ownerMessageMode = 0;
 }
 
 void LoadCollider(Collider* self, BufferedStream* in);
@@ -134,7 +134,7 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0xA) {
         if ((ChildGroupObject*)msg->target == self) {
-            if (((ChildGroupObject*)msg->target)->f550 == 0) {
+            if (((ChildGroupObject*)msg->target)->contactMode == 0) {
                 StartChildGroupDelay((ChildGroupObject*)msg->target, 0.0f);
             }
         }
@@ -149,7 +149,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self);
 void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
 {
     s32 slow;
-    if (self->f554 <= g_gameTime || (slow = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->f558)) {
+    if (self->blastTime <= g_gameTime || (slow = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v150))) < self->settleSpeed)) {
         ApplyChildGroupRepulsion(self);
     } else {
         UpdateCollider(self, dt);
@@ -260,7 +260,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
     pos = self->v140;
     ContactSide* side = &pair->side[1 - which];
     Collider* obj = side->obj;
-    switch (self->f550) {
+    switch (self->contactMode) {
     case 1:
         return;
     case 2: {
@@ -348,7 +348,7 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
     case 0: {
         BuildShortestArcRotation(&self->m110.r[2], z ? z : (Vec02*)&g_unitZVector, &a);
         MulPoseRows(self, a, self->m110);
-        Rec2195_224* rec = self->f224;
+        Rec2195_224* rec = self->linkRecord;
         void* frame;
         if (rec != 0) {
             if ((rec->fB0 & 8) != 0) {
@@ -375,7 +375,7 @@ extern f32 g_gameTime;
 
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
 {
-    self->f554 = g_gameTime + delta;
+    self->blastTime = g_gameTime + delta;
 }
 
 extern f32 D_00261364;
@@ -487,7 +487,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             }
         }
     } else {
-        GatherCollidersInSphere(self->world, 0, MaxF(self->f55C, self->f560), &self->v610, 0, 0, &count, &list);
+        GatherCollidersInSphere(self->world, 0, MaxF(self->blastRadius, self->playerBlastRadius), &self->v610, 0, 0, &count, &list);
     }
     pos = &self->v610;
     rot = &self->m620;
@@ -499,23 +499,23 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             continue;
         if (c->id == 1)
             continue;
-        if ((c->desc->flags & 0x20) != 0 && ((ChildGroupObject*)c)->f550 != 1) {
+        if ((c->desc->flags & 0x20) != 0 && ((ChildGroupObject*)c)->contactMode != 1) {
             StartChildGroupDelay((ChildGroupObject*)c, 0.1f);
             continue;
         }
         if (*(s32*)self->pad564 == 0 && c->tree.nodes != 0) {
             u8 hits[0x30];
-            if (!CollectMeshHits(pos, c->root == player ? self->f560 : self->f55C, c->tree.count2, (FaceRef*)c->tree.nodes, 0, &c->meshCopy, 1, (MeshHitEntry*)hits))
+            if (!CollectMeshHits(pos, c->root == player ? self->playerBlastRadius : self->blastRadius, c->tree.count2, (FaceRef*)c->tree.nodes, 0, &c->meshCopy, 1, (MeshHitEntry*)hits))
                 continue;
         }
         if (IsObjectOfKind(c, 5)) {
             OwnerMessage msg;
-            InitOwnerMessage(&msg, self->f67C, self);
+            InitOwnerMessage(&msg, self->ownerMessageMode, self);
             msg.fn = (void (*)())ApplyChildGroupKnockback;
             (*(ColliderQueryFn*)((u8*)c->desc + 0x140))(c, &msg);
             continue;
         }
-        if (c->mass < self->f574 && c->parent == 0) {
+        if (c->mass < self->maxMass && c->parent == 0) {
             Vec02 dir;
             Vec02 imp;
             Vec02 nv;
@@ -526,11 +526,11 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             Vu0::Q(off) = Vu0::Q(dir);
             dir.z += 200.0f;
             Vu0::Q(dir) = Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitZVector));
-            f32 m = 1.0f / Fpu::Sqrt(ClampToRange((ValueRange*)&self->f56C, c->mass) / *(f32*)&self->f56C.a);
-            f32 sv = g_unitRange.Limit(((TimePolynomial*)D_00261370)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->v150), Vu0::Q(dir))) / self->f568));
+            f32 m = 1.0f / Fpu::Sqrt(ClampToRange((ValueRange*)&self->massRange, c->mass) / *(f32*)&self->massRange.a);
+            f32 sv = g_unitRange.Limit(((TimePolynomial*)D_00261370)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(c->v150), Vu0::Q(dir))) / self->pushStrength));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(off))) - (c->radius3CC + self->radius3D0);
-            f32 sd = g_unitRange.Limit(((TimePolynomial*)D_00261380)->Eval((d >? 0.0f) / self->f55C));
-            f32 k = self->f568 * m * sv * sd;
+            f32 sd = g_unitRange.Limit(((TimePolynomial*)D_00261380)->Eval((d >? 0.0f) / self->blastRadius));
+            f32 k = self->pushStrength * m * sv * sd;
             Vu0::Q(imp) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(k));
             ConstrainColliderVector(c, &c->v440, &imp, &imp, 0);
             Vu0::Q(nv) = Vu0::Add(Vu0::Q(c->v150), Vu0::Q(imp));
@@ -560,8 +560,8 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     Vec02 at;
     {
         PlacedObject* frame;
-        if (self->f224 != 0 && (*(u32*)((u8*)self->f224 + 0xB0) & 4) != 0)
-            frame = *(PlacedObject**)((u8*)self->f224 + 0x60);
+        if (self->linkRecord != 0 && (*(u32*)((u8*)self->linkRecord + 0xB0) & 4) != 0)
+            frame = *(PlacedObject**)((u8*)self->linkRecord + 0x60);
         else
             frame = (PlacedObject*)self->parent;
         TransformPointBetweenFrames(0, frame, pos, &at);
@@ -570,18 +570,18 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     ((const Desc02*)self->desc)->m1E(self, rot);
     ((const Desc02*)self->desc)->m20(self, vel);
     ((const Desc02*)self->desc)->m21(self, spin);
-    if (self->f674 != 0) {
+    if (self->announceBlast != 0) {
         Vec02* at;
         if (self->member5BC != 0) {
             BlastMessage msg;
             msg.kind = 9;
             msg.f30 = *(f32*)self->pad5C0;
-            msg.f34 = self->f55C;
+            msg.f34 = self->blastRadius;
             msg.from = self;
             (*(ColliderMsgFn*)((u8*)*(void**)self->member5BC + 0x7C))((Collider*)self->member5BC, &msg);
             at = &self->v140;
         } else {
-            SendPointEventToWorldListener((Quad16*)&self->v140, self->f55C);
+            SendPointEventToWorldListener((Quad16*)&self->v140, self->blastRadius);
             at = &self->v140;
         }
         BlastSound* snd = (BlastSound*)self->slot;
@@ -591,8 +591,8 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
             StartSoundEffect(0x35, 0, 0, at, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
     if (self->count > 0) {
-        f32 sa = ((ValueRange*)&self->f5E0)->Limit(((TimePolynomial*)&self->f5D0)->Eval(self->f55C));
-        f32 sb = ((ValueRange*)&self->f600)->Limit(((TimePolynomial*)&self->f5F0)->Eval(self->f55C));
+        f32 sa = ((ValueRange*)&self->speedRange)->Limit(((TimePolynomial*)&self->speedCurve)->Eval(self->blastRadius));
+        f32 sb = ((ValueRange*)&self->spinRange)->Limit(((TimePolynomial*)&self->spinCurve)->Eval(self->blastRadius));
         for (s32 j = 0; j < self->count; j++) {
             Collider* o = (Collider*)self->arr[j];
             if (IsObjectAttached(o))
@@ -623,7 +623,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     self->desc->m03(self);
     TriggerScriptEvent(self, 2, 0, 0);
     self->flag60C = 0;
-    self->f554 = 3.4028235e+38f;
+    self->blastTime = 3.4028235e+38f;
 }
 
 void InitSoundParams(SoundRecord** self);

@@ -77,7 +77,7 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         TextPointObject* obj = objs[i];
         ConvertPositionToWorld(obj, &pos);
         Camera* cam = (Camera*)g_camera;
-        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(cam->f40));
+        Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(cam->position));
         if (4000.0f < Vu0::ToFloat(Vu0::Length(d))) {
             continue;
         }
@@ -128,10 +128,10 @@ void DrawTextPanelMarkers(Obj_eu_134CE0* self, PacketWriter* q)
         layout.f14 = (s32)&self->lines;
         style = D_00261168;
         Font* font = GetFontById(2);
-        style.f0 = (s32)font;
-        ((u8*)&style.f18)[3] = (s32)(alpha * (f32)((u8*)&style.f18)[3]);
-        style.f8 *= obj->f58;
-        style.fC *= obj->f58;
+        style.font = (s32)font;
+        ((u8*)&style.color)[3] = (s32)(alpha * (f32)((u8*)&style.color)[3]);
+        style.paddingX *= obj->f58;
+        style.paddingY *= obj->f58;
         StyleDrawer::Draw((Font**)&style, &layout, q);
         ((u8*)&layout.color)[3] = (s32)(alpha * (f32)((u8*)&layout.color)[3]);
         DrawWrappedAlignedText(&reader, &layout, 0, q);

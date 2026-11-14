@@ -176,7 +176,7 @@ void PlaceOnPathAt(Player* self, PathObject* path, Mat02* out, f32 length)
     }
     Vu0::Q(m.r[0]) = Vu0::Cross(y.q, Vu0::Q(m.r[2]));
     Vu0::Q(m.r[1]) = y.q;
-    if (self->f221C != 0) {
+    if (self->pathFlipped != 0) {
         // The -1 vector is stored to a local of its own after the two products (retail's sqc2
         // to the frame before the rows' stores, scheduled after both vmulx).
         Vec02 flip;
@@ -211,9 +211,9 @@ void StepPlayerOnPath(Player* self)
     Vec02 axis;
     Vec02 k;
     Vec02 angle;
-    PlaceOnPathAt(self, (PathObject*)self->f2208, &placed, self->f2410);
-    if (self->f2228 == 0x17 || self->f2228 == 0x1B) {
-        PathWatch* w = (PathWatch*)self->watched2230;
+    PlaceOnPathAt(self, (PathObject*)self->aimCurve, &placed, self->pathPos);
+    if (self->subState == 0x17 || self->subState == 0x1B) {
+        PathWatch* w = (PathWatch*)self->stateAnimPlayer;
         f32 dt = g_gameClock.dt;
         f32 t = w->target->f34 - w->f14;
         BlendRotationsWithSpin(dt >? t, dt, 1.0f, &self->rot, &self->v160, &placed, &D_00248D30, &goal, 0, 0);
@@ -275,7 +275,7 @@ static inline f32 NormalizeVector(Vec02& v, const Vec02& fallback)
 
 void ControlPlayerOnPath(Player* self, PathPad* pad)
 {
-    PathObject* path = (PathObject*)self->f2208;
+    PathObject* path = (PathObject*)self->aimCurve;
     PathHolder* holder = path->holder;
     Vec02 a;
     Vec02 b;
@@ -291,38 +291,38 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     s32 rev;
     f32 k;
 
-    Vu0::Q(self->v2400) = ApproachPointWithRamp(Vu0::Q(self->v2400), Vu0::Q(D_00248D30), (RampProfile*)D_00274F28, 0,
+    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(D_00248D30), (RampProfile*)D_00274F28, 0,
                                                 g_gameClock.dt);
-    if (self->f2228 == 0x17 || self->f2228 == 0x1B) {
-        Vu0::Set(self->v640, Vu0::Zero());
+    if (self->subState == 0x17 || self->subState == 0x1B) {
+        Vu0::Set(self->headingVelocity, Vu0::Zero());
         return;
     }
     if (holder->desc->m2) {
-        holder->desc->m2(holder, &a, self->f2410 + D_00274F14, 0);
+        holder->desc->m2(holder, &a, self->pathPos + D_00274F14, 0);
     }
     if (holder->desc->m2) {
-        holder->desc->m2(holder, &b, self->f2410 - D_00274F14, 0);
+        holder->desc->m2(holder, &b, self->pathPos - D_00274F14, 0);
     }
     TransformPointBetweenFrames(path->frame, 0, &a, &a);
     TransformPointBetweenFrames(path->frame, 0, &b, &b);
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(a), Vu0::Q(b)), Vu0::Q(g_unitZVector)));
-    if (self->f2718 == -1) {
+    if (self->padSelectMode == -1) {
         if (D_00274F08 < __builtin_fabsf(dir.z)) {
             if (0.0f < dir.z) {
-                if (self->f221C != 0) {
+                if (self->pathFlipped != 0) {
                     SetPlayerState(self, 7, 0x1B);
                     return;
                 }
-            } else if (self->f221C == 0) {
+            } else if (self->pathFlipped == 0) {
                 SetPlayerState(self, 7, 0x1B);
                 return;
             }
         }
-        if (D_00274F1C < self->f2418 && self->f221C != 0 && -D_00274F0C < dir.z) {
+        if (D_00274F1C < self->pathSpeedEased && self->pathFlipped != 0 && -D_00274F0C < dir.z) {
             SetPlayerState(self, 7, 0x1B);
             return;
         }
-        if (self->f2418 < -D_00274F1C && self->f221C == 0 && dir.z < D_00274F0C) {
+        if (self->pathSpeedEased < -D_00274F1C && self->pathFlipped == 0 && dir.z < D_00274F0C) {
             SetPlayerState(self, 7, 0x1B);
             return;
         }
@@ -354,13 +354,13 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     Vu0::Set(dir, Vu0::Sub(Vu0::Q(pa), Vu0::Q(pb)));
     dir.z = 0.0f;
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitYVector)));
-    switch (self->f2718) {
+    switch (self->padSelectMode) {
     case 0:
-        state = self->f221C ? 0x1A : 0x19;
+        state = self->pathFlipped ? 0x1A : 0x19;
         amount = 1.0f;
         break;
     case 1:
-        state = self->f221C ? 0x19 : 0x1A;
+        state = self->pathFlipped ? 0x19 : 0x1A;
         amount = 1.0f;
         break;
     default: {
@@ -368,38 +368,38 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         Vu0::Set(stick, Vu0::FromFloats(pad->x, pad->y, 0.0f));
         f32 mag = NormalizeVector(stick, D_00248D30);
         amount = Vu0::ToFloat(Vu0::Dot(Vu0::Q(dir), Vu0::Q(stick)));
-        switch (self->f241C) {
+        switch (self->pathStickSide) {
         case 0:
             if (mag < 0.25f) {
-                self->f241C = -1;
+                self->pathStickSide = -1;
             } else if (amount < -0.7f) {
-                self->f241C = 1;
+                self->pathStickSide = 1;
             }
             break;
         case 1:
             if (mag < 0.25f) {
-                self->f241C = -1;
+                self->pathStickSide = -1;
             } else if (0.7f < amount) {
-                self->f241C = 0;
+                self->pathStickSide = 0;
             }
             break;
         case -1:
             if (0.35f < mag) {
                 if (0.0f <= amount) {
-                    self->f241C = 0;
+                    self->pathStickSide = 0;
                 } else {
-                    self->f241C = 1;
+                    self->pathStickSide = 1;
                 }
             }
             break;
         }
-        switch (self->f241C) {
+        switch (self->pathStickSide) {
         case 0:
-            state = self->f221C ? 0x1A : 0x19;
+            state = self->pathFlipped ? 0x1A : 0x19;
             amount = mag;
             break;
         case 1:
-            state = self->f221C ? 0x19 : 0x1A;
+            state = self->pathFlipped ? 0x19 : 0x1A;
             amount = mag;
             break;
         case -1:
@@ -410,7 +410,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
         break;
     }
     }
-    rev = self->f221C;
+    rev = self->pathFlipped;
     if (0.01f < amount) {
         vel = (1.0f - amount) * self->blend103C[0].speed + amount * self->blend103C[1].speed;
         if (state == 0x1A) {
@@ -428,7 +428,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     ramp.rate = __builtin_fabsf(self->blend103C[1].speed);
     ramp.f04 = 0.0f;
     ramp.f08 = 0.2f;
-    self->f2418 = -k * vel / ramp.rate + (1.0f - k) * self->f2418;
+    self->pathSpeedEased = -k * vel / ramp.rate + (1.0f - k) * self->pathSpeedEased;
     if (holder->closed == 0) {
         f32 start;
         f32 end;
@@ -439,14 +439,14 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
             start = holder->first[0] + D_00274F04;
             end = holder->first[holder->count - 1] - D_00274F00;
         }
-        ApproachValueWithRamp(self->f2410, start, g_gameClock.dt, (RampProfile*)&ramp, &lo);
-        ApproachValueWithRamp(self->f2410, end, g_gameClock.dt, (RampProfile*)&ramp, &hi);
+        ApproachValueWithRamp(self->pathPos, start, g_gameClock.dt, (RampProfile*)&ramp, &lo);
+        ApproachValueWithRamp(self->pathPos, end, g_gameClock.dt, (RampProfile*)&ramp, &hi);
         vel = ClampBetween(vel, -hi, -lo);
     }
-    self->f2414 = -vel;
-    self->f2410 += -vel * g_gameClock.dt;
+    self->pathSpeed = -vel;
+    self->pathPos += -vel * g_gameClock.dt;
     if (holder->closed != 0) {
-        self->f2410 = WrapModulo(self->f2410, holder->desc->m8(holder));
+        self->pathPos = WrapModulo(self->pathPos, holder->desc->m8(holder));
     }
     if (__builtin_fabsf(vel) < 0.01f) {
         state = 0x18;
@@ -478,7 +478,7 @@ void PinPlayerToPath(Player* self)
     Vec02 local;
     Vec02 delta;
     Vec02 perp[2];
-    PathObject* path = (PathObject*)self->f2208;
+    PathObject* path = (PathObject*)self->aimCurve;
     Contact03** link;
     ContactRow03* row;
     if (path->frame != 0 && (path->frame->desc->flags & 2) != 0) {
@@ -493,11 +493,11 @@ void PinPlayerToPath(Player* self)
         link = &self->contacts4B4;
         row = (ContactRow03*)link;
     }
-    if (((PathObject*)self->f2208)->holder->desc->m2 != 0) {
-        ((PathObject*)self->f2208)->holder->desc->m2(((PathObject*)self->f2208)->holder, &pos, self->f2410, &dir);
+    if (((PathObject*)self->aimCurve)->holder->desc->m2 != 0) {
+        ((PathObject*)self->aimCurve)->holder->desc->m2(((PathObject*)self->aimCurve)->holder, &pos, self->pathPos, &dir);
     }
-    TransformPointBetweenFrames(((PathObject*)self->f2208)->frame, 0, &pos, &pos);
-    TransformDirectionBetweenFrames(((PathObject*)self->f2208)->frame, 0, &dir, &dir);
+    TransformPointBetweenFrames(((PathObject*)self->aimCurve)->frame, 0, &pos, &pos);
+    TransformDirectionBetweenFrames(((PathObject*)self->aimCurve)->frame, 0, &dir, &dir);
     Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector));
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
     TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &local);
@@ -515,12 +515,12 @@ void HideCountedScreenElement(World* self);
 
 void SetPlayerPadSelectMode(Player* a0, s32 a1)
 {
-    if (a0->f2718 != a1) {
-        if (a0->f2718 == -1) {
+    if (a0->padSelectMode != a1) {
+        if (a0->padSelectMode == -1) {
             AcquirePadSelectFlag(a0->world);
             ShowCountedScreenElement(a0->world);
         }
-        a0->f2718 = a1;
+        a0->padSelectMode = a1;
         if (a1 == -1) {
             ReleasePadSelectFlag(a0->world);
             HideCountedScreenElement(a0->world);
@@ -538,16 +538,16 @@ void SetPlayerPath(Player* self, PathObject* path)
     Mat02 rot;
     Vec02 local;
     Vec02 world;
-    if ((PathObject*)self->f2208 != path) {
+    if ((PathObject*)self->aimCurve != path) {
         if (self->f2220 == 7) {
-            TriggerScriptEvent((BaseObject*)self->f2208, 3, 0, 0);
-            ((PathObject*)self->f2208)->desc->m18((BaseObject*)self->f2208, self);
+            TriggerScriptEvent((BaseObject*)self->aimCurve, 3, 0, 0);
+            ((PathObject*)self->aimCurve)->desc->m18((BaseObject*)self->aimCurve, self);
             TriggerScriptEvent((BaseObject*)path, 2, 0, 0);
             path->desc->m17((BaseObject*)path, self);
         }
-        self->f2208 = (s32)path;
-        self->f2204 = 0;
-        self->f2200 = 0;
+        self->aimCurve = (s32)path;
+        self->boundObject = 0;
+        self->aimTarget = 0;
         TransformPointBetweenFrames(0, path->frame, &self->v140, &pos);
         if (path->holder->desc->m10 != 0) {
             path->holder->desc->m10(path->holder, &pos, 0, 0, 0, 0, (f32*)((u8*)self + 0x220C));

@@ -21,11 +21,11 @@ void UpdatePanelStick(Self_136040_eu* self, PadRecord* p)
         Vec_136040 r;
         f32 lo = -1.0f;
         f32 hi = 1.0f;
-        f32 sum = p->f40 + p->f74;
+        f32 sum = p->stickX + p->secondStickX;
         StickLimits t0 = D_00249D00;
         StickLimits t1 = D_00249D10;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
-        f32 v = p->f44;
+        f32 v = p->stickY;
         f32 lo2 = -1.0f;
         f32 hi2 = 1.0f;
         if (v < lo2) {
@@ -41,7 +41,7 @@ void UpdatePanelStick(Self_136040_eu* self, PadRecord* p)
         vb.y = v * 50.0f;
         vb.z = 0;
         f32* g = ((f32*)g_gameClock);
-        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, g[2], (RampProfile*)((0.0001f < p->f48 + p->f7C) ? &t0 : &t1), 0);
+        *(Quad_136040*)&r = ApproachPointWithRamp(*(Quad_136040*)&va, *(Quad_136040*)&vb, g[2], (RampProfile*)((0.0001f < p->stickMagnitude + p->secondStickMagnitude) ? &t0 : &t1), 0);
         self->f314 += u * -0.08f;
         self->f304 = r.x;
         self->f308 = r.y;

@@ -17,7 +17,7 @@ void ChooseStepSequenceState(StepSequence* self)
     if (*(s32*)self->target304 != 0) {
         mode = (self->mode2D0 == 2) ? self->state2D4 : 5;
     } else {
-        s32 n = self->f310;
+        s32 n = self->extraTargetCount;
         if (n > 0) {
             for (s32 i = 0; i < n; i++) {
                 if (*(s32*)self->f314[i] != 0) {

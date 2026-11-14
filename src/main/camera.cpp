@@ -45,8 +45,8 @@ void UpdateCameraProjection(Camera* self);
 
 struct Target_00143148 {
     u8 pad0[0x30];
-    f32 f30;
-    f32 f34;
+    f32 heading;
+    f32 distance;
 };
 
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
@@ -360,7 +360,7 @@ void InitCameraModule(void)
 
 void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3)
 {
-    ComputePolarOffset((Vec3*)a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
+    ComputePolarOffset((Vec3*)a3, a2->heading + 3.1415927f, a2->distance, 0.0f);
 }
 
 // One step of a damped spring pulling pos toward target: the velocity gains (target - pos) * k
@@ -368,7 +368,7 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
 // target at rest.
 void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt)
 {
-    if (self->f224 != 0) {
+    if (self->snapping != 0) {
         *pos = *target;
         Vu0::Q(*vel) = Vu0::Zero();
         return;
@@ -465,7 +465,7 @@ typedef void (*VFn_143418)(void* self, TargetRecord_00143418* out, f32 dt);
 void GetCameraTargetPlacement(Camera* self, void* o, TargetRecord_00143418* out, f32 dt)
 {
     Vec02 offset;
-    if (o == self->f2E0) {
+    if (o == self->currentTarget) {
         *out = *(TargetRecord_00143418*)((u8*)self + 0x2F0);
     } else {
         ((VFn_143418)(*(void***)o)[0x124 / 4])(o, out, dt);
@@ -478,12 +478,12 @@ void ComputeCameraFogTerms(Camera* self, f32* out, f32 p)
 {
     f32 one = 1.0f;
     f32 scale = 4080.0f;
-    f32 a = self->f200 * p;
-    f32 b = self->f1FC;
-    f32 c = self->f1F8;
+    f32 a = self->fogStrength * p;
+    f32 b = self->fogFar;
+    f32 c = self->fogNear;
     FitReciprocalThroughPoints(out, out + 1, one, scale, b / c, (one - a) * scale);
     out[0] = out[0] + 8388608.0f;
-    out[2] = self->f1F8;
+    out[2] = self->fogNear;
     out[3] = out[0] + 36864.0f;
 }
 
@@ -494,16 +494,16 @@ void UpdateCameraProjection(Camera* self)
 {
     u8* s = (u8*)self;
     f32 one = 1.0f;
-    f32 t = Tangent(self->f1C4 * 0.5f);
-    f32 inv = one / self->f1C4;
+    f32 t = Tangent(self->zoom * 0.5f);
+    f32 inv = one / self->zoom;
     f32 w = *(f32*)(s + 0x1E0);
     *(f32*)(s + 0x1F4) = t;
     *(f32*)(s + 0x1F0) = t * w;
     f32 d = w * w + one;
-    *(f32*)(s + 0xB0) = (one >? self->f1C0 * inv);
+    *(f32*)(s + 0xB0) = (one >? self->distanceScale * inv);
     f32 q = t * Fpu::Sqrt(d);
-    *(f32*)(s + 0x1EC) = q * self->f1E4 + one;
-    BuildProjectionMatrix((Mat4*)(s + 0xC0), 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->f1E4, self->f1E8);
+    *(f32*)(s + 0x1EC) = q * self->nearDistance + one;
+    BuildProjectionMatrix((Mat4*)(s + 0xC0), 640.0f / (t * w * 4096.0f), 224.0f / (t * 4096.0f), 0.0f, 0.0f, self->nearDistance, self->farDistance);
     ComputeCameraFogTerms(self, (f32*)(s + 0x208), one);
     UpdateCameraMatrices(self);
 }
@@ -586,8 +586,8 @@ void SetCameraOrientation(void* arg, void* arg2) { SetCameraPlacement((Camera*)a
 void SnapCameraZoom(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
-    c->f1C4 = x;
-    c->f1C8 = x;
+    c->zoom = x;
+    c->zoomGoal = x;
     c->i1CC = 0;
     UpdateCameraProjection((Camera*)self);
 }
@@ -595,32 +595,32 @@ void SnapCameraZoom(void* self, f32 x)
 void SetCameraNearDistance(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
-    c->f1E4 = x;
+    c->nearDistance = x;
     UpdateCameraProjection((Camera*)self);
 }
 
 void SetCameraFarDistance(Camera* self, f32 value)
 {
-    self->f1E8 = value;
+    self->farDistance = value;
     UpdateCameraProjection(self);
 }
 
 void SetCameraFogNear(Camera* self, f32 value)
 {
-    self->f1F8 = value;
+    self->fogNear = value;
     UpdateCameraProjection(self);
 }
 
 void SetCameraFogFar(Camera* self, f32 value)
 {
-    self->f1FC = value;
+    self->fogFar = value;
     UpdateCameraProjection(self);
 }
 
 void SetCameraFogStrength(void* ptr, f32 value)
 {
     Camera* self = (Camera*)ptr;
-    self->f200 = value;
+    self->fogStrength = value;
     UpdateCameraProjection(self);
 }
 
@@ -632,7 +632,7 @@ void SetCameraFogColor(void* self, void* value)
 
 void SetCameraDistanceScale(Camera* self, f32 value)
 {
-    self->f1C0 = value;
+    self->distanceScale = value;
     UpdateCameraProjection(g_camera);
 }
 
@@ -646,29 +646,29 @@ void ResetCamera(Camera* self, s32 flag)
     PushCameraController(self, 0, &self->ctl454, 0, 0);
     RequestCameraSnap(self, 0);
     self->f21C = 0x0FFFFFFF;
-    self->f218 = -10.0f;
+    self->swingStartTime = -10.0f;
 }
 
 void ClearCameraObjectList(Camera* obj)
 {
-    obj->f340 = 0;
+    obj->objectCount = 0;
 }
 
 void AddCameraObject(Camera* list, void* item)
 {
-    u32 n = list->f340;
+    u32 n = list->objectCount;
     if (n < 8) {
         list->f344[n] = item;
-        list->f340 = n + 1;
+        list->objectCount = n + 1;
     }
 }
 
 void RemoveCameraObject(Camera* list, void* item)
 {
-    for (s32 i = 0; i < list->f340; i++) {
+    for (s32 i = 0; i < list->objectCount; i++) {
         if (item == list->f344[i]) {
-            CopyMemory(&list->f344[i], &list->f344[i + 1], (list->f340 - i - 1) * 4);
-            list->f340--;
+            CopyMemory(&list->f344[i], &list->f344[i + 1], (list->objectCount - i - 1) * 4);
+            list->objectCount--;
             return;
         }
     }
@@ -713,8 +713,8 @@ void FadeCameraObstructingParts(Camera* self)
     s32 n;
     Collider** list;
     PushBackMemoryMark();
-    lo = hi = *(Vec02*)self->f40;
-    for (s32 i = 0; i < self->f340; i++) {
+    lo = hi = *(Vec02*)self->position;
+    for (s32 i = 0; i < self->objectCount; i++) {
         PlacedObject* obj = (PlacedObject*)self->f344[i];
         if (obj->flags & (1ULL << 37)) {
             Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(obj->v140));
@@ -724,12 +724,12 @@ void FadeCameraObstructingParts(Camera* self)
     GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, IsCameraObstacle, 0, &n, &list);
     for (s32 j = 0; j < n; j++) {
         Collider* c = list[j];
-        for (s32 k = 0; k < self->f340; k++) {
+        for (s32 k = 0; k < self->objectCount; k++) {
             PlacedObject* obj = (PlacedObject*)self->f344[k];
             if (!(obj->flags & (1ULL << 37))) {
                 continue;
             }
-            s32 m = CollectTreeNodeSpans(c->tree.nodes, (Vec02*)self->f40, &obj->v140, c->nodeGroups, 0x20, spans);
+            s32 m = CollectTreeNodeSpans(c->tree.nodes, (Vec02*)self->position, &obj->v140, c->nodeGroups, 0x20, spans);
             ColliderSpan* end = &spans[m];
             for (ColliderSpan* sp = spans; sp < end; sp++) {
                 if (sp->group < 0) {
@@ -750,10 +750,10 @@ void FadeCameraObstructingParts(Camera* self)
 
 void UpdateCamera(Camera* self, s32 flag, f32 dt)
 {
-    if (self->f220 != 0) {
-        self->f220 = 0;
-        self->f224 = 1;
-        self->f228 = 0;
+    if (self->snapQueued != 0) {
+        self->snapQueued = 0;
+        self->snapping = 1;
+        self->hasSnapValue = 0;
     }
     if (self->stackCount > 0) {
         CameraController* n = self->stack[0].ctl;
@@ -767,11 +767,11 @@ void UpdateCamera(Camera* self, s32 flag, f32 dt)
                     x = (u8*)self + 0x2F0;
                     if (o != last) {
                         ((VFn_143E40)(*(void***)o)[0x124 / 4])(o, dt, x);
-                        if (prev != 0 || o != self->f2E0) {
+                        if (prev != 0 || o != self->currentTarget) {
                             ResetCameraTargetTracking((Tracking_001433E0*)self, o, (Target_00143148*)x);
                         }
                         UpdateCameraTargetTracking((Spring_00143208*)self, o, dt, (Record_00143208*)x);
-                        self->f2E0 = o;
+                        self->currentTarget = o;
                         last = o;
                     }
                 } else {
@@ -788,15 +788,15 @@ void UpdateCamera(Camera* self, s32 flag, f32 dt)
             } while (n != prev);
         }
     }
-    if (self->f224 != 0) {
-        SnapCameraZoom(self, self->f1C8);
-    } else if (self->f1C4 != self->f1C8) {
-        self->f1C4 = ApproachValueClampingVelocity(self->f1C4, self->f1CC, self->f1C8, dt, &self->f1D0, &self->f1CC);
+    if (self->snapping != 0) {
+        SnapCameraZoom(self, self->zoomGoal);
+    } else if (self->zoom != self->zoomGoal) {
+        self->zoom = ApproachValueClampingVelocity(self->zoom, self->zoomSpeed, self->zoomGoal, dt, &self->zoomProfile, &self->zoomSpeed);
         UpdateCameraProjection(self);
     }
     if (flag != 0) {
-        self->f228 = 0;
-        self->f224 = 0;
+        self->hasSnapValue = 0;
+        self->snapping = 0;
     }
 }
 
@@ -854,8 +854,8 @@ void UpdateCameraLocation(Camera* self)
     BuildCameraGroundFrame(self);
     g = g_currentWorld;
     if (g != 0) {
-        in = *(Quad16*)self->f40;
-        LookupValueTreeLeaf((void*)g->f1EC4, &in, &out);
+        in = *(Quad16*)self->position;
+        LookupValueTreeLeaf((void*)g->valueListObject, &in, &out);
         if (out != 0) {
             self->f21C = out;
         }
@@ -930,15 +930,15 @@ void UpdateCameraMatrices(Camera* self)
     Vec02 pos;
     Vec02 dir;
     Mat02 rotation;
-    f32 f6 = g_gameTime - self->f218;
+    f32 f6 = g_gameTime - self->swingStartTime;
     if (D_002618C8 < f6) {
-        BuildViewProjectionMatrix((f32*)self->f40, (f32*)self->f80, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
+        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->f80, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
     } else {
         f32 t = f6 / D_002618C8;
         f32 amount = g_unitRange.Limit(D_002618D0[0] + t * (D_002618D0[1] + t * D_002618D0[2]));
         f32 swing = Sine(f6 * D_002618CC) * amount;
         u128 turn = Vu0::Rotate(*(Mat02*)self->f80, Vu0::Q(*(Vec02*)D_002618E0));
-        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->f40), turn, Vu0::Scalar(swing));
+        Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->position), turn, Vu0::Scalar(swing));
         Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec02*)D_002618F0), Vu0::Scalar(swing));
         BuildRotationFromVector(&dir, (Mat02*)&rotation);
         MulRotationRowsX(&rotation, *(Mat02*)self->f80, rotation);
@@ -947,11 +947,11 @@ void UpdateCameraMatrices(Camera* self)
         Mat4 proj;
         Vu0::Q(corner) = Vu0::MulAddX(Vu0::Q(*(Vec02*)D_00248D40), Vu0::Q(*(Vec02*)D_00261900), Vu0::Scalar(swing));
         Vu0::Q(tilt) = Vu0::MulX(Vu0::Q(*(Vec02*)D_00261910), Vu0::Scalar(swing));
-        BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->f1F0 * 4096.0f), corner.y * 224.0f / (self->f1F4 * 4096.0f), tilt.x, tilt.y, self->f1E4, self->f1E8);
+        BuildProjectionMatrix(&proj, corner.x * 640.0f / (self->projectionScaleX * 4096.0f), corner.y * 224.0f / (self->projectionScaleY * 4096.0f), tilt.x, tilt.y, self->nearDistance, self->farDistance);
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));
     }
     InvertMatrix4x4((u8*)self + 0x100, (u8*)self + 0x140);
-    BuildFrustumSideNormals((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->f1F0, self->f1F4);
+    BuildFrustumSideNormals((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->projectionScaleX, self->projectionScaleY);
     {
         f32* e = (f32*)((u8*)self + 0x1B0);
         f32* d = self->planes[0];
@@ -981,7 +981,7 @@ void WriteCameraMatricesPacket(Camera* self)
 void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
 {
     if (a != 0) {
-        *(Quad16*)self->f40 = *a;
+        *(Quad16*)self->position = *a;
     }
     if (b != 0) {
         *(Quad16*)self->f80 = b[0];
@@ -1038,8 +1038,8 @@ void ApplyLookFrameCoordinates(Quad16* a, Quad16* b, Quad16* out, f32 x, f32 y, 
 void SetCameraLookAnchor(Camera* self, Quad16* arg)
 {
     Quad16 tmp;
-    ApplyLookFrameCoordinates((Quad16*)self->f2D0, (Quad16*)self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
-    ComputeLookFrameCoordinates(arg, (Quad16*)self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
+    ApplyLookFrameCoordinates((Quad16*)self->f2D0, (Quad16*)self->position, &tmp, self->f2B0, self->f2B4, self->f2B8);
+    ComputeLookFrameCoordinates(arg, (Quad16*)self->position, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
     *(Quad16*)self->f2D0 = *arg;
 }
 
@@ -1067,13 +1067,13 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     f32 r;
     f32 y;
     f32 t;
-    if (self->f224 != 0) {
+    if (self->snapping != 0) {
         flags &= ~1;
     }
     ConvertOffsetToSpherical(target, focus, &heading, &pitch, &dist);
-    f32 yaw = heading + 3.14159274f + yawOffset * self->f1C4 * self->f1E0 * 0.5f;
-    f32 tilt = -pitch - pitchOffset * self->f1C4 * 0.5f;
-    ConvertOffsetToSpherical((Vec02*)self->f40, (Vec02*)self->f2D0, &curHeading, &curPitch, &curDist);
+    f32 yaw = heading + 3.14159274f + yawOffset * self->zoom * self->aspectScale * 0.5f;
+    f32 tilt = -pitch - pitchOffset * self->zoom * 0.5f;
+    ConvertOffsetToSpherical((Vec02*)self->position, (Vec02*)self->f2D0, &curHeading, &curPitch, &curDist);
     VectorToAngles((Vec3*)self->f80, &curYaw, &curTilt);
     if ((flags & 1) == 0) {
         y = yaw;
@@ -1142,7 +1142,7 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     ComputeDirectionFromAngles((Vec3*)&dir, h, p, r);
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(*focus), Vu0::Q(dir));
     BuildYawPitchMatrix(y, t, &m);
-    *(Vec02*)self->f40 = pos;
+    *(Vec02*)self->position = pos;
     *(Vec02*)self->f80 = m.r[0];
     *(Vec02*)self->f90 = m.r[1];
     *(Vec02*)self->fA0 = m.r[2];
@@ -1157,12 +1157,12 @@ void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32
     f32 y;
     switch (mode) {
     case 0:
-        y = p->f44;
-        x = p->f40;
+        y = p->stickY;
+        x = p->stickX;
         goto call;
     case 1:
-        y = p->f78;
-        x = p->f74;
+        y = p->secondStickY;
+        x = p->secondStickX;
         goto call;
     default:
         goto zero;
@@ -1220,7 +1220,7 @@ void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* ta
                 fn1(o, self->stack[1].arg);
             }
         }
-        self->f364 = g_gameTime;
+        self->controllerSwitchTime = g_gameTime;
         CameraControllerFn fn0 = ctl->vt->m00;
         if (fn0 != 0) {
             fn0(ctl, arg);
@@ -1259,7 +1259,7 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
             fn(s4, s5);
         }
         if (self->stackCount > 0) {
-            self->f364 = g_gameTime;
+            self->controllerSwitchTime = g_gameTime;
             CameraController* o = self->stack[0].ctl;
             CameraControllerFn fn2 = o->vt->m00;
             if (fn2 != 0) {
@@ -1313,16 +1313,16 @@ void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32*
 
 void RequestCameraSnap(Camera* self, f32* src)
 {
-    self->f224 = 1;
+    self->snapping = 1;
     if (src != 0) {
-        self->f228 = 1;
-        self->f22C = *src;
+        self->hasSnapValue = 1;
+        self->snapValue = *src;
     }
 }
 
 void QueueCameraSnap(Camera* self)
 {
-    self->f220 = 1;
+    self->snapQueued = 1;
 }
 
 void RequestPlainCameraSnap(void* p)
@@ -1343,11 +1343,11 @@ void SetCameraAimOffsetFromScreenPoint(Camera* self, Vec02* p, f32 x, f32 y)
     f32 dist;
     self->v240 = D_00248D30;
     dir.x = 1.0f;
-    dir.y = -x * self->f1F0;
-    dir.z = y * self->f1F4;
-    Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->f40), Vu0::Rotate(self->f80, Vu0::Q(dir)), Vu0::Scalar(100.0f));
-    MeasurePointToLine(p, (Vec02*)self->f40, &far, &t, &dist);
-    Vu0::Q(far) = Vu0::MulXSum(Vu0::Q(self->f40), Vu0::Scalar(1.0f - t), Vu0::Q(far), Vu0::Scalar(t));
+    dir.y = -x * self->projectionScaleX;
+    dir.z = y * self->projectionScaleY;
+    Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->position), Vu0::Rotate(self->f80, Vu0::Q(dir)), Vu0::Scalar(100.0f));
+    MeasurePointToLine(p, (Vec02*)self->position, &far, &t, &dist);
+    Vu0::Q(far) = Vu0::MulXSum(Vu0::Q(self->position), Vu0::Scalar(1.0f - t), Vu0::Q(far), Vu0::Scalar(t));
     Vu0::Q(self->v230) = Vu0::Sub(Vu0::Q(far), Vu0::Q(*p));
 }
 
@@ -1363,12 +1363,12 @@ void AimCameraAtPointWithSpring(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw,
     f32 pitch;
     f32 dist;
 
-    *(Vec02*)self->f40 = *a2;
+    *(Vec02*)self->position = *a2;
     SpringCameraVector(self, &self->v230, &self->v240, (Vec02*)&D_00248D30, D_00261920, D_00261924, g_gameClock.dt);
     Vu0::Q(tmp) = Vu0::Add(Vu0::Q(*a1), Vu0::Q(self->v230));
     ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
-    yaw = yaw + Arctangent(turnYaw * self->f1F0);
-    pitch = pitch - Arctangent(turnPitch * self->f1F4);
+    yaw = yaw + Arctangent(turnYaw * self->projectionScaleX);
+    pitch = pitch - Arctangent(turnPitch * self->projectionScaleY);
     BuildYawPitchMatrix(yaw, pitch, (Mat02*)self->f80);
     UpdateCameraMatrices(self);
 }
@@ -1549,9 +1549,9 @@ s32 PeekCameraStackValue(Camera* self)
     return PeekStackValue(&self->ctl460);
 }
 
-void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.f58 = second; }
+void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.sizeOverride = second; }
 
-void RecordCameraTimestamp(Camera* obj) { obj->f218 = g_gameTime; }
+void RecordCameraTimestamp(Camera* obj) { obj->swingStartTime = g_gameTime; }
 
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
 
@@ -1560,7 +1560,7 @@ s32 IsSphereInCameraView(Camera* self, Vec02* p, f32 radius, f32 x)
     Vec02 r;
     f32 fade;
     s32 in = 0;
-    u128 d = Vu0::Sub(Vu0::Q(*p), Vu0::Q(self->f40));
+    u128 d = Vu0::Sub(Vu0::Q(*p), Vu0::Q(self->position));
     u128 ones = Vu0::Ones();
     Vu0::Q(r) = Vu0::FromFloat(radius);
     if ((Vu0::PlaneSigns(Vu0::Q(self->planes[0]), Vu0::Q(self->planes[1]), Vu0::Q(self->planes[2]), d, ones, Vu0::Q(r)) ^ 0xF0) == 0) {

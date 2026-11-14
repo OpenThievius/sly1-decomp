@@ -177,8 +177,8 @@ struct CardDirEntry {
     u8 bC;
     u8 bD;
     u16 hE;
-    s32 f10;
-    u16 f14;
+    s32 size;
+    u16 attributes;
     u8 pad2[0x20 - 0x16];
     u8 sub20[0x10];
 };
@@ -192,64 +192,64 @@ struct CardFileInfo {
         s32 flags;          // 0x48: the attributes, rearranged
         struct {
             u8 pad48[2];
-            u8 f4A;         // 0x4A
-            u8 f4B;         // 0x4B
+            u8 createdMonth; // 0x4A
+            u8 createdDay;  // 0x4B
         };
     };
-    u16 f4C;
-    u8 f4E;
-    u8 f4F;
-    u8 f50;
+    u16 createdYear;
+    u8 createdHour;
+    u8 createdMinute;
+    u8 createdSecond;
     u8 pad3[1];
-    u8 f52;
-    u8 f53;
-    u16 f54;
-    u8 f56;
-    u8 f57;
-    u8 f58;
+    u8 modifiedMonth;
+    u8 modifiedDay;
+    u16 modifiedYear;
+    u8 modifiedHour;
+    u8 modifiedMinute;
+    u8 modifiedSecond;
 };
 
 void ConvertMemoryCardDirEntry(CardDirEntry* s, CardFileInfo* d)
 {
     FillMemory(d, 0, 0x5C);
     CopyString(d, (const char*)s->sub20);
-    d->f44 = s->f10;
-    if (s->f14 & 0x1) {
+    d->f44 = s->size;
+    if (s->attributes & 0x1) {
         d->flags |= 0x1;
     }
-    if (s->f14 & 0x2) {
+    if (s->attributes & 0x2) {
         d->flags |= 0x2;
     }
-    if (s->f14 & 0x4) {
+    if (s->attributes & 0x4) {
         d->flags |= 0x4;
     }
-    if (s->f14 & 0x8) {
+    if (s->attributes & 0x8) {
         d->flags |= 0x8;
     }
-    if (s->f14 & 0x20) {
+    if (s->attributes & 0x20) {
         d->flags |= 0x10;
     }
-    if (s->f14 & 0x80) {
+    if (s->attributes & 0x80) {
         d->flags |= 0x20;
     }
-    if (s->f14 & 0x800) {
+    if (s->attributes & 0x800) {
         d->flags |= 0x40;
     }
-    if (s->f14 & 0x1000) {
+    if (s->attributes & 0x1000) {
         d->flags |= 0x80;
     }
-    d->f4A = s->b5;
-    d->f4B = s->b4;
-    d->f4C = s->h6;
-    d->f4E = s->b3;
-    d->f4F = s->b2;
-    d->f50 = s->b1;
-    d->f52 = s->bD;
-    d->f53 = s->bC;
-    d->f54 = s->hE;
-    d->f56 = s->bB;
-    d->f57 = s->bA;
-    d->f58 = s->b9;
+    d->createdMonth = s->b5;
+    d->createdDay = s->b4;
+    d->createdYear = s->h6;
+    d->createdHour = s->b3;
+    d->createdMinute = s->b2;
+    d->createdSecond = s->b1;
+    d->modifiedMonth = s->bD;
+    d->modifiedDay = s->bC;
+    d->modifiedYear = s->hE;
+    d->modifiedHour = s->bB;
+    d->modifiedMinute = s->bA;
+    d->modifiedSecond = s->b9;
 }
 
 s32 ClassifyMemoryCardCallResult(s32 value)
@@ -706,7 +706,7 @@ s32 WriteSelectedMemoryCardSlot(MemoryCard* self)
 void StartMemoryCardSave(MemoryCard* self)
 {
     if (self->i4F44 != 0) {
-        if ((g_saveData->f19EC & 0x100) == 0) {
+        if ((g_saveData->optionFlags & 0x100) == 0) {
             g_pauseMenuElement.stage = -1;
             SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x14);
         } else {
@@ -778,26 +778,26 @@ struct IconFileName {
     u8 b[8];
 };
 struct IconSysHeader {
-    s32 f000;
+    s32 magic;
     u8 f004;
-    s16 f006;
+    s16 titleBreakOffset;
     u8 pad08[4];
-    s32 f00C;
-    s32 f010;
-    s32 f014;
-    s32 f018;
+    s32 backgroundAlpha;
+    s32 backgroundColor0Red;
+    s32 backgroundColor0Green;
+    s32 backgroundColor0Blue;
     u8 pad1C[4];
-    s32 f020;
-    s32 f024;
-    s32 f028;
+    s32 backgroundColor1Red;
+    s32 backgroundColor1Green;
+    s32 backgroundColor1Blue;
     u8 pad2C[4];
-    s32 f030;
-    s32 f034;
-    s32 f038;
+    s32 backgroundColor2Red;
+    s32 backgroundColor2Green;
+    s32 backgroundColor2Blue;
     u8 pad3C[4];
-    s32 f040;
-    s32 f044;
-    s32 f048;
+    s32 backgroundColor3Red;
+    s32 backgroundColor3Green;
+    s32 backgroundColor3Blue;
     u8 pad4C[4];
     s32 f050;
     f32 f054;
@@ -828,11 +828,11 @@ struct IconSysHeader {
     f32 f0B8;
     u8 padBC[4];
     u8 pad0C0[0x104 - 0xC0];
-    IconFileName f104;
+    IconFileName listIconName;
     u8 pad10C[0x144 - 0x10C];
-    IconFileName f144;
+    IconFileName copyIconName;
     u8 pad14C[0x184 - 0x14C];
-    IconFileName f184;
+    IconFileName deleteIconName;
     u8 pad18C[0x3C4 - 0x18C];
 };
 
@@ -848,22 +848,22 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     IconSysHeader c;
     CardFileName buf;
     (void)FillMemory(&c, 0, 0x3C4);
-    c.f000 = ((IconSysMagic*)&D_0024B3D0)->w0;
+    c.magic = ((IconSysMagic*)&D_0024B3D0)->w0;
     c.f004 = ((IconSysMagic*)&D_0024B3D0)->b4;
-    c.f006 = 0x20;
-    c.f00C = 0x60;
-    c.f010 = 0;
-    c.f014 = 0x87;
-    c.f018 = 0xFF;
-    c.f020 = 0;
-    c.f024 = 0x29;
-    c.f028 = 0x6F;
-    c.f030 = 0;
-    c.f034 = 0x29;
-    c.f038 = 0x6F;
-    c.f040 = 0;
-    c.f044 = 0x87;
-    c.f048 = 0xFF;
+    c.titleBreakOffset = 0x20;
+    c.backgroundAlpha = 0x60;
+    c.backgroundColor0Red = 0;
+    c.backgroundColor0Green = 0x87;
+    c.backgroundColor0Blue = 0xFF;
+    c.backgroundColor1Red = 0;
+    c.backgroundColor1Green = 0x29;
+    c.backgroundColor1Blue = 0x6F;
+    c.backgroundColor2Red = 0;
+    c.backgroundColor2Green = 0x29;
+    c.backgroundColor2Blue = 0x6F;
+    c.backgroundColor3Red = 0;
+    c.backgroundColor3Green = 0x87;
+    c.backgroundColor3Blue = 0xFF;
     c.f050 = 0;
     c.f054 = 0.5f;
     c.f058 = -0.5f;
@@ -886,9 +886,9 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     c.f0B4 = 0.5f;
     c.f0B8 = 0.5f;
     ConvertStringToCharCodes((u8*)a2, (u16*)((u8*)&c + 0xC0));
-    c.f104 = (*(IconFileName*)&D_0024B3D8);
-    c.f144 = (*(IconFileName*)&D_0024B3D8);
-    c.f184 = (*(IconFileName*)&D_0024B3D8);
+    c.listIconName = (*(IconFileName*)&D_0024B3D8);
+    c.copyIconName = (*(IconFileName*)&D_0024B3D8);
+    c.deleteIconName = (*(IconFileName*)&D_0024B3D8);
     FormatToString(buf.s, D_0024B3E0, a1, D_0024B3E8);
     return CreateMemoryCardFile(owner, &buf, &c, 0x3C4);
 }
@@ -935,7 +935,7 @@ s32 WriteMemoryCardKeyedFile(void* self, const char* dir, void* k, const char* n
         if (!pair.Set(key) || !OpenBufferedSectorStreamRange(&obj, &pair)) {
             status = 0x27;
         } else {
-            s32 left = obj.f10;
+            s32 left = obj.totalSize;
             while (left > 0) {
                 s32 n = 0x1000;
                 if (left <= 0xFFF) n = left;

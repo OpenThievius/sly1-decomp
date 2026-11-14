@@ -40,7 +40,7 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
     PadRecord* pad;
 
     on = 0;
-    switch ((g->f19D8 << 8) | g->f19DC) {
+    switch ((g->levelIndex << 8) | g->entryIndex) {
     case 0x106:
     case 0x204:
     case 0x304:
@@ -139,7 +139,7 @@ void UpdatePauseMenu(Self_1943E8_eu* self)
             return;
         }
         D_eu_0026BB30 = ClampFloat::Of(D_eu_0026BB30 + dx * D_0026A22C, 438.0f, 874.0f);
-        v = ClampFloat::Of(D_eu_0026BB34 + dy * D_0026A230.f0, 15.0f, 129.0f);
+        v = ClampFloat::Of(D_eu_0026BB34 + dy * D_0026A230.verticalRate, 15.0f, 129.0f);
         D_eu_0026BB34 = v;
         {
             DisplayRegs* gs = &D_00262490;

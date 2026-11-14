@@ -19,7 +19,7 @@ struct ScatterTable {
     s32 f00;                // 0x00
     f32 f04;                // 0x04: 1.0, or 0.5 in the second table
     f32 levelRange[2];      // 0x08: the level's bounds (func_00151D28 clamps to them)
-    f32 f10;                // 0x10
+    f32 levelScale;         // 0x10
     f32 raiseNew;           // 0x14: added to the level for an object not seen before (func_00151ED8)
     f32 raiseSeen;          // 0x18: the same for one already seen
     s32 countLoStart;       // 0x1C: the countdown's range at level 0 (func_00151A88, func_00152010)
@@ -32,8 +32,8 @@ struct ScatterTable {
     s32 spareCount2;        // 0x38
     f32 f3C;                // 0x3C
     f32 f40;                // 0x40
-    f32 f44;                // 0x44: added to the level by func_00152010
-    f32 f48;                // 0x48: the same, in its other branch
+    f32 bandLevelStep;      // 0x44: added to the level by func_00152010
+    f32 levelStep;          // 0x48: the same, in its other branch
     s32 f4C;                // 0x4C
     f32 f50;                // 0x50
     s32 count;              // 0x54: the entries of ranges
@@ -52,7 +52,7 @@ struct ScatterController {
     s32 countdown;          // 0x14: func_00151A88 draws it, func_00152010 counts it down
     s32 bandCountdown;      // 0x18: drawn from the level band (func_00151A88, func_00152010)
     void* table;            // 0x1C: func_00151A88, func_00151ED8, func_00152010, func_00152410
-    s32 f20;                // 0x20: func_00151A88
+    s32 spareRaised;        // 0x20: func_00151A88
 };
 
 typedef char check_ScatterController[sizeof(ScatterController) == 0x24 ? 1 : -1];

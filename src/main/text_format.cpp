@@ -135,8 +135,8 @@ struct FormatSpec {
     s32 width;      // 0x18
     s32 prec;       // 0x1C
     s32 length;     // 0x20: 1 'h', 2 'l' or 'L'
-    s32 f24;        // 0x24: a vector's count (3, or 4 for an upper-case letter)
-    s32 f28;        // 0x28: a matrix's rows ('v' for one)
+    s32 vectorCount; // 0x24: a vector's count (3, or 4 for an upper-case letter)
+    s32 matrixRows; // 0x28: a matrix's rows ('v' for one)
     u8 conv;        // 0x2C: the conversion letter, in lower case
     s8 pad2D[3];
     s32 upper;      // 0x30: the letter was upper case
@@ -447,13 +447,13 @@ s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va)
                     if (g_charClassFlags[(s8)(u8)*p] & 1) {
                         a = 4;
                     }
-                    spec->f24 = a;
+                    spec->vectorCount = a;
                     d = *p;
                     l = (g_charClassFlags[d] & 1) ? d + 0x20 : d;
                     if (l ^ 0x76) {
                         r = a;
                     }
-                    spec->f28 = r;
+                    spec->matrixRows = r;
                     adv = 1;
                     break;
                 }
@@ -894,7 +894,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
-        if (sp->f24 != 0) {
+        if (sp->vectorCount != 0) {
             const char* s4 = "
 ";
             u8* a = *va;
@@ -905,17 +905,17 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
             const char* s5 = ", ";
             const char* s6 = " }";
             f32* fp = *(f32**)a;
-            if (sp->f28 >= 2) {
+            if (sp->matrixRows >= 2) {
                 AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
-            for (s32 i = 0; i < sp->f28; ) {
+            for (s32 i = 0; i < sp->matrixRows; ) {
                 s32 next;
                 if (i != 0) {
                     AppendToOutputBuffer(c, (void*)s8, GetStringLength(s8));
                 }
                 next = i + 1;
                 AppendToOutputBuffer(c, (void*)s7, GetStringLength(s7));
-                for (s32 j = 0; j < sp->f24; j++) {
+                for (s32 j = 0; j < sp->vectorCount; j++) {
                     if (j != 0) {
                         AppendToOutputBuffer(c, (void*)s5, GetStringLength(s5));
                     }
@@ -924,7 +924,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
                 AppendToOutputBuffer(c, (void*)s6, GetStringLength(s6));
                 i = next;
             }
-            if (sp->f28 >= 2) {
+            if (sp->matrixRows >= 2) {
                 AppendToOutputBuffer(c, (void*)s4, GetStringLength(s4));
             }
         } else {

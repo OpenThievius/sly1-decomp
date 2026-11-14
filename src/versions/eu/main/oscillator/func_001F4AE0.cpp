@@ -9,14 +9,14 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
     Vec02 local;
     Vec02 radius;
     UpdatePlacedObject(self, dt);
-    switch (self->f2E4) {
+    switch (self->state) {
     case 5: {
-        f32 t = self->f31C;
+        f32 t = self->fadeTime;
         f32 zero = 0.0f;
         if (zero < t) {
             if (t < g_gameClock.time) {
                 StartObjectSubGroupFade(self);
-                self->f31C = zero;
+                self->fadeTime = zero;
             }
         }
         return;
@@ -28,7 +28,7 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
                 D_0026F138.vt->m15(&D_0026F138);
             } else {
                 SetScreenElementHoldTime(&D_0026F138, 0.0f);
-                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->f2FC));
+                SetElementTextFromPackedEntry(&D_0026F138, GetEntryIdByKey(self->levelEntry));
                 ((Ann_eu_1F4AE0*)&D_0026F138)->announce = 0;
                 D_0026F138.vt->m14(&D_0026F138);
             }
@@ -45,21 +45,21 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
         return;
     }
     TransformPointBetweenFrames(0, self, &player->v140, &local);
-    s32 inside = IsPointInsideFaceTree((TreeNode03*)self->f2F8, (FacePoint*)&local);
+    s32 inside = IsPointInsideFaceTree((TreeNode03*)self->faceTree, (FacePoint*)&local);
     s32 near = 0;
-    if (inside == 0 && self->f2DC != 0 && __builtin_fabsf(local.z) < 300.0f) {
+    if (inside == 0 && self->nearCheck != 0 && __builtin_fabsf(local.z) < 300.0f) {
         if (Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(local), Vu0::Q(local)))) <= 1000.0f) {
             near = 1;
         }
     }
-    switch (self->f2E4) {
+    switch (self->state) {
     case 3:
         if (inside != 0) {
             StartObjectSubGroupFinish(self);
         } else if (near != 0) {
             if (D_0026F388 == 0) {
                 Camera* c = g_camera;
-                u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->f40));
+                u128 d = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(c->position));
                 u128 ones = Vu0::Ones();
                 Vu0::Q(radius) = Vu0::FromFloat(100.0f);
                 if ((Vu0::PlaneSigns(Vu0::Q(c->planes[0]), Vu0::Q(c->planes[1]), Vu0::Q(c->planes[2]), d, ones, Vu0::Q(radius)) ^ 0xF0) == 0) {
@@ -78,7 +78,7 @@ void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
     case 1:
         if (inside != 0) {
             SetObjectSubGroupState(self, 0);
-        } else if (self->f320 < g_gameClock.time - self->f2E8) {
+        } else if (self->nearWaitTime < g_gameClock.time - self->stateStartTime) {
             SetObjectSubGroupState(self, 3);
         }
         break;

@@ -92,9 +92,9 @@ struct Effect {
         f32 m30[3];         // 0x30
     };
     Quad219C q40;           // 0x40
-    Vec02 rot50[3];         // 0x50: the placement (func_0019F858 reads it with the one at +0x80)
-    Quad219C q80;           // 0x80
-    Quad219C q90;           // 0x90
+    Vec02 rotation[3];      // 0x50: the placement (func_0019F858 reads it with the one at +0x80)
+    Quad219C pos;           // 0x80: the effect's current point
+    Quad219C prevPos;       // 0x90: the point it was at last frame
     union {
         Quad219C qA0;       // 0xA0
         u8 padA0[0xB0 - 0xA0];  // 0xA0
@@ -112,9 +112,9 @@ struct Effect {
     Vec02 v100;             // 0x100: a spin the effect turns by (func_0019F390)
     union {
         s32 i110;           // 0x110
-        f32 f110;           // 0x110: its drag, per second (func_0019F390)
+        f32 spinDrag;       // 0x110: its drag, per second (func_0019F390)
     };
-    void* p114;             // 0x114: the frame func_0019F858 places the record by
+    void* oscillator;       // 0x114: the frame func_0019F858 places the record by
     T219CHook* hooks;       // 0x118: run at its end (func_0019EC30)
     u8 pad11C[0x120 - 0x11C];   // 0x11C
     union {

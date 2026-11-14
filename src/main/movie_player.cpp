@@ -312,10 +312,10 @@ void LoadContactListObject(ContactListObject* self, BufferedStream* stream)
 void UnregisterContactListObject(ContactListObject* self)
 {
     UnregisterCollider(self);
-    void* p = self->f6B4;
+    void* p = self->animationPlayer;
     if (p != 0) {
         StopAnimationPlayer((AnimationPlayer*)p);
-        self->f6B4 = 0;
+        self->animationPlayer = 0;
     }
 }
 
@@ -324,23 +324,23 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
     if (self->ready != 0) {
         BuildBasisFromX(&self->v150, &self->rot);
     }
-    s32 s1 = (s32)self->f1EC;
-    s32 s0 = (s32)self->f1F0;
-    self->f1EC = 0;
-    self->f1F0 = 0;
+    s32 s1 = (s32)self->positionAttachment;
+    s32 s0 = (s32)self->orientationAttachment;
+    self->positionAttachment = 0;
+    self->orientationAttachment = 0;
     MoveCollider(self, x, b);
-    self->f1EC = (Attachment*)s1;
-    self->f1F0 = (Attachment*)s0;
+    self->positionAttachment = (Attachment*)s1;
+    self->orientationAttachment = (Attachment*)s0;
 }
 
 void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
 {
-    self->f694 = a;
-    self->v6A0 = *v;
+    self->anchorObject = a;
+    self->anchorOffset = *v;
     if (self->f6B0 != 0) {
-        CreateAnimationPlayerWithoutPresetTargets(self->f6B0, self, 0, (AnimationPlayer**)&self->f6B4, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(self->f6B0, self, 0, (AnimationPlayer**)&self->animationPlayer, 0.0f, 1.0f);
     }
     if (self->ready != 0) {
         s32 still = 0;
@@ -362,16 +362,16 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
     AttachedTransformFrame f;
 
     if ((self->flags & 0x100000000ULL) == 0) {
-        if (self->f1EC == 0 && self->f1F0 == 0) {
+        if (self->positionAttachment == 0 && self->orientationAttachment == 0) {
             ApplyPlacedObjectTransform(self, (Camera*)in1, (ScaledTransform*)in2);
         } else {
-            if (self->f1EC != 0) {
-                self->f1EC->vt->getPos(self->f1EC, 0.0f, &f.q00, &f.q10);
+            if (self->positionAttachment != 0) {
+                self->positionAttachment->vt->getPos(self->positionAttachment, 0.0f, &f.q00, &f.q10);
             } else {
                 f.q00 = D_00248D30;
             }
-            if (self->f1F0 != 0) {
-                self->f1F0->vt->getRot(self->f1F0, 0.0f, &f.tbl30, &f.q20);
+            if (self->orientationAttachment != 0) {
+                self->orientationAttachment->vt->getRot(self->orientationAttachment, 0.0f, &f.tbl30, &f.q20);
 
             } else {
                 f.tbl30 = g_identityMatrix;
@@ -477,8 +477,8 @@ void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target,
     if (0.0f < speed) {
         self->time6FC = g_gameTime + speed;
     } else {
-        ComputeObjectFrameAtTime(self->f694, 0, &pos, &rot, 0, 0, D_002699BC);
-        Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->v6A0)), Vu0::Q(pos));
+        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, D_002699BC);
+        Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
         Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.5f));
@@ -523,8 +523,8 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         Vec02 vel;
         Mat02 rot;
         f32 remain = self->time6FC - now + dt;
-        ComputeObjectFrameAtTime(self->f694, 0, &pos, &rot, 0, 0, D_002699BC <? remain);
-        Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->v6A0)), Vu0::Q(pos));
+        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, D_002699BC <? remain);
+        Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
         s32 still = 0;
         if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v700))) < 0.0001f
             && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->v700))) < 0.0001f
@@ -679,18 +679,18 @@ void CreateMovieDecodeThread(void)
 
 void InitIopRingSink(IopRingSink* self, s32 a1, s32 a2)
 {
-    self->f04 = a2;
-    self->f08 = a1;
+    self->iopBase = a2;
+    self->capacity = a1;
     ResetIopRingSink(self);
 }
 
 void ResetIopRingSink(IopRingSink* c)
 {
-    c->f14 = c->f08;
-    c->f18 = 0;
-    c->f10 = 0;
-    c->f0C = 0;
-    c->f1C = 0;
+    c->freeBytes = c->capacity;
+    c->usedBytes = 0;
+    c->readPosition = 0;
+    c->writePosition = 0;
+    c->totalWritten = 0;
 }
 
 s32 IopRingSink::Put(s32 count, u8* dst)
@@ -700,23 +700,23 @@ s32 IopRingSink::Put(s32 count, u8* dst)
     s32 left = n;
     s32 r;
 
-    if (left <= 0 || f14 < left) {
-        left = f14;
+    if (left <= 0 || freeBytes < left) {
+        left = freeBytes;
     }
     left &= -0x400;
     while (left != 0) {
-        s32 avail = f08 - f0C;
+        s32 avail = capacity - writePosition;
         r = WriteIopRingBlock(this, left < avail ? left : avail, dst + total);
         if (r == 0) {
             break;
         }
         total += r;
         left -= r;
-        f0C += r;
-        f0C = f0C % f08;
-        f18 += r;
-        f14 -= r;
-        f1C += r;
+        writePosition += r;
+        writePosition = writePosition % capacity;
+        usedBytes += r;
+        freeBytes -= r;
+        totalWritten += r;
         if (n <= 0) {
             break;
         }
@@ -730,7 +730,7 @@ s32 WriteIopRingBlock(IopRingSink* p, s32 size, u8* buf)
     void* obj;
 
     span.src = (s32)buf;
-    span.dest = p->f04 + p->f0C;
+    span.dest = p->iopBase + p->writePosition;
     span.size = (void*)size;
     span.attr = 0;
     SyncDataCache(0);
@@ -740,7 +740,7 @@ s32 WriteIopRingBlock(IopRingSink* p, s32 size, u8* buf)
     return size;
 }
 
-void UpdateIopRingSink(IopRingSink* self) { s32 raw = GetIopRingPosition(); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
+void UpdateIopRingSink(IopRingSink* self) { s32 raw = GetIopRingPosition(); s32 x = (raw & 0xFFFFFF) - self->iopBase; x = x - self->writePosition; x = x - 0x400; x = x + self->capacity; self->freeBytes = x; self->freeBytes = x % self->capacity; s32 d = self->capacity - self->freeBytes; self->usedBytes = d; s32 y = self->writePosition - d; y += self->capacity; self->readPosition = y; self->readPosition = y % self->capacity; }
 
 s32 IopRingSink::Idle()
 {
@@ -847,17 +847,17 @@ void UpdateMovieStream(MovieStream* self)
 {
     switch (self->state) {
     case 2:
-        DrainRingBuffer(&self->dataRing, self->sink.f14, (StreamSink*)&self->sink);
-        if (self->sink.f14 != 0) {
+        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, (StreamSink*)&self->sink);
+        if (self->sink.freeBytes != 0) {
             break;
         }
-        UpdateIopMovieStream(self->sink.f04, self->sink.f08, self->sink.f04, 0, 0);
+        UpdateIopMovieStream(self->sink.iopBase, self->sink.capacity, self->sink.iopBase, 0, 0);
         self->state = 3;
         break;
     case 3: {
         IopRingSink* s0 = &self->sink;
         UpdateIopRingSink(s0);
-        DrainRingBuffer(&self->dataRing, self->sink.f14, (StreamSink*)s0);
+        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, (StreamSink*)s0);
         break;
     }
     }
@@ -1010,7 +1010,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
             u32 m;
             if (self->movieIndex >= 16) m = 0;
             else m = 1u << self->movieIndex;
-            if (g_saveData->f19F8 & m) flag = 1;
+            if (g_saveData->movieBits & m) flag = 1;
             if (flag) {
                 if (RestoreFadeRequest((ScreenFade*)g_screenFade, &g_padRecord, 2)) break;
                 if (g_padRecord.flags & 0x91F) {
@@ -1146,7 +1146,7 @@ void FinishMovie(MoviePlayer* self)
     } else {
         mask = 1 << self->movieIndex;
     }
-    g_saveData->f19F8 |= mask;
+    g_saveData->movieBits |= mask;
 }
 
 s32 FeedMovieDecoder(MoviePlayer* self, s32 wait)

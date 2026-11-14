@@ -15,7 +15,7 @@ struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 struct Held23 {
     void** vtbl;            // 0x00
     u8 pad04[0x1C - 4];
-    s32 f1C;                // 0x1C
+    s32 aimAtTarget;        // 0x1C
     u8 pad20[0x4C - 0x20];
     s32 f4C;                // 0x4C
 };
@@ -42,13 +42,13 @@ struct Desc20 : Desc03 {
 struct MaskedCollider : Collider {
     s32 count550;           // 0x550: entries of slots
     Slot20 slots[16];       // 0x554: func_0013D868, 0013D8B0, 0013D900, 0013D950 append (kind 0, 1, 2, 3)
-    s32 f614;               // 0x614: a key for func_0015A418, -1 at set-up
-    BaseObject* f618;       // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
+    s32 receiverKey;        // 0x614: a key for func_0015A418, -1 at set-up
+    BaseObject* receiver;   // 0x618: the object it found (slot 10, func_00159478 when f614 is -1)
     s32 radiusKind;         // 0x61C: which radius slot 72 sends (0 radius3CC or f2A4, 1 radius3D0 or f2A8)
     f32 f620;               // 0x620: sent to f618 with the radius (slot 72)
     f32 f624;               // 0x624: 1.0 at set-up
-    f32 f628;               // 0x628: 0.8 at set-up
-    f32 f62C;               // 0x62C: 1.2 at set-up
+    f32 scaleMin;           // 0x628: 0.8 at set-up
+    f32 scaleMax;           // 0x62C: 1.2 at set-up
     f32 spread;             // 0x630: the random speed slot 72 gives each released object
     f32 spin;               // 0x634: the random spin it gives them
     s32 key638;             // 0x638: the id key slot 72 checks each with (func_001833F0)
@@ -70,7 +70,7 @@ struct MaskedCollider : Collider {
     u8 pad69C[0x6A0 - 0x69C];
     Vec02 point6A0;         // 0x6A0: where slot 72 scatters, in its own frame
     s32 scatter6B0;         // 0x6B0: what it scatters (func_00152010)
-    void* f6B4;             // 0x6B4: a block of 0x24 bytes (slot 9 copies it; func_0013DAF0 makes it)
+    void* soundParams;      // 0x6B4: a block of 0x24 bytes (slot 9 copies it; func_0013DAF0 makes it)
     u8 pad6B8[0x6C0 - 0x6B8];
 
     const Desc20* desc20() const { return (const Desc20*)desc; }
@@ -92,28 +92,28 @@ struct CountedObject : PlayerFlaggedCollider {
 typedef char check_CountedObject[sizeof(CountedObject) == 0x6D0 ? 1 : -1];
 
 struct PooledHolder : PlayerFlaggedCollider {
-    s32 f6C0;               // 0x6C0: -1 at set-up; the kind of object slot 16 looks up
+    s32 templateId;         // 0x6C0: -1 at set-up; the kind of object slot 16 looks up
     s32 cnt;                // 0x6C4
-    BaseObject* p6C8;              // 0x6C8: slot 72 lets go of it
-    PooledObject* p6CC;              // 0x6CC: the object of class 0x46 it holds while its state is 5 (func_0014FEC0)
-    f32 f6D0;               // 0x6D0: how long before func_0014FEC0 is tried again
+    BaseObject* heldObject;        // 0x6C8: slot 72 lets go of it
+    PooledObject* reservedObject;    // 0x6CC: the object of class 0x46 it holds while its state is 5 (func_0014FEC0)
+    f32 acquireDelay;       // 0x6D0: how long before func_0014FEC0 is tried again
     u8 pad6D4[0x6D8 - 0x6D4];
-    f32 f6D8;               // 0x6D8: the clock when func_0014FEC0 took the object
-    s32 f6DC;               // 0x6DC
-    PooledObject* p6E0;              // 0x6E0
+    f32 acquireTime;        // 0x6D8: the clock when func_0014FEC0 took the object
+    s32 throwTarget;        // 0x6DC
+    PooledObject* targetObject;      // 0x6E0
     u8 pad6E4[0x6F0 - 0x6E4];
-    Vec02 q6F0[4];          // 0x6F0
-    BaseObject* f730;              // 0x730
+    Vec02 savedPose[4];     // 0x6F0
+    BaseObject* savedParent;       // 0x730
     PlacedObject* p734;              // 0x734
     PlacedObject* p738;              // 0x738
-    void* p73C;             // 0x73C
-    void* p740;             // 0x740
+    void* stateGraph;       // 0x73C
+    void* walker;           // 0x740
     s32 count744;           // 0x744
     s32 items748[8];        // 0x748: object ids
     s32 count768;           // 0x768
     void* items76C[8];      // 0x76C
-    s32 f78C;               // 0x78C
-    void* f790[8];          // 0x790
+    s32 collectedCount;     // 0x78C
+    void* collected[8];     // 0x790
     s32 f7B0;               // 0x7B0
     u8 pad7B4[0x7C0 - 0x7B4];
 };
@@ -128,16 +128,16 @@ struct Alloc24 {
 
 struct C24 : PlayerFlaggedCollider {
     void* x6C0;             // 0x6C0: the path object it follows (func_00182748)
-    void* x6C4;             // 0x6C4: loaded (D_00264230)
-    StateWalker* x6C8;          // 0x6C8: a handle func_001B6290 makes for x6C4
+    void* stateGraph;       // 0x6C4: loaded (D_00264230)
+    StateWalker* walker;        // 0x6C8: a handle func_001B6290 makes for x6C4
     f32 f6CC;               // 0x6CC
     s32 f6D0;               // 0x6D0
     f32 f6D4;               // 0x6D4
     f32 f6D8;               // 0x6D8
-    f32 f6DC;               // 0x6DC
-    f32 f6E0;               // 0x6E0
+    f32 levelLimit;         // 0x6DC
+    f32 levelRate;          // 0x6E0
     f32 f6E4;               // 0x6E4: the level between 0 and f6DC, raised by f6E0 each second (func_00182548)
-    Alloc24* x6E8;          // 0x6E8
+    Alloc24* curveTable;    // 0x6E8
     void* x6EC;             // 0x6EC: loaded (D_00264230)
 };
 
@@ -153,7 +153,7 @@ struct MassScalingCollider : MaskedCollider {
 typedef char check_MassScalingCollider[sizeof(MassScalingCollider) == 0x6D0 ? 1 : -1];
 
 struct LatchedSwitchCollider : MassScalingCollider {
-    s32 f6D0;               // 0x6D0: the mode of the owner message it sends (InitOwnerMessage)
+    s32 ownerMessageMode;   // 0x6D0: the mode of the owner message it sends (InitOwnerMessage)
     SwitchedCollider* sel6D4;            // 0x6D4
     u8 pad6D8[0x6E0 - 0x6D8];
 };

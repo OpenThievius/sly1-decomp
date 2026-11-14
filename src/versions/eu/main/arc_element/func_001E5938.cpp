@@ -41,12 +41,12 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
                 u8* c = found;
                 while (c != 0) {
                     s32 i;
-                    for (i = 0; i < self->f638; i++) {
-                        if (((u8**)self->f63C)[i] == c) {
+                    for (i = 0; i < self->linkedCount; i++) {
+                        if (((u8**)self->linkedObjects)[i] == c) {
                             break;
                         }
                     }
-                    if (i < self->f638) {
+                    if (i < self->linkedCount) {
                         break;
                     }
                     c = *(u8**)(c + 0x18);

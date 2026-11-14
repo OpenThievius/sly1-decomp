@@ -22,8 +22,8 @@ void DrawWarpMenu(WarpMenu_eu* self)
     }
     f32 one = 1.0f;
     Camera* cam = g_camera;
-    f32 keep1 = cam->f1C4;
-    f32 keep2 = cam->f1C8;
+    f32 keep1 = cam->zoom;
+    f32 keep2 = cam->zoomGoal;
     SnapCameraZoom(cam, one);
     if (g_coloredTriangleSet != 0) {
         Vec02 v;
@@ -31,10 +31,10 @@ void DrawWarpMenu(WarpMenu_eu* self)
         WarpColor inner;
         WarpColor outer;
         f32 b2 = self->blend * self->blend;
-        Vu0::Q(v) = Vu0::Q(self->current->q540);
+        Vu0::Q(v) = Vu0::Q(self->current->smoothPoint);
         Camera* g = g_camera;
         Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
-        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;
         out[1] = out[1] * -234.305084f + 234.305084f;
@@ -67,7 +67,7 @@ void DrawWarpMenu(WarpMenu_eu* self)
         }
         f32 pos[2];
         ProjectWarpEntryToScreen(self->current, i, 0, pos);
-        f32 size = e->f24 * self->blend;
+        f32 size = e->dim * self->blend;
         if (AreFloatsNearlyEqual(size, 1.0f, 0.0001f) && i < 9) {
             s32 slot = self->current->slot;
             if ((GetEntryFlags((slot << 8) | i) & 2)
@@ -84,7 +84,7 @@ void DrawWarpMenu(WarpMenu_eu* self)
         if (i < 9) {
             s32 slot = self->current->slot;
             if (GetEntryFlags((slot << 8) | i) & 2) {
-                f32 scale = e->f24;
+                f32 scale = e->dim;
                 s32 flags = *(s32*)((u8*)g_saveData + (slot * 0x44C + i * 0x78) + 0x10);
                 Font* font = GetFontById(3);
                 f32 k = D_eu_0027FDA0[0] * scale;
@@ -109,5 +109,5 @@ void DrawWarpMenu(WarpMenu_eu* self)
         }
     }
     SnapCameraZoom(g_camera, keep1);
-    g_camera->f1C8 = keep2;
+    g_camera->zoomGoal = keep2;
 }

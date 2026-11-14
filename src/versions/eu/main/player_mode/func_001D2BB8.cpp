@@ -8,7 +8,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     if (g_currentMode >= 0) {
         if ((g_modeMasks[g_currentMode] & MaskWorldBitsBySave()) == 0) {
             ShowModeLabel(-1);
-            g_saveData->f19FC = -1;
+            g_saveData->lastHintMode = -1;
         }
     }
     switch (g_currentMode) {
@@ -36,7 +36,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
             if (state == 10) {
                 break;
             }
-            if (state == 2 && g_player->f2228 == 8) {
+            if (state == 2 && g_player->subState == 8) {
                 break;
             }
         }
@@ -48,7 +48,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     case 6:
         ok = 0;
         if (g_player->f2220 != 15) {
-            ok = g_player->f275C == 0;
+            ok = g_player->animSeekValue == 0;
         }
         break;
     case 3:
@@ -63,40 +63,40 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     }
     if (ok && (pad->flags & 3)) {
         s32 m = FindNextTableIndexMatchingMask(pad, g_currentMode, 7, g_modeMasks);
-        g_saveData->f19FC = -1;
+        g_saveData->lastHintMode = -1;
         ShowModeLabel(m);
     }
     switch (g_currentMode) {
     case 4:
         if (((CaptionBox_1D2BB8_eu*)&g_typedTextCaptionBox)->state == 3) {
-            self->f2748 = 0.0f;
-        } else if (pad->keyA8 & 0x10) {
-            self->f2748 = 1.0f;
+            self->speedUpAmount = 0.0f;
+        } else if (pad->buttons & 0x10) {
+            self->speedUpAmount = 1.0f;
         } else {
-            self->f2748 = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->f2748, 0.0f, g_frameStep);
+            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)D_00274F78, 0, self->speedUpAmount, 0.0f, g_frameStep);
         }
-        g_stepScale = self->f2748 * D_00274F84 + (1.0f - self->f2748);
+        g_stepScale = self->speedUpAmount * D_00274F84 + (1.0f - self->speedUpAmount);
         break;
     case 2:
         if (g_padSelectFlags & 3) {
-            self->f2744 = 0;
+            self->slowDownHeld = 0;
         } else if (((CaptionBox_1D2BB8_eu*)&g_typedTextCaptionBox)->state == 3) {
-            self->f2744 = 0;
+            self->slowDownHeld = 0;
         } else if (self->f2220 == 2) {
             if (pad->flags & 0x10) {
                 ClearPadPressedBits(pad, 0x10);
-                self->f2744 = 1;
+                self->slowDownHeld = 1;
             }
-        } else if (pad->keyA8 & 0x10) {
+        } else if (pad->buttons & 0x10) {
             if (MaskWorldBitsBySave() & 0x1000) {
-                self->f2744 = 1;
+                self->slowDownHeld = 1;
             } else {
-                self->f2744 = 0;
+                self->slowDownHeld = 0;
             }
         } else {
-            self->f2744 = 0;
+            self->slowDownHeld = 0;
         }
-        if (self->f2744 != 0) {
+        if (self->slowDownHeld != 0) {
             g_stepScale = D_00274F88[0];
         } else {
             g_stepScale = 1.0f;
@@ -109,7 +109,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         case 2:
             if (pad->flags & 0x10) {
                 ClearPadPressedBits(pad, 0x10);
-                if (self->f690 != 0) {
+                if (self->groundContact != 0) {
                     SetPlayerState(self, 13, 0x37);
                 } else {
                     SetPlayerState(self, 13, 0x36);
@@ -118,7 +118,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         }
         break;
     case 5:
-        if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->f2750 != 0) {
+        if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->contactOwner != 0) {
             ClearPadPressedBits(pad, 0x10);
             SetPlayerState(self, 14, -1);
         }
@@ -130,7 +130,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
                 SetPlayerState(self, 15, -1);
             }
         }
-        if (self->f275C != 0 && 3.0f < g_gameClock.time - self->f2758) {
+        if (self->animSeekValue != 0 && 3.0f < g_gameClock.time - self->animSeekTime) {
             SeekObjects105Animations(self, 0);
         }
         break;

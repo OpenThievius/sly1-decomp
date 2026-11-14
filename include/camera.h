@@ -17,7 +17,7 @@
 // first. The stack's size is the span up to the first controller (no code checks a limit).
 struct Camera : BaseObject {
     u8 pad34[0x40 - 0x34];
-    s32 f40[4];             // 0x40
+    s32 position[4];        // 0x40: the camera's position
     f32 planes[3][4];       // 0x50: the rows of a 3x4 matrix whose columns are the normals of
                             //       four planes through f40 (func_00146038)
     union {
@@ -32,32 +32,32 @@ struct Camera : BaseObject {
     u8 padC4[0xD4 - 0xC4];
     f32 fD4;                // 0xD4: and this
     u8 padD8[0x1C0 - 0xD8];
-    f32 f1C0;               // 0x1C0
-    f32 f1C4;               // 0x1C4
-    f32 f1C8;               // 0x1C8
+    f32 distanceScale;      // 0x1C0: scales the spawner range and the VU1 draw distance
+    f32 zoom;               // 0x1C4: the current zoom
+    f32 zoomGoal;           // 0x1C8: the zoom UpdateCamera approaches
     union {
         s32 i1CC;           // 0x1CC
-        f32 f1CC;           // 0x1CC
+        f32 zoomSpeed;      // 0x1CC: the speed of the zoom approach
     };
-    f32 f1D0;               // 0x1D0
+    f32 zoomProfile;        // 0x1D0: the ramp profile of the zoom approach
     u8 pad1D4[0x1E0 - 0x1D4];
-    f32 f1E0;               // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
-    f32 f1E4;               // 0x1E4
-    f32 f1E8;               // 0x1E8
+    f32 aspectScale;        // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
+    f32 nearDistance;       // 0x1E4: the near clip distance
+    f32 farDistance;        // 0x1E8: the far clip distance
     u8 pad1EC[0x1F0 - 0x1EC];
-    f32 f1F0;               // 0x1F0: ProjectPointToCamera divides the screen x by it
-    f32 f1F4;               // 0x1F4: and the screen y
-    f32 f1F8;               // 0x1F8
-    f32 f1FC;               // 0x1FC
-    f32 f200;               // 0x200
+    f32 projectionScaleX;   // 0x1F0: ProjectPointToCamera divides the screen x by it
+    f32 projectionScaleY;   // 0x1F4: and the screen y
+    f32 fogNear;            // 0x1F8: the distance fog starts
+    f32 fogFar;             // 0x1FC: the distance the fog is full
+    f32 fogStrength;        // 0x200: how strong the fog is at fogFar
     u32 fogColor;           // 0x204: the word func_001B3510 writes to GIF register 0x3D (FOGCOL)
     u8 pad208[0x218 - 0x208];
-    f32 f218;               // 0x218
+    f32 swingStartTime;     // 0x218: the game time the view swing started
     s32 f21C;               // 0x21C
-    s32 f220;               // 0x220
-    s32 f224;               // 0x224
-    s32 f228;               // 0x228
-    f32 f22C;               // 0x22C
+    s32 snapQueued;         // 0x220: set to ask for a snap on the next update
+    s32 snapping;           // 0x224: a snap is in progress this frame
+    s32 hasSnapValue;       // 0x228: set when the snap carries a value
+    f32 snapValue;          // 0x22C: the value a snap with a source carries
     Vec02 v230;             // 0x230: from p to the screen point's place on the view ray (func_00145610)
     Vec02 v240;             // 0x240: D_00248D30 at func_00145610
     u8 pad250[0x2B0 - 0x250];
@@ -68,11 +68,11 @@ struct Camera : BaseObject {
     f32 f2C0;               // 0x2C0
     u8 pad2C4[0x2D0 - 0x2C4];
     s32 f2D0[4];            // 0x2D0
-    void* f2E0;             // 0x2E0
+    void* currentTarget;    // 0x2E0: the target object the camera last tracked
     u8 pad2E4[0x340 - 0x2E4];
-    s32 f340;               // 0x340
+    s32 objectCount;        // 0x340: how many objects are in the list at f344
     void* f344[8];          // 0x344
-    f32 f364;               // 0x364
+    f32 controllerSwitchTime; // 0x364: the game time the first controller last started
     u8 pad368[0x3A0 - 0x368];
     Mat02 rot3A0;           // 0x3A0: a rotation DrawPhasedEffect turns each piece of its strip by
     s32 stackCount;         // 0x3D0: how many entries are in use

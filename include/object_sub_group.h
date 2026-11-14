@@ -16,28 +16,28 @@ struct ObjectSubGroup;
 // 0x7D: its own fields are read in two places only, the child table and what func_001F4500
 // reads from the stream.
 struct ObjectSubGroup : PlacedObject {
-    s32 f2D0;               // 0x2D0: FindActiveObjectSubGroup returns the first group with it set
+    s32 selected;           // 0x2D0: FindActiveObjectSubGroup returns the first group with it set
     void* f2D4;             // 0x2D4: set means the object has something to do after its children
-    s32 f2D8;               // 0x2D8
-    s32 f2DC;               // 0x2DC: tested before the player counts as near (func_001F4AE0)
+    s32 exitsLevel;         // 0x2D8
+    s32 nearCheck;          // 0x2DC: tested before the player counts as near (func_001F4AE0)
     s32 f2E0;               // 0x2E0
-    s32 f2E4;               // 0x2E4: cleared by the load
-    f32 f2E8;               // 0x2E8
+    s32 state;              // 0x2E4: cleared by the load
+    f32 stateStartTime;     // 0x2E8
     s32 f2EC;               // 0x2EC: four values func_001E4C48 reads from the stream
     void* f2F0;             // 0x2F0: the points ReadMeshTables reads
     s32 f2F4;               // 0x2F4
-    void* f2F8;             // 0x2F8: and the links (the face tree)
-    KeyedEntry* f2FC;       // 0x2FC: the level entry it shows (GetEntryIdByKey)
+    void* faceTree;         // 0x2F8: and the links (the face tree)
+    KeyedEntry* levelEntry; // 0x2FC: the level entry it shows (GetEntryIdByKey)
     s32 f300;               // 0x300
     s32 f304;               // 0x304
     s32 f308;               // 0x308
     s32 f30C;               // 0x30C
     s32 count;              // 0x310: how many children
     BaseObject** items;            // 0x314: the children, each created by func_0011E580
-    s32 f318;               // 0x318
-    f32 f31C;               // 0x31C
-    f32 f320;               // 0x320: the time the player must have been in range of f2E8 (func_001F4AE0)
-    f32 f324;               // 0x324
+    s32 exitTarget;         // 0x318
+    f32 fadeTime;           // 0x31C
+    f32 nearWaitTime;       // 0x320: the time the player must have been in range of f2E8 (func_001F4AE0)
+    f32 fadeDelay;          // 0x324
     u8 pad328[0x330 - 0x328];
 };
 

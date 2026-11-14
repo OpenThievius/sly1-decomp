@@ -5,7 +5,7 @@ struct Gx_18C7F8_eu { u8 pad0[0x58C]; s32 f58C; };
 void StartMemoryCardSave(MemoryCard* self)
 {
     if (self->i4F44 != 0) {
-        if ((g_saveData->f19EC & 0x100) == 0) {
+        if ((g_saveData->optionFlags & 0x100) == 0) {
             ((Gx_18C7F8_eu*)&g_pauseMenuElement)->f58C = -1;
             SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x14);
         } else {

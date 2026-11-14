@@ -128,7 +128,7 @@ struct Aim_0017BB78 {
     u8 pad0[0x100];
     Vec02 pos;              // 0x100
     u8 pad110[0x554 - 0x110];
-    s32 f554;               // 0x554
+    s32 targeting;          // 0x554
     u8 pad558[0x560 - 0x558];
     Vec02 aim;              // 0x560
     u8 pad570[0x2530 - 0x570];
@@ -138,18 +138,18 @@ struct Aim_0017BB78 {
 void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 {
     Aim_0017BB78* p = (Aim_0017BB78*)self->f3C;
-    if (self->f54 != 0) {
+    if (self->aimTarget != 0) {
         Vu0::Q(p->mark) = Vu0::Sub(Vu0::Q(p->aim), Vu0::Q(p->pos));
-        p->f554 = 0;
+        p->targeting = 0;
         p->mark.z = 0.0f;
-        self->f54 = 0;
+        self->aimTarget = 0;
     }
     if (target != 0) {
-        p->f554 = 1;
+        p->targeting = 1;
         GetNodeAnchorAndHeading(self, target, &p->aim, 0);
         p->aim.z += 125.0f;
         p->mark = D_00248D30;
-        self->f54 = target;
+        self->aimTarget = target;
     }
 }
 
@@ -159,22 +159,22 @@ s32 IsObjectAttached(BaseObject* self);
 
 void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
 {
-    if (self->f58 != 0) {
-        SetOnOffObjectForcedState(self->f58, -1);
-        self->f58->f2D0 = 0;
+    if (self->forcedOnOffObject != 0) {
+        SetOnOffObjectForcedState(self->forcedOnOffObject, -1);
+        self->forcedOnOffObject->switchedCollider = 0;
         if (self->f5C != 0) {
-            self->f58->desc->m03(self->f58);
+            self->forcedOnOffObject->desc->m03(self->forcedOnOffObject);
         }
-        self->f58 = 0;
+        self->forcedOnOffObject = 0;
     }
     if (next != 0) {
-        self->f58 = next;
+        self->forcedOnOffObject = next;
         s32 isNull = IsObjectAttached(next) == 0;
         self->f5C = isNull;
         if (isNull != 0) {
             next->desc->m02(next);
         }
-        next->f2D0 = self->f3C;
+        next->switchedCollider = self->f3C;
         SetOnOffObjectForcedState(next, 1);
     }
 }
@@ -213,17 +213,17 @@ extern f32 g_gameTime;
 
 void StartNextQueueEntry(EntryQueue* self)
 {
-    s32 n = self->f40 + 1;
-    self->f40 = n;
-    if (n >= self->f34) {
+    s32 n = self->entryIndex + 1;
+    self->entryIndex = n;
+    if (n >= self->entryCount) {
         return;
     }
     QueueEntry* e = &((QueueEntry*)self->buffer)[n];
     Player* p = (Player*)self->f3C;
-    BaseObject* obj = (BaseObject*)FindFirstObjectById(self->world, 0x104, e->id, self->f4C);
+    BaseObject* obj = (BaseObject*)FindFirstObjectById(self->world, 0x104, e->id, self->lastFoundObject);
     switch (e->kind) {
     case 0:
-        self->f4C = obj;
+        self->lastFoundObject = obj;
         break;
     case 1: {
         Vec02 pos;
@@ -234,9 +234,9 @@ void StartNextQueueEntry(EntryQueue* self)
             goto done;
         }
         GetNodeAnchorAndHeading(self, obj, &pos, &heading);
-        p->v6A0 = pos;
+        p->groundContactPoint = pos;
         pos.z += 75.0f;
-        p->v560 = pos;
+        p->focusPoint = pos;
         p->desc02()->m1D(p, &pos);
         p->f638 = heading;
         BuildAxisAngleMatrix(&g_unitZVector, &rot, heading);
@@ -244,27 +244,27 @@ void StartNextQueueEntry(EntryQueue* self)
         p->desc02()->m20(p, (Vec02*)&D_00248D30);
         p->desc02()->m21(p, (Vec02*)&D_00248D30);
         SetPlayerState(p, 2, 2);
-        p->f690 = 0;
-        self->f48 = 0;
+        p->groundContact = 0;
+        self->pendingEntry = 0;
         break;
     }
     case 6: {
-        self->f48 = e;
+        self->pendingEntry = e;
         if (obj == 0) {
             break;
         }
         if (IsObjectOfKind(obj, 0x7F) || IsObjectOfKind(obj, 0x6F) || IsObjectOfKind(obj, 0x3A)
             || IsObjectOfKind(obj, 0x70) || IsObjectOfKind(obj, 0x76)) {
-            s32 t = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)p, obj, &p->f239C);
+            s32 t = ChooseNearbyPlayerTarget((Chooser_1CDFB8*)p, obj, &p->targetMode);
             if (t != -1) {
                 SetPlayerState(p, 6, t);
             }
         }
-        if (p->f2220 == 6 && p->f239C == 4) {
+        if (p->f2220 == 6 && p->targetMode == 4) {
             Vec02 pos;
             GetNodeAnchorAndHeading(self, obj, &pos, 0);
-            TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->f23BC)->frame), &pos, &pos);
-            QueueTargetDriver* d = ((QueueTargetHolder*)p->f23BC)->driver;
+            TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->targetTrack)->frame), &pos, &pos);
+            QueueTargetDriver* d = ((QueueTargetHolder*)p->targetTrack)->driver;
             if (d->vt->m0A == 0) {
                 break;
             }
@@ -274,10 +274,10 @@ void StartNextQueueEntry(EntryQueue* self)
     }
     case 7: {
         Vec02 pos;
-        self->f48 = e;
+        self->pendingEntry = e;
         GetNodeAnchorAndHeading(self, obj, &pos, 0);
-        TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->f2208)->frame), &pos, &pos);
-        QueueTargetDriver* d = ((QueueTargetHolder*)p->f2208)->driver;
+        TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->aimCurve)->frame), &pos, &pos);
+        QueueTargetDriver* d = ((QueueTargetHolder*)p->aimCurve)->driver;
         if (d->vt->m0A == 0) {
             break;
         }
@@ -286,7 +286,7 @@ void StartNextQueueEntry(EntryQueue* self)
     }
     case 4:
         if (obj != 0) {
-            self->f48 = e;
+            self->pendingEntry = e;
             break;
         }
         goto done;
@@ -296,7 +296,7 @@ void StartNextQueueEntry(EntryQueue* self)
         Vec02 goal;
         Vec02 drift;
         f32 rise;
-        self->f48 = e;
+        self->pendingEntry = e;
         s32 sub = e->value != 0 ? 0 : 2;
         if (obj == 0) {
             SetPlayerState(p, 2, sub);
@@ -304,17 +304,17 @@ void StartNextQueueEntry(EntryQueue* self)
         }
         start = p->pos;
         rise = 0.0f;
-        p->f224C = 0;
+        p->jumpKind = 0;
         switch (p->f2220) {
         case 1:
-            p->f224C = 2;
+            p->jumpKind = 2;
             break;
         case 3:
         case 7:
-            p->f224C = 1;
+            p->jumpKind = 1;
             break;
         case 8:
-            p->f224C = 4;
+            p->jumpKind = 4;
             break;
         }
         switch (e->value) {
@@ -357,7 +357,7 @@ void StartNextQueueEntry(EntryQueue* self)
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(goal), Vu0::Q(p->pos));
             f32 h = ArctangentOfRatio(d.y, d.x);
             p->f638 = h;
-            p->f630 = h;
+            p->stickHeading = h;
         }
         p->f2250 = e->value10;
         break;
@@ -371,7 +371,7 @@ void StartNextQueueEntry(EntryQueue* self)
         if (e->state != 0) {
             goto done;
         }
-        self->f50 = player;
+        self->animationPlayer = player;
         break;
     }
     case 10:
@@ -406,7 +406,7 @@ void StartNextQueueEntry(EntryQueue* self)
         break;
     }
 done:
-    self->f44 = g_gameTime;
+    self->entryStartTime = g_gameTime;
 }
 
 extern f32 g_gameTime;
@@ -417,13 +417,13 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
 {
     s32 done;
     Player* pl = (Player*)self->f3C;
-    void* obj = FindFirstObjectById(pl->world, 0x104, e->id, self->f4C);
+    void* obj = FindFirstObjectById(pl->world, 0x104, e->id, self->lastFoundObject);
     switch (e->kind) {
     default:
         done = 1;
         break;
     case 4:
-        done = e->valueF < g_gameTime - self->f44;
+        done = e->valueF < g_gameTime - self->entryStartTime;
         break;
     case 5:
         done = pl->f2220 != 2;
@@ -440,21 +440,21 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         break;
     }
     case 7:
-        done = __builtin_fabsf(pl->f2410 - self->f64) < D_00263E3C;
+        done = __builtin_fabsf(pl->pathPos - self->f64) < D_00263E3C;
         break;
     case 9: {
-        void* p = self->f50;
+        void* p = self->animationPlayer;
         done = p == 0 || ((f32*)p)[6] == 0.0f;
         if (done && p != 0) {
             StopAnimationPlayer((AnimationPlayer*)p);
-            self->f50 = 0;
+            self->animationPlayer = 0;
         }
         break;
     }
     case 8:
         switch (e->value) {
         case 2:
-            done = pl->f223C == -1;
+            done = pl->aimMode == -1;
             break;
         case 4:
             done = pl->f2220 != 2;
@@ -468,9 +468,9 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         }
         break;
     case 12:
-        if (pl->f2220 == 2 && (u32)(pl->f2228 - 12) < 2) {
+        if (pl->f2220 == 2 && (u32)(pl->subState - 12) < 2) {
             done = 0;
-        } else if (pl->f2220 == 6 && (u32)pl->f239C < 2) {
+        } else if (pl->f2220 == 6 && (u32)pl->targetMode < 2) {
             SetPlayerState(pl, 0, -1);
             done = 1;
         } else {
@@ -485,16 +485,16 @@ void StartNextQueueEntry(EntryQueue* self);
 
 void AdvanceEntryQueue(EntryQueue* self)
 {
-    if (self->f40 < 0 && self->f34 > 0)
+    if (self->entryIndex < 0 && self->entryCount > 0)
         StartNextQueueEntry(self);
-    while (self->f40 < self->f34) {
-        QueueEntry* entry = &((QueueEntry*)self->buffer)[self->f40];
+    while (self->entryIndex < self->entryCount) {
+        QueueEntry* entry = &((QueueEntry*)self->buffer)[self->entryIndex];
         if (entry->state == 0 && !CheckQueueEntryDone(self, entry))
             break;
         StartNextQueueEntry(self);
     }
-    if (self->f48 && CheckQueueEntryDone(self, (QueueEntry*)self->f48))
-        self->f48 = 0;
+    if (self->pendingEntry && CheckQueueEntryDone(self, (QueueEntry*)self->pendingEntry))
+        self->pendingEntry = 0;
 }
 
 struct TargetCand;
@@ -525,130 +525,130 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
     Vec02 d;
     Vec02 dir;
     f32 heading;
-    QueueEntry* e = (QueueEntry*)self->f48;
+    QueueEntry* e = (QueueEntry*)self->pendingEntry;
     Player* p = (Player*)self->f3C;
     if (e == 0) {
-        p->f634 = 0.0f;
+        p->stickLevel = 0.0f;
         if (p->f2220 == 6) {
-            pad->keyA8 |= 0x20;
+            pad->buttons |= 0x20;
         }
         return;
     }
     {
-        BaseObject* o = (BaseObject*)FindFirstObjectById(p->world, 0x104, e->id, self->f4C);
+        BaseObject* o = (BaseObject*)FindFirstObjectById(p->world, 0x104, e->id, self->lastFoundObject);
         switch (e->kind) {
         case 4:
             if (o != 0) {
                 GetNodeAnchorAndHeading(self, o, 0, &heading);
-                p->f630 = p->f638 = heading;
+                p->stickHeading = p->f638 = heading;
             }
-            p->f634 = 0.0f;
+            p->stickLevel = 0.0f;
             if (p->f2220 == 6) {
-                pad->keyA8 |= 0x20;
+                pad->buttons |= 0x20;
             }
             return;
         case 5:
             if (p->f2220 == 2 && o != 0) {
-                if ((p->f2228 == 2 && D_00263E40 < g_gameTime - p->f222C) || (p->f2228 == 3 && D_00263E44 < g_gameTime - p->f222C)) {
+                if ((p->subState == 2 && D_00263E40 < g_gameTime - p->subStateStartTime) || (p->subState == 3 && D_00263E44 < g_gameTime - p->subStateStartTime)) {
                     if (IsObjectOfKind(o, 0x81) || IsObjectOfKind(o, 0x71) || IsObjectOfKind(o, 0x6F) || IsObjectOfKind(o, 0x7F) || IsObjectOfKind(o, 0x70) || IsObjectOfKind(o, 0x76)) {
                         SetPlayerState(p, 2, ChoosePlayerTargetByCost((Chooser*)p, (TargetCand*)o));
                     }
                 }
             }
-            if (e->value == 2 && p->f2228 == 2 && p->f2498 != 0) {
+            if (e->value == 2 && p->subState == 2 && p->f2498 != 0) {
                 SetPlayerState(p, 2, 3);
             }
-            p->f634 = 0.0f;
+            p->stickLevel = 0.0f;
             return;
         case 6:
             if (o != 0) {
-                if (p->f2220 == 6 && p->f239C == 4) {
-                    TrackRecord_17C718* r = (TrackRecord_17C718*)p->f23BC;
+                if (p->f2220 == 6 && p->targetMode == 4) {
+                    TrackRecord_17C718* r = (TrackRecord_17C718*)p->targetTrack;
                     TrackShape_17C718* s = r->shape;
                     void* frame = r->frame;
                     if (s->desc->m1 != 0) {
-                        s->desc->m1(s, p->f23C0, &a, &b);
+                        s->desc->m1(s, p->trackPos, &a, &b);
                     }
                     TransformPointBetweenFrames((PlacedObject*)frame, 0, &a, &c);
                     TransformDirectionBetweenFrames((PlacedObject*)frame, 0, &b, &d);
                     d.z = 0.0f;
                     Vu0::Set(d, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)));
                     s32 flip = 0;
-                    p->f630 = ArctangentOfRatio(d.y, d.x);
-                    s = ((TrackRecord_17C718*)p->f23BC)->shape;
+                    p->stickHeading = ArctangentOfRatio(d.y, d.x);
+                    s = ((TrackRecord_17C718*)p->targetTrack)->shape;
                     if (s->looped != 0) {
                         f32 fwd;
                         f32 back;
-                        if (self->f60 < p->f23C0) {
-                            fwd = p->f23C0 - self->f60;
-                            back = s->desc->m7(s) + self->f60 - p->f23C0;
+                        if (self->f60 < p->trackPos) {
+                            fwd = p->trackPos - self->f60;
+                            back = s->desc->m7(s) + self->f60 - p->trackPos;
                         } else {
-                            back = self->f60 - p->f23C0;
-                            fwd = s->desc->m7(s) + p->f23C0 - self->f60;
+                            back = self->f60 - p->trackPos;
+                            fwd = s->desc->m7(s) + p->trackPos - self->f60;
                         }
                         if (fwd < back) {
                             flip = 1;
                         }
-                    } else if (self->f60 < p->f23C0) {
+                    } else if (self->f60 < p->trackPos) {
                         flip = 1;
                     }
                     if (flip) {
-                        p->f630 = WrapAngle(p->f630 + 3.14159274f);
+                        p->stickHeading = WrapAngle(p->stickHeading + 3.14159274f);
                     }
                 } else {
                     GetNodeAnchorAndHeading(self, o, &a, 0);
                     Vu0::Q(b) = Vu0::Sub(Vu0::Q(a), Vu0::Q(p->v140));
-                    p->f630 = ArctangentOfRatio(b.y, b.x);
+                    p->stickHeading = ArctangentOfRatio(b.y, b.x);
                 }
             }
-            p->f634 = __builtin_fabsf(e->valueF);
-            if (p->f2220 == 6 && p->f239C < 2 && p->f239C >= 0) {
-                pad->keyA8 |= 0x20;
+            p->stickLevel = __builtin_fabsf(e->valueF);
+            if (p->f2220 == 6 && p->targetMode < 2 && p->targetMode >= 0) {
+                pad->buttons |= 0x20;
             }
             return;
         case 7: {
-            TrackShape_17C718* s = ((TrackRecord_17C718*)p->f2208)->shape;
+            TrackShape_17C718* s = ((TrackRecord_17C718*)p->aimCurve)->shape;
             if (s->desc->m2 != 0) {
-                s->desc->m2(s, p->f2410 + D_00274F14, &a, 0);
-                s = ((TrackRecord_17C718*)p->f2208)->shape;
+                s->desc->m2(s, p->pathPos + D_00274F14, &a, 0);
+                s = ((TrackRecord_17C718*)p->aimCurve)->shape;
                 if (s->desc->m2 != 0) {
-                    s->desc->m2(s, p->f2410 - D_00274F14, &b, 0);
+                    s->desc->m2(s, p->pathPos - D_00274F14, &b, 0);
                 }
             }
-            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->f2208)->frame), 0, &a, &a);
-            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->f2208)->frame), 0, &b, &b);
+            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->aimCurve)->frame), 0, &a, &a);
+            TransformPointBetweenFrames((PlacedObject*)(((TrackRecord_17C718*)p->aimCurve)->frame), 0, &b, &b);
             ProjectPointToCamera(g_camera, &a, (f32*)&c);
             ProjectPointToCamera(g_camera, &b, (f32*)&d);
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(c), Vu0::Q(d));
             dir.z = 0.0f;
             Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Q(dir), Vu0::Q(g_unitYVector)));
             s32 flip = 0;
-            p->f630 = ArctangentOfRatio(dir.y, dir.x);
-            pad->f40 = dir.x;
-            pad->f44 = dir.y;
-            s = ((TrackRecord_17C718*)p->f2208)->shape;
+            p->stickHeading = ArctangentOfRatio(dir.y, dir.x);
+            pad->stickX = dir.x;
+            pad->stickY = dir.y;
+            s = ((TrackRecord_17C718*)p->aimCurve)->shape;
             if (s->looped != 0) {
                 f32 fwd;
                 f32 back;
-                if (self->f64 < p->f2410) {
-                    fwd = p->f2410 - self->f64;
-                    back = s->desc->m8(s) + self->f64 - p->f2410;
+                if (self->f64 < p->pathPos) {
+                    fwd = p->pathPos - self->f64;
+                    back = s->desc->m8(s) + self->f64 - p->pathPos;
                 } else {
-                    back = self->f64 - p->f2410;
-                    fwd = s->desc->m8(s) + p->f2410 - self->f64;
+                    back = self->f64 - p->pathPos;
+                    fwd = s->desc->m8(s) + p->pathPos - self->f64;
                 }
                 if (fwd < back) {
                     flip = 1;
                 }
-            } else if (self->f64 < p->f2410) {
+            } else if (self->f64 < p->pathPos) {
                 flip = 1;
             }
             if (flip) {
-                p->f630 = WrapAngle(p->f630 + 3.14159274f);
-                pad->f40 = -pad->f40;
-                pad->f44 = -pad->f44;
+                p->stickHeading = WrapAngle(p->stickHeading + 3.14159274f);
+                pad->stickX = -pad->stickX;
+                pad->stickY = -pad->stickY;
             }
-            p->f634 = 1.0f;
+            p->stickLevel = 1.0f;
             return;
         }
         }
@@ -660,8 +660,8 @@ void AdvanceEntryQueue(EntryQueue* self);
 s32 IsEntryQueueRunning(EntryQueue* self)
 {
     AdvanceEntryQueue(self);
-    if (self->f34 > 0) {
-        return self->f40 < self->f34;
+    if (self->entryCount > 0) {
+        return self->entryIndex < self->entryCount;
     }
     return 0;
 }
@@ -672,11 +672,11 @@ void ResetEntryQueue(EntryQueue* self)
 {
     if (self->f3C != 0) {
         UnbindEntryQueue(self);
-        self->f34 = 0;
+        self->entryCount = 0;
     } else {
-        self->f34 = 0;
+        self->entryCount = 0;
     }
-    self->f40 = 0;
+    self->entryIndex = 0;
 }
 
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
@@ -688,7 +688,7 @@ void BindEntryQueueToObject(EntryQueue* self, Player* player)
 {
     player->entryQueue = self;
     self->f3C = player;
-    self->f40 = -1;
+    self->entryIndex = -1;
     TriggerScriptEvent(self, 0x17, 0, 0);
     if (self->flag68 != 0) {
         SetPadSelectFlags(4);
@@ -707,14 +707,14 @@ void UnbindEntryQueue(EntryQueue* self)
     if (self->f3C != 0) {
         ReplaceQueueOnOffObject(self, 0);
         SetEntryQueueTargetNode(self, 0);
-        if (self->f50 != 0) {
-            StopAnimationPlayer((AnimationPlayer*)self->f50);
-            self->f50 = 0;
+        if (self->animationPlayer != 0) {
+            StopAnimationPlayer((AnimationPlayer*)self->animationPlayer);
+            self->animationPlayer = 0;
         }
         SetGameClockScale(1.0f);
-        self->f40 = self->f34;
-        self->f4C = 0;
-        self->f48 = 0;
+        self->entryIndex = self->entryCount;
+        self->lastFoundObject = 0;
+        self->pendingEntry = 0;
         ((Player*)self->f3C)->entryQueue = 0;
         self->f3C = 0;
         TriggerScriptEvent(self, 25, 0, 0);
@@ -731,12 +731,12 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void* AddQueueEntry(EntryQueue* pool, s32 a, s32 b, s32 c)
 {
-    if (pool->f34 >= 0x80) {
+    if (pool->entryCount >= 0x80) {
         return D_002BE478;
     }
-    s32 n = pool->f34;
+    s32 n = pool->entryCount;
     u8* e = (u8*)pool->buffer + n * 0x14;
-    pool->f34 = n + 1;
+    pool->entryCount = n + 1;
     FillMemory(e, 0, 0x14);
     s32* f = (s32*)e;
     f[0] = a;

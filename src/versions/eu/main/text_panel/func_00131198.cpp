@@ -32,8 +32,8 @@ void SetupTextPanel(Panel_131198_eu* self)
     f32 sy = 0.8f;
     Font* small = self->font->Clone(0.7f, sy);
     self->smallFont = small;
-    small->f30 = 1;
-    small->f38 = 0x3F001;
+    small->useTestWord = 1;
+    small->testWord = 0x3F001;
     self->font = self->font->Clone(0.75f, sy);
     if (IsFontLoaded(2) != 0) {
         self->frame = (Font**)&D_00261148;

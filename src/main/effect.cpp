@@ -623,16 +623,16 @@ f32 D_0026B770[2] = { 0.5f, 1.0f };
 
 EffectOwner* AcquireEffectOwner(World* self, s32 flag)
 {
-    if (flag == 0 && self->f1B3C != 0) {
-        return self->f1B3C;
+    if (flag == 0 && self->sharedEffectOwner != 0) {
+        return self->sharedEffectOwner;
     }
-    EffectOwner* n = self->f1B38;
+    EffectOwner* n = self->freeEffectOwners;
     if (n != 0) {
-        self->f1B38 = n->saved564;
-        n->f550 = flag;
+        self->freeEffectOwners = n->saved564;
+        n->exclusive = flag;
         n->desc->m02(n);
         if (flag == 0) {
-            self->f1B3C = n;
+            self->sharedEffectOwner = n;
         }
     }
     return n;
@@ -652,13 +652,13 @@ void InitEffectOwner(EffectOwner* self)
     f32 k = 1e10f;
     flags |= (u64)1 << 40;
     self->flags538 = wide;
-    self->f80 = k;
+    self->fadeDistanceFar = k;
     self->flags = flags;
 }
 
 void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b)
 {
-    a->f554 = b->f1E8;
+    a->boundsMargin = b->f1E8;
 }
 
 void ReleaseEffectOwner(EffectOwner* self)
@@ -669,10 +669,10 @@ void ReleaseEffectOwner(EffectOwner* self)
         RemoveEffect(node);
         node = (Effect*)cur.Next();
     }
-    self->saved564 = self->world->f1B38;
-    self->world->f1B38 = self;
-    if (self == self->world->f1B3C) {
-        self->world->f1B3C = 0;
+    self->saved564 = self->world->freeEffectOwners;
+    self->world->freeEffectOwners = self;
+    if (self == self->world->sharedEffectOwner) {
+        self->world->sharedEffectOwner = 0;
     }
     UnregisterCollider(self);
 }
@@ -687,13 +687,13 @@ void MoveEffectsAndBounds(EffectOwner* self, f32 dt)
         if (e->start <= g_gameClock[1]) {
             e->vt->m03(e, dt);
         }
-        Vu0::Q(self->boundsMin) = Vu0::Min(Vu0::Q(self->boundsMin), Vu0::Min(Vu0::Q(e->q80), Vu0::Q(e->q90)));
-        Vu0::Q(self->boundsMax) = Vu0::Max(Vu0::Q(self->boundsMax), Vu0::Max(Vu0::Q(e->q80), Vu0::Q(e->q90)));
+        Vu0::Q(self->boundsMin) = Vu0::Min(Vu0::Q(self->boundsMin), Vu0::Min(Vu0::Q(e->pos), Vu0::Q(e->prevPos)));
+        Vu0::Q(self->boundsMax) = Vu0::Max(Vu0::Q(self->boundsMax), Vu0::Max(Vu0::Q(e->pos), Vu0::Q(e->prevPos)));
         e = (Effect*)walk.Next();
     }
-    if (self->f554 != 0.0f) {
+    if (self->boundsMargin != 0.0f) {
         Vec02 m;
-        Vu0::Q(m) = Vu0::Splat(self->f554);
+        Vu0::Q(m) = Vu0::Splat(self->boundsMargin);
         Vu0::Q(self->boundsMin) = Vu0::Sub(Vu0::Q(self->boundsMin), Vu0::Q(m));
         Vu0::Q(self->boundsMax) = Vu0::Add(Vu0::Q(self->boundsMax), Vu0::Q(m));
     }
@@ -704,7 +704,7 @@ void MoveEffectsAndBounds(EffectOwner* self, f32 dt)
     f32 r = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(center), Vu0::Q(self->boundsMax))));
     self->radius3D0 = r;
     self->radius3CC = r;
-    self->f2A8 = r;
+    self->boundRadius = r;
     self->f2A4 = r;
 }
 
@@ -736,7 +736,7 @@ void UpdateEffectOwner(EffectOwner* self, f32 t)
 
 void CollideEffects(EffectOwner* self)
 {
-    if (self->f550 != 1) return;
+    if (self->exclusive != 1) return;
     ContactRow03* l;
     for (l = self->contacts->head; l != 0; l = l->next) {
         ListFrame it0;
@@ -767,7 +767,7 @@ void CollideEffects(EffectOwner* self)
                 Effect* n;
                 for (n = (Effect*)NextListItem::Of(&it1); n != 0; n = (Effect*)NextListItem::Of(&it1)) {
                     if (n->start >= g_gameClock[1]) continue;
-                    s32 cnt = CollectColliderSpansInTree(s2, buf, &n->q90, &n->q80, 4, hits);
+                    s32 cnt = CollectColliderSpansInTree(s2, buf, &n->prevPos, &n->pos, 4, hits);
                     s32 i;
                     for (i = 0; i < cnt; i++) {
                         ColliderSpan* h = &hits[i];
@@ -947,7 +947,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
         friction = self->f128;
     } else {
         bounce = 0.7f;
-        radius = ((PlacedObject*)self->p20)->f2A8;
+        radius = ((PlacedObject*)self->p20)->boundRadius;
         friction = 0.8f;
     }
     f32 t = (g_gameTime - self->start) / self->life;
@@ -968,7 +968,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     Vu0::Vec p;
     if (o->desc->flags & 2) {
         Vec02 v;
-        Vu0::Q(v) = Vu0::RotateTransposed(self->rot50, nv).q;
+        Vu0::Q(v) = Vu0::RotateTransposed(self->rotation, nv).q;
         Vec02 cur;
         Vec02* end = (Vec02*)o->mesh.verts + o->mesh.vertCount;
         Vec02 best;
@@ -982,7 +982,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
                 bestD = d;
             }
         }
-        p = Vu0::RotateUntied(self->rot50, Vu0::Vec::Of(best));
+        p = Vu0::RotateUntied(self->rotation, Vu0::Vec::Of(best));
     } else {
         p = Vu0::MulX(nv, Vu0::Vec::Scalar(-radius));
     }
@@ -1019,8 +1019,8 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
         ((Vec02*)&self->qA0)->z = D_0026B54C;
         ShortenEffectLife(self, D_0026B550);
     }
-    f32 depth = MaxF(0.0f, Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Vec::Of(*at), Vu0::Vec::Of(self->q80)), nv))) + 1.0f;
-    Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Vec::Of(self->q80), nv, Vu0::Vec::Scalar(depth)).q;
+    f32 depth = MaxF(0.0f, Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Vec::Of(*at), Vu0::Vec::Of(self->pos)), nv))) + 1.0f;
+    Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Vec::Of(self->pos), nv, Vu0::Vec::Scalar(depth)).q;
     return 1;
 }
 
@@ -1048,21 +1048,21 @@ void MoveEffect(Effect* self, f32 dt)
     if (IsSpinNegligible(&self->v100) == 0) {
         f32 len;
         Mat02 res;
-        Vu0::Q(self->v100) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(self->f110 * dt + 1.0f));
+        Vu0::Q(self->v100) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(self->spinDrag * dt + 1.0f));
         len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v100)));
         if (0.0001f < len) {
             Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(1.0f / len));
             BuildAxisAngleMatrix(&frame.r[0], (Mat02*)&frame.r[1], len * dt);
-            MulRotationRowsIndexed(&res, *(Mat02*)&frame.r[1], *(Mat02*)self->rot50);
-            *(Mat02*)self->rot50 = res;
+            MulRotationRowsIndexed(&res, *(Mat02*)&frame.r[1], *(Mat02*)self->rotation);
+            *(Mat02*)self->rotation = res;
         }
     }
-    self->q90 = self->q80;
+    self->prevPos = self->pos;
     if (IsVelocityNegligible(&self->qA0) == 0 || IsAccelerationNegligible(&self->qC0) == 0) {
         TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0xB0), dt, (f32*)&frame);
         u128 nv = Vu0::Transform(frame, Vu0::Q(self->qA0), 1.0f);
         Vu0::Q(self->qA0) = nv;
-        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), nv, Vu0::Scalar(dt));
+        Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), nv, Vu0::Scalar(dt));
     }
 }
 
@@ -1074,7 +1074,7 @@ void UpdateEffect(Effect* self, f32 dt)
         return;
     }
     EffectOwner* c = self->owner;
-    if (c->f550 == 1) {
+    if (c->exclusive == 1) {
         return;
     }
     Collider* h = self->target;
@@ -1086,7 +1086,7 @@ void UpdateEffect(Effect* self, f32 dt)
     }
     s32 flag = 0;
     if (IsObjectAttached(h) != 0) {
-        if (FindPlaneTreeNodeForPoint((Vec02*)&self->q80, self->target->tree.nodes) != 0) {
+        if (FindPlaneTreeNodeForPoint((Vec02*)&self->pos, self->target->tree.nodes) != 0) {
             flag = 1;
         }
     }
@@ -1102,7 +1102,7 @@ s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x
 struct EffectDraw {
     f32 m[4][4];            // 0x00
     f32 alpha;              // 0x40
-    f32 f44;                // 0x44: 1.0
+    f32 scale;              // 0x44: 1.0
 };
 
 s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
@@ -1118,14 +1118,14 @@ s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
     f32 a;
     ClampedQuadratic::Get(a, (const QuadraticCoeffs*)&self->q40, t);
     f32 b = ClampedQuadratic::Eval((const QuadraticCoeffs*)&self->q30, t);
-    f32 radius = o->f2A8 * b;
+    f32 radius = o->boundRadius * b;
     f32 fade;
-    u128 d = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(cam->f40));
+    u128 d = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(cam->position));
     u128 ones = Vu0::Ones();
     if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Scalar(radius)) ^ 0xF0) != 0) {
         return 1;
     }
-    if (ComputeCameraDistanceFade(cam, d, &fade, radius, o->f80) == 0) {
+    if (ComputeCameraDistanceFade(cam, d, &fade, radius, o->fadeDistanceFar) == 0) {
         return 0;
     }
     if (a < 0.0001f && b < 0.0001f) {
@@ -1136,13 +1136,13 @@ s32 DrawEffectAt(Effect* self, Camera* cam, Vec02* pos, f32 (*rot)[4])
     Vu0::Q(scale) = Vu0::Splat(b);
     BuildScaledTransformMatrix(&pos->x, rot, &scale.x, draw.m);
     draw.alpha = a * fade;
-    draw.f44 = 1.0f;
+    draw.scale = 1.0f;
     o->desc02()->m26(o, cam, &draw);
-    f32 keep = o->f28C;
+    f32 keep = o->xyScale;
     if (0.0f < keep) {
-        o->f28C = keep * b;
+        o->xyScale = keep * b;
         SubmitScaledPlacedObjectTransform(o, cam, (Quad16*)&draw);
-        o->f28C = keep;
+        o->xyScale = keep;
     }
     return 1;
 }
@@ -1152,13 +1152,13 @@ void DrawEffect(Effect* self, void* a1)
     u8 scratch[0x40];
     void* a2;
     void* a3;
-    if (self->p114 != 0) {
-        ComputeOscillatorDisplacement((Oscillator*)self->p114, 50.0f, (Vec02*)&self->q80, (Vec02*)self->rot50, (Vec02*)scratch, (Vec02*)(scratch + 0x10), 0);
+    if (self->oscillator != 0) {
+        ComputeOscillatorDisplacement((Oscillator*)self->oscillator, 50.0f, (Vec02*)&self->pos, (Vec02*)self->rotation, (Vec02*)scratch, (Vec02*)(scratch + 0x10), 0);
         a2 = scratch;
         a3 = scratch + 0x10;
     } else {
-        a2 = &self->q80;
-        a3 = self->rot50;
+        a2 = &self->pos;
+        a3 = self->rotation;
     }
     s32 r = DrawEffectAt(self, (Camera*)a1, (Vec02*)a2, (f32 (*)[4])a3);
     if (r == 0) {
@@ -1195,9 +1195,9 @@ void EndEffectWithImpact(Effect* self, s32 flag)
 {
     if (flag != 0) {
         ColliderSpan s[16];
-        *(Quad219C*)&s[0].q[0] = self->q80;
+        *(Quad219C*)&s[0].q[0] = self->pos;
         if (self->target->tree.nodes != 0) {
-            CollectTreeNodeSpans(self->target->tree.nodes, (Vec02*)&self->q90, (Vec02*)&self->q80, 0, 0x10, s);
+            CollectTreeNodeSpans(self->target->tree.nodes, (Vec02*)&self->prevPos, (Vec02*)&self->pos, 0, 0x10, s);
         }
         Effect* p = CreateEffect(4, 0);
         if (p != 0) {
@@ -1205,7 +1205,7 @@ void EndEffectWithImpact(Effect* self, s32 flag)
             p->life = 0.75f;
             p->m30[1] = 30.0f;
             if (self->target->f278 != 0) {
-                p->p114 = (void*)((s32*)self->target->f278)[3];
+                p->oscillator = (void*)((s32*)self->target->f278)[3];
             }
         }
         RemoveEffect(self);
@@ -1253,7 +1253,7 @@ void MoveDriftingEffect(Effect* self, f32 dt)
         f32 speed = RandomFloatInRange(100.0f, (1.0f - r * 3.3333333f) * 300.0f + 100.0f);
         ComputeSinCos(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
         Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(side[0]), Vu0::Scalar(s * speed), Vu0::Q(side[1]), Vu0::Scalar(c * speed));
-        Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(push), Vu0::Scalar(dt));
+        Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(push), Vu0::Scalar(dt));
     }
 }
 
@@ -1321,12 +1321,12 @@ void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02*
 void DrawDroppingEffect(Effect* self, void* a1)
 {
     DrawEffect(self, a1);
-    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(self->q90));
+    u128 d = Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(self->prevPos));
     if (100.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
         f32 t = (g_gameTime - self->start) / self->life;
         f32 x;
         ClampedQuadratic::Get(x, (const QuadraticCoeffs*)&self->q40, t);
-        DrawBeamBetweenPoints((PlacedObject*)g_currentWorld->slot1CE8[7], (PlacedObject*)a1, (Vec02*)&self->q90, (Vec02*)&self->q80, 0.1f, x);
+        DrawBeamBetweenPoints((PlacedObject*)g_currentWorld->slot1CE8[7], (PlacedObject*)a1, (Vec02*)&self->prevPos, (Vec02*)&self->pos, 0.1f, x);
     }
 }
 
@@ -1355,7 +1355,7 @@ void DrawStreakEffect(Effect* self, void* a1)
     if (t < m) {
         m = t;
     }
-    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(self->qA0), Vu0::Scalar(-m));
+    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->qA0), Vu0::Scalar(-m));
     f32 p = t / self->life;
     f32 x;
     ClampedQuadratic::Get(x, (const QuadraticCoeffs*)&self->q40, p);
@@ -1363,7 +1363,7 @@ void DrawStreakEffect(Effect* self, void* a1)
     if (x <= 0.0f || y <= 0.0f) {
         RemoveEffect(self);
     } else {
-        DrawBeamBetweenPoints((PlacedObject*)self->p20, (PlacedObject*)a1, &pos, (Vec02*)&self->q80, y, x);
+        DrawBeamBetweenPoints((PlacedObject*)self->p20, (PlacedObject*)a1, &pos, (Vec02*)&self->pos, y, x);
     }
 }
 
@@ -1418,7 +1418,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
     case 1:
         RemoveEffectCallback(self->p124, (void*)OnTrailAnchorEnded, self);
         if (kind == 0) {
-            Vu0::Q(self->q90) = Vu0::Q(self->p124->q80);
+            Vu0::Q(self->prevPos) = Vu0::Q(self->p124->pos);
         }
         self->i120 = kind;
         break;
@@ -1427,9 +1427,9 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
         ((void (*)(BaseObject*, void*, void*))((s32*)anchor->desc)[0x78 / 4])(anchor, (void*)OnTrailAnchorEnded, self);
         if (kind == 0) {
             if (extra != 0) {
-                Vu0::Q(self->q90) = Vu0::Q(*(Quad219C*)extra);
+                Vu0::Q(self->prevPos) = Vu0::Q(*(Quad219C*)extra);
             } else {
-                Vu0::Q(self->q90) = Vu0::Q(((PlacedObject*)self->p128)->v140);
+                Vu0::Q(self->prevPos) = Vu0::Q(((PlacedObject*)self->p128)->v140);
             }
         }
         self->i120 = kind;
@@ -1442,7 +1442,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
     switch (kind) {
     case 1: {
         Effect* other = (Effect*)extra;
-        Vu0::Q(self->q80) = Vu0::Q(other->q80);
+        Vu0::Q(self->pos) = Vu0::Q(other->pos);
         Vu0::Q(self->qA0) = Vu0::Q(other->qA0);
         self->p124 = other;
         AddEffectCallback(other, (void*)OnTrailAnchorEnded, self);
@@ -1450,7 +1450,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
     }
     case 2: {
         PlacedObject* other = (PlacedObject*)extra;
-        Vu0::Q(self->q80) = Vu0::Q(other->v140);
+        Vu0::Q(self->pos) = Vu0::Q(other->v140);
         Vu0::Q(self->qA0) = Vu0::Q(other->v150);
         self->p128 = (Effect*)other;
         ((void (*)(BaseObject*, void*, void*))((s32*)other->desc)[0x74 / 4])(other, (void*)OnTrailAnchorEnded, self);
@@ -1466,7 +1466,7 @@ void SplitTrailSegment(Effect* self)
 {
     Effect* d = CreateEffect(10, 0);
     if (d != 0) {
-        d->vt->m00(d, &self->q80, 0.0f, 0);
+        d->vt->m00(d, &self->pos, 0.0f, 0);
         d->i20 = self->i20;
         d->fB0 = self->fB0;
         d->q40 = self->q40;
@@ -1499,15 +1499,15 @@ void SplitTrailSegment(Effect* self)
 void MoveTrailSegment(Effect* self, f32 dt)
 {
     Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Q(self->qA0), Vu0::Scalar(self->fB0 * dt + 1.0f), Vu0::Q(self->qC0), Vu0::Scalar(dt));
-    Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(self->qA0), Vu0::Scalar(dt));
+    Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->qA0), Vu0::Scalar(dt));
     Vec02* vel;
     Vec02* pos;
     switch (self->i120) {
     case 0:
-        Vu0::Q(self->q90) = Vu0::MulAddX(Vu0::Q(self->q90), Vu0::Q(self->qA0), Vu0::Scalar(dt));
+        Vu0::Q(self->prevPos) = Vu0::MulAddX(Vu0::Q(self->prevPos), Vu0::Q(self->qA0), Vu0::Scalar(dt));
         return;
     case 1:
-        pos = (Vec02*)&self->p124->q80;
+        pos = (Vec02*)&self->p124->pos;
         vel = (Vec02*)&self->p124->qA0;
         break;
     case 2: {
@@ -1527,7 +1527,7 @@ void MoveTrailSegment(Effect* self, f32 dt)
         SetTrailSegmentAnchor(self, 0, 0);
         return;
     }
-    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(*pos));
+    u128 d = Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(*pos));
     if (625.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
         SplitTrailSegment(self);
     }
@@ -1544,13 +1544,13 @@ void DrawTrailSegment(Effect* self, Camera* cam)
         RemoveEffect(self);
         return;
     }
-    f32 radius = o->f2A8;
+    f32 radius = o->boundRadius;
     s32 in = 0;
-    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(cam->f40));
+    u128 d = Vu0::Sub(Vu0::Q(self->pos), Vu0::Q(cam->position));
     u128 ones = Vu0::Ones();
     Vu0::Q(r) = Vu0::FromFloat(radius);
     if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, Vu0::Q(r)) ^ 0xF0) == 0) {
-        in = ComputeCameraDistanceFade(cam, d, &fade, radius, o->f80) != 0;
+        in = ComputeCameraDistanceFade(cam, d, &fade, radius, o->fadeDistanceFar) != 0;
     }
     if (in == 0) {
         return;
@@ -1570,10 +1570,10 @@ void DrawTrailSegment(Effect* self, Camera* cam)
             to = (u8*)self->p128 + 0x140;
             break;
         case 0:
-            to = &self->q90;
+            to = &self->prevPos;
             break;
         }
-        DrawBeamBetweenPoints((PlacedObject*)self->p20, (PlacedObject*)cam, (Vec02*)&self->q80, (Vec02*)to, b * 100.0f, a * fade);
+        DrawBeamBetweenPoints((PlacedObject*)self->p20, (PlacedObject*)cam, (Vec02*)&self->pos, (Vec02*)to, b * 100.0f, a * fade);
         return;
     }
     RemoveEffect(self);
@@ -1630,7 +1630,7 @@ void SpawnFollowUpEffect(Effect* self, f32 arg)
         arg = -self->m30[2];
         Effect* n = CreateEffect(12, 0);
         if (n != 0) {
-            n->vt->m00(n, &self->q80, arg, 0);
+            n->vt->m00(n, &self->pos, arg, 0);
         }
     }
 }
@@ -1703,7 +1703,7 @@ void MoveCameraSpaceEffect(Effect* self, f32 f)
     EvaluateHermiteVectorSegment(t, (const Vec02*)&self->f120, (const Vec02*)&self->qA0, (const Vec02*)self->params, (const Vec02*)(self->params->rows + 4), f, 1.0f, (Vec02*)&a, (Vec02*)&b, 0);
     *(Quad219C*)&self->f120 = a;
     self->qA0 = b;
-    UnprojectCameraPoint(g_camera, (f32*)&a, (Vec02*)&self->q80);
+    UnprojectCameraPoint(g_camera, (f32*)&a, (Vec02*)&self->pos);
 }
 
 
@@ -1725,7 +1725,7 @@ void DrawCameraSpaceEffect(Effect* self, Camera* cam)
     f32 t;
     Mat02 r2;
     Mat02 r1;
-    Mat02* c = (Mat02*)self->rot50;
+    Mat02* c = (Mat02*)self->rotation;
 
     UnprojectCameraPoint(cam, &self->f120, &point);
     MultiplyMatrices3x3(c, (Mat02*)&cam->g80, &view);
@@ -1779,13 +1779,13 @@ void MoveEmitterEffect(Effect* self, f32 dt)
     f32 u = ClampRange(t, 0.0f, 1.0f);
     Vu0::Q(pa) = Vu0::FromFloats(a.x + u * (a.y + u * a.z), 0.0f, 0.0f);
     Vu0::Q(pb) = Vu0::FromFloats(0.0f, b.x + u * (b.y + u * b.z), 0.0f);
-    Vu0::Q(d1) = Vu0::Sub(Vu0::Q(pa), Vu0::Q(self->q80));
+    Vu0::Q(d1) = Vu0::Sub(Vu0::Q(pa), Vu0::Q(self->pos));
     Vu0::Q(d2) = Vu0::Sub(Vu0::Q(pb), Vu0::Q(self->qA0));
     Vu0::Q(d2) = Vu0::MulXSum(Vu0::Q(d1), Vu0::Scalar(25.0f), Vu0::Q(d2), Vu0::Scalar(10.0f));
     Vu0::Q(self->qA0) = Vu0::MulAddX(Vu0::Q(self->qA0), Vu0::Q(d2), Vu0::Scalar(dt));
     Vu0::Q(vel) = Vu0::Q(self->qA0);
     vel.y = 0.0f;
-    Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(vel), Vu0::Scalar(dt));
+    Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(vel), Vu0::Scalar(dt));
 }
 
 void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
@@ -1795,16 +1795,16 @@ void UpdateEmitterEffect(Effect* self, f32 dt)
     Mat02 axisRot;
     Mat02 m;
     BuildAxisAngleMatrix(&g_unitZVector, &axisRot, *(f32*)((u8*)self + 0xA4) * dt);
-    MulRotationRowsIndexed(&m, axisRot, *(Mat02*)self->rot50);
+    MulRotationRowsIndexed(&m, axisRot, *(Mat02*)self->rotation);
     s32 fire = 0;
     Vec02* cam = (Vec02*)&g_camera->g80;
-    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot50[0]), Vu0::Q(*cam))) &&
+    if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rotation[0]), Vu0::Q(*cam))) &&
         Vu0::ToFloat(Vu0::Dot(Vu0::Q(m.r[0]), Vu0::Q(*cam))) <= 0.0f && 0.5f < g_gameTime - self->start) {
         fire = 1;
     }
     if (fire) {
         Vec02 pos;
-        u128 r = Vu0::Rotate(m, Vu0::Q(self->q80));
+        u128 r = Vu0::Rotate(m, Vu0::Q(self->pos));
         Vu0::Set(pos, r);
         Vu0::Set(pos, Vu0::Add(r, Vu0::Q(((PlacedObject*)self->p120)->v140)));
         Effect* e = CreateEffect(0x10, 0);
@@ -1817,9 +1817,9 @@ void UpdateEmitterEffect(Effect* self, f32 dt)
             return;
         }
     }
-    self->rot50[0] = m.r[0];
-    self->rot50[1] = m.r[1];
-    self->rot50[2] = m.r[2];
+    self->rotation[0] = m.r[0];
+    self->rotation[1] = m.r[1];
+    self->rotation[2] = m.r[2];
 }
 
 
@@ -1827,7 +1827,7 @@ void DrawEmitterEffect(Effect* self, void* a1)
 {
     Vec02 pos;
     Mat02 rot;
-    Vu0::Q(pos) = Vu0::Rotate(self->rot50, Vu0::Q(self->q80));
+    Vu0::Q(pos) = Vu0::Rotate(self->rotation, Vu0::Q(self->pos));
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->p120)->v140));
     rot = g_identityMatrix;
     DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])&rot);
@@ -1930,14 +1930,14 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
     s32 n = self->points(self->p134, 0x3F, pts);
     pts[n] = pts[0];
     f32 scaleMin = 3.402823466e+38f;
-    draw.f44 = 1.0f;
+    draw.scale = 1.0f;
     draw.alpha = 0.0f;
     for (i = 0; i < n; i++) {
         p = &pts[i];
         Vu0::Q(v) = Vu0::Sub(Vu0::Q(pts[i + 1].at), Vu0::Q(p->at));
         f32 h = ArctangentOfRatio(v.y, v.x) + 3.14159274f;
         p->heading = h;
-        f32 w = cam->f1E4 >? p->at.z;
+        f32 w = cam->nearDistance >? p->at.z;
         f32 a;
         f32 b;
         f32 c;
@@ -2107,7 +2107,7 @@ s32 ComputeHullSeenFromCamera(Vec02* pos, s32 n, HullPoint* pts)
     m0.m[3][0] = -((f32*)g_camera)[16];
     m0.m[3][1] = -((f32*)g_camera)[17];
     m0.m[3][2] = -((f32*)g_camera)[18];
-    Vu0::Q(v) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(g_camera->f40));
+    Vu0::Q(v) = Vu0::Sub(Vu0::Q(*pos), Vu0::Q(g_camera->position));
     BuildBasisFromX(&v, &rot);
     m1.m[0][0] = -rot.r[1].x;
     m1.m[1][0] = -rot.r[1].y;
@@ -2190,7 +2190,7 @@ void DrawProjectileEffect(Effect* self, void* a1)
     }
     Vu0::Q(*p) = d;
     BuildBasisFromXAndZHint((const Vec02*)&self->qA0, &dir, &rot);
-    DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->q80, (f32 (*)[4])&rot);
+    DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->pos, (f32 (*)[4])&rot);
 }
 
 void BuildEulerRotationMatrix(f32* in, f32* out);
@@ -2234,9 +2234,9 @@ void AttachHitMarkEffect(Effect* self, s32 target, void* other, Vec02* point, Ve
                 r.r[1] = y;
                 Vu0::Q(z) = Vu0::RotateUntied(basis, Vu0::Q(turn.r[2]));
                 r.r[2] = z;
-                e->rot50[0] = r.r[0];
-                e->rot50[1] = r.r[1];
-                e->rot50[2] = r.r[2];
+                e->rotation[0] = r.r[0];
+                e->rotation[1] = r.r[1];
+                e->rotation[2] = r.r[2];
             }
             if (__builtin_fabsf(normal->z) < 0.7f) {
                 Vec02 up = *normal;
@@ -2282,8 +2282,8 @@ void DrawHitMarkEffect(Effect* self, void* a1)
 {
     u8 scratch[0x40];
 
-    TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->q80, (Vec02*)scratch);
-    TransformRotationBetweenFrames((PlacedObject*)self->p120, 0, (Mat02*)self->rot50, (Mat02*)(scratch + 0x10));
+    TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->pos, (Vec02*)scratch);
+    TransformRotationBetweenFrames((PlacedObject*)self->p120, 0, (Mat02*)self->rotation, (Mat02*)(scratch + 0x10));
     DrawEffectAt(self, (Camera*)a1, (Vec02*)scratch, (f32 (*)[4])(scratch + 0x10));
 }
 
@@ -2296,7 +2296,7 @@ void SetRandomEffectSpin(Effect* self)
     f32 y = RandomFloatInRange(-1.0f, 1.0f);
     f32 z = RandomFloatInRange(0.1f, 0.9f) + 0.1f;
     Vu0::Q(axis) = Vu0::FromFloats(x, y, z);
-    BuildBasisFromX((Vec02*)&axis, (Mat02*)self->rot50);
+    BuildBasisFromX((Vec02*)&axis, (Mat02*)self->rotation);
 }
 
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
@@ -2340,7 +2340,7 @@ static inline void TurnEffectAboutRow(Effect* o, const Mat02& rot, Mat02* turn, 
     Vu0::Q(y) = Vu0::RotateRows(a0, a1, a2, q[1]);
     r.r[1] = y;
     Vu0::Q(z) = Vu0::Q(r.r[2]) = Vu0::RotateRows(a0, a1, a2, q[2]);
-    *(Mat02*)o->rot50 = r;
+    *(Mat02*)o->rotation = r;
 }
 
 // v made unit length in place, or set to fallback when shorter than 0.0001; returns the length.
@@ -2364,15 +2364,15 @@ static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
 // locals in both places ($f4).
 void MoveTumblingEffect(Effect* self, f32 dt)
 {
-    f32 t = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->qA0), Vu0::Q(self->rot50[0])));
+    f32 t = Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->qA0), Vu0::Q(self->rotation[0])));
     f32 w = EvalClampedQuadratic(D_0026B6D0, D_0026B6E0, t);
     Mat02 turn;
-    TurnEffectAboutRow(self, *(Mat02*)self->rot50, &turn, w * dt);
+    TurnEffectAboutRow(self, *(Mat02*)self->rotation, &turn, w * dt);
     f32 drag = self->fB0;
     self->iB0 = 0;
     Vec02 along;
     Vec02 across;
-    SplitVectorAlongAxis((Vec02*)&self->qA0, self->rot50, &along, &across);
+    SplitVectorAlongAxis((Vec02*)&self->qA0, self->rotation, &along, &across);
     t = NormalizeInPlace(&along, g_unitXVector);
     Vu0::Q(self->qA0) =
         Vu0::MulXSum(Vu0::Vec::Of(along), Vu0::Vec::Scalar(D_0026B6EC + (D_0026B6E8 * dt + 1.0f) * (t - D_0026B6EC)),
@@ -2448,7 +2448,7 @@ void AimEffectAtNearestObject(Effect* self, Rec50* src)
     Quadword128 uq;
     f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->qA0)));
     f32 reach = speed * peak;
-    Vec02* from = (Vec02*)&self->q80;
+    Vec02* from = (Vec02*)&self->pos;
     Vu0::Q(self->qA0) = Vu0::NormalizeOr(Vu0::Q(self->qA0), Vu0::Q(g_unitZVector));
     Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(*from), Vu0::Q(self->qA0), Vu0::Scalar(reach * 100.0f));
     PushBackMemoryMark();
@@ -2461,14 +2461,14 @@ void AimEffectAtNearestObject(Effect* self, Rec50* src)
     Quadword128 tv = tq;
     CopyQuadword((u128*)&uq, poly);
     StoreQuadword((u128*)&self->q30, ScaleQuadword(tv, uq));
-    BuildBasisFromX((Vec02*)&self->qA0, (Mat02*)self->rot50);
+    BuildBasisFromX((Vec02*)&self->qA0, (Mat02*)self->rotation);
     Vu0::Q(self->qA0) = Vu0::Zero();
 }
 
 void PlaceEffectAtSource(Effect* dst, void* a1)
 {
     Rec50* src = (Rec50*)a1;
-    TransformPointBetweenFrames((PlacedObject*)src->target, 0, (Vec02*)((u8*)src + 0x20), (Vec02*)&dst->q80);
+    TransformPointBetweenFrames((PlacedObject*)src->target, 0, (Vec02*)((u8*)src + 0x20), (Vec02*)&dst->pos);
     dst->iB0 = 0;
     dst->i110 = 0;
     dst->i120 = src->i1F4;
@@ -2488,12 +2488,12 @@ void DrawStreakedEffect(Effect* self, void* a1)
         u128 v = Vu0::Q(self->qA0);
         Vu0::Q(dir) = v;
         Vu0::Q(dir) = Vu0::DivX(v, Vu0::Length(v));
-        Vu0::Q(tail) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(dir), Vu0::Scalar(100.0f));
-        DrawBeamBetweenPoints((PlacedObject*)tmpl, (PlacedObject*)a1, &tail, (Vec02*)&self->q80, 10.0f, 1.0f);
+        Vu0::Q(tail) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(dir), Vu0::Scalar(100.0f));
+        DrawBeamBetweenPoints((PlacedObject*)tmpl, (PlacedObject*)a1, &tail, (Vec02*)&self->pos, 10.0f, 1.0f);
     } else {
         Mat02 rot;
         BuildBasisFromXAndYHint((Vec02*)&self->qA0, (Vec02*)((u8*)a1 + 0x80), &rot);
-        DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->q80, (f32 (*)[4])&rot);
+        DrawEffectAt(self, (Camera*)a1, (Vec02*)&self->pos, (f32 (*)[4])&rot);
     }
 }
 
@@ -2516,7 +2516,7 @@ s32 HandleStreakedEffectImpact(Effect* self, void* hold, Vec02* where, Vec02* di
     if (self->i120 != 0) {
         Mat02 basis;
         Vec02 v;
-        *(Vec02*)&self->q80 = *where;
+        *(Vec02*)&self->pos = *where;
         BuildBasisFromX(dir, &basis);
         Vu0::Q(v) = Vu0::RotateTransposed(basis, Vu0::Q(self->qA0));
         v.x *= RandomFloatInRange(-0.95f, -0.85f);
@@ -2560,8 +2560,8 @@ void DrawSpinningEffect(Effect* self, void* a1)
     Vec02 pos;
     Vec02 k;
     Vu0::Q(k) = Vu0::FromFloatAt(self->f120);
-    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(g_unitZVector), Vu0::Q(k));
-    DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])self->rot50);
+    Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(g_unitZVector), Vu0::Q(k));
+    DrawEffectAt(self, (Camera*)a1, &pos, (f32 (*)[4])self->rotation);
 }
 
 void InitFacingEffect(Effect* self, void* pos, f32 scale, s32 flags)
@@ -2588,15 +2588,15 @@ void DrawFacingEffect(Effect* self, Camera* cam)
     EffectDraw draw;
     PlacedObject* o = (PlacedObject*)self->p20;
     if (o != 0) {
-        TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->q80, &pos);
-        u128 r = Vu0::ScalarAt(o->f2A8);
+        TransformPointBetweenFrames((PlacedObject*)self->p120, 0, (Vec02*)&self->pos, &pos);
+        u128 r = Vu0::ScalarAt(o->boundRadius);
         u128 ones = Vu0::Ones();
-        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(cam->f40));
+        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(cam->position));
         if ((Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), d, ones, r) ^ 0xF0) != 0) {
             RemoveEffect(self);
             return;
         }
-        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(g_camera->f40), Vu0::Q(pos));
+        Vu0::Q(dir) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(pos));
         BuildBasisFromXAndZHint(&dir, (const Vec02*)&g_unitZVector, &basis);
         f32 t = (g_gameTime - self->start) / self->life;
         f32 k = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(dir))) * 0.001f;
@@ -2609,7 +2609,7 @@ void DrawFacingEffect(Effect* self, Camera* cam)
         f32 fade;
         ClampedQuadratic::Clamp(fade, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B760, k), (const ValueRange*)D_0026B770);
         draw.alpha = a * fade;
-        draw.f44 = 1.0f;
+        draw.scale = 1.0f;
         BuildAxisAngleMatrix(&g_unitXVector, &axis, ClampedQuadratic::Eval((const QuadraticCoeffs*)D_0026B730, t));
         MulRotationRowsX(&rot, basis, axis);
         BuildScaledTransformMatrix(&pos.x, (f32(*)[4])&rot, &scale.x, draw.m);
@@ -2639,14 +2639,14 @@ void TakeDelayedEffectSourcePose(Effect* self)
     Mat02 rot;
     Mat02 turn;
     PlacedObject* src = (PlacedObject*)self->p134;
-    *(Vec02*)&self->q80 = src->v140;
-    self->rot50[0] = src->m110.r[0];
-    self->rot50[1] = src->m110.r[1];
-    self->rot50[2] = src->m110.r[2];
+    *(Vec02*)&self->pos = src->v140;
+    self->rotation[0] = src->m110.r[0];
+    self->rotation[1] = src->m110.r[1];
+    self->rotation[2] = src->m110.r[2];
     ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, &pos, &rot, 0, 0, self->life);
-    Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80)), Vu0::Scalar(1.0f / self->life),
+    Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.0f / self->life),
                                      Vu0::Q(self->qC0), Vu0::Scalar(self->life * -0.5f));
-    MultiplyMatrices3x3(&rot, (Mat02*)self->rot50, &turn);
+    MultiplyMatrices3x3(&rot, (Mat02*)self->rotation, &turn);
     MatrixToAxisAngle(&turn, &self->f130, (Vec02*)&self->f120);
     if (0.0f < self->f130) {
         self->f130 = self->f130 + 6.28318548f;
@@ -2690,21 +2690,21 @@ void MoveDelayedEffect(Effect* self, f32 f)
     f32 t;
 
     if (!(g_gameClock[1] < self->start)) {
-        self->q90 = self->q80;
+        self->prevPos = self->pos;
         t = self->start + self->life - g_gameClock[1];
         t = f >? t;
         ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, &pos, &rot, 0, 0, t);
-        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80));
+        u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos));
         u128 w1 = Vu0::Scalar(1.5f / t);
         u128 w2 = Vu0::Scalar(-0.5f);
         u128 w3 = Vu0::Scalar(0.25f);
         u128 c = Vu0::MulX(Vu0::Q(self->qC0), Vu0::Scalar(t));
         Vu0::Q(v10) = Vu0::MulXSum3(d, w1, Vu0::Q(self->qA0), w2, c, w3);
-        EvaluateHermiteVectorSegment(t, (const Vec02*)&self->q80, (const Vec02*)&self->qA0, &pos, &v10, f, 1.0f, &v20, &v30, 0);
+        EvaluateHermiteVectorSegment(t, (const Vec02*)&self->pos, (const Vec02*)&self->qA0, &pos, &v10, f, 1.0f, &v20, &v30, 0);
         BuildAxisAngleMatrix((Vec02*)&self->f120, &turn, self->f130 * t / self->life);
-        self->q80 = *(Quad219C*)&v20;
+        self->pos = *(Quad219C*)&v20;
         self->qA0 = *(Quad219C*)&v30;
-        MulRows(self->rot50, turn, rot);
+        MulRows(self->rotation, turn, rot);
     }
 }
 
@@ -2750,7 +2750,7 @@ void SendEffectMessagesAtRate(Effect* self, f32 scale)
     do {
         SlotMessage buf;
         buf.kind = 4;
-        buf.qb = *(Quad16*)&self->q80;
+        buf.qb = *(Quad16*)&self->pos;
         BaseObject* obj = (BaseObject*)self->p120;
         obj->desc->m1B(obj, &buf);
         nv = self->f128 - 1.0f;

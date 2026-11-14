@@ -116,7 +116,7 @@ void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail
 s32 ReduceBufferedStreamBytesLeft(BufferedStream* self, s32 n);
 s32 ReadBufferedS32(BufferedStream* self);
 
-struct WalkerHolder { u8 pad[0x48]; void* f48; };
+struct WalkerHolder { u8 pad[0x48]; void* walker; };
 
 void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
@@ -412,7 +412,7 @@ void ProcessPathFollowerContacts(PathFollower* self)
             self->pushed[self->pushedCount++] = other;
         }
         if (IsObjectOfKind(other, 0x19)) {
-            ((PathFollower*)other)->f86C = g_gameClock[1];
+            ((PathFollower*)other)->pushedTime = g_gameClock[1];
         } else if (IsObjectOfKind(other, 8)) {
             ChangeAgentState((Agent*)other, 0x10, 0);
         }
@@ -425,10 +425,10 @@ void UpdatePathFollower(PathFollower* self, f32 t)
 {
     s32 local = 0;
     UpdateSwitchedCollider(self, t);
-    if (self->fB34 != 1) {
-        if (self->fB34 < 2) {
-            if (self->fB34 == 0) {
-                self->f698 = 0;
+    if (self->mode != 1) {
+        if (self->mode < 2) {
+            if (self->mode == 0) {
+                self->targetSpeed = 0;
             }
         }
     } else {
@@ -442,9 +442,9 @@ void UpdatePathFollower(PathFollower* self, f32 t)
     AdvancePathFollowerEntry(self, local);
     ProcessPathFollowerContacts(self);
     if (self->rot.r[2].z > 0.5f) {
-        self->f850 = g_gameTime;
+        self->uprightTime = g_gameTime;
     }
-    if (self->fB34 != 0) {
+    if (self->mode != 0) {
         ClearRootTries(self);
     }
 }
@@ -462,23 +462,23 @@ extern s32 D_002751D4;
 // button 0x80, then by kind the race places (0) or the end of the round (1).
 void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
 {
-    if (self->fB34 != 1) {
-        if (0.0f < pad->f48) {
-            ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->f694);
+    if (self->mode != 1) {
+        if (0.0f < pad->stickMagnitude) {
+            ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->targetHeading);
         } else {
-            self->f694 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
+            self->targetHeading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
         }
     }
-    if (self->fB34 == 2) {
-        self->f698 = self->f618 * pad->f48;
+    if (self->mode == 2) {
+        self->targetSpeed = self->maxSpeed * pad->stickMagnitude;
         if (g_movieChecksumFailed != 0) {
-            self->f698 = self->f698 * 0.4f;
+            self->targetSpeed = self->targetSpeed * 0.4f;
         }
         if ((pad->flags & 0x80) != 0) {
             ClearPadPressedBits(pad, 0x80);
-            switch (self->fB30) {
+            switch (self->kind) {
             case 0:
-                if (self->f858 > 0 && D_002751DC < g_gameTime - self->f854) {
+                if (self->lapsLeft > 0 && D_002751DC < g_gameTime - self->lapTime) {
                     CountDownPathFollowerLap(self);
                     StartSoundEffect(0x5A, 0, 0, 0, 0.0f, 0.0f, 2.0f, -0.25f, 0.0f, 0, 0);
                 } else {
@@ -486,7 +486,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 }
                 break;
             case 1:
-                if (self->fB44 != 0) {
+                if (self->walkerGraph != 0) {
                     SetStateWalkerTarget((StateWalker*)self->fB48, 0x485);
                     self->pushedCount = 0;
                 }
@@ -497,21 +497,21 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
         }
     }
     HandleStepSequenceSkipButtons(self, pad);
-    if (self->fAFC != 0) {
-        self->f698 = self->fAFC->f1C <? self->f698;
+    if (self->activeZone != 0) {
+        self->targetSpeed = self->activeZone->maxSpeed <? self->targetSpeed;
     }
-    switch (self->fB30) {
+    switch (self->kind) {
     case 0: {
         WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
         if (r != 0) {
-            void* dev = r->f48;
+            void* dev = r->walker;
             s32 code;
             GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
                 GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
-                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->fB10 && self->f830 != 0) {
+                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->placeChangeTime && self->f830 != 0) {
                     PathFollower* found[16];
                     s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, found);
                     s32 place = 1;
@@ -520,10 +520,10 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                             place++;
                         }
                     }
-                    if (place != self->fB08 || n != self->fB0C) {
+                    if (place != self->fB08 || n != self->placeCount) {
                         self->fB08 = place;
-                        self->fB0C = n;
-                        self->fB10 = g_gameClock[1];
+                        self->placeCount = n;
+                        self->placeChangeTime = g_gameClock[1];
                     }
                 }
             }
@@ -533,7 +533,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
     case 1: {
         WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
         if (r != 0) {
-            void* dev = r->f48;
+            void* dev = r->walker;
             s32 code;
             GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
@@ -559,11 +559,11 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
 {
     s32 a = 0;
     s32 b = 0;
-    switch (self->fB30) {
+    switch (self->kind) {
     case 0: {
         WalkerHolder* r = (WalkerHolder*)FindFirstObjectById(self->world, 5, 0x42C, 0);
         if (r != 0) {
-            void* dev = r->f48;
+            void* dev = r->walker;
             s32 code;
             GetStateWalkerTargetKey((StateWalker*)dev, &code);
             if (code == -1) {
@@ -599,7 +599,7 @@ void UpdatePathFollowerScreenElements(PathFollower* self)
     }
 }
 
-void ReleasePathFollowerContacts(PathFollower* self) { self->f6A0++; }
+void ReleasePathFollowerContacts(PathFollower* self) { self->contactStamp++; }
 
 struct FaceRef;
 struct PooledContact;
@@ -630,23 +630,23 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
             Vec02 k;
             ColliderSpan hit;
             p = *(Vec02*)((u8*)slot->obj8 + 0x40);
-            p.z = p.z - (first ? self->f610 : self->f614);
+            p.z = p.z - (first ? self->frontWheelRadius : self->rearWheelRadius);
             TransformPointBetweenFrames(self, 0, &p, &p);
             q = slot->obj->v190;
-            q.z = q.z - (first ? self->f610 : self->f614);
+            q.z = q.z - (first ? self->frontWheelRadius : self->rearWheelRadius);
             TransformPointBetweenFrames(self, 0, &q, &q);
             u128* pp = &Vu0::Q(p);
             u128 base = *pp;
-            f32 r = first ? self->f610 : self->f614;
+            f32 r = first ? self->frontWheelRadius : self->rearWheelRadius;
             u128 d = Vu0::Sub(Vu0::Q(p), Vu0::Q(q));
             Vu0::Q(k) = Vu0::FromFloat(r);
             *pp = Vu0::MulAddX(base, Vu0::DivX(d, Vu0::Sqrt(Vu0::Dot(d, d))), Vu0::Q(k));
             if (CollectColliderSpansInTree(other, a4, &p, &q, 1, &hit) > 0 && hit.time[0] > 0.0f) {
-                if (slot->f0C != self->f6A0 + 1 || IsLowerAlong(slot->v20, *(Vec02*)&hit.q[0], self->rot.r[2])) {
-                    slot->f0C = self->f6A0 + 1;
-                    slot->v20 = *(Vec02*)&hit.q[0];
-                    slot->v30 = *(Vec02*)&hit.q[2];
-                    ComputeObjectMotionInFrame(other, 0, &slot->v20, &slot->v40, 0, 0, 0);
+                if (slot->contactStamp != self->contactStamp + 1 || IsLowerAlong(slot->contactPoint, *(Vec02*)&hit.q[0], self->rot.r[2])) {
+                    slot->contactStamp = self->contactStamp + 1;
+                    slot->contactPoint = *(Vec02*)&hit.q[0];
+                    slot->contactDirection = *(Vec02*)&hit.q[2];
+                    ComputeObjectMotionInFrame(other, 0, &slot->contactPoint, &slot->contactVelocity, 0, 0, 0);
                 }
                 if (other->id != 1) {
                     if ((other->desc->flags & 0x20) != 0) {
@@ -668,12 +668,12 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
                 }
             }
         }
-    } else if (self->fB4C != 0 && IsObjectAttached((Collider*)self->fB4C) != 0) {
+    } else if (self->contactMesh != 0 && IsObjectAttached((Collider*)self->contactMesh) != 0) {
         if ((other->flags538 & ((u64)0x8000 << 25)) != 0) {
-            Collider* c = (Collider*)self->fB4C;
+            Collider* c = (Collider*)self->contactMesh;
             AddMeshContacts(other, other->radius3CC, (Vec02*)((u8*)other + 0x140), c, c->tree.count, (FaceRef*)c->tree.nodes, 0, (PooledContact**)((u8*)self + 0xB74));
         } else if (a3 != 0) {
-            CreateMeshPairContacts((Collider*)self->fB4C, other, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)((u8*)self + 0xB74));
+            CreateMeshPairContacts((Collider*)self->contactMesh, other, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)((u8*)self + 0xB74));
         }
     }
 }
@@ -712,26 +712,26 @@ void UpdatePathFollowerAttachmentFrames(PathFollower* self, ParentFrame* frame)
         Mat02 world;
         Mat02 tilt;
         Mat02 turn;
-        s->f54 += s->f50 * g_gameClock[2];
-        if (s->f0C == self->f6A0) {
-            TransformPointBetweenFrames(0, self, &s->v20, &s->v10);
-            s->v10.z = s->v10.z + (((s32)i < 2) ? self->f610 : self->f614);
+        s->turnAngle += s->turnRate * g_gameClock[2];
+        if (s->contactStamp == self->contactStamp) {
+            TransformPointBetweenFrames(0, self, &s->contactPoint, &s->placedPos);
+            s->placedPos.z = s->placedPos.z + (((s32)i < 2) ? self->frontWheelRadius : self->rearWheelRadius);
         } else {
-            *(Quad_1DA7E0*)&s->v10 = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->v10, *(Quad_1DA7E0*)&s->obj->v190, g_gameClock[2], (RampProfile*)D_00275620, 0);
+            *(Quad_1DA7E0*)&s->placedPos = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->placedPos, *(Quad_1DA7E0*)&s->obj->v190, g_gameClock[2], (RampProfile*)D_00275620, 0);
         }
         if ((s32)i < 2) {
-            BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->f69C);
+            BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->steerAngle);
         } else {
             tilt = g_identityMatrix;
         }
-        BuildAxisAngleMatrix(&g_unitYVector, &turn, s->f54);
+        BuildAxisAngleMatrix(&g_unitYVector, &turn, s->turnAngle);
         MulMatInto(&world, tilt, turn);
         if (s->obj2 != 0) {
             Vec02 moved;
-            TransformPointBetweenFrames((PlacedObject*)s->obj->parent, (PlacedObject*)s->obj2->parent, &s->v10, &moved);
+            TransformPointBetweenFrames((PlacedObject*)s->obj->parent, (PlacedObject*)s->obj2->parent, &s->placedPos, &moved);
             s->obj2->desc02()->m1D(s->obj2, &moved);
         }
-        s->obj->desc02()->m1D(s->obj, &s->v10);
+        s->obj->desc02()->m1D(s->obj, &s->placedPos);
         s->obj->desc02()->m1E(s->obj, &world);
     }
 }
@@ -750,7 +750,7 @@ void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02*
 void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
 {
     DrawCollider(self, a, b);
-    if (self->f690 != 0) {
+    if (self->bodyObject != 0) {
         f32 len[3];
         DrawTransform m;
         Vec02 pos;
@@ -764,20 +764,20 @@ void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
         f32 sy = len[2] >? len[1];
         Vu0::Q(rot.r[0]) = Vu0::MulX(Vu0::Q(rot.r[0]), Vu0::Scalar(sx));
         Vu0::Q(rot.r[1]) = Vu0::MulX(Vu0::Q(rot.r[1]), Vu0::Scalar(sy));
-        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->v140), Vu0::Rotate(rot, Vu0::Q(self->f690->pos)));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->v140), Vu0::Rotate(rot, Vu0::Q(self->bodyObject->pos)));
         BuildMatrixFromRotationAndTranslation(&pos, &rot, (Mat4A*)&m);
-        self->f690->desc02()->m26(self->f690, a, &m);
+        self->bodyObject->desc02()->m26(self->bodyObject, a, &m);
     }
-    if (self->fB28 != 0 || self->fB2C != 0) {
+    if (self->frontBeam != 0 || self->rearBeam != 0) {
         Vec02 q[4];
         for (s32 i = 0; i < 4; i++) {
-            TransformPointBetweenFrames(self, 0, &self->f6B0[i].v10, &q[i]);
+            TransformPointBetweenFrames(self, 0, &self->f6B0[i].placedPos, &q[i]);
         }
-        if (self->fB28 != 0) {
-            DrawBeamBetweenPoints((PlacedObject*)self->fB28, (PlacedObject*)a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
+        if (self->frontBeam != 0) {
+            DrawBeamBetweenPoints((PlacedObject*)self->frontBeam, (PlacedObject*)a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
         }
-        if (self->fB2C != 0) {
-            DrawBeamBetweenPoints((PlacedObject*)self->fB2C, (PlacedObject*)a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
+        if (self->rearBeam != 0) {
+            DrawBeamBetweenPoints((PlacedObject*)self->rearBeam, (PlacedObject*)a, &q[2], &q[3], 1.0f, b != 0 ? b->f40 : 1.0f);
         }
     }
 }
@@ -793,7 +793,7 @@ void UpdatePathFollowerBounds(PathFollower* self)
             f32 f;
             q = *(Quad16*)&slot->obj->v190;
             TransformPointBetweenFrames(self, 0, (Vec02*)&q, (Vec02*)&q);
-            f = ((s32)i < 2) ? self->f610 : self->f614;
+            f = ((s32)i < 2) ? self->frontWheelRadius : self->rearWheelRadius;
             ExpandColliderBoundsBySphere(self, &q, f);
         }
     }
@@ -801,9 +801,9 @@ void UpdatePathFollowerBounds(PathFollower* self)
 
 void StartPathFollowerEffect(PathFollower* self, s32 a, PlacedObject* b)
 {
-    if (((FollowerEffectTarget*)self->fB78) != 0) {
-        SetAgentMainClip((Agent*)(((FollowerEffectTarget*)self->fB78)), 0);
-        FollowerEffectTarget* t = ((FollowerEffectTarget*)self->fB78);
+    if (((FollowerEffectTarget*)self->partner) != 0) {
+        SetAgentMainClip((Agent*)(((FollowerEffectTarget*)self->partner)), 0);
+        FollowerEffectTarget* t = ((FollowerEffectTarget*)self->partner);
         t->vtbl[82](t, a, b);
     } else {
         StartSwitchedColliderEffect(self, a, b);
@@ -822,8 +822,8 @@ void FindPathFollowerPathPosition(PathFollower* self)
         }
         u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
         Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
-        self->f83C = self->f830->curve->vt->m05(self->f830->curve, *(f32*)((u8*)self + 0x838));
-        Vu0::StoreX(self->f840, Vu0::Dot(Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x100)), Vu0::Q(p)), Vu0::Q(side)));
+        self->pathDistance = self->f830->curve->vt->m05(self->f830->curve, *(f32*)((u8*)self + 0x838));
+        Vu0::StoreX(self->sideOffset, Vu0::Dot(Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x100)), Vu0::Q(p)), Vu0::Q(side)));
     }
 }
 
@@ -851,7 +851,7 @@ void HandlePathFollowerActivation(PathFollower* self, void* v)
         b->limit = (s32*)((u8*)self + 0xB0C);
         SetWorldActiveFollower((World*)(*(void**)((u8*)self + 0x14)), self);
     } else {
-        if (self->fB34 == 2) {
+        if (self->mode == 2) {
             SetPathFollowerMode(self, 0);
         }
     }
@@ -882,9 +882,9 @@ void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg)
     PathCurve* o = arg->curve;
     if (o->vt->m10) o->vt->m10(o, (u8*)self + 0x100, 0, 0, 0, (f32*)((u8*)self + 0x838), 0);
     FindPathFollowerPathPosition(self);
-    self->f844 = self->f840;
-    self->f834 = self->f830->curve->vt->m08(self->f830->curve);
-    for (s32 i = 0; i < self->f870; i++) {
+    self->sideTarget = self->sideOffset;
+    self->pathLength = self->f830->curve->vt->m08(self->f830->curve);
+    for (s32 i = 0; i < self->markerCount; i++) {
         PathMarker* e = &self->f874[i];
         if (e->kind == 0) {
             s32 loc[4];
@@ -912,21 +912,21 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
     if (item == 0) {
         return;
     }
-    s32 n = self->f870;
+    s32 n = self->markerCount;
     if ((u32)n >= 16) {
         return;
     }
-    self->f870 = n + 1;
+    self->markerCount = n + 1;
     PathMarker* e = &self->f874[n];
     e->item = item;
     e->kind = 0;
-    if (self->fAF4 == 0) {
-        self->fAF8 = e;
-        self->fAF4 = e;
+    if (self->firstMarker == 0) {
+        self->currentMarker = e;
+        self->firstMarker = e;
         e->next = e;
     } else {
-        e->next = self->fAF4->next;
-        self->fAF4->next = e;
+        e->next = self->firstMarker->next;
+        self->firstMarker->next = e;
         e->index = e->next->index + 1;
     }
     if (self->f830 != 0) {
@@ -940,11 +940,11 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
     }
 }
 
-void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b, s32 c) { if (a && (u32)self->f870 < 16) { PathMarker* e = &self->f874[self->f870]; self->f870++; e->item = a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
+void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b, s32 c) { if (a && (u32)self->markerCount < 16) { PathMarker* e = &self->f874[self->markerCount]; self->markerCount++; e->item = a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
 
 void SetPathFollowerMode(PathFollower* self, s32 mode)
 {
-    if (mode != self->fB34) {
+    if (mode != self->mode) {
         *(s32*)((u8*)self + 0xB34) = mode;
         *(f32*)((u8*)self + 0xB38) = g_gameTime;
         if (mode == 2 && self != GetActiveSwitchedCollider()) {
@@ -956,14 +956,14 @@ void SetPathFollowerMode(PathFollower* self, s32 mode)
 void ResetPathFollower(PathFollower* self)
 {
     self->fB00 = 1;
-    self->fAF8 = self->fAF4;
-    self->f858 = 0;
-    self->f854 = -10.0f;
-    self->f864 = -10.0f;
-    self->f86C = -10.0f;
-    self->fB10 = -10.0f;
+    self->currentMarker = self->firstMarker;
+    self->lapsLeft = 0;
+    self->lapTime = -10.0f;
+    self->paceChangeTime = -10.0f;
+    self->pushedTime = -10.0f;
+    self->placeChangeTime = -10.0f;
     G27C230* rec = g_currentEntry;
-    f32 t = ((QuadraticCurve*)&self->v620)->Eval(rec->dt);
+    f32 t = ((QuadraticCurve*)&self->paceBlendCurve)->Eval(rec->dt);
     f32 l = g_unitRange.lo;
     f32 h = g_unitRange.hi;
     f32 x;
@@ -974,9 +974,9 @@ void ResetPathFollower(PathFollower* self)
     else
         x = t;
     f32 y = 1.0f - x;
-    u8* p630 = self->v630;
-    u8* p650 = self->v650;
-    u8* p670 = self->v670;
+    u8* p630 = self->firstEnd;
+    u8* p650 = self->secondEnd;
+    u8* p670 = self->blendedEnd;
     Quadword a, b, c, d;
     Quadword a2, b2, c2, d2;
     StoreFloatAsQuadword((u128*)&a, y);
@@ -988,10 +988,10 @@ void ResetPathFollower(PathFollower* self)
     CopyQuadword((u128*)&d, p650);
     d2 = d;
     StoreQuadword((u128*)p670, AddWeightedVectors(a2, b2, c2, d2));
-    ((BlendRange*)&self->f680)->Blend(y, *(BlendRange*)&self->f640, x, *(BlendRange*)&self->f660);
-    f32 r = ((RangeClamp*)&self->f680)->Clamp(*(f32*)p670);
-    self->f860 = r;
-    self->f85C = r;
+    ((BlendRange*)&self->paceMin)->Blend(y, *(BlendRange*)&self->firstRangeLo, x, *(BlendRange*)&self->secondRangeLo);
+    f32 r = ((RangeClamp*)&self->paceMin)->Clamp(*(f32*)p670);
+    self->paceTarget = r;
+    self->pace = r;
 }
 
 LINKER_REMNANT(func_001DB448);
@@ -1067,18 +1067,18 @@ void InitWorldPools(World* self)
         x = -900.0f;
     }
     SetWorldGravityZ(self, x);
-    self->f1D64 = 0x10;
-    self->f1D65 = 0x10;
-    self->f1D66 = 0x40;
+    self->fillRed = 0x10;
+    self->fillGreen = 0x10;
+    self->fillBlue = 0x40;
     self->f1D68 = 50.0f;
-    self->f1D70 = -1;
-    self->f1D74 = 0;
+    self->soundBank = -1;
+    self->stagedBank = 0;
     self->f2308 = 15.0f;
-    self->f230C = 180.0f;
+    self->timerDuration = 180.0f;
     self->f234C = 1.0f;
-    self->f2350 = 1.0f;
+    self->valueTarget = 1.0f;
     self->f2354 = 1;
-    self->f235C = 0xF03FFFFF;
+    self->flagBits = 0xF03FFFFF;
 }
 
 void ResetWorldSubsystems(World* a0)
@@ -1120,7 +1120,7 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
     if (self->mode == 1) {
         if (s2 == 0) {
             ReduceBufferedStreamBytesLeft(self, D_00275728);
-            self->f14 -= D_00275728;
+            self->bytesToRead -= D_00275728;
         }
         s3 = ReadBufferedS32(self);
         s0 = ReadBufferedS32(self);
@@ -1129,8 +1129,8 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
         s0 = ReadBufferedS32(self);
         if (s0 != D_00275724) s2 = 1;
         if (s2 == 0) {
-            s32 v = self->f14 - D_00275728;
-            self->f14 = (s2 < v) ? v : 0;
+            s32 v = self->bytesToRead - D_00275728;
+            self->bytesToRead = (s2 < v) ? v : 0;
         }
     }
     u8* r = (u8*)AllocateFrontMemory(s3);
@@ -1143,7 +1143,7 @@ void ReadBufferedBlockHeader(s32 a0, BufferedStream* self)
 void ReadBufferedBlockBody(BufferedStream* self)
 {
     if (D_0027571C != 0) {
-        D_00275728 = self->f14;
+        D_00275728 = self->bytesToRead;
         AlignBufferedStreamPosition(self, 0x10);
         ReadBufferedStreamBytes(self, D_00275720, D_00275718);
     }
@@ -1209,7 +1209,7 @@ QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
 {
-    QueuedCall* n = self->f1EC8;
+    QueuedCall* n = self->queuedCallHead;
     if (n != 0) {
         do {
             if (n->code == a1 && n->arg == a2 && n->k2 == a3 && n->k3 == a4) {
@@ -1228,16 +1228,16 @@ QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
     e->arg = arg;
     e->k2 = c;
     e->k3 = d;
-    if (self->f1ECC != 0) self->f1ECC->next = e;
-    else self->f1EC8 = e;
-    self->f1ECC = e;
+    if (self->queuedCallTail != 0) self->queuedCallTail->next = e;
+    else self->queuedCallHead = e;
+    self->queuedCallTail = e;
 }
 
 void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32 k3)
 {
     QueuedCall* prev = 0;
     QueuedCall* removed = 0;
-    QueuedCall* cur = self->f1EC8;
+    QueuedCall* cur = self->queuedCallHead;
     QueuedCall* next;
     s32 bit;
 
@@ -1267,10 +1267,10 @@ void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32
             if (prev != 0) {
                 prev->next = next;
             } else {
-                self->f1EC8 = next;
+                self->queuedCallHead = next;
             }
             if (next == 0) {
-                self->f1ECC = prev;
+                self->queuedCallTail = prev;
             }
             cur->next = removed;
             removed = cur;
@@ -1286,10 +1286,10 @@ void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32
 
 void RunQueuedCalls(World* self)
 {
-    while (self->f1EC8 != 0) {
-        QueuedCall* node = self->f1EC8;
-        if (node == self->f1ECC) self->f1ECC = 0;
-        self->f1EC8 = node->next;
+    while (self->queuedCallHead != 0) {
+        QueuedCall* node = self->queuedCallHead;
+        if (node == self->queuedCallTail) self->queuedCallTail = 0;
+        self->queuedCallHead = node->next;
         node->next = 0;
         node->fn(node->arg, node->k2, node->k3);
         ReleaseCallRecords(self, (T219CHook*)node);
@@ -1304,7 +1304,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
     InitScriptValue(&a);
     InitScriptValue(&q);
     MarkPoolLiveEnds((MarkStacks*)g_markStacks);
-    LookupScriptVariable((ScriptScope*)self->f2C, self->f1EF8, 0, &a);
+    LookupScriptVariable((ScriptScope*)self->scriptScope, self->scopeVariableId, 0, &a);
     R11B008Node* n;
     s32 found;
     if (a.tag != 0x1E) {
@@ -1318,7 +1318,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
             f32 d = e->f - limit;
             if (d <= 0.0f) {
                 found = 1;
-                EvalScriptExpression(&t, (R11B008Node*)e->next, (ScriptScope*)self->f2C);
+                EvalScriptExpression(&t, (R11B008Node*)e->next, (ScriptScope*)self->scriptScope);
                 AssignScriptValue(&q, &t);
                 DestroyScriptValue(&t, 2);
                 SetScriptValueTag(n, 0);
@@ -1334,7 +1334,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
             return;
         }
     }
-    LookupScriptVariable((ScriptScope*)self->f2C, self->f1EF8, 0, &a);
+    LookupScriptVariable((ScriptScope*)self->scriptScope, self->scopeVariableId, 0, &a);
     {
         R11B008Node* head = a.node;
         R11B008Node* prev = 0;
@@ -1353,7 +1353,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit)
             } else {
                 SetScriptValueTag(&a, 0);
             }
-            AssignScriptVariable(&t, (ScriptScope*)self->f2C, self->f1EF8, &a);
+            AssignScriptVariable(&t, (ScriptScope*)self->scriptScope, self->scopeVariableId, &a);
             DestroyScriptValue(&t, 2);
         }
     }
@@ -1390,12 +1390,12 @@ void PushCloneBatch(World* self, void* src, s32 n)
             ((void**)tmp.buf)[i] = CreateObjectCopy((BaseObject*)src, self, 0);
         }
     }
-    idx = self->f1EFC;
-    ((PackedCloneBatch*)self->f1F00)[idx] = tmp;
-    self->f1EFC = idx + 1;
+    idx = self->cloneBatchCount;
+    ((PackedCloneBatch*)self->cloneBatches)[idx] = tmp;
+    self->cloneBatchCount = idx + 1;
 }
 
-s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->f1F00)[index]; s->count--; return s->values[s->count]; }
+s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->cloneBatches)[index]; s->count--; return s->values[s->count]; }
 
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ColliderListWalker {
@@ -1743,7 +1743,7 @@ void LoadWorld(World* self, BufferedStream* s)
     ResetScatterController((ScatterController*)g_scatterController);
     InitScriptValuePools();
     D_00275714 = ReadBufferedU8(s);
-    self->f1D70 = ReadBufferedS16(s);
+    self->soundBank = ReadBufferedS16(s);
     SkipBufferedBlocks(s);
     g_camera = (Camera*)CreateTypedRecord(0x6D, self, 0, 4, -1);
     for (i = 0; i < 10; i++) {
@@ -1756,24 +1756,24 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, (u32*)&self->f2310);
-    ReadBufferedString(s, (u8**)&self->f2314);
-    ReadOptionalBufferedBlock(s, (u32*)&self->f1D74);
+    ReadOptionalBufferedBlock(s, (u32*)&self->commentaryRecord);
+    ReadBufferedString(s, (u8**)&self->creditsText);
+    ReadOptionalBufferedBlock(s, (u32*)&self->stagedBank);
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);
     ReadBufferedBlockBody(s);
-    if (self->f1D70 >= 0) {
-        EnsureSoundBankLoaded(self->f1D70);
+    if (self->soundBank >= 0) {
+        EnsureSoundBankLoaded(self->soundBank);
     }
-    if (self->f1D78 == 0) {
+    if (self->volumeChannel2On == 0) {
         SilenceVolumeChannel2();
     }
-    RequestStagedBank(self->f1D74);
+    RequestStagedBank(self->stagedBank);
     SendResidentImages();
     if (IsListEmpty(&self->list1BE8) != 0) {
         CreateConeVolumes(self);
     }
-    self->f1D67 = 0x80;
+    self->fillAlpha = 0x80;
     color = self->color1D64;
     FillScreenColor(D_002BDC20, &color, 0);
     self->f1D68 *= 0.003921569f;
@@ -1804,12 +1804,12 @@ void LoadWorld(World* self, BufferedStream* s)
     RunQueuedCalls(self);
     UpdateScatterLevelLimits((ScatterController*)g_scatterController);
     ResumeElementStackState(g_elementStack);
-    if (g_mapScreenList.current == 0 && g_saveData->f19D8 != 0) {
+    if (g_mapScreenList.current == 0 && g_saveData->levelIndex != 0) {
         AllocateZeroedFrontMemory(0x80000);
     }
     UpdateCameraLocation(g_camera);
     UpdateWorldContacts(self, 0);
-    PlayStagedBank(self->f1D74);
+    PlayStagedBank(self->stagedBank);
     StartWorldSoundEntries(self);
 }
 
@@ -1924,10 +1924,10 @@ void SetWorldSoundLevel(void* self, f32 x)
 {
     World* s = (World*)self;
 
-    s->f2318 = x;
+    s->soundLevel = x;
     *(s32*)g_previousSoundLevel = -100;
     SetVolumeChannelFactor(7, 1, 1.0f);
-    SendIopSoundLevel((s32)(s->f2318 + 0.5f));
+    SendIopSoundLevel((s32)(s->soundLevel + 0.5f));
 }
 
 s32 TestLevelEntryFlag1(void* self, s32 obj)
@@ -2068,8 +2068,8 @@ void GetCurrentScatterLevel(void* unused, f32* out)
 }
 
 void AcquirePadSelectFlag(World* a0) {
-    s32 n = a0->f231C + 1;
-    a0->f231C = n;
+    s32 n = a0->padSelectHolds + 1;
+    a0->padSelectHolds = n;
     if (n == 1) {
         SetPadSelectFlags(2);
     }
@@ -2077,14 +2077,14 @@ void AcquirePadSelectFlag(World* a0) {
 
 void ReleasePadSelectFlag(World* self)
 {
-    s32 v = self->f231C - 1;
-    self->f231C = v;
+    s32 v = self->padSelectHolds - 1;
+    self->padSelectHolds = v;
     if (v == 0) {
         ClearPadSelectFlags(2);
     }
 }
 
-s32 IsPadSelectFlagHeld(World* self) { return self->f231C > 0; }
+s32 IsPadSelectFlagHeld(World* self) { return self->padSelectHolds > 0; }
 
 void GetHasStreamVoice(void* self, s32* out)
 {
@@ -2093,11 +2093,11 @@ void GetHasStreamVoice(void* self, s32* out)
 
 void SetWorldValueAndTarget(World* self, f32 v)
 {
-    self->f2350 = v;
+    self->valueTarget = v;
     self->f234C = v;
 }
 
-void SetWorldValueTarget(World* self, f32 value) { self->f2350 = value; }
+void SetWorldValueTarget(World* self, f32 value) { self->valueTarget = value; }
 
 void PopActiveSequenceElement(World* world)
 {
@@ -2118,7 +2118,7 @@ void ShowPauseMenuPageWith(void* unused, s32 a1, s32 a2)
 
 void ShowCountedScreenElement(World* self)
 {
-    if (++self->f2320 == 1) {
+    if (++self->elementHolds == 1) {
         SetScreenElementHoldTime(&D_002721D0, 0.0f);
         D_002721D0.vt->m14(&D_002721D0);
     }
@@ -2126,7 +2126,7 @@ void ShowCountedScreenElement(World* self)
 
 void HideCountedScreenElement(World* self)
 {
-    if (--self->f2320 == 0) {
+    if (--self->elementHolds == 0) {
         D_002721D0.vt->m15(&D_002721D0);
     }
 }
@@ -2145,12 +2145,12 @@ void RemoveSoundLevelBuiltin(void* unused, void* p)
 
 void SetWorldActiveFollower(World* self, void* v)
 {
-    self->f2324 = v;
+    self->activeFollower = v;
 }
 
 void NotifyWorldActiveFollower(World* self)
 {
-    ActiveFollowerChild* p = (ActiveFollowerChild*)self->f2324;
+    ActiveFollowerChild* p = (ActiveFollowerChild*)self->activeFollower;
     if (p != 0) {
         ActiveFollowerFn fn = p->vtbl[50];
         if (fn != 0) {
@@ -2163,22 +2163,22 @@ void SetWorldFlagBit(World* self, s32 bit)
 {
     s32 m = 1;
     m <<= bit;
-    self->f235C |= m;
+    self->flagBits |= m;
 }
 
 void ClearWorldFlagBit(World* self, s32 bit)
 {
     s32 m = 1;
     m <<= bit;
-    self->f235C &= ~m;
+    self->flagBits &= ~m;
 }
 
 void GetSaveSpareCount(void* self, s32* out)
 {
-    *out = g_saveData->f19E4;
+    *out = g_saveData->spareCount;
 }
 
 void GetReserveUnitCount(void* unused, s32* out)
 {
-    *out = g_saveData->f19E0;
+    *out = g_saveData->reserveCount;
 }

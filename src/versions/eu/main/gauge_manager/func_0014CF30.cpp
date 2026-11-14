@@ -30,7 +30,7 @@ void HandleGaugeManagerNotification(GaugeManager* self, s32 kind, void* key)
                 (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f574 = &self->amount;
                 (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f578 = &self->maxAmount;
                 SetWorldActiveFollower(self->world, self);
-                StartTimer(&g_timerElement, self->f2D8);
+                StartTimer(&g_timerElement, self->timerSeconds);
                 SetTimerLimit(&g_timerElement, 0.0f, FinishGaugeOnTimeout);
                 StartTimerCounting(&g_timerElement);
             }

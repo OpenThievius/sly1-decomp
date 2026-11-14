@@ -102,7 +102,7 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     L.w = 0.0f;
     L.h = 0.0f;
     f32 s = 0.4f;
-    if (self->open != 0 && pad->f48 != 0.0f) {
+    if (self->open != 0 && pad->stickMagnitude != 0.0f) {
         s = 0.5f;
     }
     PushFontScale(glyphs, s, s);
@@ -112,7 +112,7 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     PopFontScale(glyphs);
     FormatToString(buf, D_eu_0024C520, 0x29);
     s = 0.4f;
-    if (self->open != 0 && pad->f7C != 0.0f) {
+    if (self->open != 0 && pad->secondStickMagnitude != 0.0f) {
         s = 0.5f;
     }
     PushFontScale(glyphs, s, s);

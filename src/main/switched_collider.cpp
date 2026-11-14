@@ -145,10 +145,10 @@ void InitSwitchedCollider(SwitchedCollider* self)
 void CopySwitchedCollider(SwitchedCollider* self, SwitchedCollider* src)
 {
     CopyCollider(self, src);
-    if (self->f550 != 0) {
+    if (self->enabled != 0) {
         return;
     }
-    self->f550 = 1;
+    self->enabled = 1;
     SetSwitchedColliderEnabled(self, 0);
 }
 
@@ -157,13 +157,13 @@ void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* 
     HandlePlacedObjectNotification(self, kind, msg);
     switch (kind) {
     case 0xB:
-        StopSoundRecord((PlayingSound*)self->f574, 0);
+        StopSoundRecord((PlayingSound*)self->playingSound, 0);
         break;
     case 0x10: {
         s32 i;
-        for (i = 0; i < self->f5D0; i++) {
-            if (self->f5AC[i] == msg) {
-                self->f5AC[i] = 0;
+        for (i = 0; i < self->effectCount; i++) {
+            if (self->effects[i] == msg) {
+                self->effects[i] = 0;
                 break;
             }
         }
@@ -175,7 +175,7 @@ void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* 
 void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator)
 {
     if (activator != 0) {
-        self->v560 = self->v140;
+        self->focusPoint = self->v140;
         PushCameraController(g_camera, 1, &g_camera->ctl520, self, 0);
         return;
     }
@@ -187,13 +187,13 @@ void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator)
 void CaptureSwitchedColliderPose(SwitchedCollider* self, u8* out, f32 a)
 {
     CaptureColliderPose(self, (ColliderPose*)out);
-    if (self->f554 != 0) {
+    if (self->holdFocus != 0) {
         *(Quad16*)(out + 0x10) = *(Quad16*)((u8*)self + 0x560);
         return;
     }
     Camera* base = g_camera;
-    if (base->f224 == 0) {
-        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->v560.z, self->v140.z, a, (RampProfile*)D_00269BC0, 0);
+    if (base->snapping == 0) {
+        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->focusPoint.z, self->v140.z, a, (RampProfile*)D_00269BC0, 0);
     }
     *(Quad16*)((u8*)self + 0x560) = *(Quad16*)(out + 0x10);
 }
@@ -237,8 +237,8 @@ void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject*
             return;
         {
             Effect* n = (Effect*)CreateEffect(0x1A, 0);
-            self->f5AC[0] = n;
-            self->f5D0 = 1;
+            self->effects[0] = n;
+            self->effectCount = 1;
             if (n != 0) {
                 void (*init)(Effect* self, void* pos, f32 scale, s32 flags) = n->vt->m00;
                 init(n, (u8*)other + 0x140, 1.0f, 0);
@@ -273,7 +273,7 @@ void* GetCurrentSwitchedCollider(void)
     if (r == 0) {
         Player* q = g_player;
         if (q != 0) {
-            s32 t = q->f550;
+            s32 t = q->enabled;
             if (t != 0) r = q;
         }
     }
@@ -296,7 +296,7 @@ s32 FindSwitchedColliderIndex(void* obj)
 
 void AddToSwitchedColliderList(SwitchedCollider* self)
 {
-    if (self->f550 == 0) return;
+    if (self->enabled == 0) return;
     if (self->parent != 0) return;
     if (!IsObjectAttached(self)) return;
     if (FindSwitchedColliderIndex(self) >= 0) return;
@@ -361,8 +361,8 @@ LINKER_REMNANT(func_00192988);
 
 void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value)
 {
-    if (self->f550 == value) return;
-    self->f550 = value;
+    if (self->enabled == value) return;
+    self->enabled = value;
     if (value) AddToSwitchedColliderList(self);
     else RemoveFromSwitchedColliderList(self);
 }
@@ -514,8 +514,8 @@ void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
             to[0] = target->v140;
         } else {
             count = 0;
-            for (s32 k = 0; k < self->f5D0; k++) {
-                TrailNode* n = (TrailNode*)self->f5AC[k];
+            for (s32 k = 0; k < self->effectCount; k++) {
+                TrailNode* n = (TrailNode*)self->effects[k];
                 if (n != 0 && g_gameClock[1] >= n->time) {
                     from[count] = n->v90;
                     to[count] = n->v80;
