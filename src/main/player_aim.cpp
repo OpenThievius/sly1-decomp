@@ -211,7 +211,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     case 7:
     case 8:
     case 9:
-        if (self->f2220 == 0) {
+        if (self->state == 0) {
             TeleportStateWalker((StateWalker*)self->stateWalker, 0x146);
         }
         break;
@@ -262,7 +262,7 @@ void SetPlayerAimMode(Player* self, s32 state)
         TransformPointBetweenFrames(0, self, (Vec02*)((u8*)self->f23D4 + 0x140), &v);
         Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
         Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(*(Vec02*)((u8*)self->f61C + 0x100)), h).q;
-        if (self->f2220 == 0) {
+        if (self->state == 0) {
             if (D_00274C10 != 0) {
                 state = 6;
                 goto aim6;
@@ -440,7 +440,7 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
 {
     s32 flag = 1;
     s32 held = other->flags & 0x80;
-    switch (self->f2220) {
+    switch (self->state) {
     case 3:
         if (held == 0) goto tail;
         flag = 0;
@@ -512,7 +512,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
     u8* list = g_class75List;
     f32 bestDist = 300.0f;
     Class75Object* best = 0;
-    BuildAxisAngleMatrix(&g_unitZVector, &rot, self->f638);
+    BuildAxisAngleMatrix(&g_unitZVector, &rot, self->heading);
     {
         Vec02 k;
         Vu0::Q(k) = Vu0::FromFloat(a);
@@ -540,7 +540,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         if (hit[1] < bestDist) {
             Vu0::Q(bestDir) = Vu0::Sub(Vu0::Q(delta), Vu0::Q(self->v140));
             f32 ang = ArctangentOfRatio(bestDir.y, bestDir.x);
-            f32 diff = WrapAngle(ang - self->f638);
+            f32 diff = WrapAngle(ang - self->heading);
             if (__builtin_fabsf(diff) > b) {
                 continue;
             }
@@ -571,7 +571,7 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
 {
     NearestAhead fr;
     f32 k = 1.60000002f;
-    if (s->f2220 == 0) {
+    if (s->state == 0) {
         k = 3.1500001f;
     }
     FindNearestClass75Ahead(s, 2, D_00274BE0, &fr.found, fr.dir, 0.150000006f, k);
@@ -599,8 +599,8 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
     s->boundObject = 0;
     s->aimTarget = fr.found;
     s->aimCurve = 0;
-    if (fr.found != 0 && s->f2220 == 0) {
-        s->f638 = ArctangentOfRatio(fr.dir[1], fr.dir[0]);
+    if (fr.found != 0 && s->state == 0) {
+        s->heading = ArctangentOfRatio(fr.dir[1], fr.dir[0]);
         TurnColliderTowardHeading(s);
     }
 }
@@ -613,7 +613,7 @@ void TurnPlayerToClass75AheadMask8(Player* self)
     self->aimTarget = t.found;
     self->aimCurve = 0;
     if (t.found != 0) {
-        self->f638 = ArctangentOfRatio(t.dir[1], t.dir[0]);
+        self->heading = ArctangentOfRatio(t.dir[1], t.dir[0]);
         TurnColliderTowardHeading(self);
     }
 }
@@ -626,7 +626,7 @@ void TurnPlayerToClass75AheadMask4(Player* self)
     self->aimTarget = t.found;
     self->aimCurve = 0;
     if (t.found != 0) {
-        self->f638 = ArctangentOfRatio(t.dir[1], t.dir[0]);
+        self->heading = ArctangentOfRatio(t.dir[1], t.dir[0]);
         TurnColliderTowardHeading(self);
     }
 }

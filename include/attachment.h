@@ -87,7 +87,7 @@ struct Rec2195_224 {
     s32 fA0;                // 0xA0: set, the owner's transform is unscaled by its parent's (func_00125C90)
     s32 fA4;                // 0xA4: whether q60 is set (func_001261C0)
     u8 padA8[0xB0 - 0xA8];  // 0xA8
-    s32 fB0;                // 0xB0: the flags; bit 0x20 gives the value at +0x8C
+    s32 flags;              // 0xB0: the flags; bit 0x20 gives the value at +0x8C
 };
 
 // The player an animation track attachment follows (D_002197C0): it holds the animation, a
@@ -100,7 +100,7 @@ struct AnimationPlayer {
     const void* vt;         // 0x00: D_002197B8
     u8 pad04[0x08 - 0x04]; // 0x04
     Animation* anim;              // 0x08: its tracks (Animation::tracks at +0x3C) are what the attachment follows
-    void* fC;               // 0x0C: an object func_0012F760 tells first (its slot 14, Desc01::m0E)
+    void* object;           // 0x0C: an object func_0012F760 tells first (its slot 14, Desc01::m0E)
     f32 f10;                // 0x10
     f32 time;               // 0x14
     f32 speed;              // 0x18

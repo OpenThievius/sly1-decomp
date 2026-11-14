@@ -351,7 +351,7 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
         Rec2195_224* rec = self->linkRecord;
         void* frame;
         if (rec != 0) {
-            if ((rec->fB0 & 8) != 0) {
+            if ((rec->flags & 8) != 0) {
                 frame = rec->p60;
             } else {
                 frame = self->parent;

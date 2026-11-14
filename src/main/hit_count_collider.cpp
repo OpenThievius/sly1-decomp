@@ -304,7 +304,7 @@ void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 en
     if (p != 0) {
         u128 vel = Vu0::Q(c->end[end].v30);
         u128 k = Vu0::Scalar((D_00274A44 - self->baseRadius) / p->anim->length);
-        u128 d = Vu0::Sub(Vu0::Q(c->end[end].v10), Vu0::Q(self->v140));
+        u128 d = Vu0::Sub(Vu0::Q(c->end[end].point), Vu0::Q(self->v140));
         Vu0::Q(c->end[end].v30) = Vu0::MulAddX(vel, Vu0::DivX(d, Vu0::Length(d)), k);
     }
 }

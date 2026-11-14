@@ -68,9 +68,9 @@ void SampleAnimationFrameChain(BlendAnimationView* self, f32 t, f32 scale, Place
 
 struct GridBlendSlot {
     u8 pad0[4];
-    SlotObject* n4;             // 0x04: the object named by the id
+    SlotObject* object;         // 0x04: the object named by the id
     u8 pad8[4];
-    s32 fC;                 // 0x0C: the id read from the stream
+    s32 id;                 // 0x0C: the id read from the stream
     u8 pad10[0x10];
 };
 

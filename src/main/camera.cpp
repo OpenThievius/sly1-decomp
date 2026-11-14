@@ -658,7 +658,7 @@ void AddCameraObject(Camera* list, void* item)
 {
     u32 n = list->objectCount;
     if (n < 8) {
-        list->f344[n] = item;
+        list->objects[n] = item;
         list->objectCount = n + 1;
     }
 }
@@ -666,8 +666,8 @@ void AddCameraObject(Camera* list, void* item)
 void RemoveCameraObject(Camera* list, void* item)
 {
     for (s32 i = 0; i < list->objectCount; i++) {
-        if (item == list->f344[i]) {
-            CopyMemory(&list->f344[i], &list->f344[i + 1], (list->objectCount - i - 1) * 4);
+        if (item == list->objects[i]) {
+            CopyMemory(&list->objects[i], &list->objects[i + 1], (list->objectCount - i - 1) * 4);
             list->objectCount--;
             return;
         }
@@ -715,7 +715,7 @@ void FadeCameraObstructingParts(Camera* self)
     PushBackMemoryMark();
     lo = hi = *(Vec02*)self->position;
     for (s32 i = 0; i < self->objectCount; i++) {
-        PlacedObject* obj = (PlacedObject*)self->f344[i];
+        PlacedObject* obj = (PlacedObject*)self->objects[i];
         if (obj->flags & (1ULL << 37)) {
             Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(obj->v140));
             Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(obj->v140));
@@ -725,7 +725,7 @@ void FadeCameraObstructingParts(Camera* self)
     for (s32 j = 0; j < n; j++) {
         Collider* c = list[j];
         for (s32 k = 0; k < self->objectCount; k++) {
-            PlacedObject* obj = (PlacedObject*)self->f344[k];
+            PlacedObject* obj = (PlacedObject*)self->objects[k];
             if (!(obj->flags & (1ULL << 37))) {
                 continue;
             }
@@ -932,16 +932,16 @@ void UpdateCameraMatrices(Camera* self)
     Mat02 rotation;
     f32 f6 = g_gameTime - self->swingStartTime;
     if (D_002618C8 < f6) {
-        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->f80, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
+        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->rotation, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
     } else {
         f32 t = f6 / D_002618C8;
         f32 amount = g_unitRange.Limit(D_002618D0[0] + t * (D_002618D0[1] + t * D_002618D0[2]));
         f32 swing = Sine(f6 * D_002618CC) * amount;
-        u128 turn = Vu0::Rotate(*(Mat02*)self->f80, Vu0::Q(*(Vec02*)D_002618E0));
+        u128 turn = Vu0::Rotate(*(Mat02*)self->rotation, Vu0::Q(*(Vec02*)D_002618E0));
         Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->position), turn, Vu0::Scalar(swing));
         Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec02*)D_002618F0), Vu0::Scalar(swing));
         BuildRotationFromVector(&dir, (Mat02*)&rotation);
-        MulRotationRowsX(&rotation, *(Mat02*)self->f80, rotation);
+        MulRotationRowsX(&rotation, *(Mat02*)self->rotation, rotation);
         Vec02 corner;
         Vec02 tilt;
         Mat4 proj;
@@ -951,7 +951,7 @@ void UpdateCameraMatrices(Camera* self)
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));
     }
     InvertMatrix4x4((u8*)self + 0x100, (u8*)self + 0x140);
-    BuildFrustumSideNormals((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->projectionScaleX, self->projectionScaleY);
+    BuildFrustumSideNormals((Mat02*)self->rotation, (Vec02*)((u8*)self + 0x180), self->projectionScaleX, self->projectionScaleY);
     {
         f32* e = (f32*)((u8*)self + 0x1B0);
         f32* d = self->planes[0];
@@ -984,7 +984,7 @@ void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b)
         *(Quad16*)self->position = *a;
     }
     if (b != 0) {
-        *(Quad16*)self->f80 = b[0];
+        *(Quad16*)self->rotation = b[0];
         *(Quad16*)self->f90 = b[1];
         *(Quad16*)self->fA0 = b[2];
     }
@@ -1074,7 +1074,7 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     f32 yaw = heading + 3.14159274f + yawOffset * self->zoom * self->aspectScale * 0.5f;
     f32 tilt = -pitch - pitchOffset * self->zoom * 0.5f;
     ConvertOffsetToSpherical((Vec02*)self->position, (Vec02*)self->f2D0, &curHeading, &curPitch, &curDist);
-    VectorToAngles((Vec3*)self->f80, &curYaw, &curTilt);
+    VectorToAngles((Vec3*)self->rotation, &curYaw, &curTilt);
     if ((flags & 1) == 0) {
         y = yaw;
         t = tilt;
@@ -1143,7 +1143,7 @@ void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, co
     Vu0::Q(pos) = Vu0::Add(Vu0::Q(*focus), Vu0::Q(dir));
     BuildYawPitchMatrix(y, t, &m);
     *(Vec02*)self->position = pos;
-    *(Vec02*)self->f80 = m.r[0];
+    *(Vec02*)self->rotation = m.r[0];
     *(Vec02*)self->f90 = m.r[1];
     *(Vec02*)self->fA0 = m.r[2];
     UpdateCameraMatrices(self);
@@ -1345,7 +1345,7 @@ void SetCameraAimOffsetFromScreenPoint(Camera* self, Vec02* p, f32 x, f32 y)
     dir.x = 1.0f;
     dir.y = -x * self->projectionScaleX;
     dir.z = y * self->projectionScaleY;
-    Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->position), Vu0::Rotate(self->f80, Vu0::Q(dir)), Vu0::Scalar(100.0f));
+    Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->position), Vu0::Rotate(self->rotation, Vu0::Q(dir)), Vu0::Scalar(100.0f));
     MeasurePointToLine(p, (Vec02*)self->position, &far, &t, &dist);
     Vu0::Q(far) = Vu0::MulXSum(Vu0::Q(self->position), Vu0::Scalar(1.0f - t), Vu0::Q(far), Vu0::Scalar(t));
     Vu0::Q(self->v230) = Vu0::Sub(Vu0::Q(far), Vu0::Q(*p));
@@ -1369,7 +1369,7 @@ void AimCameraAtPointWithSpring(Camera* self, Vec02* a1, Vec02* a2, f32 turnYaw,
     ConvertOffsetToSpherical(&tmp, a2, &yaw, &pitch, &dist);
     yaw = yaw + Arctangent(turnYaw * self->projectionScaleX);
     pitch = pitch - Arctangent(turnPitch * self->projectionScaleY);
-    BuildYawPitchMatrix(yaw, pitch, (Mat02*)self->f80);
+    BuildYawPitchMatrix(yaw, pitch, (Mat02*)self->rotation);
     UpdateCameraMatrices(self);
 }
 s32 FindFirstFreeSpan(s32 count, Collider** objs, void* a2, void* a3, f32 thresh, f32* lo, f32* hi)

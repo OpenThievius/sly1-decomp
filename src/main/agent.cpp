@@ -251,7 +251,7 @@ s32 TestAgentMayContact(Agent* self, Collider* obj)
             return 1;
         }
     }
-    if (self->f724 == 0xB) {
+    if (self->state == 0xB) {
         if ((obj->flags538 & ((u64)1 << 55)) == 0) {
             return 1;
         }
@@ -363,7 +363,7 @@ void StepAgent(Agent* self, f32 dt)
         Mat02 m;
         f32 a = __builtin_fabsf(Arccosine(Vu0::ToFloat(Vu0::Dot(Vu0::Q(self->rot.r[0]), Vu0::Q(self->headingMatrix.r[0])))));
         f32 k = LimitToUnitRange(D_00274C50.c[0] + a * (D_00274C50.c[1] + a * D_00274C50.c[2]));
-        if (self->f724 == 12) {
+        if (self->state == 12) {
             f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(self->v140))));
             f32* q = &F(f32, 0xB30);
             k = k * LimitToUnitRange(q[0] + d * (q[1] + d * q[2]));
@@ -386,7 +386,7 @@ void StepAgent(Agent* self, f32 dt)
         ClampVectorLength(&v, &v, 20000.0f);
         AddColliderForce(self, &v);
         TurnColliderTowardRotation(self, dt, &self->headingMatrix, &self->turnGain);
-    } else if (self->f724 == 16 && self->fA6C != 0) {
+    } else if (self->state == 16 && self->fA6C != 0) {
         Vec02 q2;
         Vec02 q;
         f32 x;
@@ -428,8 +428,8 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
 {
     if (IsAgentFacingBlocked(self) != 0) return;
     s32 t = self->usesPitch;
-    self->f638 = x;
-    self->fB24 = y;
+    self->heading = x;
+    self->pitch = y;
     if (t != 0) {
         BuildYawPitchMatrix(x, y, (Mat02*)((u8*)self + 0x660));
     } else {
@@ -446,7 +446,7 @@ void SettleAgentState(Agent* self)
     if (g_player != 0 && g_player->animSeekValue != 0) return;
     for (;;) {
         s32 v = self->desc08()->m59(self);
-        if (v == self->f724) break;
+        if (v == self->state) break;
         ChangeAgentState(self, v, 0);
     }
 }
@@ -460,7 +460,7 @@ void FaceAgentFromAnimationMotion(Agent* self)
     f32 out[3];
     f32 zero = 0.0f;
     out[1] = zero;
-    ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->usesPitch ? &out[1] : 0, &out[2]);
+    ComputeObjectSteeringHeading(g_frameDt, self->heading, self, 0, 0, &out[0], self->usesPitch ? &out[1] : 0, &out[2]);
     f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->headingVelocity)));
     if (0.0001f < out[2] && 0.0001f < len) {
         self->mainPlayer->speed *= len / out[2];
@@ -576,7 +576,7 @@ void UpdateAgent(Agent* self, f32 dt)
         } else {
             push = g_unitZVector;
         }
-        BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, self->f638, &spin);
+        BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, self->heading, &spin);
         BuildShortestArcRotation(&g_unitZVector, &push, &arc);
         MulRotationInto(self, arc, spin);
     }
@@ -590,11 +590,11 @@ s32 HasAgentReachedPathEnd(Agent* self);
 
 s32 ChooseAgentState(Agent* self)
 {
-    s32 s = self->f724;
+    s32 s = self->state;
     s32 m = GetAgentRosterState(self);
 
     if (self->clip10Deadline < g_gameClock[1]) {
-        if (self->f724 != 0xB && self->f724 != 0x10) {
+        if (self->state != 0xB && self->state != 0x10) {
             if (self->stateClips[10].obj != 0) {
                 s = 0xA;
                 goto done;
@@ -602,7 +602,7 @@ s32 ChooseAgentState(Agent* self)
         }
     }
 
-    switch (self->f724) {
+    switch (self->state) {
     case 0:
         switch (m) {
         case 1:
@@ -986,7 +986,7 @@ void FaceAgentAlongPath(Agent* self)
     if (1.0f < Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(dir), Vu0::Q(dir))))) {
         yaw = ArctangentOfRatio(dir.y, dir.x);
     } else {
-        yaw = self->f638;
+        yaw = self->heading;
     }
     f32 pitch;
     if (F(s32, 0xB1C) == 0) {
@@ -995,7 +995,7 @@ void FaceAgentAlongPath(Agent* self)
         u128 e = Vu0::Sub(Vu0::Q(self->snappedGoal), Vu0::Q(self->v140));
         f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(e, e)));
         f32 dz = self->snappedGoal.z - self->v140.z;
-        switch (self->f724) {
+        switch (self->state) {
         case 5: case 6: case 7: case 10: case 12: case 13: case 14: case 15:
             dz += F(f32, 0xB20);
             break;
@@ -1029,7 +1029,7 @@ BlendSourceEntry* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key)
 void UpdateAgentGoal(Agent* self, s32 flag)
 {
     Vec02 q;
-    switch (self->f724) {
+    switch (self->state) {
     case 7:
     case 10:
     case 12:
@@ -1104,7 +1104,7 @@ void FaceAgentTowardGoalPoint(Agent* self);
 void UpdateAgentState(Agent* self)
 {
     self->desc08()->m62(self);
-    switch (self->f724) {
+    switch (self->state) {
     case 0:
     case 16:
         break;
@@ -1118,7 +1118,7 @@ void UpdateAgentState(Agent* self)
             f32 out[3];
             f32 zero = 0.0f;
             out[1] = zero;
-            ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &out[0], self->usesPitch ? &out[1] : 0, &out[2]);
+            ComputeObjectSteeringHeading(g_frameDt, self->heading, self, 0, 0, &out[0], self->usesPitch ? &out[1] : 0, &out[2]);
             f32 y = out[1];
             SetAgentFacingAngles(self, out[0], y);
         }
@@ -1146,15 +1146,15 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void ChangeAgentState(Agent* self, s32 state, void* context)
 {
     self->requestBits &= -2;
-    if (self->f724 == state) return;
-    s32 old = self->f724;
+    if (self->state == state) return;
+    s32 old = self->state;
     self->desc08()->m5B(self, state, context);
-    self->f724 = state;
+    self->state = state;
     self->stateTime = g_gameClock[1];
     self->desc08()->m5C(self, old, context);
     StateChangeArgs frame;
     frame.oldSlot = &old;
-    frame.stateSlot = &self->f724;
+    frame.stateSlot = &self->state;
     TriggerScriptEvent(self, 15, 2, &frame);
 }
 
@@ -1188,7 +1188,7 @@ void LeaveAgentState(Agent* self, s32 mode)
     for (i = 0; i < self->meshKeyCount; i++) {
         ((BaseObject*)self->meshKeys[i].obj)->desc->m03((BaseObject*)self->meshKeys[i].obj);
     }
-    switch (self->f724) {
+    switch (self->state) {
     case 1:
         if (self->mainPlayer != 0 && mode != 2) {
             self->savedClipTime = self->mainPlayer->time;
@@ -1213,7 +1213,7 @@ void LeaveAgentState(Agent* self, s32 mode)
         self->targetReadyTime = g_gameTime[0] + RandomFloatInRange(self->retargetDelayMin, self->retargetDelayMax);
         break;
     case 11:
-        self->f724 = mode;
+        self->state = mode;
         InitContactPairFlags(g_currentWorld, self);
     case 16:
         self->contactsDisabled = 0;
@@ -1264,16 +1264,16 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     if (arg != 0) {
         tgt = arg;
     } else {
-        tgt = (Animation*)self->stateClips[self->f724].obj;
+        tgt = (Animation*)self->stateClips[self->state].obj;
     }
-    t = (Animation*)self->secondaryClips[self->f724].obj;
+    t = (Animation*)self->secondaryClips[self->state].obj;
     if (t == 0) {
         t = ((Animation*)self->defaultSecondaryClip);
     }
     SetTurningColliderFollowedMesh(self, (Collider*)t, 0);
     self->desc08()->m5E(self, 1);
 
-    switch (self->f724) {
+    switch (self->state) {
     case 2:
         if (self->mainPlayer != 0) {
             SetAnimationPlayerSpeed(self->mainPlayer, 1.0f);
@@ -1318,9 +1318,9 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
             PopBackMemoryMark();
         }
         SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
-        if (((BaseObject*)self->fB54) != 0) {
-            ((BaseObject*)self->fB54)->desc->m18(((BaseObject*)self->fB54), self);
-            self->fB54 = 0;
+        if (((BaseObject*)self->target) != 0) {
+            ((BaseObject*)self->target)->desc->m18(((BaseObject*)self->target), self);
+            self->target = 0;
         }
         if (self->fadesOut != 0) {
             f32 f = self->fadeDelay;
@@ -1351,7 +1351,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     if (tgt != 0) {
         f32 w;
         s32 mode;
-        if (self->f724 == 2 && self->fB14 != 0) {
+        if (self->state == 2 && self->fB14 != 0) {
             f32 t = self->startPhase;
             w = (0.0f <= t) ? t : RandomFloatInRange(0.0f, 1.0f);
         } else {
@@ -1398,7 +1398,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
         self->lastClipPhase = 0.0f;
     }
 
-    switch (self->f724) {
+    switch (self->state) {
     case 1:
     case 4:
     case 5:
@@ -1467,8 +1467,8 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
         if (0.0001f < Vu0::ToFloat(Vu0::Length(Vu0::Q(ev->push)))) {
             self->facingLocked = 0;
             f32 heading = ArctangentOfRatio(-ev->push.y, -ev->push.x);
-            f32 turn = WrapAngle(heading - self->f638);
-            SetAgentFacingAngles(self, WrapAngle(self->f638 + turn * *(f32*)&self->fBD0), self->fB24);
+            f32 turn = WrapAngle(heading - self->heading);
+            SetAgentFacingAngles(self, WrapAngle(self->heading + turn * *(f32*)&self->fBD0), self->pitch);
             TurnColliderTowardHeading(self);
         }
     }
@@ -1530,7 +1530,7 @@ void ApplyPendingAgentChanges(Agent* self) {
     }
     if (self->requestBits & 2) {
         if (self->statePlayer != 0) {
-            if (self->f724 != 0xB) {
+            if (self->state != 0xB) {
                 StopAnimationPlayer(self->statePlayer);
                 self->statePlayer = 0;
             } else {
@@ -1543,7 +1543,7 @@ void ApplyPendingAgentChanges(Agent* self) {
     }
     if (self->requestBits & 1) {
 
-        ChangeAgentState(self, self->f730, 0);
+        ChangeAgentState(self, self->requestedState, 0);
     }
 }
 
@@ -1601,9 +1601,9 @@ s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 TestAgentTargetContact(Agent* self, s32 key, Collider* other)
 {
-    if (key != (s32)self->fB54)
+    if (key != (s32)self->target)
         return 0;
-    switch (self->f724) {
+    switch (self->state) {
     case 10:
     case 11:
     case 16:
@@ -1663,7 +1663,7 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
         self->stateObject = obj;
         obj->desc->m17(obj, self);
         self->requestBits |= 1;
-        self->f730 = 3;
+        self->requestedState = 3;
         s32 state;
         s32 id = ((StateResetObject*)self->stateObject)->id2E0;
         ItemKeeper* keeper;
@@ -1684,12 +1684,12 @@ void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* msg)
         }
         switch (msg->code) {
         case 2:
-            if (self->f724 == 3) {
+            if (self->state == 3) {
                 CreateAgentAnimationPlayer(self);
             }
             break;
         case 0:
-            self->f730 = 1;
+            self->requestedState = 1;
             self->requestBits |= 1;
             break;
         }
@@ -2062,7 +2062,7 @@ void* SelectAgentTarget(Agent* self)
         s32 r = ((SwitchedCollider*)s0)->desc05()->m4D((SwitchedCollider*)s0);
         s0 = (r == 2) ? 0 : s0;
     }
-    void* a0 = self->fB54;
+    void* a0 = self->target;
     if (s0 == a0) {
         return s0;
     }
@@ -2072,7 +2072,7 @@ void* SelectAgentTarget(Agent* self)
     if (s0 != 0) {
         ((BaseObject*)s0)->desc->m17((BaseObject*)s0, self);
     }
-    self->fB54 = s0;
+    self->target = s0;
     return s0;
 }
 
@@ -2256,7 +2256,7 @@ void DispatchAgentContactHits(Agent* self)
                                 goto out;
                             }
                         }
-                        if (g_player->f2220 == 10 && g_gameTime[0] - g_player->stateStartTime < 0.25f) {
+                        if (g_player->state == 10 && g_gameTime[0] - g_player->stateStartTime < 0.25f) {
                             goto out;
                         }
                         switch (g_player->subState) {
@@ -2295,7 +2295,7 @@ void DispatchAgentContactHits(Agent* self)
                             break;
                         }
                     case 0:
-                        ComputeObjectMotionInFrame(c->end[j].part, 0, &c->end[1 - j].v10, &vel, 0, 0, 0);
+                        ComputeObjectMotionInFrame(c->end[j].part, 0, &c->end[1 - j].point, &vel, 0, 0, 0);
                         Vu0::Q(vel) = Vu0::MulX(Vu0::Vec::Of(vel), Vu0::Vec::Scalar(D_00274CFC + 1.0f)).q;
                         ClampVectorLength(&vel, &vel, D_00274D04);
                         vel.z = D_00274D00 >? vel.z;
@@ -2307,7 +2307,7 @@ void DispatchAgentContactHits(Agent* self)
                 } else {
                     NodeQuery q;
                     InitAgentContactQuery(&q, self, part);
-                    ComputeObjectMotionInFrame(c->end[j].part, 0, &other->v10, &q.dir, 0, 0, 0);
+                    ComputeObjectMotionInFrame(c->end[j].part, 0, &other->point, &q.dir, 0, 0, 0);
                     q.kind = 2;
                     FindNodeForQuery(&q, 0, 0);
                 }
@@ -2342,7 +2342,7 @@ void SetAgentMainClip(Agent* self, void* value)
     }
     self->mainClip = value;
     if (GetAgentRosterState(self) == 0) {
-        self->f730 = 0;
+        self->requestedState = 0;
         self->requestBits = self->requestBits | 1;
     }
     p = self->mainClip;
@@ -2380,7 +2380,7 @@ s32 IsPlayerUntargetableByAgent(Agent* self)
     if (IsObjectOfKind(t, 7) == 0) {
         return 0;
     }
-    if (t->f2220 != 6) {
+    if (t->state != 6) {
         return 0;
     }
     Vec02 d;

@@ -1801,7 +1801,7 @@ void UpdateHintGlyphElement(T217D_420* self)
     UpdateScreenElementSlide(self);
     if (self->flag == 0) goto tail;
     g = g_player;
-    if (g != 0 && g->f2220 == 6) goto tail;
+    if (g != 0 && g->state == 6) goto tail;
     m = (ElementStack*)g_elementStack;
     if (m->state == 3 && m->count < 2) {
         self->vt->m14(self);

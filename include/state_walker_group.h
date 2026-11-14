@@ -18,9 +18,9 @@ struct StateWalkerGroup : PlacedObject {
     void* graph;            // 0x2D4: what the handle at 0x2D8 is made from
     void* walker;           // 0x2D8: the object's own handle
     s32 idCount;            // 0x2DC: ids in the list below
-    s32 ids2E0[8];          // 0x2E0: ids of the objects to collect
+    s32 ids[8];             // 0x2E0: ids of the objects to collect
     s32 objectCount;        // 0x300: objects collected
-    void* objs304[8];       // 0x304: the objects (found by kind 0x5C, then by id)
+    void* objects[8];       // 0x304: the objects (found by kind 0x5C, then by id)
     u8 pad324[0x330 - 0x324];
 };
 

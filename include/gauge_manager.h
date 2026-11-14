@@ -92,7 +92,7 @@ struct GaugeManager : PlacedObject {
     u8 pad47C[0x480 - 0x47C];
     GaugeParams params0;       // 0x480
     GaugeParams params1;       // 0x530
-    f32 o5E0[44];           // 0x5E0: the blend of the two sets (func_0014C138)
+    f32 blend[44];          // 0x5E0: the blend of the two sets (func_0014C138)
     s32 setIndex;           // 0x690
     u8 pad694[0x6A0 - 0x694];
 };

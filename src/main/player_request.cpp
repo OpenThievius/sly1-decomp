@@ -333,7 +333,7 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out);
 
 void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2)
 {
-    a0->f638 = f12;
+    a0->heading = f12;
     if (a1->secondBlends == 0) {
         a1->weight0 = 1.0f;
         a1->weight1 = 0.0f;
@@ -467,7 +467,7 @@ void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimationView* blend, f32 heading, f32 speed)
 {
     Vec02 h;
-    ComputePolarOffset((Vec3*)&h, heading - self->f638, speed, 0.0f);
+    ComputePolarOffset((Vec3*)&h, heading - self->heading, speed, 0.0f);
     f32 m;
     if (10.0f < h.y) {
         if (self->eightWayHalf == 0) {
@@ -576,7 +576,7 @@ void UpdatePlayerRequestSubState(Player* self) {
     switch (self->subState) {
     case 0x2B: {
         f32 t = ArctangentOfRatio(self->v150.y, self->v150.x);
-        self->f638 = ApproachAngleWithRamp(self->f638, t + 3.1415927f, g_gameClock.dt, D_00275030, 0);
+        self->heading = ApproachAngleWithRamp(self->heading, t + 3.1415927f, g_gameClock.dt, D_00275030, 0);
         if (0.25f < g_gameClock.time - self->subStateStartTime && self->groundContact != 0) {
 
             RunPlayerCallback(self);
@@ -659,14 +659,14 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     if (self->desc05()->m4B(self, msg->kind) != 0) {
         return 0;
     }
-    if (self->f2220 == 6 && self->targetMode == 2) {
+    if (self->state == 6 && self->targetMode == 2) {
         Ev07* tmp = msg;
         TriggerScriptEvent((BaseObject*)self->heldObject, 0x13, 1, &tmp);
         SetPlayerState(self, 2, 5);
         return 0;
     }
     self->lastMessage = *msg;
-    if (self->f2220 != 4 && self->f2220 != 0xB && self->pulseActive == 0 && (g_buttonCodeFlags & 1) == 0 &&
+    if (self->state != 4 && self->state != 0xB && self->pulseActive == 0 && (g_buttonCodeFlags & 1) == 0 &&
         IsPadSelectFlagHeld(self->world) == 0) {
         s32 c;
         switch (self->lastMessage.kind) {
@@ -724,7 +724,7 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
     case 1:
     case 2: {
         s32 id;
-        if (self->f2220 == 0xD) {
+        if (self->state == 0xD) {
             (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->savedSpin) = *(const Quad16*)&D_00248D30;
         } else {
             (*(Quad16*)&self->savedVelocity) = (*(Quad16*)&self->v150);
@@ -810,7 +810,7 @@ void ContinuePlayerRequestKind0(Player* self)
             SetPlayerState(self, 4, 0x2D);
         }
     }
-    if (self->f2220 == 4) {
+    if (self->state == 4) {
         f32 t = self->v150.z;
         f32 x = D_00275050[0] + t * (D_00275050[1] + t * D_00275050[2]);
         f32 lo = D_00275060[0];
@@ -864,7 +864,7 @@ s32 IsPlayerRequestBlocked(Player* self, s32 n)
     s32 v;
     s32 k;
     if (n == 3 || n == 5) {
-        switch (self->f2220) {
+        switch (self->state) {
         case 4:
             switch (self->subState) {
             case 0x27:
@@ -892,7 +892,7 @@ s32 IsPlayerRequestBlocked(Player* self, s32 n)
         case 5:
         default: {
             s32 r = 0;
-            if (self->f2220 == 11) goto set;
+            if (self->state == 11) goto set;
             if (IsPadSelectFlagHeld((World*)self->world) != 0) {
 set:
                 r = 1;
@@ -905,7 +905,7 @@ set:
             goto one;
         }
     }
-    v = self->f2220;
+    v = self->state;
     if (v == 4) goto one;
     if (v == 11) goto one;
     if (self->pulseActive != 0) goto one;

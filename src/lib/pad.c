@@ -16,8 +16,8 @@
 typedef struct PadSlot {
     u8* buffer;
     u32* dma;
-    u32* f08;
-    s32 f0C;
+    u32* iopBuffer;
+    s32 dmaId;
     s32 open;
     s32 f14;
     s32 f18;
@@ -26,27 +26,27 @@ typedef struct PadSlot {
 /* One of the two frames of a slot's buffer, 0x80 bytes. */
 typedef struct PadFrame {
     u8 head[0x30];
-    u8 f30[8][4];
-    u16 f50[4];
+    u8 replyTable[8][4];
+    u16 values[4];
     s32 count;
     u8 pad5C[4];
     s32 size;
-    u8 f64;
-    u8 f65;
-    u8 f66;
+    u8 infoLevel;
+    u8 idByte;
+    u8 maskLevel;
     u8 f67;
-    u8 f68;
-    u8 f69;
-    u8 f6A;
+    u8 valueCount;
+    u8 currentIndex;
+    u8 tableCount;
     u8 pad6B[5];
     u8 state;
     u8 mode;
-    u8 f72;
+    u8 valid;
     u8 pad73[6];
-    u8 f79;
-    u8 f7A;
-    u8 f7B;
-    u8 f7C;
+    u8 maskByte0;
+    u8 maskByte1;
+    u8 maskByte2;
+    u8 maskByte3;
     u8 pad7D[3];
 } PadFrame;
 
@@ -129,13 +129,13 @@ s32 SendPadDma(s32 port, s32 slot)
     s32 id;
     u32 count;
 
-    if (g_padSlots[port][slot].f0C != 0 && GetIopDmaStatus(g_padSlots[port][slot].f0C) >= 0) {
+    if (g_padSlots[port][slot].dmaId != 0 && GetIopDmaStatus(g_padSlots[port][slot].dmaId) >= 0) {
         if (D_0027AE84 != 0)
             PrintFormatted("libpad: sceSifSetDma faild\n");
         return 0;
     }
     count = dma[0] + 1;
-    dst = (u8*)g_padSlots[port][slot].f08 + ((count & 1) << 5);
+    dst = (u8*)g_padSlots[port][slot].iopBuffer + ((count & 1) << 5);
     dma[0] = count;
     RefreshPadFrames(dma, dma + 8);
     transfers[0].dst = dst;
@@ -148,7 +148,7 @@ s32 SendPadDma(s32 port, s32 slot)
             PrintFormatted("libpad: sceSifSetDma faild\n");
         return 0;
     }
-    g_padSlots[port][slot].f0C = id;
+    g_padSlots[port][slot].dmaId = id;
     return 1;
 }
 
@@ -240,11 +240,11 @@ s32 OpenPadPort(s32 port, s32 slot, u8* buffer)
         return 0;
     dma = D_0062ABC0[port][slot];
     g_padSlots[port][slot].open = 1;
-    g_padSlots[port][slot].f08 = request->arg14;
+    g_padSlots[port][slot].iopBuffer = request->arg14;
     g_padSlots[port][slot].buffer = buffer;
     g_padSlots[port][slot].dma = dma;
     dma[0] = 0;
-    g_padSlots[port][slot].f0C = 0;
+    g_padSlots[port][slot].dmaId = 0;
     return request->result;
 }
 
@@ -309,24 +309,24 @@ s32 GetPadReplyTableByte(s32 port, s32 slot, s32 index, s32 kind)
     if (g_padSlots[port][slot].open == 0)
         return 0;
     frame = GetNewerPadFrame(port, slot);
-    if (frame->f72 != 1)
+    if (frame->valid != 1)
         return 0;
-    if (frame->f64 < 2)
+    if (frame->infoLevel < 2)
         return 0;
-    count = frame->f6A;
+    count = frame->tableCount;
     if (index >= count)
         return 0;
     if (index == -1)
         return count;
     switch (kind) {
     case 1:
-        return frame->f30[index][0];
+        return frame->replyTable[index][0];
     case 2:
-        return frame->f30[index][1];
+        return frame->replyTable[index][1];
     case 3:
-        return frame->f30[index][2];
+        return frame->replyTable[index][2];
     case 4:
-        return frame->f30[index][3];
+        return frame->replyTable[index][3];
     }
     return 0;
 }
@@ -338,30 +338,30 @@ s32 GetPadReplyListValue(s32 port, s32 slot, s32 kind, s32 index)
     if (g_padSlots[port][slot].open == 0)
         return 0;
     frame = GetNewerPadFrame(port, slot);
-    if (frame->f72 != 1)
+    if (frame->valid != 1)
         return 0;
     if (frame->mode == 2)
         return 0;
     switch (kind) {
     case 1:
-        if (frame->f65 == 0xF3)
+        if (frame->idByte == 0xF3)
             return 0;
-        return frame->f65 >> 4;
+        return frame->idByte >> 4;
     case 2:
-        if (frame->f64 == 1)
+        if (frame->infoLevel == 1)
             return 0;
-        return frame->f50[frame->f69];
+        return frame->values[frame->currentIndex];
     case 3:
-        if (frame->f64 == 1)
+        if (frame->infoLevel == 1)
             return 0;
-        return frame->f69;
+        return frame->currentIndex;
     case 4:
-        if (frame->f64 == 1)
+        if (frame->infoLevel == 1)
             return 0;
         if (index == -1)
-            return frame->f68;
-        if (index < frame->f68)
-            return frame->f50[index];
+            return frame->valueCount;
+        if (index < frame->valueCount)
+            return frame->values[index];
         return 0;
     }
     return 0;
@@ -394,7 +394,7 @@ s32 SetPadActuatorBytes(s32 port, s32 slot, u8* src)
     s32 i;
     s32 ok;
 
-    if (GetNewerPadFrame(port, slot)->f72 != 1)
+    if (GetNewerPadFrame(port, slot)->valid != 1)
         return 0;
     dma = g_padSlots[port][slot].dma;
     bytes = (u8*)(dma + 3);
@@ -436,13 +436,13 @@ s32 GetPadButtonMask(s32 port, s32 slot)
     if (g_padSlots[port][slot].open == 0)
         return 0;
     frame = GetNewerPadFrame(port, slot);
-    if (frame->f72 != 1)
+    if (frame->valid != 1)
         return 0;
-    if (frame->f64 < 2)
+    if (frame->infoLevel < 2)
         return 0;
-    if (frame->f66 < 2)
+    if (frame->maskLevel < 2)
         return 0;
-    return frame->f79 + ((u64)frame->f7A << 8) + ((u64)frame->f7B << 16) + ((u64)frame->f7C << 24);
+    return frame->maskByte0 + ((u64)frame->maskByte1 << 8) + ((u64)frame->maskByte2 << 16) + ((u64)frame->maskByte3 << 24);
 }
 
 

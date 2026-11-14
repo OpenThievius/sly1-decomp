@@ -27,7 +27,7 @@ void AnnouncePendingWarpEntry(WarpPage* self)
     e->i974 = 1;
     SetScreenElementHoldTime((Eng_1F0908*)e, 0.0f);
     e->vt->set((Eng_1F0908*)e, 2);
-    Animation* sl = self->entries[D_00276250].f00;
+    Animation* sl = self->entries[D_00276250].animation;
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->length;

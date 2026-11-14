@@ -26,7 +26,7 @@ struct LoadProgress;
 // the word at 0x2D0 (a placed object's subclass).
 struct SortKeyedObject : PlacedObject {
     s32 kind;               // 0x2D0
-    s32 f2D4;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
+    s32 mode;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
     u8 pad2D8[0x304 - 0x2D8];
     s32 dynamic;            // 0x304
     s32 f308;               // 0x308
@@ -369,8 +369,8 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
                 if (((s32)mask & bit) && num < maxLights) {
                     LightObject* l = (LightObject*)prev->lights[k];
                     out[num++] = l;
-                    if (strongest < l->f2D4) {
-                        strongest = l->f2D4;
+                    if (strongest < l->mode) {
+                        strongest = l->mode;
                     }
                     flaggedCount += prev->flags & 1;
                 }

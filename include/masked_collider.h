@@ -59,7 +59,7 @@ struct MaskedCollider : Collider {
     s32 list658[4];         // 0x658: the accepted object kinds (func_0013DA80 appends)
     s32 count668;           // 0x668
     void* list66C[3];       // 0x66C: func_0013DAB8 appends
-    s32 f678;               // 0x678: busy; slot 17 clears it and calls slot 72
+    s32 busy;               // 0x678: busy; slot 17 clears it and calls slot 72
     s32 keep;               // 0x67C: set, slot 72 leaves it in its parent's list
     s32 hold;               // 0x680: func_0013D820 (an id of the table at D_00261420 is kept at 0x688)
     s32 quiet;              // 0x684: set, slot 72 only marks it done
@@ -127,7 +127,7 @@ struct Alloc24 {
 };
 
 struct C24 : PlayerFlaggedCollider {
-    void* x6C0;             // 0x6C0: the path object it follows (func_00182748)
+    void* path;             // 0x6C0: the path object it follows (func_00182748)
     void* stateGraph;       // 0x6C4: loaded (D_00264230)
     StateWalker* walker;        // 0x6C8: a handle func_001B6290 makes for x6C4
     f32 f6CC;               // 0x6CC
@@ -136,7 +136,7 @@ struct C24 : PlayerFlaggedCollider {
     f32 f6D8;               // 0x6D8
     f32 levelLimit;         // 0x6DC
     f32 levelRate;          // 0x6E0
-    f32 f6E4;               // 0x6E4: the level between 0 and f6DC, raised by f6E0 each second (func_00182548)
+    f32 level;              // 0x6E4: the level between 0 and f6DC, raised by f6E0 each second (func_00182548)
     Alloc24* curveTable;    // 0x6E8
     void* x6EC;             // 0x6EC: loaded (D_00264230)
 };

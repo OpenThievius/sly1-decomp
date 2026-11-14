@@ -3230,7 +3230,7 @@ ScriptValue* GetScriptPointAheadOfCamera(ScriptValue* ret, s32 count, ScriptValu
     f32* p = AcquireVectorAPayload();
     Camera* c = g_camera;
     Vu0::Q(k) = Vu0::FromFloatAt(c->nearDistance);
-    Vu0::Q(t) = Vu0::MulX(Vu0::Q(c->f80), Vu0::Q(k));
+    Vu0::Q(t) = Vu0::MulX(Vu0::Q(c->rotation), Vu0::Q(k));
     Vu0::Q(*(Vec02*)p) = Vu0::Add(Vu0::Q(c->position), Vu0::Q(t));
     SetScriptValueVectorA(&obj, p);
     CopyConstructScriptValue(ret, &obj);

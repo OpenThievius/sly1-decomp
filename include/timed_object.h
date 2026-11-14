@@ -52,7 +52,7 @@ struct TimedObject : Collider {
     f32 beginDuration;      // 0x5B8
     f32 endDuration;        // 0x5BC
     s32 triggerHeld;        // 0x5C0
-    void* f5C4;             // 0x5C4: a sound (func_001BFCD8 starts it, func_001BF788 stops it)
+    void* sound;            // 0x5C4: a sound (func_001BFCD8 starts it, func_001BF788 stops it)
     TrackPlayer* heldTrack;      // 0x5C8
     f32 heldValue;          // 0x5CC: the value kept out of f5C8's record
 

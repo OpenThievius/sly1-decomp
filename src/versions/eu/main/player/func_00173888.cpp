@@ -18,7 +18,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
     }
     PadRecord blank;
     if (D_00261D38 > 0 || self->walkerActivation != 0 || self->firstActivation != 0 || self->secondActivation != 0) {
-        switch (self->f2220) {
+        switch (self->state) {
         case 12:
             if (self->pendingCaption == 0) {
                 SetPlayerState(g_player, 12, 0x23);
@@ -47,7 +47,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
         FillMemory(&blank, 0, sizeof(blank));
         pad = &blank;
     }
-    if (self->f2220 != 4) {
+    if (self->state != 4) {
     if (self->entryQueue != 0 && IsEntryQueueRunning(self->entryQueue)) {
         EntryQueue* q = self->entryQueue;
         if ((g_padRecord.flags & 0x800) && D_00275F84 == 0) {
@@ -85,7 +85,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
     s32 jump = 0;
     WrapAngle(self->stickHeading - ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x));
     if (pad->flags & 0x40) {
-        switch (self->f2220) {
+        switch (self->state) {
         case 6:
             if (self->targetMode == 2 || self->targetMode == 5 || self->targetMode == 4) {
                 jump = 1;
@@ -131,7 +131,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
         jump = 1;
     }
 held:
-    switch (self->f2220) {
+    switch (self->state) {
     case 0:
     case 1:
     case 5:
@@ -141,7 +141,7 @@ held:
     case 16:
         if (g_gameTime[0] - self->groundContactTime > 0.1f) {
             Vec02 off;
-            if (self->f2220 == 6 && self->targetMode == 3) {
+            if (self->state == 6 && self->targetMode == 3) {
                 Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth - 200.0f));
             } else {
                 Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth - 60.0f));
@@ -164,14 +164,14 @@ held:
         PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         StepSequence* seq = (StepSequence*)((CaptionBox_eu*)&g_typedTextCaptionBox)->child;
         if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
-            if (self->f2220 == 12) {
+            if (self->state == 12) {
                 self->pendingCaption = 0;
                 skipStep = 1;
             }
             SkipRemainingSteps((StepSequence*)((CaptionBox_eu*)&g_typedTextCaptionBox)->child);
             ClearPadPressedBits(rec, 0xC);
         } else if (self->f2BD4 != 0 || (pad->flags & 0xC)) {
-            if (self->f2220 == 12) {
+            if (self->state == 12) {
                 if (((CaptionBox_eu*)&g_typedTextCaptionBox)->child == 0) {
                     self->pendingCaption = 0;
                     skipStep = 1;
@@ -187,7 +187,7 @@ held:
         }
     }
     for (;;) {
-        s32 state = self->f2220;
+        s32 state = self->state;
         s32 sub = self->subState;
         s32 target;
         switch (state) {
@@ -200,7 +200,7 @@ held:
             }
             if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < D_00263910[0]) {
                 RunPlayerCallback(self);
-                state = self->f2220;
+                state = self->state;
                 sub = self->subState;
             }
             break;
@@ -427,7 +427,7 @@ held:
                 sub = 0x38;
                 break;
             }
-            self->f638 = self->stickHeading;
+            self->heading = self->stickHeading;
             break;
         case 14:
         case 15:
@@ -438,7 +438,7 @@ held:
             }
             break;
         }
-        if (state == self->f2220 && sub == self->subState) {
+        if (state == self->state && sub == self->subState) {
             break;
         }
         SetPlayerState(self, state, sub);
@@ -447,7 +447,7 @@ held:
         falling = 0;
     }
     HandlePlayerAimButton(self, pad);
-    switch (self->f2220) {
+    switch (self->state) {
     case 5:
         SetPlayerVelocityFromHeading(self, (const Vec02*)((u8*)self + 0x910), self->eightWayBlend, self->stickHeading, self->stickLevel);
         break;

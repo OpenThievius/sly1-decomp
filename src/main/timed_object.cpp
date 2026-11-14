@@ -171,7 +171,7 @@ void UpdateTimedObject(TimedObject* self, f32 dt)
     if (sink != 0) {
         Player* g = g_player;
         if (g != 0) {
-            if (g->f2220 != 4) {
+            if (g->state != 4) {
                 sink->f18.f = self->heldValue;
                 self->heldTrack = 0;
                 *(s32*)&self->heldValue = 0;
@@ -558,7 +558,7 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
     if ((a1->flags538 & m) != 0 || a1->root == a0->root || IsObjectExcluded(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)g_player && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->targetMode == 3) {
+    if ((void*)a1 == (void*)g_player && ((Player*)a1)->state == 6 && ((Player*)a1)->targetMode == 3) {
         if ((MaskWorldBitsBySave() & 0x12000) != 0) {
             return 0;
         }
@@ -620,7 +620,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
                 u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), v, ones, Vu0::Scalar(radius)) ^ 0xF0;
                 look = signs == 0;
                 if (look && g_player != 0 && *(s32*)((u8*)self + 0x5D0) == 1) {
-                    if (g_player->f2220 != 6 || g_player->targetMode != 3 || (MaskWorldBitsBySave() & 0x12000) == 0) {
+                    if (g_player->state != 6 || g_player->targetMode != 3 || (MaskWorldBitsBySave() & 0x12000) == 0) {
                         hit = (Collider*)FindNearestSpanObject(0, &p0, &p1, 1, (Collider**)&g_player, &span);
                         look = 0;
                     }
@@ -731,7 +731,7 @@ void EnterTimedGroupState(TimedGroup* self, s32 s)
     if (st == -1 || st == 8) {
         f32 z = 0.0f;
         f32 a = 1000.0f, c = 100.0f, d = 0.4f;
-        StartSoundEffect(0x1A, (PlayingSound**)&self->f5C4, self, 0, a, c, d, z, z, 0, 0);
+        StartSoundEffect(0x1A, (PlayingSound**)&self->sound, self, 0, a, c, d, z, z, 0, 0);
     }
     switch (s) {
     case 3:
@@ -744,7 +744,7 @@ void EnterTimedGroupState(TimedGroup* self, s32 s)
     case 8: {
         f32 v;
         if (self->repeating == 0) v = self->endDuration; else v = self->repeatEndDuration;
-        StopSoundRecord((PlayingSound*)self->f5C4, (s32)v * 1000);
+        StopSoundRecord((PlayingSound*)self->sound, (s32)v * 1000);
         self->desc->m03(self);
         g_groupStaggerDirty = 1;
         break;
@@ -1064,7 +1064,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
     if (IsPointInsideCollider(self, &pl->v140) == 0) {
         return;
     }
-    if (pl == g_player && pl->f2220 == 6) {
+    if (pl == g_player && pl->state == 6) {
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(pl->v140), Vu0::Q(self->v140));
         delta.z = 0.0f;
         Vu0::Q(delta) = Vu0::NormalizeOr(Vu0::Q(delta), Vu0::Q(g_unitXVector));
@@ -1165,7 +1165,7 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
     case 0:
         break;
     case 1:
-        StopSoundRecord((PlayingSound*)self->f5C4, 0);
+        StopSoundRecord((PlayingSound*)self->sound, 0);
         break;
     case 2:
         break;
@@ -1179,7 +1179,7 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
         }
         break;
     case 1:
-        StartSoundEffect(0x1B, (PlayingSound**)&self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x1B, (PlayingSound**)&self->sound, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
         if (self->aimAttachment != 0) {
@@ -1393,7 +1393,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     switch (self->state) {
     case 1:
     case 5:
-        StopSoundRecord((PlayingSound*)self->f5C4, 0);
+        StopSoundRecord((PlayingSound*)self->sound, 0);
         self->savedStartTime = self->stateStartTime;
         break;
     case 8:
@@ -1403,7 +1403,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     }
     switch (n) {
     case 1:
-        StartSoundEffect(15, (PlayingSound**)&self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(15, (PlayingSound**)&self->sound, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
     case 6:
@@ -1414,7 +1414,7 @@ void EnterBlinkObjectState(BlinkObject* self, s32 n)
     case 7:
         break;
     case 5:
-        StartSoundEffect(27, (PlayingSound**)&self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(27, (PlayingSound**)&self->sound, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     }
     EnterTimedObjectState(self, n);

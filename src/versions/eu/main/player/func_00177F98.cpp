@@ -9,7 +9,7 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
         PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         return;
     }
-    if (self->f2220 != 0xC) {
+    if (self->state != 0xC) {
         s32 f = self->pendingFlags;
         self->pendingSubState = 0x21;
         self->pendingCaption = node;

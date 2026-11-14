@@ -660,12 +660,12 @@ void BounceStateNotifierOffSurfaces(StateNotifier* self)
             SplitVectorAlongAxis(&self->motionVel, &g_unitZVector, &along, &across);
             Vu0::Q(motion) = Vu0::MulXSum(Vec::Of(along), Vec::Scalar(-self->bounceRetention), Vec::Of(across),
                                           Vec::ScalarAt(self->slideRetention)).q;
-            if (self->f33C == 0) {
+            if (self->landed == 0) {
                 s32 low = Vu0::ToFloat(Vu0::Dot(Vec::Of(motion), Vec::Of(bestN))) < self->minBounceSpeed;
                 if (low) {
                     across.z = zero >? across.z;
                     Vu0::Q(motion) = Vu0::MulAddX(Vec::Of(across), Vec::Of(g_unitZVector), Vec::Scalar(self->minBounceSpeed)).q;
-                    self->f33C = 1;
+                    self->landed = 1;
                 }
             }
         } else {
@@ -766,7 +766,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
     if (below != self->belowCameraPlane) {
         if (RandomFloatInRange(0.0f, 1.0f) < self->splashChance && D_00261A54 < g_gameClock[1] - self->lastSplashTime) {
             PlacedObject* at;
-            if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->f80))) < 0.0f) {
+            if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(d), Vu0::Q(*(Vec02*)(*(Camera**)g_camera)->rotation))) < 0.0f) {
                 at = self->splashAnchorAway;
             } else {
                 at = self->splashAnchorToward;
@@ -807,8 +807,8 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
             self->desc02()->m2F(self, 2);
             break;
         }
-        if (self->f33C != 0 && self->motionVel.z < 25.0f) {
-            self->f33C = 0;
+        if (self->landed != 0 && self->motionVel.z < 25.0f) {
+            self->landed = 0;
             self->desc02()->m2F(self, 0);
             break;
         }
@@ -1427,7 +1427,7 @@ s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotif
             o->desc02()->m20(o, (Vec02*)D_00248D30);
             o->desc02()->m21(o, (Vec02*)D_00248D30);
             o->f2E0 = (f32)i * D_00261B40;
-            o->f33C = 0;
+            o->landed = 0;
             i++;
             o->desc02()->m2F(o, 3);
             a = RandomFloatInRange(D_00261B48[0], D_00261B48[1]);

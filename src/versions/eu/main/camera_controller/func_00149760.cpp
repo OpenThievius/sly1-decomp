@@ -55,7 +55,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(*(Vec02*)(obj + 0x140)), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
             f32 reach = size + Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(span))) * 0.5f;
             Vu0::Q(d) = Vu0::Sub(Vu0::Vec::Of(mid), Vu0::Vec::Of(gc->position)).q;
-            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->f80, Vu0::Vec::Of(d)).q;
+            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->rotation, Vu0::Vec::Of(d)).q;
             e.x = -d.y;
             e.y = d.z;
             e.z = d.x;
@@ -160,7 +160,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         self->yawSpeed = ClampToMagnitude(self->yawSpeed + yaw * dt, limit * 0.9f);
         self->pitchSpeed = ClampToMagnitude(self->pitchSpeed + pitch * dt, limit * 0.8f);
         self->g08 = WrapAngle(self->g08 + self->yawSpeed * dt);
-        self->f10 = ClampFloat(self->f10 + self->pitchSpeed * dt, D_00261BFC, D_00261C00);
+        self->pitch = ClampFloat(self->pitch + self->pitchSpeed * dt, D_00261BFC, D_00261C00);
         eye = GetTargetCameraControllerEyePoint(self);
         f32 since = (g_gameTime[0] - cam->controllerSwitchTime) * 2.0f;
         blend = ClampFloat(since, 0.0f, 1.0f);
@@ -190,7 +190,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vec02 ahead;
             Vec02 world;
             Vec02 push;
-            const u128* rows = (const u128*)cam->f80;
+            const u128* rows = (const u128*)cam->rotation;
             Vu0::Vec r0, r1, r2;
             r0.q = rows[0];
             r1.q = rows[1];
@@ -219,7 +219,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 dy = ClampToRange((ValueRange*)(coll + 0x658), WrapAngle(yaw - *(f32*)(coll + 0x648)));
         f32 dp = ClampToRange((ValueRange*)(coll + 0x650), WrapAngle(pitch - *(f32*)(coll + 0x64C)));
         self->g08 = WrapAngle(*(f32*)(coll + 0x648) + dy);
-        self->f10 = WrapAngle(*(f32*)(coll + 0x64C) + dp);
+        self->pitch = WrapAngle(*(f32*)(coll + 0x64C) + dp);
         eye = GetTargetCameraControllerEyePoint(self);
         break;
     }
@@ -287,7 +287,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         Mat02 rot;
         Mat02 m;
         MulRotationThenCopy(&m, mz, my);
-        MulRotationThenCopyVia((Mat02*)cam->f80, rot, m, mx);
+        MulRotationThenCopyVia((Mat02*)cam->rotation, rot, m, mx);
         UpdateCameraMatrices(cam);
         *(Quad16*)cam->f2D0 = pos;
         return;

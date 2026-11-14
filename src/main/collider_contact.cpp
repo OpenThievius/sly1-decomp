@@ -187,18 +187,18 @@ void RefreshContactEndPoints(World* world, s32 n, Contact03** list)
                 case 5:
                 case 6: {
                     u128 centre = Vu0::Q(part->v140);
-                    Vu0::Q(end->v10) = Vu0::MulAddX(centre, Vu0::Q(c->normal), Vu0::Scalar(-part->radius3CC));
+                    Vu0::Q(end->point) = Vu0::MulAddX(centre, Vu0::Q(c->normal), Vu0::Scalar(-part->radius3CC));
                     break;
                 }
                 default:
-                    TransformPointBetweenFrames(end->part, 0, &end->localPoint, &end->v10);
+                    TransformPointBetweenFrames(end->part, 0, &end->localPoint, &end->point);
                     break;
                 }
             } else if (c->kind == 7 || c->kind == 9) {
                 u128 centre = Vu0::Q(part->v140);
-                Vu0::Q(end->v10) = Vu0::MulAddX(centre, Vu0::Q(c->normal), Vu0::Scalar(-part->radius3CC));
+                Vu0::Q(end->point) = Vu0::MulAddX(centre, Vu0::Q(c->normal), Vu0::Scalar(-part->radius3CC));
             } else {
-                TransformPointBetweenFrames(part, 0, &end->localPoint, &end->v10);
+                TransformPointBetweenFrames(part, 0, &end->localPoint, &end->point);
             }
         }
     }
@@ -214,7 +214,7 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list)
         s32 e;
         for (e = 0; e < 2; e++) {
             if (c->end[e].part != 0) {
-                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].v10, (Vec02*)((u8*)&c->end[e] + 0x30), 0, 0, 0);
+                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].point, (Vec02*)((u8*)&c->end[e] + 0x30), 0, 0, 0);
                 ((void (*)(Collider*, Contact03*, s32))c->end[e].part->desc03()->m3B)(c->end[e].part, c, e);
             }
         }

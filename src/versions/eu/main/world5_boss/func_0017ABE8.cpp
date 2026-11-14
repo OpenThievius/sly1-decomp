@@ -11,7 +11,7 @@ struct T217D_BF0Rates {
 
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 {
-    s32 old = self->f610;
+    s32 old = self->mode;
     if (mode == old) return;
     switch (old) {
     case 3:
@@ -41,7 +41,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
         SetFollowObjects((PlacedObject*)self->f6E8, self, self);
         break;
     }
-    self->f610 = mode;
+    self->mode = mode;
     self->modeStartTime = g_gameClock[1];
     ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->modeAnimPlayer, 0.0f, 1.0f);
 }

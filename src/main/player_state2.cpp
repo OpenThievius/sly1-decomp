@@ -368,7 +368,7 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             bestCost = cost;
         }
         if (best != 0) {
-            if (p->f2220 != 2 || p->subState != 5) {
+            if (p->state != 2 || p->subState != 5) {
                 void* held = p->heldObject;
                 if (held != best) {
                     InitContactPairFlags(p->world, (Collider*)best);
@@ -616,7 +616,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             default:
                 continue;
             }
-            if (ComputeLedgeOffsetForContact(self, other, &c->end[1 - side].v10, c->kind, (void*)extra, &tmp) == 0) {
+            if (ComputeLedgeOffsetForContact(self, other, &c->end[1 - side].point, c->kind, (void*)extra, &tmp) == 0) {
                 continue;
             }
             if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
@@ -625,12 +625,12 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             if (0.0f < D_00274AD0[side] * *(f32*)((u8*)c + 0xB8)) {
                 continue;
             }
-            Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].v10), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
+            Vu0::Q(p) = Vu0::MulAddX2(Vu0::Vec::Of(c->end[1 - side].point), Vu0::Vec::Of(tmp), Vu0::Vec::Scalar(-D_00264020),
                                       Vu0::Vec::Of(g_unitZVector), Vu0::Vec::ScalarAtCall(D_00264024)).q;
             if (FindPlaneTreeNodeForPoint(&p, other->tree.nodes) != 0) {
                 continue;
             }
-            if (best == 0 || !(c->end[1 - side].v10.z < best->end[1 - side].v10.z)) {
+            if (best == 0 || !(c->end[1 - side].point.z < best->end[1 - side].point.z)) {
                 *outEnd = side;
                 *outPos = tmp;
                 best = c;
@@ -961,25 +961,25 @@ void UpdatePlayerState2(Player* p)
     if (p->aimMode == -1) {
         switch (p->subState) {
         case 13:
-            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetPoint)(p->targetPoint, 0, &p->f638, p->targetPointPlace);
+            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetPoint)(p->targetPoint, 0, &p->heading, p->targetPointPlace);
             break;
         case 12:
-            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetCurve)(p->targetCurve, 0, &p->f638, p->targetCurvePos);
+            ((void (*)(void*, s32, f32*, f32))PlaceOnTargetCurve)(p->targetCurve, 0, &p->heading, p->targetCurvePos);
             break;
         default:
             if (D_00263E54 < Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(p->v150), Vu0::Q(p->v150))))) {
-                p->f638 = ArctangentOfRatio(p->v150.y, p->v150.x);
+                p->heading = ArctangentOfRatio(p->v150.y, p->v150.x);
             }
             break;
         case 0:
-            p->f638 = p->stickHeading;
+            p->heading = p->stickHeading;
             break;
         case 7:
         case 8:
             break;
         }
     } else if (AimPlayerAtTarget(p) == 0) {
-        p->f638 = p->stickHeading;
+        p->heading = p->stickHeading;
     }
     switch (p->jumpStickPhase) {
     case 0:
@@ -1010,7 +1010,7 @@ void UpdatePlayerState2(Player* p)
         ContactEnd03* e = &hit->end[1 - end];
         void* part = e->part;
         p->ledgeCollider = part;
-        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->v10, (Vec02*)p->ledgeLocalPoint);
+        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->point, (Vec02*)p->ledgeLocalPoint);
         p->ledgeKind = hit->kind;
         s32 key;
         if (end == 0) {
@@ -1254,7 +1254,7 @@ void ComputePlayerJumpVelocity(Player* self, Vec02* out)
     }
     *out = self->v150;
     out->z = z;
-    if (self->f2220 == 3) {
+    if (self->state == 3) {
         out->z = z;
     } else {
         out->z = z;

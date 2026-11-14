@@ -109,7 +109,7 @@ struct Effect {
         Vec02 vC0;          // 0xC0: kind 26's direction (func_001924C8 gives it the world's gravity)
     };
     u8 padD0[0x100 - 0xD0]; // 0xD0
-    Vec02 v100;             // 0x100: a spin the effect turns by (func_0019F390)
+    Vec02 spin;             // 0x100: a spin the effect turns by (func_0019F390)
     union {
         s32 i110;           // 0x110
         f32 spinDrag;       // 0x110: its drag, per second (func_0019F390)

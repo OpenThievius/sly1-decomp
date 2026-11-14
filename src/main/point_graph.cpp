@@ -168,7 +168,7 @@ struct ModelPart {
     u8 pad3C[0x60 - 0x3C];
     s32 flag60;             // 0x60: fades in as well
     u8 pad64[0x68 - 0x64];
-    void* f68;              // 0x68: a matrix the transform is multiplied by
+    void* matrix;           // 0x68: a matrix the transform is multiplied by
     u8 pad6C[4];
 };
 
@@ -333,14 +333,14 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
                     adjust(part->hook, self, &rec);
                 }
             }
-            if (part->f68 != 0) {
-                rec.m = MultiplyMatrices(rec.m, *(Mat4A*)part->f68);
+            if (part->matrix != 0) {
+                rec.m = MultiplyMatrices(rec.m, *(Mat4A*)part->matrix);
             }
             if (part->cameraFacing != 0) {
                 BuildCameraFacingMatrix(self, cam, part->cameraFacing, (f32*)&rec.at, &rec.m);
             }
             QueueDeferredRequest((DeferredRequest*)&rec);
-            if (part->f68 != 0 || part->cameraFacing != 0) {
+            if (part->matrix != 0 || part->cameraFacing != 0) {
                 rec.m = D_00248400;
             }
         }
@@ -370,7 +370,7 @@ void StartSeekingAgent(SeekingAgent* self)
 void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
 {
     s32 a2v = a2;
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
         self->stateTarget = 0;
         self->objectCount = 0;
@@ -394,7 +394,7 @@ void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
         break;
     }
     EnterAgentState(self, a1, (Animation*)a2v);
-    s32 kind = self->f724;
+    s32 kind = self->state;
     if (kind == 0xB || kind == 0x10) {
         self->contactsDisabled = 0;
     }
@@ -403,7 +403,7 @@ void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
 void LeaveSeekingAgentState(SeekingAgent* self, s32 mode)
 {
     LeaveAgentState(self, mode);
-    s32 kind = self->f724;
+    s32 kind = self->state;
     if (kind != 8) {
         if (kind == 0x10) {
             SeekPartner* child = ((SeekPartner*)self->partner);
@@ -422,12 +422,12 @@ void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag)
 {
     s32 tmp[4];
 
-    switch (self->f724) {
+    switch (self->state) {
     case 7:
         if (flag != 0) {
             s32 i;
             void** slot;
-            for (i = 0, slot = self->fC14; i < self->objectCount; slot++, i++) {
+            for (i = 0, slot = self->objects; i < self->objectCount; slot++, i++) {
                 void* n = *slot;
                 if (IsObjectAttached((BaseObject*)n) != 0) {
                     SetAgentGoalPoint(self, (Vec02*)((u8*)n + 0x140));
@@ -475,7 +475,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
     Vec02 third;
     f32 a;
 
-    switch (self->f724) {
+    switch (self->state) {
     case 7:
         FaceAgentTowardGoalPoint(self);
         break;
@@ -521,7 +521,7 @@ void UpdateSeekingAgentState(SeekingAgent* self)
         }
         Vu0::Q(tmp) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self->partner + 0x140)));
         a = ArctangentOfRatio(tmp.y, tmp.x);
-        if (self->f724 == 0x10) {
+        if (self->state == 0x10) {
             a = WrapAngle(a + 4.0f);
         } else {
             a = WrapAngle(a + 4.7f);
@@ -582,9 +582,9 @@ s32 HasAttachedSeekingTarget(SeekingAgent* self)
     s32 i;
     if (self->stateTarget != 0) {
         for (i = 0; i < self->objectCount; i++) {
-            Agent* n = (Agent*)self->fC14[i];
+            Agent* n = (Agent*)self->objects[i];
             if (IsObjectOfKind(n, 8) != 0) {
-                s32 k = n->f724;
+                s32 k = n->state;
                 if (k == 0xB) {
                     continue;
                 }
@@ -612,10 +612,10 @@ s32 IsSeekingAgentTargetInRange(void)
 s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
 {
     if (item != 0 && IsObjectAttached(item) != 0) {
-        if (IsObjectOfKind(item, 8) == 0 || item->f724 != 0xB) {
+        if (IsObjectOfKind(item, 8) == 0 || item->state != 0xB) {
             s32 n = self->objectCount;
             if ((u32)n < 4) {
-                self->fC14[n] = item;
+                self->objects[n] = item;
                 self->objectCount = n + 1;
                 return 1;
             }
@@ -646,7 +646,7 @@ void StartSeekingAgentEffect(SeekingAgent* self, s32 flag, PlacedObject* extra)
 
 s32 GetSeekingAgentStateKind(SeekingAgent* self)
 {
-    switch (self->f724) {
+    switch (self->state) {
     case 0x10: return 1;
     case 0xB: return 2;
     }

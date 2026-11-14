@@ -16,7 +16,7 @@ struct AnimationPlayer;
 // One of the page's eleven entries; PostLoadWarpPage clears two values and draws a phase and a
 // speed at random from a range.
 struct WarpEntry {
-    Animation* f00;         // 0x00: the animation SetWarpPageMode plays when the page opens on it
+    Animation* animation;   // 0x00: the animation SetWarpPageMode plays when the page opens on it
     void* availableObject;  // 0x04: an object func_001F1050 starts with weight f08
     f32 availableLevel;     // 0x08
     void* cursorObject;     // 0x0C: another, with weight f10

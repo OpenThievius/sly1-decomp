@@ -187,7 +187,7 @@ struct CardDirEntry {
 // flags at 0x48 and the two times.
 struct CardFileInfo {
     u8 pad0[0x44];
-    s32 f44;                // 0x44: the size
+    s32 size;               // 0x44: the size
     union {
         s32 flags;          // 0x48: the attributes, rearranged
         struct {
@@ -213,7 +213,7 @@ void ConvertMemoryCardDirEntry(CardDirEntry* s, CardFileInfo* d)
 {
     FillMemory(d, 0, 0x5C);
     CopyString(d, (const char*)s->sub20);
-    d->f44 = s->size;
+    d->size = s->size;
     if (s->attributes & 0x1) {
         d->flags |= 0x1;
     }
@@ -973,7 +973,7 @@ s32 ReadMemoryCardSlotFile(void* a0, void* a1, GameProgress* out, void* i)
     r = CheckMemoryCardFileExists(a0, a1, info);
     if (r != 0) return r;
     if ((info->flags & 0xD4) != 4) return 20;
-    size = info->f44;
+    size = info->size;
     if (size != 0x1A00) return 28;
     r = OpenMemoryCardFile(a0, (const char*)a1, 1, &handle);
     if (r != 0) return r;

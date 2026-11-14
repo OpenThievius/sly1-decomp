@@ -991,7 +991,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     Vec02 vAt;
     ComputeObjectMotionInFrame(other, 0, at, &vAt, 0, 0, 0);
     radius = MaxF(radius, 10.0f);
-    Vu0::Vec turn = Vu0::Cross(Vu0::Vec::Of(self->v100), p);
+    Vu0::Vec turn = Vu0::Cross(Vu0::Vec::Of(self->spin), p);
     Vu0::Vec rel = Vu0::Sub(Vu0::Add(Vu0::Vec::Of(self->qA0), turn), Vu0::Vec::Of(vAt));
     Vu0::Vec wv1 = Vu0::MulAddX(d1, Vu0::Cross(c1, p), Vu0::Vec::Scalar(2.5f / (radius * radius)));
     f32 j1 = Vu0::ToFloatMoved(Vu0::Dot(rel, nv)) * (-1.0f - bounce) / Vu0::ToFloatMoved(Vu0::Dot(wv1, nv));
@@ -1014,7 +1014,7 @@ s32 HandleEffectContact(Effect* self, void* b, void* c, void* d)
     f32 off;
     MeasurePointToSegment((Vec02*)&D_00248D30, &t1, &t2, &along, &off);
     *(Vu0::Vec*)&self->qA0 = Vu0::Add(Vu0::Vec::Of(self->qA0), Vu0::MulXSum(d1, Vu0::Vec::Scalar((1.0f - along) * j1), dir, Vu0::Vec::Scalar(along * j2)));
-    *(Vu0::Vec*)&self->v100 = Vu0::MulAddX(Vu0::Vec::Of(self->v100), Vu0::MulXSum(c1, Vu0::Vec::Scalar((1.0f - along) * j1), c2, Vu0::Vec::Scalar(along * j2)), Vu0::Vec::Scalar(2.5f / (radius * radius)));
+    *(Vu0::Vec*)&self->spin = Vu0::MulAddX(Vu0::Vec::Of(self->spin), Vu0::MulXSum(c1, Vu0::Vec::Scalar((1.0f - along) * j1), c2, Vu0::Vec::Scalar(along * j2)), Vu0::Vec::Scalar(2.5f / (radius * radius)));
     if (((Vec02*)&self->qA0)->z < D_0026B54C) {
         ((Vec02*)&self->qA0)->z = D_0026B54C;
         ShortenEffectLife(self, D_0026B550);
@@ -1045,13 +1045,13 @@ void MoveEffect(Effect* self, f32 dt)
 {
     EffectFrame frame;
 
-    if (IsSpinNegligible(&self->v100) == 0) {
+    if (IsSpinNegligible(&self->spin) == 0) {
         f32 len;
         Mat02 res;
-        Vu0::Q(self->v100) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(self->spinDrag * dt + 1.0f));
-        len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->v100)));
+        Vu0::Q(self->spin) = Vu0::MulX(Vu0::Q(self->spin), Vu0::Scalar(self->spinDrag * dt + 1.0f));
+        len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->spin)));
         if (0.0001f < len) {
-            Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->v100), Vu0::Scalar(1.0f / len));
+            Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->spin), Vu0::Scalar(1.0f / len));
             BuildAxisAngleMatrix(&frame.r[0], (Mat02*)&frame.r[1], len * dt);
             MulRotationRowsIndexed(&res, *(Mat02*)&frame.r[1], *(Mat02*)self->rotation);
             *(Mat02*)self->rotation = res;

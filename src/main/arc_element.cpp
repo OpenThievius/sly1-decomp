@@ -130,7 +130,7 @@ void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self, f32 dt)
                 do {
                     void* item = arr[i];
                     if (item != self->target) {
-                        if (((Agent*)item)->f724 != 0xB) {
+                        if (((Agent*)item)->state != 0xB) {
                             ChangeAgentState((Agent*)item, 0xA, 0);
                         }
                     }
@@ -203,7 +203,7 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
         SetTextPanelState(&g_typedTextCaptionBox, 5);
         g_camera->ctl460.anchorObject = (void*)self->f61C;
         if (self->f630 != 0) {
-            *(Quad16*)g_camera->f80 = *(Quad16*)&self->m110.r[0];
+            *(Quad16*)g_camera->rotation = *(Quad16*)&self->m110.r[0];
             *(Quad16*)g_camera->f90 = *(Quad16*)&self->m110.r[1];
             *(Quad16*)g_camera->fA0 = *(Quad16*)&self->m110.r[2];
         }
@@ -232,11 +232,11 @@ s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
     if ((void*)node->root == (void*)self) {
         return 0;
     }
-    if (IsObjectInPool(self->f618, node) != 0) {
+    if (IsObjectInPool(self->pool, node) != 0) {
         return 0;
     }
     a = node->root03();
-    b = (Collider*)self->f618->chosenItem;
+    b = (Collider*)self->pool->chosenItem;
     if (a->desc03()->m38(a, b) != 0 || b->desc03()->m38(b, a) != 0) {
         return 0;
     }
@@ -264,8 +264,8 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 {
-    if (HasObjectPoolChoice(self->f618) != 0) {
-        ObjectPool* pool = self->f618;
+    if (HasObjectPoolChoice(self->pool) != 0) {
+        ObjectPool* pool = self->pool;
         u8* place = (u8*)pool + 0x60;
         u8* e0 = (u8*)pool + 0xE0;
         u8* ang = (u8*)pool + 0x150;
@@ -345,7 +345,7 @@ void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
     GetStateWalkerCurrentKey(self->stateWalker, &a);
     GetStateWalkerTargetKey(self->stateWalker, &b);
     if (a == 0x359 && b == a) {
-        if (HasObjectPoolChoice(self->f618) != 0) {
+        if (HasObjectPoolChoice(self->pool) != 0) {
             SetStateWalkerTarget(self->stateWalker, 0x35A);
         }
     }
@@ -363,7 +363,7 @@ void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind
         s32 id = rec->sourceId;
         if (id == (s32)dev->player) {
             if (rec->code == 0x35B) {
-                LaunchChosenPoolObject(self->f618, 1);
+                LaunchChosenPoolObject(self->pool, 1);
             }
         } else if (((Agent*)self->agent) != 0 && id == (s32)((Agent*)self->agent)->statePlayer) {
             s32 k = rec->code;
@@ -386,8 +386,8 @@ s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
     if (TestCollidersMayContact(self, (Collider*)arg)) {
         return 1;
     }
-    if (self->f618 != 0) {
-        s32 r = IsObjectInPool(self->f618, (BaseObject*)arg);
+    if (self->pool != 0) {
+        s32 r = IsObjectInPool(self->pool, (BaseObject*)arg);
         if (r != 0) {
             return 1;
         }
@@ -1116,7 +1116,7 @@ void QueueArcDraw(T217D_3F0* self)
             BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
             BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
             Vec02 pos;
-            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->f80, Vu0::Q(((ArcHeld*)self->current)->offset)));
+            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
             break;
         }

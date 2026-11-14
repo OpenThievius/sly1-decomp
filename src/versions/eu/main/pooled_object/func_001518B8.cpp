@@ -20,7 +20,7 @@ void ChooseStepSequenceState(StepSequence* self)
         s32 n = self->extraTargetCount;
         if (n > 0) {
             for (s32 i = 0; i < n; i++) {
-                if (*(s32*)self->f314[i] != 0) {
+                if (*(s32*)self->extraTargets[i] != 0) {
                     mode = 5;
                     break;
                 }

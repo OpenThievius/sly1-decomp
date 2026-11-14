@@ -366,9 +366,9 @@ struct OscPart {
     u8 pad08[0x20 - 0x08];
     s32 mode;               // 0x20
     f32 endDistance;        // 0x24: the distance at which the vertex weight is endWeight
-    f32 f28;                // 0x28
+    f32 endWeight;          // 0x28: the weight at endDistance
     f32 startDistance;      // 0x2C: the distance at which the vertex weight is startWeight
-    f32 f30;                // 0x30
+    f32 startWeight;        // 0x30: the weight at startDistance
     u8 pad34[0x40 - 0x34];
     Vec02 m40[4];           // 0x40
     u8 pad80[0x84 - 0x80];
@@ -410,10 +410,10 @@ void RefreshOscillatorFrames(Oscillator* self)
             dir = Vu0::Q(D_00248D30);
         } else {
             m = *(Mat4R*)part->m40;
-            range.lo = MinB(part->f28, part->f30);
-            range.hi = MaxB(part->f28, part->f30);
-            poly.y = (part->f28 - part->f30) / (part->endDistance - part->startDistance);
-            poly.x = part->f28 - poly.y * part->endDistance;
+            range.lo = MinB(part->endWeight, part->startWeight);
+            range.hi = MaxB(part->endWeight, part->startWeight);
+            poly.y = (part->endWeight - part->startWeight) / (part->endDistance - part->startDistance);
+            poly.x = part->endWeight - poly.y * part->endDistance;
             poly.z = 0.0f;
             switch (part->mode) {
             case 4:
@@ -1430,7 +1430,7 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
                 ContactEnd03* far = &it->end[1 - side];
                 Collider* o = far->part;
                 if (IsObjectOfKind(o, 0x41)) {
-                    p = (ObjectGatherer*)o; AddGathererContact::Of(self, p, &far->v10, &it->normal);
+                    p = (ObjectGatherer*)o; AddGathererContact::Of(self, p, &far->point, &it->normal);
                 }
             }
         }
@@ -1615,7 +1615,7 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
         self->desc02()->m1D(self, (Vec02*)f.b);
         self->desc02()->m20(self, (Vec02*)&D_00248D30);
         self->desc02()->m21(self, (Vec02*)&D_00248D30);
-        BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)f.c, self->f638);
+        BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)f.c, self->heading);
         self->desc02()->m1E(self, (Mat02*)f.c);
         SetPlayerState(self, 2, 2);
     } else {

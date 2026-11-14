@@ -351,7 +351,7 @@ void TurnPlayerTowardLinkedObject(Player* self)
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(*(Vec02*)((u8*)self + 0x140)));
     BuildShortestArcRotation(&g_unitZVector, &d, &a);
-    BuildAxisAngleMatrix(&g_unitZVector, &b, self->f638);
+    BuildAxisAngleMatrix(&g_unitZVector, &b, self->heading);
     MulRotation(&r, a, b);
     TurnColliderTowardRotation(self, g_frameDt[0], &r, D_00274D88);
 }
@@ -405,12 +405,12 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     f32 stick;
     s32 toward = 0;
     s32 away = 0;
-    GetLinkedObjectHeading(self, &self->f638);
+    GetLinkedObjectHeading(self, &self->heading);
     if (self->linkReversed != 0) {
-        self->f638 = WrapAngle(self->f638 + 3.14159274f);
+        self->heading = WrapAngle(self->heading + 3.14159274f);
     }
     ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)pad, 0, &stick);
-    f32 diff = WrapAngle(stick - self->f638);
+    f32 diff = WrapAngle(stick - self->heading);
     if (0.3f < self->stickLevel) {
         f32 ad = __builtin_fabsf(diff);
         if (ad < 1.04719758f) {
@@ -425,7 +425,7 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     }
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140)), Vu0::Q(g_unitZVector)));
-    BuildAxisAngleMatrix(&g_unitZVector, &m, self->f638);
+    BuildAxisAngleMatrix(&g_unitZVector, &m, self->heading);
     Vu0::Q(local) = Vu0::RotateTransposed(m, Vu0::Q(dir));
     f32 angle = WrapAngle(ArctangentOfRatio(local.z, local.x) - 1.57079637f);
     s32 state = self->subState;
@@ -747,7 +747,7 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32
 
 void GetPlayerPose(Player* self, f32 t, void* out, void* extra)
 {
-    if (self->f2220 == 3) {
+    if (self->state == 3) {
         GetPlacedObjectRotationAt(self, t, (Mat02*)out, (Vec02*)extra);
     } else {
         GetTurningColliderPose(self, out, (Vec02*)extra, t);

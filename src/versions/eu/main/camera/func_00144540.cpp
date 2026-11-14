@@ -7,16 +7,16 @@ void UpdateCameraMatrices(Camera* self)
     Mat02 rotation;
     f32 f6 = g_gameTime - self->swingStartTime;
     if (D_002618C8 < f6) {
-        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->f80, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
+        BuildViewProjectionMatrix((f32*)self->position, (f32*)self->rotation, (void*)((u8*)self + 0xC0), (Quad16*)((u8*)self + 0x100));
     } else {
         f32 t = f6 / D_002618C8;
         f32 amount = g_unitRange.Limit(D_002618D0[0] + t * (D_002618D0[1] + t * D_002618D0[2]));
         f32 swing = Sine(f6 * D_002618CC) * amount;
-        u128 turn = Vu0::Rotate(*(Mat02*)self->f80, Vu0::Q(*(Vec02*)D_002618E0));
+        u128 turn = Vu0::Rotate(*(Mat02*)self->rotation, Vu0::Q(*(Vec02*)D_002618E0));
         Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(*(Vec02*)self->position), turn, Vu0::Scalar(swing));
         Vu0::Q(dir) = Vu0::MulX(Vu0::Q(*(Vec02*)D_002618F0), Vu0::Scalar(swing));
         BuildRotationFromVector(&dir, (Mat02*)&rotation);
-        MulRotationRowsX(&rotation, *(Mat02*)self->f80, rotation);
+        MulRotationRowsX(&rotation, *(Mat02*)self->rotation, rotation);
         Vec02 corner;
         Vec02 tilt;
         Mat4 proj;
@@ -26,7 +26,7 @@ void UpdateCameraMatrices(Camera* self)
         BuildViewProjectionMatrix((f32*)&pos, (f32*)&rotation, &proj, (Quad16*)((u8*)self + 0x100));
     }
     InvertMatrix4x4((u8*)self + 0x100, (u8*)self + 0x140);
-    BuildFrustumSideNormals((Mat02*)self->f80, (Vec02*)((u8*)self + 0x180), self->projectionScaleX, self->projectionScaleY);
+    BuildFrustumSideNormals((Mat02*)self->rotation, (Vec02*)((u8*)self + 0x180), self->projectionScaleX, self->projectionScaleY);
     {
         f32* e = (f32*)((u8*)self + 0x1B0);
         f32* d = self->planes[0];

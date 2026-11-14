@@ -21,7 +21,7 @@ void StartPathFollower(PathFollower* self)
     self->targetHeading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     if (self->walkerGraph != 0) {
         StateWalker* v = CreateStateWalker((StateGraph*)self->walkerGraph, self, -1, 0);
-        self->fB48 = v;
+        self->walker = v;
         SetStateWalkerTarget(v, self->kind == 1 ? 0x484 : 0x384);
     }
     switch (g_currentWorld->soundBank) {
@@ -70,7 +70,7 @@ void StartPathFollower(PathFollower* self)
         ((Blk_eu_1D7440*)&D_002726B0)->p574 = &((Blk_eu_1D7440*)&D_002726B0)->f58C;
     }
     for (s32 k = 0; k < 4; k++) {
-        Slot19* s = &self->f6B0[k];
+        Slot19* s = &self->wheels[k];
         s->placedPos = s->obj->pos;
     }
     ResetPathFollower(self);

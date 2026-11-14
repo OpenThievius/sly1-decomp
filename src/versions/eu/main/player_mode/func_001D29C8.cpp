@@ -8,7 +8,7 @@ void ShowModeLabel(s32 mode)
     case 1:
         if ((*(Player**)&g_player) == 0)
             goto tail;
-        if ((*(Player**)&g_player)->f2220 == 0xD)
+        if ((*(Player**)&g_player)->state == 0xD)
             SetPlayerState((*(Player**)&g_player), 0, -1);
         break;
     case 3:

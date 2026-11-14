@@ -71,7 +71,7 @@ struct ContactListObject : ChildGroupObject {
     PlacedObject* anchorObject; // 0x694
     u8 pad698[0x6A0 - 0x698];
     Vec02 anchorOffset;     // 0x6A0
-    Animation* f6B0;        // 0x6B0: the animation slot 0x130 starts into f6B4
+    Animation* animation;   // 0x6B0: the animation slot 0x130 starts into f6B4
     void* animationPlayer;  // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
     s32 count6BC;           // 0x6BC: the objects of items6C0

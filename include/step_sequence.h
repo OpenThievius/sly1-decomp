@@ -67,7 +67,7 @@ struct StepSequence : PlacedObject {
     u8 fallback308[4];      // 0x308
     s32 first30C;           // 0x30C: -1 at load; then set from the id at +0x08
     s32 extraTargetCount;   // 0x310: the entries of extraTargets
-    void* f314[4];          // 0x314
+    void* extraTargets[4];  // 0x314: up to four extra target slots
     s32 startPending;       // 0x324: set when the sequence should start as soon as it can
     s32 f328;               // 0x328
     s32 f32C;               // 0x32C

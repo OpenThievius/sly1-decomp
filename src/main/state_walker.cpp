@@ -487,10 +487,10 @@ void SpawnInitialStateWalker(StateGraph* self)
 StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3)
 {
     StateWalker* obj = (StateWalker*)PopZeroedFreeSlot(&self->world->pool1B88);
-    obj->f1C = a1;
+    obj->object = a1;
     obj->vt = (void*)&g_stateWalkerMethods;
     obj->playerFlags = a3;
-    obj->f38 = 1.0f;
+    obj->speed = 1.0f;
     obj->owner = self;
     obj->nextEntry = -1;
     AppendToList(&self->world->list1B94, obj);
@@ -514,7 +514,7 @@ void* FindListNodeByKey(StateGraph* self, void* key)
     StateWalker* node = (StateWalker*)self->walkers.head;
     if (node != 0) {
         do {
-            if (node->f1C == key) {
+            if (node->object == key) {
                 return node;
             }
             node = node->next;
@@ -624,7 +624,7 @@ void GetStateWalkerNextKey(StateWalker* self, s32* out)
 
 void SetStateWalkerSpeed(StateWalker* self, f32 v)
 {
-    self->f38 = v;
+    self->speed = v;
     if (self->player != 0) {
         SetAnimationPlayerSpeed(self->player, v);
     }
@@ -798,12 +798,12 @@ void StartNextStateWalkerEdge(StateWalker* self)
             {
                 self->nextEntry = e->b;
                 fa = 0.0f;
-                fb = self->f38;
+                fb = self->speed;
             }
             else
             {
                 self->nextEntry = e->a;
-                fb = -self->f38;
+                fb = -self->speed;
                 fa = e->anim->length;
             }
             void* old = self->player;
@@ -811,7 +811,7 @@ void StartNextStateWalkerEdge(StateWalker* self)
             self->player = 0;
             if (e->anim != 0)
             {
-                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->f1C, self->playerFlags, &self->player, fa, fb);
+                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->object, self->playerFlags, &self->player, fa, fb);
                 if (self->player != 0)
                 {
                     AddAnimationPlayerCallback(self->player, HandleStateWalkerTrackEnd, self);
@@ -876,7 +876,7 @@ void AdvanceStateWalkerTime(StateWalker* self, f32 t)
 
 void CallStateWalkerListeners(StateWalker* self, s32 a, void* b)
 {
-    BaseObject* o = (BaseObject*)self->f1C;
+    BaseObject* o = (BaseObject*)self->object;
     if (o != 0) {
         o->desc->m0E(o, a, b);
     }
@@ -968,15 +968,15 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
             count--;
         } while (count != 0);
     }
-    self->fC14 = (void*)best;
+    self->companion = (void*)best;
     PopBackMemoryMark();
-    if (self->fC14 != 0) {
-        self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->fC14, (const T2195_Vt*)D_0021A790);
+    if (self->companion != 0) {
+        self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->companion, (const T2195_Vt*)D_0021A790);
         ((T2195_790*)self->poseSource)->mode1 = 2;
         ((T2195_790*)self->poseSource)->hasTarget = 1;
         ((T2195_790*)self->poseSource)->f84 = ((T2195_790*)self->poseSource)->f80 = 0;
-        InsertAttachment((PlacedObject*)self->fC14, (Attachment*)self->poseSource);
-        self->bindingObject = (s32)self->fC14;
+        InsertAttachment((PlacedObject*)self->companion, (Attachment*)self->poseSource);
+        self->bindingObject = (s32)self->companion;
     }
 }
 
@@ -1060,7 +1060,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
     if (F(s32, 0xCC8) != 0) return 1;
     PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
     if (target != 0) {
-        if (self->fC14 == 0 || self->f724 == 0xB || self->f724 == 0x10) return 0;
+        if (self->companion == 0 || self->state == 0xB || self->state == 0x10) return 0;
         Vec02 a;
         if (IsObjectOfKind(target, 6) != 0) {
             if (*(s32*)((u8*)target + 0x690) != 0) {
@@ -1090,7 +1090,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
             RemoveSoundLevelAndRecompute((SoundLevelEntry*)self->soundLevel);
             self->soundLevel = 0;
         }
-        if (IsPointInsideObjectFaces((ScalingVolume*)self->fC14, &a) == 0) {
+        if (IsPointInsideObjectFaces((ScalingVolume*)self->companion, &a) == 0) {
             if (self->reachRadius < dist) return 0;
             if (self->reachHeight < __builtin_fabsf(delta.z)) return 0;
         }
@@ -1151,7 +1151,7 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     s32 res;
     f32 f;
 
-    if (self->fC14 == 0) {
+    if (self->companion == 0) {
         return;
     }
     t = (T2195_790 *)self->poseSource;
@@ -1196,18 +1196,18 @@ void AimCompanionAgentPose(CompanionAgent *self) {
         f = 0.1f;
         break;
     }
-    ((ScalingVolume*)self->fC14)->f2F0 = f;
+    ((ScalingVolume*)self->companion)->f2F0 = f;
 }
 
 void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    switch (self->f724) {
+    switch (self->state) {
     case 6:
         self->clipEndCount = 0;
         break;
     case 0xB: {
-        BaseObject* p = ((BaseObject*)self->fC14);
+        BaseObject* p = ((BaseObject*)self->companion);
         if (p != 0) {
             p->desc->m03(p);
         }
@@ -1216,7 +1216,7 @@ void EnterCompanionAgentState(CompanionAgent* self, s32 evt, Animation* arg)
         break;
     }
     }
-    self->lookTarget = *(s32*)((u8*)self + (self->f724 << 3) + 0xC3C);
+    self->lookTarget = *(s32*)((u8*)self + (self->state << 3) + 0xC3C);
 }
 
 s32 IsCompanionAgentTargetInRange(CompanionAgent* self)
@@ -1230,10 +1230,10 @@ s32 IsCompanionAgentTargetInRange(CompanionAgent* self)
 s32 AnswerCompanionAgentRosterPoll(CompanionAgent* self)
 {
     s32 r;
-    if (self->f724 == 11) {
+    if (self->state == 11) {
         goto ret1;
     }
-    if (self->f724 != 6) {
+    if (self->state != 6) {
         goto ret0;
     }
     if (self->clipEndCount <= 0) {

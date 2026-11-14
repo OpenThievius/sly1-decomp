@@ -89,7 +89,7 @@ struct Part07 {
     u8 pad54[0x60 - 0x54];
     Vec02 pointA;           // 0x60: the two points func_001C4790 queries a collider's spans between
     Vec02 pointB;           // 0x70: the second point of the span query
-    f32 f80;                // 0x80: the distance func_001C4618 measures between the two points
+    f32 distance;           // 0x80: the distance func_001C4618 measures between the two points
     u8 pad84[0x90 - 0x84];
     ColliderSpan span;      // 0x90: the nearest span found (func_001C4790)
 };
@@ -242,7 +242,7 @@ struct TurningCollider : SwitchedCollider {
     void* f62C;             // 0x62C
     f32 stickHeading;       // 0x630: the heading the stick asks for
     f32 stickLevel;         // 0x634: the stick's push level
-    f32 f638;               // 0x638
+    f32 heading;            // 0x638: the facing angle about z
     f32 headingWeight;      // 0x63C: how much the heading steers its contacts, 0 to 1
     union {
         void* f640;         // 0x640
@@ -329,12 +329,12 @@ struct Player : TurningCollider {
     void* f1508[4];         // 0x1508
     void* f1518;            // 0x1518
     u8 contactChainHead[4]; // 0x151C: given to func_001BC4D8
-    u8 f1520[0x21C0 - 0x1520];  // 0x1520: a record func_001C29E8 and func_001C3028 work on
+    u8 trail[0x21C0 - 0x1520];  // 0x1520: a record func_001C29E8 and func_001C3028 work on
     s32 trailEnabled;       // 0x21C0: set, the trail ribbon is drawn
     AimBlendGrid* aimGrid;  // 0x21C4: the aim grid TrackAimTargetObject and TrackAimTargetPoint blend
     f32 f21C8;              // 0x21C8
     s32 boundsPointCount;   // 0x21CC: how many points boundsPoints holds
-    Vec02 v21D0[3];         // 0x21D0
+    Vec02 boundsPoints[3];  // 0x21D0: the points the player's bounds are expanded over
     void* aimTarget;        // 0x2200: the object aimed at
     BaseObject* boundObject; // 0x2204: the object aimed at (player_target.cpp)
     s32 aimCurve;           // 0x2208: the curve object aimed at or ridden
@@ -343,7 +343,7 @@ struct Player : TurningCollider {
     s32 previousAimCurve;   // 0x2214: the same
     u8 pad2218[0x221C - 0x2218];
     s32 pathFlipped;        // 0x221C: set, the path's frame is turned about (func_001D1630)
-    s32 f2220;              // 0x2220
+    s32 state;              // 0x2220: the player's state, 0..16
     f32 stateStartTime;     // 0x2224: the time the state was entered
     s32 subState;           // 0x2228: the sub-state within the state
     f32 subStateStartTime;  // 0x222C: the time the sub-state was entered
@@ -539,10 +539,10 @@ struct Player : TurningCollider {
 
 struct Agent : TurningCollider {
     void* roster;           // 0x720: the item keeper record it belongs to
-    s32 f724;               // 0x724
+    s32 state;              // 0x724: the agent's state
     f32 stateTime;          // 0x728: the clock when the state last changed
     s32 requestBits;        // 0x72C: bit 0 asks to change state to requestedState, bit 1 to end the second player
-    s32 f730;               // 0x730: the state func_001C9A58 hands to func_001C8F20 (0 from func_001CB328)
+    s32 requestedState;     // 0x730: the state func_001C9A58 hands to func_001C8F20 (0 from func_001CB328)
     u8 pad734[0x738 - 0x734];
     s32 targetRangeMin;     // 0x738: the nearest distance a target may be at
     f32 targetRangeMax;     // 0x73C: the furthest distance a target may be at
@@ -600,14 +600,14 @@ struct Agent : TurningCollider {
     f32 startPhase;         // 0xB18: the fraction of the clip a state-2 clip starts at
     s32 usesPitch;          // 0xB1C: set when it faces with a pitch as well as a yaw
     u8 fB20[4];             // 0xB20
-    f32 fB24;               // 0xB24
+    f32 pitch;              // 0xB24: the facing pitch
     u8 padB28[0xB40 - 0xB28];
     s32 hasSecondaryTarget; // 0xB40: set to 1 with fB48 (func_001CAB00)
     u8 padB44[0xB48 - 0xB44];
     void* secondaryTarget;  // 0xB48
     s32 secondaryTargetKey; // 0xB4C: the id of the objects PickAgentSecondaryTarget picks from
     void* primaryTarget;    // 0xB50
-    void* fB54;             // 0xB54
+    void* target;           // 0xB54
     s32 fB58;               // 0xB58
     s32 fB5C;               // 0xB5C
     u8 scatterPoint[0x10];  // 0xB60
@@ -642,7 +642,7 @@ struct Agent : TurningCollider {
 struct ObjectGatherer;
 struct CompanionAgent : Agent {
     s32 companionId;        // 0xC10: the id of its companion object
-    void* fC14;             // 0xC14
+    void* companion;        // 0xC14
     f32 reachRadius;        // 0xC18: the horizontal reach from the companion
     f32 reachHeight;        // 0xC1C: the height reach from the companion
     f32 closeRadius;        // 0xC20: the distance that counts as close
@@ -663,7 +663,7 @@ struct ConeAgent : Agent {
     f32 leashDistance;      // 0xC10: the furthest the target may be from its home
     f32 leashHeight;        // 0xC14: the greatest height difference to a target
     s32 zoneId;             // 0xC18: the id of the zone the target must be in
-    ObjectGatherer* fC1C;   // 0xC1C: the object of id fC18, whose shape func_00167F10 tests
+    ObjectGatherer* zone;   // 0xC1C: the object of id fC18, whose shape func_00167F10 tests
     f32 nearRange;          // 0xC20: the distance inside which the full angle holds
     f32 farRange;           // 0xC24: the distance beyond which a target is refused
     f32 farAngle;           // 0xC28: the widest bearing at farRange
@@ -725,7 +725,7 @@ struct World4Boss : Agent {
 
 struct SeekingAgent : Agent {
     s32 objectCount;        // 0xC10: the number of fC14
-    void* fC14[4];          // 0xC14: objects
+    void* objects[4];       // 0xC14: objects
     void* walkTarget;       // 0xC24: an object whose position slot 89 takes (func_001F3BD8)
     void* stateTarget;      // 0xC28: the same in states 12 and 13; slot 71 clears it
     void* partner;          // 0xC2C: an object (slot 91 calls its slot 80)
@@ -773,7 +773,7 @@ struct TempoPlayerEntry {
 // 0x13, the tempo agent: counts beats at a tempo (UpdateWorld3Boss) for the class 0x1C
 // beat-press colliders to judge presses against (JudgeWorld3BeatPressInput).
 struct World3Boss : Agent {
-    s32 fC10[4];            // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
+    s32 clips[4];           // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
     s32 pendingClip;        // 0xC20: the clip of the scheduled press
     void* lines[4];         // 0xC24: the timelines of the links 0x4E7.. (func_001EC828 takes the one at fC40)
     World3Timeline* pendingTimeline; // 0xC34: the timeline to start when the beat clock restarts
@@ -786,13 +786,13 @@ struct World3Boss : Agent {
     void* walkerGraph;      // 0xC50
     void* walker;           // 0xC54
     u8 padC58[0xC5C - 0xC58];
-    s32 fC5C;               // 0xC5C: the tempo in beats a minute (SetWorld3BossTempo)
+    s32 tempo;              // 0xC5C: the tempo in beats a minute (SetWorld3BossTempo)
     s32 spanBeats;          // 0xC60: a span in beats (SetWorld3BossSpanBeats)
     f32 spanSeconds;        // 0xC64: that span in seconds
     s32 playerCount;        // 0xC68: the number of fC6C entries (func_001ED090)
     TempoPlayerEntry* players; // 0xC6C: a 0x400-byte table (slot 0)
-    s32 fC70;               // 0xC70: the bars counted (four beats each)
-    s32 fC74;               // 0xC74: the beats counted
+    s32 bar;                // 0xC70: the bars counted (four beats each)
+    s32 beat;               // 0xC74: the beats counted
     s32 beatInBar;          // 0xC78: the beat in the bar, 0 to 3
     f32 barPosition;        // 0xC7C: the position in the bar, in beats
     f32 lastBeatTime;       // 0xC80: the time of the last beat
@@ -827,7 +827,7 @@ struct TintBlendCollider : TurningCollider {
 struct WalkerCollider : SwitchedCollider {
     s32 state;              // 0x610: the walker's state, -1 at set-up
     s32 subState;           // 0x614: the walker's sub-state, -1 at set-up
-    f32 f618;               // 0x618
+    f32 heading;            // 0x618: the heading of the left stick
     f32 stickLength;        // 0x61C: how far the left stick is pushed
     f32 aimHeading;         // 0x620: the heading of the second stick
     f32 aimLength;          // 0x624: how far the second stick is pushed
@@ -845,7 +845,7 @@ struct WalkerCollider : SwitchedCollider {
     void* f660;             // 0x660
     void* f664;             // 0x664
     s32 spawnerCount;       // 0x668: how many effect spawners spawners holds
-    u8 f66C[0xC];           // 0x66C
+    u8 spawners[0xC];       // 0x66C: the effect spawners gathered at start
     s32 f678;               // 0x678
     void* f67C;             // 0x67C
     void* f680;             // 0x680
@@ -859,7 +859,7 @@ struct ObjectPool;      // object_pool.h
 struct PlayerLinkedCollider : SwitchedCollider {
     void* stateGraph;       // 0x610: the graph of the walker
     StateWalker* stateWalker; // 0x614: the walker on f610 (func_001E5428)
-    ObjectPool* f618;       // 0x618: the pool it chooses from (func_001E5888, func_001E5C78)
+    ObjectPool* pool;       // 0x618: the pool it chooses from (func_001E5888, func_001E5C78)
     s32 f61C;               // 0x61C
     void* target;           // 0x620: the object this collider stands for
     void* agent;            // 0x624: the agent found for it
@@ -902,7 +902,7 @@ struct GaugeCollider : SwitchedCollider {
     StateWalker* carryWalker;   // 0x614: a handle (func_001B6290)
     f32 heading;            // 0x618: the heading it is driven along
     f32 lastGroundTime;     // 0x61C: the clock when it last had a floor contact
-    f32 f620;               // 0x620: the stick's push times f624 (func_001974F8)
+    f32 push;               // 0x620: the stick's push times f624 (func_001974F8)
     f32 pushStrength;       // 0x624
     f32 topSpeed;           // 0x628
     u8 pad62C[0x630 - 0x62C];
@@ -917,7 +917,7 @@ struct GaugeCollider : SwitchedCollider {
     void* carrier;          // 0x668: its record at +0x2D0 takes the held object's value (func_001974F8)
     u8 pad66C[0x670 - 0x66C];
     void* carryNode;        // 0x670: the node func_001971B8 measures from (its world position and +0x40)
-    void* f674;             // 0x674: the object being carried (func_001974F8)
+    void* held;             // 0x674: the object being carried (func_001974F8)
     void* f678;             // 0x678
     s32 waitingCount;       // 0x67C: counted up by func_00198760, at most D_0026A720
     s32 deliveredCount;     // 0x680: the count g_gaugeAmountCaption shows (func_00197F10)
@@ -943,7 +943,7 @@ struct PathEmitter {
 };
 struct PathEmitters {
     u8 pad00[0x18];
-    f32 f18;                // 0x18: the grip a path follower using them has in place of its f868 (func_001D7778)
+    f32 grip;               // 0x18: the grip a path follower using them has in place of its f868 (func_001D7778)
     f32 maxSpeed;           // 0x1C: the most pace a path follower using them may have (func_001D9D78)
     PathEmitter* firstEmitter; // 0x20
     PathEmitter* secondEmitter; // 0x24
@@ -986,8 +986,8 @@ struct PathFollower : SwitchedCollider {
     f32 steerAngle;         // 0x69C: eased by func_001D8D90
     s32 contactStamp;       // 0x6A0: the contact generation; a wheel stamped with it touched this step
     u8 pad6A4[0x6B0 - 0x6A4];
-    Slot19 f6B0[4];         // 0x6B0
-    PathCurveObject* f830;  // 0x830: the path it follows (func_001DAFB8)
+    Slot19 wheels[4];       // 0x6B0: the four wheels
+    PathCurveObject* path;  // 0x830: the path it follows (func_001DAFB8)
     f32 pathLength;         // 0x834: the path's length
     f32 pathTime;           // 0x838: the time it samples the path at (func_00181658)
     f32 pathDistance;       // 0x83C: the distance along the path
@@ -1004,13 +1004,13 @@ struct PathFollower : SwitchedCollider {
     f32 grip;               // 0x868
     f32 pushedTime;         // 0x86C: -10.0 at reset (func_001DB290)
     s32 markerCount;        // 0x870: the number of markers in use
-    PathMarker f874[16];    // 0x874: f870 of them
+    PathMarker markers[16]; // 0x874: f870 of them
     PathMarker* firstMarker; // 0xAF4: the first object marker
     PathMarker* currentMarker; // 0xAF8: the current one
     PathEmitters* activeZone; // 0xAFC: the emitters it uses in place of fB18 and fB1C, none for those (func_001D8E40)
-    s32 fB00;               // 0xB00
+    s32 lap;                // 0xB00
     s32 lapCount;           // 0xB04: the number of laps
-    s32 fB08;               // 0xB08
+    s32 place;              // 0xB08: its place among the followers
     s32 placeCount;         // 0xB0C: the number of followers when place was counted
     f32 placeChangeTime;    // 0xB10: -10.0 at reset (func_001DB290)
     BaseObject* lapObject;  // 0xB14
@@ -1024,7 +1024,7 @@ struct PathFollower : SwitchedCollider {
     f32 modeTime;           // 0xB38: the clock when the mode was set
     u8 padB3C[0xB44 - 0xB3C];
     StateTrigger* walkerGraph; // 0xB44: the graph its walker (fB48) is made on
-    void* fB48;             // 0xB48
+    void* walker;           // 0xB48
     void* contactMesh;      // 0xB4C: the mesh object func_001DA320 tests the other against
     s32 pushedCount;        // 0xB50: the objects in pushed (func_001D9AC8)
     Collider* pushed[8];    // 0xB54: the objects its contacts pushed, each once (func_001D9AC8)
@@ -1066,7 +1066,7 @@ struct ModeWalker : PathFollower {
 };
 
 struct World5ModeCollider : SwitchedCollider {
-    s32 f610;               // 0x610: the mode (SetWorld5ModeColliderMode)
+    s32 mode;               // 0x610: the mode (SetWorld5ModeColliderMode)
     f32 modeStartTime;      // 0x614: the clock when the mode was set
     s32 modeAnimPlayer;     // 0x618: the player of the mode's animation
     f32 heading;            // 0x61C: the angle about z of the matrix at 0x620 outside modes 2 to 4 (func_00179A68)
@@ -1121,7 +1121,7 @@ struct World3BeatPressCollider : SwitchedCollider {
     EntryQueue* entryQueue; // 0x628: the entry queue it binds to the player (func_001EB748)
     s32 nextEntry;          // 0x62C: the index of the entry being judged
     s32 entryCount;         // 0x630: the number of entries held
-    Ent1C f634[8];          // 0x634: f630 of them, f62C the next (slot 77)
+    Ent1C entries[8];       // 0x634: f630 of them, f62C the next (slot 77)
     f32 pressBeat;          // 0x674: the beat position of the press
     s32 pressDirection;     // 0x678: the direction pressed
     void* frameAnchor;      // 0x67C

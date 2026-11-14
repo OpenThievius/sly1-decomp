@@ -56,7 +56,7 @@ struct Range50 {
 
 struct EffectSpawner : PlacedObject {
     Rec50* rec;             // 0x2D0
-    s32 f2D4;               // 0x2D4: -1 at setup; the mode, 0 to 3, chosen when it starts (func_00155270)
+    s32 mode;               // 0x2D4: -1 at setup; the mode, 0 to 3, chosen when it starts (func_00155270)
     s32 remaining;          // 0x2D8: -1 at setup
     union {
         struct {
@@ -80,7 +80,7 @@ struct EffectSpawner : PlacedObject {
     s32 sharedId;           // 0x310: -1 at setup
     u8 list314[0x10];       // 0x314: initialised with func_00152438
     u8 pad324[0x328 - 0x324];
-    f32 f328;               // 0x328: a random delay (func_00155270)
+    f32 rate;               // 0x328: a random delay (func_00155270)
     f32 rateInterval;       // 0x32C
     f32 nextRateTime;       // 0x330
     f32 volumeScale;        // 0x334: 1.0, or the volume of the record's box scaled

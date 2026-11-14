@@ -226,10 +226,10 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
                 Vu0::Q(out[j]) = Vu0::Zero();
             } else if (body == contact->end[0].body) {
                 Collider* part = e[j].part;
-                ComputeColliderPointVelocity(part, &e[j].v10, (f32*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
+                ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
             } else if (body == contact->end[1].body) {
                 Collider* part = e[j].part;
-                ComputeColliderPointVelocity(part, &e[j].v10, (f32*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
+                ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
             } else {
                 Vu0::Q(out[j]) = Vu0::Zero();
             }

@@ -199,7 +199,7 @@ struct GaugeCurve {
     static f32 Lerp(f32 s, f32 a, f32 b) { return (1.0f - s) * a + s * b; }
 };
 
-// GaugeManager::o5E0, the blend of the two parameter sets, as func_0014C2F0 reads it: pairs of
+// GaugeManager::blend, the blend of the two parameter sets, as func_0014C2F0 reads it: pairs of
 // limits and the quadratics that pick between them.
 struct BlendedGaugeParams {
     f32 agentCountFrom;
@@ -254,13 +254,13 @@ typedef NumberedAgent* (*TargetOfFn)(NumberedAgent* self);
 void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
 {
     typedef Vu0::Vec Vec;
-    switch (self->f724) {
+    switch (self->state) {
     case 12:
     case 13:
         if (g_frameCount % D_00261C90 == self->number % D_00261C90) {
             f32 step = 0.3926991f;
             f32 best = 3.40282347e+38f;
-            f32 angle = self->f638;
+            f32 angle = self->heading;
             f32 frac;
             Vec02 bestPos;
             Vec02 probe;
@@ -346,7 +346,7 @@ void UpdateNumberedAgentGoal(NumberedAgent* self, s32 flag)
                     }
                     score = score + (1.0f - q) * 0.5f;
                 }
-                f32 turn = WrapAngle(angle - self->f638) * 0.31830987f;
+                f32 turn = WrapAngle(angle - self->heading) * 0.31830987f;
                 score = score + (__builtin_fabsf(turn) + __builtin_fabsf(turn));
                 if (score < best) {
                     best = score;
@@ -375,7 +375,7 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
     if (IsPadSelectFlagHeld(self->world) != 0) {
         return 0;
     }
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
     case 0xB:
     case 0x10:
@@ -407,10 +407,10 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
 
 s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
 {
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         return 1;
     }
-    if (self->f724 == 0xB) {
+    if (self->state == 0xB) {
         return 1;
     }
     if (HandleAgentObjectEvent(self, event) == 0) {
@@ -423,7 +423,7 @@ s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
 void EnterNumberedAgentState(NumberedAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    switch (self->f724) {
+    switch (self->state) {
     case 0xB:
         AddToGaugeAmount(D_0027C00C, self);
         if (((GaugeSlot*)self->slot) != 0) { ((GaugeSlot*)self->slot)->taken = 0; self->slot = 0; }
@@ -457,13 +457,13 @@ s32 ChooseAgentStateByContact(ContactAgent* self)
 s32 IsContactAgentFree(ContactAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0) return 0;
-    if (self->f724 == 0xB || self->f724 == 0x10) return 0;
+    if (self->state == 0xB || self->state == 0x10) return 0;
     return 1;
 }
 
 s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 {
-    if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
+    if (self->state == 0x10 || self->state == 0xB) return 1;
     if (HandleAgentObjectEvent(self, (AgentHit*)slot) == 0) return 0;
     ListedAgentView* found = (ListedAgentView*)GetActiveSwitchedCollider();
     ListedAgentView* n = *slot;
@@ -478,7 +478,7 @@ s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 void EnterContactAgentState(ContactAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    switch (self->f724) {
+    switch (self->state) {
     case 0xB:
         CountDownGaugeContacts(D_0027C00C, self);
         if (((GaugeSlot*)self->slot) != 0) {
@@ -550,18 +550,18 @@ void BlendParamSets(GaugeManager* self)
     f32 u = 1.0f - t;
     f32* pa = (f32*)&self->params0;
     f32* pb = (f32*)&self->params1;
-    f32* po = self->o5E0;
+    f32* po = self->blend;
     for (u32 k = 0; k < 44; k++) {
         *po++ = u * *pa++ + t * *pb++;
     }
-    self->maxSlotAgents = (s32)self->o5E0[0];
+    self->maxSlotAgents = (s32)self->blend[0];
     ComputeGaugeOutputs(self);
 }
 
 void ComputeGaugeOutputs(GaugeManager* o)
 {
     f32 t = GaugeCurve::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
-    BlendedGaugeParams* p = (BlendedGaugeParams*)o->o5E0;
+    BlendedGaugeParams* p = (BlendedGaugeParams*)o->blend;
     f32 s;
 
     s = GaugeCurve::Limit(GaugeCurve::Eval(&p->q30, t), g_unitRange.lo, g_unitRange.hi);

@@ -32,7 +32,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 break;
             case 1:
                 if (self->walkerGraph != 0) {
-                    SetStateWalkerTarget((StateWalker*)self->fB48, 0x485);
+                    SetStateWalkerTarget((StateWalker*)self->walker, 0x485);
                     self->pushedCount = 0;
                 }
                 break;
@@ -56,7 +56,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
-                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->placeChangeTime && self->f830 != 0) {
+                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->placeChangeTime && self->path != 0) {
                     PathFollower* found[16];
                     s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, found);
                     s32 place = 1;
@@ -65,8 +65,8 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                             place++;
                         }
                     }
-                    if (place != self->fB08 || n != self->placeCount) {
-                        self->fB08 = place;
+                    if (place != self->place || n != self->placeCount) {
+                        self->place = place;
                         self->placeCount = n;
                         self->placeChangeTime = g_gameClock[1];
                     }

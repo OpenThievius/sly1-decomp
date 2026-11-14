@@ -731,7 +731,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
     Collider* c = (Collider*)FindContactingPart(self);
     if (c != 0) {
         s32 lands = 1;
-        if (c == (Collider*)g_player && (g_player->f2220 != 6 || g_player->targetMode != 2)) {
+        if (c == (Collider*)g_player && (g_player->state != 6 || g_player->targetMode != 2)) {
             OwnerMessage m;
             InitOwnerMessage(&m, 0, self);
             m.fn = (void (*)())LaunchObjectFromPooledObject;
@@ -798,7 +798,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
         }
         return;
     }
-    if (g_player != 0 && g_player->f2220 == 4) {
+    if (g_player != 0 && g_player->state == 4) {
         return;
     }
     Vec02 at;
@@ -1671,7 +1671,7 @@ s32 TestStepWaitConditions(StepSequence* self)
             if (0.8f < __builtin_fabsf(in->stickY)) r = 1;
             break;
         case 13:
-            if (g_player != 0 && g_player->f2220 == 2) r = g_player->subState == 3;
+            if (g_player != 0 && g_player->state == 2) r = g_player->subState == 3;
             break;
         case 14:
         {
@@ -1774,7 +1774,7 @@ void ChooseStepSequenceState(StepSequence* self)
         s32 n = self->extraTargetCount;
         if (n > 0) {
             for (s32 i = 0; i < n; i++) {
-                if (*(s32*)self->f314[i] != 0) {
+                if (*(s32*)self->extraTargets[i] != 0) {
                     mode = 5;
                     break;
                 }
@@ -1799,7 +1799,7 @@ void AddSequenceExtraTarget(StepSequence* collection, s32 key, u32 kind)
 	void* value = GetIndexedTargetSlot(item, kind);
 	if (!value) return;
 	u32 count = collection->extraTargetCount;
-	collection->f314[count] = value;
+	collection->extraTargets[count] = value;
 	collection->extraTargetCount = count + 1;
 }
 

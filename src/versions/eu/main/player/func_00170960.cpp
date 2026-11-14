@@ -15,7 +15,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
                 self->pendingAimMode = -1;
             }
         } else if ((void*)msg == self->stateAnimPlayer) {
-            switch (self->f2220) {
+            switch (self->state) {
             case 7:
                 if (self->subState == 0x1B || self->subState == 0x17) {
                     self->pendingState = 7;
@@ -60,7 +60,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         break;
     case 7:
         if ((void*)msg == self->stateAnimPlayer) {
-            switch (self->f2220) {
+            switch (self->state) {
             case 5:
             case 6:
                 self->eightWayHalf = -1;
@@ -218,7 +218,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         break;
     case 2: {
         void* held;
-        switch (self->f2220) {
+        switch (self->state) {
         case 3:
             held = (void*)self->boundObject;
             goto check;

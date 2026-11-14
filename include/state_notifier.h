@@ -53,7 +53,7 @@ struct StateNotifier : PlacedObject {
     f32 lastSplashTime;     // 0x330: the time of the last splash
     s32 f334;               // 0x334: func_001DCD28 copies only one whose word is 0
     void* f338;             // 0x338
-    s32 f33C;               // 0x33C: set once it has landed on a slope (func_00146DB0)
+    s32 landed;             // 0x33C: set once it has landed on a slope (func_00146DB0)
     s32 armed;               // 0x340
     f32 f344;               // 0x344
     union {

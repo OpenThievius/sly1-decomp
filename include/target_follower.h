@@ -70,7 +70,7 @@ struct TargetFollower : Collider {
     s32 f58C;               // 0x58C: loaded (id 0x2FC)
     void* lookTarget;       // 0x590: the object it looks at (func_0016DAC0, mode 3)
     void* trailObject;      // 0x594: func_0011E580(0x73, ...)
-    s32 f598;               // 0x598: -1 at set-up
+    s32 mode;               // 0x598: -1 at set-up
     f32 modeStartTime;      // 0x59C: the clock's time when the mode changed (func_0016DAC0)
     f32 heading;            // 0x5A0: read by slot 28 (func_00188850)
     f32 leadTime;           // 0x5A4: slot 10 reads it from f550's entry

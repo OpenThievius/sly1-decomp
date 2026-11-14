@@ -5,8 +5,8 @@ struct Cap_eu_1E5938 { u8 pad[0x5AC]; s32 palette; };
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 {
-    if (HasObjectPoolChoice(self->f618) != 0) {
-        ObjectPool* pool = self->f618;
+    if (HasObjectPoolChoice(self->pool) != 0) {
+        ObjectPool* pool = self->pool;
         u8* place = (u8*)pool + 0x60;
         u8* e0 = (u8*)pool + 0xE0;
         u8* ang = (u8*)pool + 0x150;

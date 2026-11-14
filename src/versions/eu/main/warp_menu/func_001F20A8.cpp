@@ -33,7 +33,7 @@ void DrawWarpMenu(WarpMenu_eu* self)
         f32 b2 = self->blend * self->blend;
         Vu0::Q(v) = Vu0::Q(self->current->smoothPoint);
         Camera* g = g_camera;
-        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
         Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;

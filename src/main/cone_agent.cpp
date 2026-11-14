@@ -68,7 +68,7 @@ void StartConeAgent(ConeAgent* self)
 
     StartAgent(self);
     if (self->zoneId != -1) {
-        self->fC1C = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->zoneId, self);
+        self->zone = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->zoneId, self);
     }
     if (self->sightZoneId != -1) {
         self->sightZone = (ObjectGatherer*)FindFirstObjectByIdMode4(self->world, self->sightZoneId, self);
@@ -105,10 +105,10 @@ s32 IsConeAgentFree(ConeAgent* self)
     if (IsPadSelectFlagHeld(self->world) != 0) {
         return 0;
     }
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         return 0;
     }
-    if (self->f724 == 0xB) {
+    if (self->state == 0xB) {
         return 0;
     }
     Collider* target = (Collider*)self->desc08()->m62(self);
@@ -117,8 +117,8 @@ s32 IsConeAgentFree(ConeAgent* self)
         inside = 1;
     } else if (IsObjectOfKind(target, 5) != 0 && ((SlotFnRet*)target->desc)[81](target) == 2) {
         inside = 1;
-    } else if (self->fC1C != 0) {
-        inside = TestPointAgainstObjectShape(self->fC1C, &target->v140) == 0;
+    } else if (self->zone != 0) {
+        inside = TestPointAgainstObjectShape(self->zone, &target->v140) == 0;
     } else if (__builtin_fabsf(target->v140.z - self->v190.z) > self->leashHeight) {
         inside = 1;
     } else {

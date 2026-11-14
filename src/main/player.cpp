@@ -378,7 +378,7 @@ void InitTurningCollider(TurningCollider* self);
 void InitPlayer(Player* self)
 {
     InitTurningCollider(self);
-    self->f2220 = -1;
+    self->state = -1;
     self->aimMode = -1;
     self->subState = -1;
     self->jumpKind = -1;
@@ -616,7 +616,7 @@ void ApplyPlayerDefaultSteering(Player* self)
     f32 tiltSpeed;
     f32 headingSpeed;
 
-    if (self->f2220 == 1) {
+    if (self->state == 1) {
         f32 v = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
         f32 t = g_unitRange.Limit(EvalCurve3(D_00263760, v));
         ramp.maxSpeed = BlendRamp(t, D_00263740.maxSpeed, D_00263750.maxSpeed);
@@ -699,7 +699,7 @@ void StepPlayer(Player* self, f32 t)
     s128 a;
     s128 b;
     StepCollider(self, t);
-    switch (self->f2220) {
+    switch (self->state) {
     case 2:
         StepPlayerState2(self);
         break;
@@ -718,12 +718,12 @@ void StepPlayer(Player* self, f32 t)
     case 13:
         switch (self->subState) {
         case 0x38:
-            BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)&m, self->f638);
+            BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)&m, self->heading);
             TurnColliderTowardRotation(self, g_frameDt[0], &m, D_00263780);
             break;
         case 0x36:
         case 0x37: {
-            ComputePolarOffset((Vec3*)&m.r[0], self->f638 + 1.5707964f, self->stickLevel * D_00262E28 / self->radius3CC, 0.0f);
+            ComputePolarOffset((Vec3*)&m.r[0], self->heading + 1.5707964f, self->stickLevel * D_00262E28 / self->radius3CC, 0.0f);
             u8* table = (u8*)D_00263790;
             StoreFloatAsQuadword((u128*)&a, self->stickLevel);
             qa = a;
@@ -758,13 +758,13 @@ void ComputePlayerSlideRates(Player* self, Contact03* out)
 {
     f32 a;
     f32 b;
-    if (self->f2220 == 0xD) {
+    if (self->state == 0xD) {
         a = D_00262E34;
         b = D_00262E38;
-    } else if (self->f2220 == 7) {
+    } else if (self->state == 7) {
         goto zero_both;
     } else if (((VFn_170410*)self->desc)[90](self, out) != 0) {
-        if (self->f2220 == 6 && self->targetMode == 4 && ((PathRecord*)self->targetTrack)->isRail != 0) {
+        if (self->state == 6 && self->targetMode == 4 && ((PathRecord*)self->targetTrack)->isRail != 0) {
             goto zero_both;
         }
         a = D_002637B8;
@@ -772,7 +772,7 @@ void ComputePlayerSlideRates(Player* self, Contact03* out)
         out->friction = a;
         goto divide;
     } else {
-        if (self->f2220 != 4) {
+        if (self->state != 4) {
             goto zero_both;
         }
         s32 v = self->subState;
@@ -800,7 +800,7 @@ void ClampColliderContactLimit(Collider* self, s32 flags, ContactLimit03* limit)
 
 void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out)
 {
-    if (self->f2220 == 4) {
+    if (self->state == 4) {
         if (flags & 0x10) {
             f32 v;
             if (flags & 1) {
@@ -853,7 +853,7 @@ void ReleasePlayerContacts(Player* self)
 {
     FreePooledContactChain((World*)self->world, self->contacts4B4);
     self->contacts4B4 = 0;
-    switch (self->f2220) {
+    switch (self->state) {
     case 7:
         PinPlayerToPath(self);
         break;
@@ -882,7 +882,7 @@ s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 
 s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
 {
-    if (self->f2220 != 0xD) {
+    if (self->state != 0xD) {
         return IsTurningColliderGroundContact(self, e, idx);
     }
     f32 scale = D_00274AD0[idx];
@@ -903,18 +903,18 @@ void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s3
 void ResolvePlayerContact(Player* self, Contact03* c, s32 idx)
 {
     ContactEnd03* e = &c->end[idx];
-    if (self->f2220 == 4) {
+    if (self->state == 4) {
         if (c->kind == 1 && idx == 0 && (Vec02*)c->featureEnd0 == self->lowestVertex) {
             Vec02 t;
             u128 n = Vu0::Rotate(self->headingMatrix, Vu0::Q(self->headingVelocity));
             Vu0::Q(t) = Vu0::Sub(n, Vu0::MulX(Vu0::Q(c->normal), Vu0::Dot(n, Vu0::Q(c->normal))));
             Vu0::Q(c->end[0].v30) = Vu0::Add(Vu0::Q(c->end[0].v30), Vu0::Q(t));
         }
-    } else if (self->f2220 != 0xD) {
+    } else if (self->state != 0xD) {
         if (((s32 (*)(Player*, Contact03*, s32))self->desc06()->m56)(self, c, idx)) {
             ResolveTurningColliderGroundContact(self, c, idx);
         } else if (e->part == (Collider*)self) {
-            Vu0::Q(e->v30) = Vu0::Sub(Vu0::Q(e->v30), Vu0::Cross(Vu0::Q(self->v160), Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(self->v140))));
+            Vu0::Q(e->v30) = Vu0::Sub(Vu0::Q(e->v30), Vu0::Cross(Vu0::Q(self->v160), Vu0::Sub(Vu0::Q(e->point), Vu0::Q(self->v140))));
         }
     }
 }
@@ -987,7 +987,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
                 self->pendingAimMode = -1;
             }
         } else if ((void*)msg == self->stateAnimPlayer) {
-            switch (self->f2220) {
+            switch (self->state) {
             case 7:
                 if (self->subState == 0x1B || self->subState == 0x17) {
                     self->pendingState = 7;
@@ -1032,7 +1032,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         break;
     case 7:
         if ((void*)msg == self->stateAnimPlayer) {
-            switch (self->f2220) {
+            switch (self->state) {
             case 5:
             case 6:
                 self->eightWayHalf = -1;
@@ -1190,7 +1190,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         break;
     case 2: {
         void* held;
-        switch (self->f2220) {
+        switch (self->state) {
         case 3:
             held = (void*)self->boundObject;
             goto check;
@@ -1255,7 +1255,7 @@ s32 AimPlayerAtTarget(Player* self)
     } else {
         return 0;
     }
-    self->f638 = ArctangentOfRatio(y, x);
+    self->heading = ArctangentOfRatio(y, x);
     return 1;
 }
 
@@ -1299,7 +1299,7 @@ static inline void SampleCurveDirection(PathCurve* c, PlacedObject* frame, f32 t
 void PosePlayerTargetPart(Player* self)
 {
     s32 mode;
-    if (self->f2220 == 6 && self->targetMode == 4 && self->subState == 0x10 && (u32)(self->aimMode - 4) < 2) {
+    if (self->state == 6 && self->targetMode == 4 && self->subState == 0x10 && (u32)(self->aimMode - 4) < 2) {
         void* angles;
         mode = 2;
         if (((PathRecord*)self->targetTrack)->isRail != 0) {
@@ -1338,7 +1338,7 @@ void PosePlayerTargetPart(Player* self)
     PosedPart* lead = (PosedPart*)self->f2500;
     if (lead == 0 || lead->state == -1)
         return;
-    switch (self->f2220) {
+    switch (self->state) {
     case 0:
         if (self->groundContact != 0) {
             frame = (PlacedObject*)self->groundContactPart;
@@ -1464,7 +1464,7 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
     ProbeHolder* obj = (ProbeHolder*)b;
     ProbeRecord* rec = (ProbeRecord*)d;
     ProbeNode* node;
-    if (pl->f2220 == 0) {
+    if (pl->state == 0) {
         if (pl->aimMode < 10) {
             if (pl->aimMode < 6) {
                 node = *(ProbeNode**)((u8*)pl->stateWalker + 0x24);
@@ -1569,7 +1569,7 @@ void UpdatePlayerState0(Player* self)
         if (self->groundContact != 0) {
             ComputeObjectMotionInFrame((PlacedObject*)self->groundContactPart, 0, (Vec02*)((u8*)self + 0x6A0), 0, (Vec02*)&loc, 0, 0);
             loc.z = ClampToMagnitude(loc.z, 10.0f);
-            self->f638 = self->f638 + loc.z * g_frameDt[0];
+            self->heading = self->heading + loc.z * g_frameDt[0];
         }
     }
     if (self->footPartA == 0) return;
@@ -1596,7 +1596,7 @@ void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale)
     Vec02 out;
     ComputeBallisticLaunchVelocity(&tmp, (Vec02*)target, &out, (u8*)self, angle);
     self->desc02()->m20(self, &out);
-    if (self->f2220 != 4) {
+    if (self->state != 4) {
         SetPlayerState(self, 2, 6);
         self->jumpSpeed = self->jumpSpeed * scale;
         if (scale == 0.0f) {
@@ -1607,7 +1607,7 @@ void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale)
 
 void ReleasePlayerToState2(Player* self)
 {
-    s32 st = self->f2220;
+    s32 st = self->state;
     if (st != 6) {
         if (st < 7) {
             if (st == 3) {
@@ -1670,7 +1670,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         return;
     }
     f32 target;
-    if (self->f2220 == 6 && self->targetMode == 3 && HasNoActiveObject89(self) != 0) {
+    if (self->state == 6 && self->targetMode == 3 && HasNoActiveObject89(self) != 0) {
         f32 since = g_gameClock[1] - self->stateStartTime;
         f32 k;
         if (0.5f <= since) {
@@ -1709,7 +1709,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         ((Collider*)self->f61C)->flags |= (0x8000ULL << 17);
     } else {
         s32 flag;
-        switch (self->f2220) {
+        switch (self->state) {
         case 3:
         case 4:
         case 7:
@@ -1721,7 +1721,7 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         }
         AddTrailPoint((TrailRing*)((u8*)self + 0x1520), 0, 0, flag, 0.0f, g_gameClock[2]);
     }
-    if (self->f2220 == 12 && self->subState == 0x22) {
+    if (self->state == 12 && self->subState == 0x22) {
         return;
     }
     if (D_0026FA68 != 0 && (u32)(*(s32*)((u8*)D_0026FA68 + 0x2D0) - 2) < 2) {
@@ -1737,7 +1737,7 @@ void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, 
 void RecomputePlayerFrame(Player* self)
 {
     RecomputeTurningColliderFrame(self);
-    if (self->f2220 == 6 && self->targetMode == 7) {
+    if (self->state == 6 && self->targetMode == 7) {
         self->f1290.valid = 0;
         goto clear;
     }
@@ -1775,7 +1775,7 @@ void DrawPlayer(Player* self, void* a, void* b)
     f32 out[20];
     s32 i;
 
-    if (!(self->f2220 == 6 && self->targetMode == 7))
+    if (!(self->state == 6 && self->targetMode == 7))
     {
         PlacePartAtProbeSpan(self, (PlacedObject*)self->f610, (PlacedObject*)self->f610, &self->f1190);
         PlacePartAtProbeSpan(self, (PlacedObject*)self->f614, (PlacedObject*)self->f614, &self->f1290);
@@ -1793,14 +1793,14 @@ void DrawPlayer(Player* self, void* a, void* b)
         }
         ((PlacedObject*)self->f61C)->flags |= 0x100000000UL;
     }
-    if (self->f2220 == 3)
+    if (self->state == 3)
     {
         UpdatePlayerLinkPose(self);
     }
     DrawTurningCollider(self, a, b);
     if (self->trailEnabled)
     {
-        QueueTrailRibbonDraw((TrailRing*)self->f1520, (u8*)a);
+        QueueTrailRibbonDraw((TrailRing*)self->trail, (u8*)a);
     }
     QueuePlayerMarkerRingDraw(self, (RingSource*)a, b);
 }
@@ -1889,7 +1889,7 @@ void PrunePlayerContacts(Player* self)
         } while (row);
     }
     CollectTurningColliderContacts(self);
-    if (self->f2220 == 8) {
+    if (self->state == 8) {
         self->groundContact = 1;
         self->groundContactTime = g_gameTime[0];
         TransformPointBetweenFrames((PlacedObject*)self->ledgeCollider, 0, (Vec02*)self->ledgeLocalPoint, &self->groundContactPoint);
@@ -1940,12 +1940,12 @@ void MoveCollider(Collider* self, f32 x, void* b);
 
 void SetPlayerBoundsPoints(Player* self)
 {
-    self->v21D0[1] = ((PlacedObject*)self->f23D4)->v140;
+    self->boundsPoints[1] = ((PlacedObject*)self->f23D4)->v140;
     self->boundsPointCount = 0;
     MoveCollider(self, g_frameDt[0], 0);
     if (self->aimMode == 0) {
-        self->v21D0[0] = self->v140;
-        self->v21D0[2] = ((PlacedObject*)self->f23D4)->v140;
+        self->boundsPoints[0] = self->v140;
+        self->boundsPoints[2] = ((PlacedObject*)self->f23D4)->v140;
         self->boundsPointCount = 3;
         self->desc03()->m32(self);
     } else {
@@ -1961,7 +1961,7 @@ void UpdatePlayerBounds(Player* self)
     s32 i = 0;
     UpdateColliderBounds(self);
     if (self->boundsPointCount > 0) {
-        Vec02* p = self->v21D0;
+        Vec02* p = self->boundsPoints;
         do {
             ExpandColliderBoundsBySphere(self, p, self->boundsRadius);
             i++;
@@ -2013,7 +2013,7 @@ void CollidePlayerWithObject(Player* self, Collider* a1, s32 a2, void* a3, void*
     Collider* v;
     Collider* cur;
 
-    switch (self->f2220)
+    switch (self->state)
     {
     case 4:
         if (self->probeContactsDisabled == 0)
@@ -2064,7 +2064,7 @@ void CollidePlayerWithObject(Player* self, Collider* a1, s32 a2, void* a3, void*
 
 s32 GetPlayerContactMode(Player* self)
 {
-    if (self->f2220 == 3 || self->f2220 == 0xD) {
+    if (self->state == 3 || self->state == 0xD) {
         return 0;
     }
     return 3;
@@ -2095,7 +2095,7 @@ struct ColliderPose {
     Vec02 pos;              // 0x10: where the camera looks
     Vec02 dir;              // 0x20: the path's direction times the speed along it
     u8 pad30[0x34 - 0x30];
-    f32 f34;                // 0x34: a weight, scaled down by the spin or cleared
+    f32 weight;             // 0x34: a weight, scaled down by the spin or cleared
     f32 stampTime;          // 0x38: the time it was last stamped
     s32 f3C;                // 0x3C
 };
@@ -2107,7 +2107,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
     Vec02 last = self->focusPoint;
     CaptureSwitchedColliderPose(self, out, dt);
     if (self->holdFocus == 0) {
-        if (self->f2220 == 7) {
+        if (self->state == 7) {
             Vec02 pos;
             Vec02 dir;
             PoseHolder47* h = ((PoseTarget*)self->aimCurve)->holder;
@@ -2124,7 +2124,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             Vu0::Q(dir) = d;
             self->cameraHeight = pose->pos.z - 125.0f;
         } else {
-            if (self->f2220 == 3) {
+            if (self->state == 3) {
                 Vec02 pos;
                 GetObjectWorldPosition(self->boundObject, &pos);
                 self->cameraHeight = pos.z + D_002638C8[0];
@@ -2164,14 +2164,14 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
                 pose->pos.z = w;
             }
         }
-        if (self->f2220 == 6 && self->targetMode == 0) {
+        if (self->state == 6 && self->targetMode == 0) {
             FillPlayerPushRecord(self, (PushRecord*)out);
         }
         u128 d = ApproachPointWithRamp(Vu0::Q(self->poseOffset), Vu0::Q(D_00248D30), dt, (RampProfile*)D_002638E0, 0);
         Vu0::Q(self->poseOffset) = d;
         Vu0::Q(pose->pos) = Vu0::Add(Vu0::Q(pose->pos), d);
     }
-    switch (self->f2220) {
+    switch (self->state) {
     case 2:
         if (self->f2498 != 0) {
             pose->flags |= 1;
@@ -2199,7 +2199,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         break;
     }
     s32 stamp = 1;
-    switch (self->f2220) {
+    switch (self->state) {
     case 0:
         stamp = 0;
         break;
@@ -2218,7 +2218,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         self->f2680 = g_gameTime[0];
     }
     pose->stampTime = self->f2680;
-    switch (self->f2220) {
+    switch (self->state) {
     case 0: {
         f32 a = __builtin_fabsf(self->v160.z);
         f32 k = D_002638D0[0] + a * (D_002638D0[1] + a * D_002638D0[2]);
@@ -2234,7 +2234,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             r = k;
         }
         k = r;
-        pose->f34 = pose->f34 * k;
+        pose->weight = pose->weight * k;
         break;
     }
     case 4:
@@ -2245,12 +2245,12 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
         case 47:
         case 48:
         case 49:
-            pose->f34 = 0.0f;
+            pose->weight = 0.0f;
         }
         break;
     case 7:
     case 13:
-        pose->f34 = 0.0f;
+        pose->weight = 0.0f;
         break;
     }
     self->focusPoint = pose->pos;
@@ -2471,7 +2471,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
     }
     PadRecord blank;
     if (D_00261D38 > 0 || self->walkerActivation != 0 || self->firstActivation != 0 || self->secondActivation != 0) {
-        switch (self->f2220) {
+        switch (self->state) {
         case 12:
             if (self->pendingCaption == 0) {
                 SetPlayerState(g_player, 12, 0x23);
@@ -2500,7 +2500,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
         FillMemory(&blank, 0, sizeof(blank));
         pad = &blank;
     }
-    if (self->f2220 != 4) {
+    if (self->state != 4) {
     if (self->entryQueue != 0 && IsEntryQueueRunning(self->entryQueue)) {
         EntryQueue* q = self->entryQueue;
         if ((g_padRecord.flags & 0x800) && D_00275F84 == 0) {
@@ -2538,7 +2538,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
     s32 jump = 0;
     WrapAngle(self->stickHeading - ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x));
     if (pad->flags & 0x40) {
-        switch (self->f2220) {
+        switch (self->state) {
         case 6:
             if (self->targetMode == 2 || self->targetMode == 5 || self->targetMode == 4) {
                 jump = 1;
@@ -2584,7 +2584,7 @@ void ControlPlayer(Player* self, PadRecord* pad, f32 dt)
         jump = 1;
     }
 held:
-    switch (self->f2220) {
+    switch (self->state) {
     case 0:
     case 1:
     case 5:
@@ -2594,7 +2594,7 @@ held:
     case 16:
         if (g_gameTime[0] - self->groundContactTime > 0.1f) {
             Vec02 off;
-            if (self->f2220 == 6 && self->targetMode == 3) {
+            if (self->state == 6 && self->targetMode == 3) {
                 Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth - 200.0f));
             } else {
                 Vu0::Q(off) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-self->probeDepth - 60.0f));
@@ -2617,14 +2617,14 @@ held:
         PadRecord* rec = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         StepSequence* seq = (StepSequence*)g_typedTextCaptionBox.child;
         if (seq != 0 && seq->state2D4 == 3 && seq->f32C == 0 && (rec->flags & 0xC) && *(s32*)seq->target304 != 0) {
-            if (self->f2220 == 12) {
+            if (self->state == 12) {
                 self->pendingCaption = 0;
                 skipStep = 1;
             }
             SkipRemainingSteps((StepSequence*)g_typedTextCaptionBox.child);
             ClearPadPressedBits(rec, 0xC);
         } else if (self->f2BD4 != 0 || (pad->flags & 0xC)) {
-            if (self->f2220 == 12) {
+            if (self->state == 12) {
                 if (g_typedTextCaptionBox.child == 0) {
                     self->pendingCaption = 0;
                     skipStep = 1;
@@ -2640,7 +2640,7 @@ held:
         }
     }
     for (;;) {
-        s32 state = self->f2220;
+        s32 state = self->state;
         s32 sub = self->subState;
         s32 target;
         switch (state) {
@@ -2653,7 +2653,7 @@ held:
             }
             if (self->f2738 != 0 && g_gameTime[0] - self->f2734 < D_00263910[0]) {
                 RunPlayerCallback(self);
-                state = self->f2220;
+                state = self->state;
                 sub = self->subState;
             }
             break;
@@ -2880,7 +2880,7 @@ held:
                 sub = 0x38;
                 break;
             }
-            self->f638 = self->stickHeading;
+            self->heading = self->stickHeading;
             break;
         case 14:
         case 15:
@@ -2891,7 +2891,7 @@ held:
             }
             break;
         }
-        if (state == self->f2220 && sub == self->subState) {
+        if (state == self->state && sub == self->subState) {
             break;
         }
         SetPlayerState(self, state, sub);
@@ -2900,7 +2900,7 @@ held:
         falling = 0;
     }
     HandlePlayerAimButton(self, pad);
-    switch (self->f2220) {
+    switch (self->state) {
     case 5:
         SetPlayerVelocityFromHeading(self, (const Vec02*)((u8*)self + 0x910), self->eightWayBlend, self->stickHeading, self->stickLevel);
         break;
@@ -3004,10 +3004,10 @@ void UpdatePlayer(Player* self, f32 dt)
     if (HasAnimationDrivenAttachment(self) != 0) {
         UpdatePlayerWhileAnimationDriven(self);
     }
-    if (self->pulseActive != 0 && self->f2220 != 4 && self->pulseFadeDuration < g_gameTime[0] - self->pulseFadeStart) {
+    if (self->pulseActive != 0 && self->state != 4 && self->pulseFadeDuration < g_gameTime[0] - self->pulseFadeStart) {
         self->pulseActive = 0;
     }
-    switch (self->f2220) {
+    switch (self->state) {
     case 1:
         UpdateSixEntryBlendWeights(self, (u8*)self + 0x720, self->sixWayBlend, self->stateAnimPlayer);
         {
@@ -3039,7 +3039,7 @@ void UpdatePlayer(Player* self, f32 dt)
             SetPlayerState(self, 2, 2);
             break;
         }
-        self->f638 = ArctangentOfRatio(-self->ledgeOffset.y, -self->ledgeOffset.x);
+        self->heading = ArctangentOfRatio(-self->ledgeOffset.y, -self->ledgeOffset.x);
         break;
     }
     case 9: {
@@ -3049,14 +3049,14 @@ void UpdatePlayer(Player* self, f32 dt)
         } else {
             Vu0::Q(local) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(g_player->v140));
         }
-        self->f638 = ArctangentOfRatio(local.y, local.x);
+        self->heading = ArctangentOfRatio(local.y, local.x);
         break;
     }
     case 4:
         UpdatePlayerRequestSubState(self);
         break;
     case 12:
-        self->f638 = *(f32*)&g_camera->ctl460.value;
+        self->heading = *(f32*)&g_camera->ctl460.value;
         break;
     case 13:
         if (self->subState == 0x38) {
@@ -3089,7 +3089,7 @@ void UpdatePlayer(Player* self, f32 dt)
         if (self->boundObject != 0) {
             GetObjectWorldPosition((BaseObject*)self->boundObject, &local);
             for (s32 i = 1; i < self->boundsPointCount; i++) {
-                MeasurePointToSegment(&local, &self->v21D0[i - 1], &self->v21D0[i], &t, &dist);
+                MeasurePointToSegment(&local, &self->boundsPoints[i - 1], &self->boundsPoints[i], &t, &dist);
                 if (dist < ((LinkTarget_174808*)self->aimTarget)->radius + self->boundsRadius) {
                     SetPlayerState(self, 3, 0x33);
                     break;
@@ -3098,7 +3098,7 @@ void UpdatePlayer(Player* self, f32 dt)
         } else if (self->aimCurve != 0) {
             s32 i;
             for (i = 0; i < self->boundsPointCount; i++) {
-                TransformPointBetweenFrames(0, (PlacedObject*)((PathTarget_174808*)self->aimCurve)->frame, &self->v21D0[i], &pts[i]);
+                TransformPointBetweenFrames(0, (PlacedObject*)((PathTarget_174808*)self->aimCurve)->frame, &self->boundsPoints[i], &pts[i]);
                 PathShape_174808* s = ((PathTarget_174808*)self->aimCurve)->shape;
                 if (s->desc->m30 != 0) {
                     s->desc->m30(s, &pts[i], *(f32*)((u8*)self + 0x220C), 0, &dirs[i], 0, 0, 0);
@@ -3141,7 +3141,7 @@ void UpdatePlayer(Player* self, f32 dt)
 
 void UpdatePlayerWhileAnimationDriven(Player* self)
 {
-    switch (self->f2220) {
+    switch (self->state) {
     case 3:
         SetPlayerState(self, 2, 2);
         break;
@@ -3149,7 +3149,7 @@ void UpdatePlayerWhileAnimationDriven(Player* self)
         SetPlayerState(self, 0xD, 0x38);
         break;
     }
-    s32 state = self->f2220;
+    s32 state = self->state;
     SetPlayerAimMode(self, -1);
     switch (state) {
     case 2:
@@ -3167,11 +3167,11 @@ void UpdatePlayerWhileAnimationDriven(Player* self)
         f32 heading;
         f32 speed;
         state = 0;
-        ComputeObjectSteeringHeading(g_frameDt[0], self->f638, self, 0, 0, &heading, 0, &speed);
+        ComputeObjectSteeringHeading(g_frameDt[0], self->heading, self, 0, 0, &heading, 0, &speed);
         if (speed > 0.0f) {
             state = 1;
         }
-        self->f638 = heading;
+        self->heading = heading;
         Vu0::Q(self->headingVelocity) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
         SetPlayerState(self, state, -1);
     }
@@ -3184,7 +3184,7 @@ void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 
 void SelectPlayerStateAnimation(Player* self)
 {
     void* node;
-    switch (self->f2220) {
+    switch (self->state) {
     case 6: {
         s32 m = self->targetMode;
         if ((m == 0 && self->subState == 0x15) || m == 7) {
@@ -3221,7 +3221,7 @@ void SelectPlayerStateAnimation(Player* self)
         }
     }
     default:
-        node = self->stateNodes[self->f2220];
+        node = self->stateNodes[self->state];
         break;
     case 0xD:
         return;
@@ -3427,12 +3427,12 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
     s32 skip = 0;
     walker = 0;
 
-    if (self->f2220 == state && self->subState == sub) {
+    if (self->state == state && self->subState == sub) {
         return;
     }
     self->pendingFlags &= ~1;
-    if (self->f2220 != state) {
-        switch (self->f2220) {
+    if (self->state != state) {
+        switch (self->state) {
         case 2: {
             self->penalizedTarget = 0;
             if (state != 3 && state != 7) {
@@ -3503,7 +3503,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 ReleaseAttachRecords((World*)self->world, (Attach03*)self->linkSystem);
                 self->linkSystem = 0;
             }
-            ResetTrailRing((TrailRing*)self->f1520);
+            ResetTrailRing((TrailRing*)self->trail);
             break;
         }
         case 7: {
@@ -3523,7 +3523,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetPlayerAimMode(self, aim);
             Vu0::Q(self->poseOffset) = Vu0::Sub(Vu0::Q(self->focusPoint), Vu0::Q(self->pos));
             self->poseOffset.z = 0.0f;
-            ResetTrailRing((TrailRing*)self->f1520);
+            ResetTrailRing((TrailRing*)self->trail);
             break;
         }
         case 8:
@@ -3539,7 +3539,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 AT(Vec02, PS(void*, 0x2494), 0x300) = D_00248D30;
             }
             self->f580 = 1;
-            ResetTrailRing((TrailRing*)self->f1520);
+            ResetTrailRing((TrailRing*)self->trail);
             self->pulseFadeStart = g_gameTime[0];
             break;
         case 6: {
@@ -3568,7 +3568,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 break;
             case 7: {
                 PlacedObject* o = (PlacedObject*)self->targetSwitch;
-                self->f638 = WrapAngle(ArctangentOfRatio(o->m110.r[0].y, o->m110.r[0].x) + 1.0f);
+                self->heading = WrapAngle(ArctangentOfRatio(o->m110.r[0].y, o->m110.r[0].x) + 1.0f);
                 self->targetSwitch = 0;
                 break;
             }
@@ -3664,7 +3664,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             walkerId = 0x146;
             self->f118C = 0;
             walker = self->stateGraph;
-            if (self->f2220 == 2) {
+            if (self->state == 2) {
                 s32 late = self->f2250;
                 if (late == -1) {
                     f32 limit = 0.95f;
@@ -3730,19 +3730,19 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             switch (kind) {
             case 2:
-                self->f638 = back;
+                self->heading = back;
                 self->linkReversed = 1;
                 break;
             case 1:
-                self->f638 = heading;
+                self->heading = heading;
                 self->linkReversed = 0;
                 break;
             case 0:
                 if (__builtin_fabsf(WrapAngle(heading - self->stickHeading)) < 1.57079637f) {
-                    self->f638 = heading;
+                    self->heading = heading;
                     self->linkReversed = 0;
                 } else {
-                    self->f638 = back;
+                    self->heading = back;
                     self->linkReversed = 1;
                 }
                 break;
@@ -3910,7 +3910,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             case 0:
             case 1:
                 loud = 1;
-                if (self->f2220 != 2 || (self->subState != 12 && self->subState != 13)) {
+                if (self->state != 2 || (self->subState != 12 && self->subState != 13)) {
                     StartSoundEffect(0x94, 0, 0, &self->v140, 3000.0f, 300.0f, D_00262E20, 0.0f, 0.0f, 0, 0);
                 }
                 break;
@@ -3928,7 +3928,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             } else {
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(g_player->v140));
             }
-            self->f638 = ArctangentOfRatio(d.y, d.x);
+            self->heading = ArctangentOfRatio(d.y, d.x);
             TurnColliderTowardHeading(self);
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             SetPlayerAimMode(self, -1);
@@ -4142,7 +4142,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 anim = PS(void*, 0x1020);
             }
             if (self->jumpKind == 4 && self->stickLevel == 0.0f) {
-                ComputePolarOffset((Vec3*)&v, self->f638, 100.0f, v.z);
+                ComputePolarOffset((Vec3*)&v, self->heading, 100.0f, v.z);
                 self->jumpStickPhase = 3;
             } else {
                 ComputePolarOffset((Vec3*)&v, self->stickHeading, self->jumpSpeed * self->stickLevel, v.z);
@@ -4176,7 +4176,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 4:
             ((Attachment*)self->selfPoseSource)->mode0 = 4;
             self->desc02()->m2B(self);
-            if (self->f2220 == 2) {
+            if (self->state == 2) {
                 skip = 1;
             } else {
                 anim = PS(void*, 0x1020);
@@ -4190,7 +4190,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             // The same if/else as case 4's: here anim is set again below, so the else is dead and
             // flow deletes it, but it keeps jump.c from turning a lone `skip = 1` into a
             // conditional move, as retail's branch shows (docs/TOOLCHAIN.md, "Conditional moves").
-            if (self->f2220 == 2) {
+            if (self->state == 2) {
                 skip = 1;
             } else {
                 anim = PS(void*, 0x1020);
@@ -4258,7 +4258,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             if (self->touchedObject != 0 && IsObjectOfKind((BaseObject*)self->touchedObject, 0x70)) {
-                self->f638 = ArctangentOfRatio(self->v150.y, self->v150.x);
+                self->heading = ArctangentOfRatio(self->v150.y, self->v150.x);
                 TurnColliderTowardHeading(self);
             }
             ((Attachment*)self->selfPoseSource)->mode0 = 4;
@@ -4507,7 +4507,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                     } else {
                         r = k;
                     }
-                    self->f638 = WrapAngle(self->f638 + WrapAngle(ArctangentOfRatio(self->v150.y, self->v150.x) + 3.14159274f - self->f638) * r);
+                    self->heading = WrapAngle(self->heading + WrapAngle(ArctangentOfRatio(self->v150.y, self->v150.x) + 3.14159274f - self->heading) * r);
                     TurnColliderTowardHeading(self);
                 }
             }
@@ -4520,14 +4520,14 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (sub == 47) {
                 Vec02 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(self->v140));
-                self->f638 = ArctangentOfRatio(d.y, d.x);
+                self->heading = ArctangentOfRatio(d.y, d.x);
             }
             break;
         case 41:
         case 48: {
             Vec02 d;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(self->v140));
-            self->f638 = ArctangentOfRatio(d.y, d.x);
+            self->heading = ArctangentOfRatio(d.y, d.x);
             anim = self->subStateAnims[sub];
             break;
         }
@@ -4539,13 +4539,13 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 40:
         case 49:
             self->desc02()->m21(self, (Vec02*)&D_00248D30);
-            self->f638 = self->stickHeading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
+            self->heading = self->stickHeading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
             anim = self->subStateAnims[sub];
             break;
         case 37:
         case 38:
             flag = 0;
-            self->f638 = self->stickHeading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
+            self->heading = self->stickHeading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
             anim = self->subStateAnims[sub];
             if (D_002639B8 != 0) {
                 speed = 0.0f;
@@ -4573,7 +4573,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(v) = vel;
             s32 slow = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(vel, vel))) < D_002639B0[0];
             if (slow) {
-                ComputePolarOffset((Vec3*)&v, self->f638, most, 0.0f);
+                ComputePolarOffset((Vec3*)&v, self->heading, most, 0.0f);
             } else {
                 f32 len = Vu0::ToFloatMoved(Vu0::Length(vel));
                 if (len < most) {
@@ -4609,8 +4609,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         }
     }
 
-    if (state != self->f2220) {
-        self->f2220 = state;
+    if (state != self->state) {
+        self->state = state;
         self->stateStartTime = g_gameTime[0];
     }
     if (sub != self->subState) {
@@ -4731,7 +4731,7 @@ void UpdatePlayerGrabs(Player* self)
     s32 n;
     s32 i;
 
-    if (self->f2220 == 4) {
+    if (self->state == 4) {
         goto done;
     }
     if (self->subState == 7) {
@@ -4740,7 +4740,7 @@ void UpdatePlayerGrabs(Player* self)
     } else if (self->aimMode == 4 || self->aimMode == 6 || self->aimMode == 5 || self->aimMode == 7) {
         target = (Collider*)self->f25D8[0];
         mask = 2;
-    } else if (self->f2220 == 10) {
+    } else if (self->state == 10) {
         target = (Collider*)self->f25D8[2];
         mask = 8;
     } else if (self->subState == 8) {
@@ -4799,7 +4799,7 @@ void UpdatePlayerGrabs(Player* self)
         n++;
         rec->p00 = self;
         rec->hold = c->end[1 - e].part;
-        rec->pos = c->end[1 - e].v10;
+        rec->pos = c->end[1 - e].point;
         rec->kind = mask;
         rec->weight = self->mass * 1000.0f;
         ComputeObjectMotionInFrame((PlacedObject*)c->end[e].part, 0, &rec->pos, (Vec02*)&rec->dir, 0, 0, 0);
@@ -4847,7 +4847,7 @@ s32 IsTopCameraController(CameraController* self);
 
 s32 IsPlayerCameraFree(Player* self)
 {
-    if (self->f2220 == 12 && self->subState == 0x22) return 0;
+    if (self->state == 12 && self->subState == 0x22) return 0;
     return IsTopCameraController((CameraController*)&g_camera->ctl454) == 0;
 }
 
@@ -4878,7 +4878,7 @@ extern s32 D_00275BC4;
 void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
 {
     s32 v;
-    switch (self->f2220) {
+    switch (self->state) {
     case 0:
     case 1:
     case 5:
@@ -4931,7 +4931,7 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
         PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         return;
     }
-    if (self->f2220 != 0xC) {
+    if (self->state != 0xC) {
         s32 f = self->pendingFlags;
         self->pendingSubState = 0x21;
         self->pendingCaption = node;
@@ -4946,7 +4946,7 @@ void ResetTrailRing(TrailRing* o);
 void SetPlayerPosition(Player* self, Vec02* pos)
 {
     SetColliderPosition(self, pos);
-    ResetTrailRing((TrailRing*)self->f1520);
+    ResetTrailRing((TrailRing*)self->trail);
     self->f2768 = 0;
 }
 
@@ -4969,7 +4969,7 @@ void RegisterSwitchedCollider(SwitchedCollider* self);
 
 void RegisterPlayer(Player* self)
 {
-    ResetTrailRing((TrailRing*)self->f1520);
+    ResetTrailRing((TrailRing*)self->trail);
     RegisterSwitchedCollider(self);
 }
 
@@ -4982,7 +4982,7 @@ void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void RunPlayerQueuedActivations(Player* self)
 {
-    s32 state = self->f2220;
+    s32 state = self->state;
     if (state < 0) {
         return;
     }
@@ -5030,7 +5030,7 @@ walker:
         }
         Vec02 d;
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(host->v140), Vu0::Q(g_player->v140));
-        g_player->f638 = ArctangentOfRatio(d.y, d.x);
+        g_player->heading = ArctangentOfRatio(d.y, d.x);
     }
 }
 
@@ -5069,7 +5069,7 @@ void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
 void QueuePlayerWalkerActivation(Player* self, u8* other)
 {
     WalkerKeys r;
-    if (self->f2220 != 9) {
+    if (self->state != 9) {
         GetStateWalkerCurrentKey((StateWalker*)(*(void**)(other + 0x2D8)), &r.a);
         GetStateWalkerTargetKey((StateWalker*)(*(void**)(other + 0x2D8)), &r.b);
         if (r.a == 0x22E && (r.b == r.a || r.b == -1)) {
@@ -5118,14 +5118,14 @@ void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void QueuePlayerFirstActivation(Player* a0, InteractTarget* a1)
 {
-    if (a0->f2220 != 9 && a1->mode == 0) {
+    if (a0->state != 9 && a1->mode == 0) {
         a0->firstActivation = a1;
     }
 }
 
 void QueuePlayerSecondActivation(Player* a0, InteractTarget* a1)
 {
-    if (a0->f2220 != 9 && a1->mode == 0) {
+    if (a0->state != 9 && a1->mode == 0) {
         a0->secondActivation = a1;
     }
 }
@@ -5563,7 +5563,7 @@ void RecordPlayerTargetMemo(Player* self)
     TargetMemo tmp;
     u8* key = 0;
     f32 w = 0.0f;
-    switch (self->f2220) {
+    switch (self->state) {
     case 3: {
         u8* o = (u8*)self->boundObject;
         if (*(s32*)(o + 0xB8) != 0) {

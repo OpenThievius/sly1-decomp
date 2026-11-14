@@ -56,7 +56,7 @@ s32 TestStepWaitConditions(StepSequence* self)
             if (0.8f < __builtin_fabsf(in->stickY)) r = 1;
             break;
         case 13:
-            if (g_player != 0 && g_player->f2220 == 2) r = g_player->subState == 3;
+            if (g_player != 0 && g_player->state == 2) r = g_player->subState == 3;
             break;
         case 14:
         {

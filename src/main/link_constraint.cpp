@@ -187,7 +187,7 @@ void ApplyLinkConstraint(PlacedObject* self)
     }
     a->rot = MulRotationValue(*(Mat02*)((u8*)a->linkRecord + 0x30), *(Mat02*)a->linkRecord);
     Rec2195_224* rb = b->linkRecord;
-    if (rb != 0 && (rb->fB0 & 3)) {
+    if (rb != 0 && (rb->flags & 3)) {
         b->rot = MulRotationValue(*(Mat02*)((u8*)rb + 0x30), *(Mat02*)rb);
     } else {
         Mat02* m = &b->rot;

@@ -122,7 +122,7 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
     f32 zero = 0.0f;
     WheelSpawn spawn;
     for (u32 i = 0; i < 4; i++) {
-        Slot19* s = &self->f6B0[i];
+        Slot19* s = &self->wheels[i];
         if (one <= s->firstEmitterOwed) {
             if (500.0f < self->targetSpeed) {
                 Vec02 off;
@@ -214,14 +214,14 @@ void RecordPathFollowerProgress(PathFollower* self)
 {
     f32 lo = 0.0f;
     f32 hi = 1.0f;
-    s32 idx = self->fB00 - 1;
+    s32 idx = self->lap - 1;
     f32 f = (f32)(idx * 3 + self->currentMarker->index) * 0.1f;
     if (f < lo) {
         f = lo;
     } else if (hi < f) {
         f = hi;
     }
-    s32 s0 = self->placeCount - self->fB08;
+    s32 s0 = self->placeCount - self->place;
     s32 t = 0;
     if (s0 >= 3) {
         s32 mk = 1 << (s0 & 7);
@@ -256,7 +256,7 @@ void ResetScatterLevels(ScatterController* object);
 void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 {
     for (s32 i = 0; i < self->markerCount; i++) {
-        PathMarker* e = &self->f874[i];
+        PathMarker* e = &self->markers[i];
         s32 r = TestPointAgainstObjectShape((ObjectGatherer*)e->item, (u8*)self + 0x100);
         if (r == *(s32*)((u8*)e + 8)) {
             continue;
@@ -268,8 +268,8 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
             if (r != 0 && e->next == self->currentMarker) {
                 self->currentMarker = e;
                 if (e == self->firstMarker) {
-                    s32 n = self->fB00 + 1;
-                    self->fB00 = n;
+                    s32 n = self->lap + 1;
+                    self->lap = n;
                     if (self->lapCount < n) {
                         void* w = ((WalkerHolder*)FindFirstObjectById(self->world, 4, 0x42C, self))->f48;
                         s32 key;
@@ -278,7 +278,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
                             GetStateWalkerCurrentKey((StateWalker*)w, &key);
                         }
                         if (self == GetActiveSwitchedCollider()) {
-                            self->fB00 = self->lapCount;
+                            self->lap = self->lapCount;
                         }
                         switch (key) {
                         case 0x42F:

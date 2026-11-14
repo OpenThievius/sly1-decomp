@@ -1968,7 +1968,7 @@ struct LightedVertexBatch {
     u8 padA0[0xB0 - 0xA0];
     s32 flaggedLightCount;
     s32 lightCount;
-    LightObject* fB8[16];   // 0xB8: the lights CollectLightsForSphere gives
+    LightObject* lights[16]; // 0xB8: the lights CollectLightsForSphere gives
     u8* mode;
 };
 
@@ -1981,7 +1981,7 @@ void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius)
         self->flaggedLightCount = 0;
     } else {
         self->strongestLight = CollectLightsForSphere(g_currentWorld, (const Vec02*)center, radius, 1, 0x10, &self->flaggedLightCount,
-                                           &self->lightCount, self->fB8);
+                                           &self->lightCount, self->lights);
         self->f94 = 4;
     }
 }

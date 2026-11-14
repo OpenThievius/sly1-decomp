@@ -399,12 +399,12 @@ static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s
 void RecomputeModeWalker(ModeWalker* self)
 {
     RecomputePathFollowerFrame(self);
-    if (self->f830 != 0 && self->fC08 != 0) {
+    if (self->path != 0 && self->fC08 != 0) {
         Vec02 pos;
         Vec02 dir;
         Mat02 m1;
         Mat02 m2;
-        PathCurve* curve = self->f830->curve;
+        PathCurve* curve = self->path->curve;
         PathSampleFn fn = (PathSampleFn)curve->vt->m01;
         if (fn) {
             fn(curve, self->pathTime, &pos, &dir);
@@ -501,7 +501,7 @@ void LaunchPlayerFromModeWalker(void* unused, void* obj_)
     ComputeColliderJumpVelocity(obj, (f32*)&first, (f32*)&second, D_00264190);
     obj->desc02()->m20(obj, &second);
     f32 r = ArctangentOfRatio(second.y, second.x);
-    obj->f638 = WrapAngle(r + 3.1415927f);
+    obj->heading = WrapAngle(r + 3.1415927f);
     TurnColliderTowardHeading(obj);
     SetPlayerState(obj, 4, 0x2B);
 }

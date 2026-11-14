@@ -487,7 +487,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 break;
             case 1:
                 if (self->walkerGraph != 0) {
-                    SetStateWalkerTarget((StateWalker*)self->fB48, 0x485);
+                    SetStateWalkerTarget((StateWalker*)self->walker, 0x485);
                     self->pushedCount = 0;
                 }
                 break;
@@ -511,7 +511,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                 GetStateWalkerCurrentKey((StateWalker*)dev, &code);
             }
             if (code < 0x431) {
-                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->placeChangeTime && self->f830 != 0) {
+                if (code >= 0x42F && 0.5f < g_gameClock[1] - self->placeChangeTime && self->path != 0) {
                     PathFollower* found[16];
                     s32 n = GatherObjectsById(self->world, 5, 0x19, 0, 0x10, found);
                     s32 place = 1;
@@ -520,8 +520,8 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
                             place++;
                         }
                     }
-                    if (place != self->fB08 || n != self->placeCount) {
-                        self->fB08 = place;
+                    if (place != self->place || n != self->placeCount) {
+                        self->place = place;
                         self->placeCount = n;
                         self->placeChangeTime = g_gameClock[1];
                     }
@@ -623,7 +623,7 @@ void CollidePathFollowerWithObject(PathFollower* self, Collider* other, s32 a2, 
 {
     if ((other->flags538 & ((u64)0x8000 << 40)) != 0 || (((u32*)other->desc)[2] & 0x10) != 0) {
         for (u32 i = 0; i < 4; i++) {
-            Slot19* slot = &self->f6B0[i];
+            Slot19* slot = &self->wheels[i];
             s32 first = (s32)i < 2;
             Vec02 p;
             Vec02 q;
@@ -708,7 +708,7 @@ void UpdatePathFollowerAttachmentFrames(PathFollower* self, ParentFrame* frame)
     u32 i = 0;
     UpdateAttachmentFrames(self, frame);
     for (; i < 4; i++) {
-        Slot19* s = &self->f6B0[i];
+        Slot19* s = &self->wheels[i];
         Mat02 world;
         Mat02 tilt;
         Mat02 turn;
@@ -771,7 +771,7 @@ void DrawPathFollower(PathFollower* self, void* a, DrawScale* b)
     if (self->frontBeam != 0 || self->rearBeam != 0) {
         Vec02 q[4];
         for (s32 i = 0; i < 4; i++) {
-            TransformPointBetweenFrames(self, 0, &self->f6B0[i].placedPos, &q[i]);
+            TransformPointBetweenFrames(self, 0, &self->wheels[i].placedPos, &q[i]);
         }
         if (self->frontBeam != 0) {
             DrawBeamBetweenPoints((PlacedObject*)self->frontBeam, (PlacedObject*)a, &q[0], &q[1], 1.0f, b != 0 ? b->f40 : 1.0f);
@@ -788,7 +788,7 @@ void UpdatePathFollowerBounds(PathFollower* self)
     Quad16 q;
     UpdateColliderBounds(self);
     for (i = 0; i < 4; i++) {
-        Slot19* slot = &self->f6B0[i];
+        Slot19* slot = &self->wheels[i];
         if (slot->obj != 0) {
             f32 f;
             q = *(Quad16*)&slot->obj->v190;
@@ -812,17 +812,17 @@ void StartPathFollowerEffect(PathFollower* self, s32 a, PlacedObject* b)
 
 void FindPathFollowerPathPosition(PathFollower* self)
 {
-    if (self->f830 != 0) {
+    if (self->path != 0) {
         Vec02 p;
         Vec02 tangent;
         Vec02 side;
-        PathCurve* o = self->f830->curve;
+        PathCurve* o = self->path->curve;
         if (o->vt->m11) {
             o->vt->m11(o, *(f32*)((u8*)self + 0x838), (u8*)self + 0x100, 0, (f32*)&p, (f32*)&tangent, (f32*)((u8*)self + 0x838), 0);
         }
         u128 c = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(tangent));
         Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
-        self->pathDistance = self->f830->curve->vt->m05(self->f830->curve, *(f32*)((u8*)self + 0x838));
+        self->pathDistance = self->path->curve->vt->m05(self->path->curve, *(f32*)((u8*)self + 0x838));
         Vu0::StoreX(self->sideOffset, Vu0::Dot(Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x100)), Vu0::Q(p)), Vu0::Q(side)));
     }
 }
@@ -878,18 +878,18 @@ void HandlePathFollowerNotification(PathFollower* self, s32 code, CountedNotice*
 
 void SetPathFollowerPath(PathFollower* self, PathCurveObject* arg)
 {
-    self->f830 = arg;
+    self->path = arg;
     PathCurve* o = arg->curve;
     if (o->vt->m10) o->vt->m10(o, (u8*)self + 0x100, 0, 0, 0, (f32*)((u8*)self + 0x838), 0);
     FindPathFollowerPathPosition(self);
     self->sideTarget = self->sideOffset;
-    self->pathLength = self->f830->curve->vt->m08(self->f830->curve);
+    self->pathLength = self->path->curve->vt->m08(self->path->curve);
     for (s32 i = 0; i < self->markerCount; i++) {
-        PathMarker* e = &self->f874[i];
+        PathMarker* e = &self->markers[i];
         if (e->kind == 0) {
             s32 loc[4];
             GetObjectWorldPosition((BaseObject*)e->item, (Vec02*)loc);
-            PathCurve* o2 = self->f830->curve;
+            PathCurve* o2 = self->path->curve;
             if (o2->vt->m10) o2->vt->m10(o2, loc, 0, 0, 0, 0, &e->pathLength);
         }
     }
@@ -917,7 +917,7 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
         return;
     }
     self->markerCount = n + 1;
-    PathMarker* e = &self->f874[n];
+    PathMarker* e = &self->markers[n];
     e->item = item;
     e->kind = 0;
     if (self->firstMarker == 0) {
@@ -929,10 +929,10 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
         self->firstMarker->next = e;
         e->index = e->next->index + 1;
     }
-    if (self->f830 != 0) {
+    if (self->path != 0) {
         Quad16 tmp;
         GetObjectWorldPosition((BaseObject*)item, (Vec02*)&tmp);
-        PathCurve* o = self->f830->curve;
+        PathCurve* o = self->path->curve;
         void (*fn)(PathCurve*, void*, void*, void*, void*, f32*, f32*) = o->vt->m10;
         if (fn != 0) {
             fn(o, &tmp, 0, 0, 0, 0, &e->pathLength);
@@ -940,7 +940,7 @@ void AddPathFollowerEntry(PathFollower* self, void* item)
     }
 }
 
-void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b, s32 c) { if (a && (u32)self->markerCount < 16) { PathMarker* e = &self->f874[self->markerCount]; self->markerCount++; e->item = a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
+void AddPathFollowerActiveEntry(PathFollower* self, void* a, f32 x, f32 y, s32 b, s32 c) { if (a && (u32)self->markerCount < 16) { PathMarker* e = &self->markers[self->markerCount]; self->markerCount++; e->item = a; e->kind = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
 
 void SetPathFollowerMode(PathFollower* self, s32 mode)
 {
@@ -955,7 +955,7 @@ void SetPathFollowerMode(PathFollower* self, s32 mode)
 
 void ResetPathFollower(PathFollower* self)
 {
-    self->fB00 = 1;
+    self->lap = 1;
     self->currentMarker = self->firstMarker;
     self->lapsLeft = 0;
     self->lapTime = -10.0f;
@@ -1075,7 +1075,7 @@ void InitWorldPools(World* self)
     self->stagedBank = 0;
     self->f2308 = 15.0f;
     self->timerDuration = 180.0f;
-    self->f234C = 1.0f;
+    self->value = 1.0f;
     self->valueTarget = 1.0f;
     self->f2354 = 1;
     self->flagBits = 0xF03FFFFF;
@@ -2094,7 +2094,7 @@ void GetHasStreamVoice(void* self, s32* out)
 void SetWorldValueAndTarget(World* self, f32 v)
 {
     self->valueTarget = v;
-    self->f234C = v;
+    self->value = v;
 }
 
 void SetWorldValueTarget(World* self, f32 value) { self->valueTarget = value; }

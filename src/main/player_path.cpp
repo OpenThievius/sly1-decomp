@@ -539,7 +539,7 @@ void SetPlayerPath(Player* self, PathObject* path)
     Vec02 local;
     Vec02 world;
     if ((PathObject*)self->aimCurve != path) {
-        if (self->f2220 == 7) {
+        if (self->state == 7) {
             TriggerScriptEvent((BaseObject*)self->aimCurve, 3, 0, 0);
             ((PathObject*)self->aimCurve)->desc->m18((BaseObject*)self->aimCurve, self);
             TriggerScriptEvent((BaseObject*)path, 2, 0, 0);

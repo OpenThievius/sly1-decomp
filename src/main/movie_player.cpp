@@ -339,8 +339,8 @@ void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
 {
     self->anchorObject = a;
     self->anchorOffset = *v;
-    if (self->f6B0 != 0) {
-        CreateAnimationPlayerWithoutPresetTargets(self->f6B0, self, 0, (AnimationPlayer**)&self->animationPlayer, 0.0f, 1.0f);
+    if (self->animation != 0) {
+        CreateAnimationPlayerWithoutPresetTargets(self->animation, self, 0, (AnimationPlayer**)&self->animationPlayer, 0.0f, 1.0f);
     }
     if (self->ready != 0) {
         s32 still = 0;

@@ -670,7 +670,7 @@ void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
         break;
     case 2: {
         Vec02* verts = (Vec02*)self->meshCopy.verts;
-        f32 t = ComputeSegmentParameter(&verts[idx[0]], &verts[idx[1]], &end->v10);
+        f32 t = ComputeSegmentParameter(&verts[idx[0]], &verts[idx[1]], &end->point);
         f32 lo = 0.0f;
         f32 hi = 1.0f;
         f32 r;
@@ -696,7 +696,7 @@ void AddContactVertexBlendVelocity(Collider* self, Contact03* c, s32 which)
             Vec v = Vec::Scalar(1.0f);
             Vec c = Vec::Of(verts[idx[(i + 2) % 3]]);
             Vu0::Q(sum) = Vu0::MulXSum3(a, s, b, u, c, v).q;
-            w[i] = ComputeSegmentParameter(&verts[idx[i]], &sum, &end->v10);
+            w[i] = ComputeSegmentParameter(&verts[idx[i]], &sum, &end->point);
         }
         f32 a = w[0];
         f32 lo = 0.0f;
@@ -2156,10 +2156,10 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, C
     Vec02 k;
     ContactEnd03* e = &c->end[idx];
     if (idx == 0) {
-        dir = hit->v10;
+        dir = hit->point;
     } else {
         Vu0::Q(v) = Vu0::FromFloat(-1.0f);
-        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(hit->v10), Vu0::Q(v));
+        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(hit->point), Vu0::Q(v));
     }
     for (Collider* b = c->end[idx].part; b != 0; b = (Collider*)b->parent) {
         if (b->flags538 & (1ULL << 54)) {
@@ -2169,7 +2169,7 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, C
             continue;
         }
         ImpulseRow* row = &rows[b->index];
-        Vu0::Set(arm, Vu0::Cross(Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(b->v140)), Vu0::Q(dir)));
+        Vu0::Set(arm, Vu0::Cross(Vu0::Sub(Vu0::Q(e->point), Vu0::Q(b->v140)), Vu0::Q(dir)));
         ConstrainVectorByParentAnchor(b, (VectorConstraint*)&b->v440, &dir, &v, &dir);
         Vu0::Q(k) = Vu0::FromFloat(1.0f / b->mass);
         Vu0::Q(row->linear) = Vu0::MulX(Vu0::Q(v), Vu0::Q(k));

@@ -1197,7 +1197,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
     f32 lo;
     f32 hi;
     f32 end;
-    s32 mode = self->f2220;
+    s32 mode = self->state;
     s32 sub = self->subState;
     switch (self->targetMode) {
     case 0:
@@ -1279,9 +1279,9 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
                 SetPlayerOnOffPhase(self, 3);
             }
         }
-        self->f638 = heading;
+        self->heading = heading;
         if (self->subState == 0x15) {
-            f32 off = __builtin_fabsf(WrapAngle(ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x) - self->f638));
+            f32 off = __builtin_fabsf(WrapAngle(ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x) - self->heading));
             if (D_00274E54 < off) {
                 sub = 0x15;
             }
@@ -1314,7 +1314,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
         }
         break;
     case 5:
-        self->f638 = self->stickHeading;
+        self->heading = self->stickHeading;
         Vu0::Q(self->headingVelocity) = Vu0::Zero();
         break;
     case 4: {
@@ -1410,7 +1410,7 @@ void ControlPlayerOnTarget(Player* self, PadRecord* pad)
             SetPlayerBlendWeights(angle, along, self, (TurnBlendRecords*)((u8*)self + 0xE30), *(BlendAnimationView**)((u8*)self + 0x1010));
         } else {
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
-            self->f638 = angle;
+            self->heading = angle;
             sub = 0x10;
         }
         break;

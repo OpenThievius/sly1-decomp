@@ -47,7 +47,7 @@ void InitTargetFollower(TargetFollower* self)
 {
     InitCollider(self);
     self->followedObjectId = -1;
-    self->f598 = -1;
+    self->mode = -1;
     self->f5C4 = 3000.0f;
     self->f5C8 = 1000.0f;
     SetListLinkOffset(&self->list55C, 0x7B0);
@@ -163,7 +163,7 @@ void UpdateTargetFollower(TargetFollower* self, f32 dt)
         return;
     }
     s32 mode;
-    while ((mode = ChooseTargetFollowerMode(self)) != self->f598) {
+    while ((mode = ChooseTargetFollowerMode(self)) != self->mode) {
         SetTargetFollowerMode(self, mode);
     }
     switch (mode) {
@@ -193,7 +193,7 @@ s32 ChooseTargetFollowerMode(TargetFollower* self)
 {
     FollowableObject* next;
     Collider* c;
-    s32 mode = self->f598;
+    s32 mode = self->mode;
     switch (mode) {
     case 2:
     case 4: {
@@ -563,13 +563,13 @@ struct FollowerTrail { u8 pad00[0x40]; Vec02 v40; Vec02 v50; Vec02 v60; Vec02 v7
 void SetTargetFollowerMode(TargetFollower* self, s32 mode)
 {
     s32 key;
-    if (self->f598 == mode) {
+    if (self->mode == mode) {
         return;
     }
-    if (self->f598 == 1) {
+    if (self->mode == 1) {
         PlaceTargetFollowerOnFollowed(self);
     }
-    self->f598 = mode;
+    self->mode = mode;
     self->modeStartTime = g_gameClock.time;
     switch (mode) {
     case 0: {

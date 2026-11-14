@@ -1925,7 +1925,7 @@ void ApplyPoseSourceRotation(Attachment* self)
         now = g_gameClock.time;
     }
     self->vt->getRot(self, 0.0f, &A, &B);
-    if (owner->linkRecord != 0 && (owner->linkRecord->fB0 & 0x20)) {
+    if (owner->linkRecord != 0 && (owner->linkRecord->flags & 0x20)) {
         self->vt->getValue(self, &value, &slope);
         hasValue = 1;
     } else {
@@ -2122,7 +2122,7 @@ void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
     self->rot.r[2] = src->m1A0.r[2];
     Rec2195_224* p = (Rec2195_224*)src->linkRecord;
     if (p != 0) {
-        if (p->fB0 & 0x20) {
+        if (p->flags & 0x20) {
             self->f80 = p->f8C;
         }
     }
@@ -2185,7 +2185,7 @@ void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
     self->values = *(f32**)((u8*)src + 0x274);
     Rec2195_224* o = (Rec2195_224*)src->linkRecord;
     if (o != 0) {
-        if (o->fB0 & 0x20) {
+        if (o->flags & 0x20) {
             self->p30 = (f32*)D_00248D30;
             self->p2C = &o->f8C;
         }

@@ -1619,7 +1619,7 @@ s32 IsTextPanelTextTyped(T217D_440* self)
     return v >= n;
 }
 
-void SetTextPanelSubject(T217D_440* self, BaseObject* value) { self->f2FC = value; }
+void SetTextPanelSubject(T217D_440* self, BaseObject* value) { self->subject = value; }
 
 void SetTextPanelValuePercent(T217D_440* self, f32 value)
 {

@@ -341,7 +341,7 @@ void InitTintBlendCollider(TintBlendCollider* self)
 
     InitTurningCollider(self);
     f = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    self->f638 = f;
+    self->heading = f;
     BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)((u8*)self + 0x660), f);
     self->state = -1;
     self->tintStartTime = -10.0f;
@@ -472,8 +472,8 @@ void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 void ResetTintBlendColliderOrientation(TintBlendCollider* self)
 {
     f32 heading, pitch, speed;
-    ComputeObjectSteeringHeading(g_frameDt, self->f638, self, 0, 0, &heading, &pitch, &speed);
-    self->f638 = heading;
+    ComputeObjectSteeringHeading(g_frameDt, self->heading, self, 0, 0, &heading, &pitch, &speed);
+    self->heading = heading;
     BuildYawPitchMatrix(heading, pitch, &self->headingMatrix);
     Vu0::Q(self->headingVelocity) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
 }
@@ -562,8 +562,8 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     }
     HandleStepSequenceSkipButtons(self, pad);
     if (IsTopCameraController(&g_camera->ctl454) == 0 && 0.7f < pad->secondStickMagnitude) {
-        ComputeCameraRelativeStickHeading(g_camera, pad, 1, &self->f638);
-        if (__builtin_fabsf(WrapAngle(self->f638 - ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x))) < 0.5f && g_movieChecksumFailed == 0) {
+        ComputeCameraRelativeStickHeading(g_camera, pad, 1, &self->heading);
+        if (__builtin_fabsf(WrapAngle(self->heading - ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x))) < 0.5f && g_movieChecksumFailed == 0) {
             SetStateWalkerTarget((StateWalker*)self->walker, 0x353);
         }
     } else {
@@ -576,7 +576,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     Vu0::Q(axis) = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(axis));
     f32 lean = g_unitRange.Limit(Quadratic(D_00275800, pad->stickMagnitude));
     BuildAxisAngleMatrix(&axis, &tilt, D_00275810[0] * lean);
-    BuildAxisAngleMatrix(&g_unitZVector, &turn, self->f638);
+    BuildAxisAngleMatrix(&g_unitZVector, &turn, self->heading);
     // Row 0 is stored after rows 1 and 2: the six stores of this block tie in sched1 and go in
     // the order they are written (docs/toolchain/sched1.md, "Argument moves held back").
     u128 p0 = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[0]));
@@ -716,7 +716,7 @@ void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider
     q = Vu0::MulX(n, Vu0::Q(k));
     d.z = z;
     other->desc02()->m20(other, &d);
-    other->f638 = WrapAngle(ArctangentOfRatio(d.y, d.x) + 3.1415927f);
+    other->heading = WrapAngle(ArctangentOfRatio(d.y, d.x) + 3.1415927f);
     TurnColliderTowardHeading(other);
     SetPlayerState((Player*)other, 4, 0x2B);
 }
@@ -909,7 +909,7 @@ void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
         case 2:
         case 3:
             self->headingVelocity = D_00248D30;
-            BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->f638);
+            BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->heading);
 
             self->f580 = 0;
             break;

@@ -610,7 +610,7 @@ void StepGaugeCollider(GaugeCollider* self, f32 dt)
     f32 k1 = g_unitRange.Limit(D_0026A7F0.x + turn * (D_0026A7F0.y + turn * D_0026A7F0.z));
     f32 phase = (g_gameTime[0] - self->lastGroundTime) / D_0026A800.x;
     f32 k2 = g_unitRange.Limit(D_0026A810.x + phase * (D_0026A810.y + phase * D_0026A810.z));
-    Vu0::Q(force) = Vu0::MulX(Vu0::Q(c.r[0]), Vu0::Scalar(k1 * k2 * self->f620));
+    Vu0::Q(force) = Vu0::MulX(Vu0::Q(c.r[0]), Vu0::Scalar(k1 * k2 * self->push));
     AddColliderForce(self, &force);
     Vec02 drag;
     drag = self->v150;
@@ -843,13 +843,13 @@ void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad, f32 dt)
     if (0.0f < pad->stickMagnitude) {
         ComputeCameraRelativeStickHeading(g_camera, pad, 0, &self->heading);
     }
-    self->f620 = pad->stickMagnitude * self->pushStrength;
+    self->push = pad->stickMagnitude * self->pushStrength;
     if (pad->flags & 0xC0) {
         GetStateWalkerCurrentKey(self->carryWalker, &cur);
         GetStateWalkerTargetKey(self->carryWalker, &tgt);
         if (cur == 0x3DB && tgt == cur) {
             if (self->waitingCount > 0) {
-                self->f674 = 0;
+                self->held = 0;
                 ((GaugeCarrier*)self->carrier)->rec->f18C = self->f678;
                 SetStateWalkerTarget(self->carryWalker, 0x3DC);
                 self->waitingCount--;
@@ -857,17 +857,17 @@ void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad, f32 dt)
             }
         }
     }
-    GaugeHeld* held = (GaugeHeld*)self->f674;
+    GaugeHeld* held = (GaugeHeld*)self->held;
     if (held != 0 && self->pickTime + D_0026A834 < g_gameTime[0]) {
         held->taken = 1;
-        BaseObject* o = ((GaugeHeld*)self->f674)->object;
+        BaseObject* o = ((GaugeHeld*)self->held)->object;
         o->desc->m02(o);
         BaseObject* c = (BaseObject*)self->carrier;
         c->desc->m03(c);
         self->deliveredCount++;
         if (self->deliveredCount >= self->deliveryLimit) {
             if (self->phaseWalker == 0) {
-                self->f674 = 0;
+                self->held = 0;
                 goto settled;
             }
             GetStateWalkerCurrentKey((StateWalker*)self->phaseWalker, &cur2);
@@ -877,20 +877,20 @@ void ControlGaugeCollider(GaugeCollider* self, PadRecord* pad, f32 dt)
             }
             StopTimer(&g_timerElement);
         }
-        self->f674 = 0;
+        self->held = 0;
     }
 settled:
     if (IsObjectAttached((BaseObject*)self->carrier) != 0) {
-        if (self->f674 == 0) {
-            self->f674 = FindHeldObjectAhead(self);
-            if (self->f674 != 0) {
-                GaugeHeld* h = (GaugeHeld*)self->f674;
+        if (self->held == 0) {
+            self->held = FindHeldObjectAhead(self);
+            if (self->held != 0) {
+                GaugeHeld* h = (GaugeHeld*)self->held;
                 ConvertPositionToWorld((BaseObject*)h->anchor, &pos);
                 Vu0::Q(delta) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
                 self->heading = ArctangentOfRatio(delta.y, delta.x);
-                ((T2195_790*)self->poseSource)->target = (void*)((GaugeHeld*)self->f674)->anchor->target;
-                ((T2195_790*)self->poseSource)->point = *(Vec02*)&((GaugeHeld*)self->f674)->anchor->q40;
-                ((GaugeCarrier*)self->carrier)->rec->f18C = (void*)((GaugeHeld*)self->f674)->f55C;
+                ((T2195_790*)self->poseSource)->target = (void*)((GaugeHeld*)self->held)->anchor->target;
+                ((T2195_790*)self->poseSource)->point = *(Vec02*)&((GaugeHeld*)self->held)->anchor->q40;
+                ((GaugeCarrier*)self->carrier)->rec->f18C = (void*)((GaugeHeld*)self->held)->f55C;
             }
         }
     } else {
@@ -1110,7 +1110,7 @@ void StepGaugeColliderAgent(GaugeColliderAgent* self, f32 dt)
         ApplyTurningColliderDrive(self);
         Vu0::Q(moved) = Vu0::RotateMembers(self->m110, Vu0::MulX(Vu0::Q(self->headingVelocity), Vu0::Scalar(-1.0f)));
         Vu0::Q(accel) = Vu0::DivX(Vu0::Sub(Vu0::Q(moved), Vu0::Q(self->v150)), Vu0::Scalar(dt));
-        f32 turn = WrapAngle(self->f638 - ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x));
+        f32 turn = WrapAngle(self->heading - ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x));
         f32 a = __builtin_fabsf(turn);
         f32 t = g_unitRange.Limit(D_0026A880.x + a * (D_0026A880.y + a * D_0026A880.z));
         ClampVectorLength(&accel, &accel, D_0026A870.x * t);
@@ -1132,7 +1132,7 @@ s32 ChooseGaugeColliderAgentState(GaugeColliderAgent* self)
 {
     s32 r;
 
-    switch (self->f724) {
+    switch (self->state) {
     case 2:
         if (GetAgentRosterState(self) == 0) {
             r = 4;
@@ -1167,7 +1167,7 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
     Vec02 d;
     Vec02 t;
     Vec02 k;
-    switch (self->f724) {
+    switch (self->state) {
     case 12:
     case 13: {
         SwitchedCollider* c = (SwitchedCollider*)GetActiveSwitchedCollider();
@@ -1208,7 +1208,7 @@ void UpdateGaugeColliderAgentGoal(GaugeColliderAgent* self, s32 pick)
 
 void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, s32 arg)
 {
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         void* h = GetActiveSwitchedCollider();
         ReleaseObjectNode((u8*)h, self);
         Vec02 ctx = self->v150;
@@ -1221,7 +1221,7 @@ void LeaveGaugeColliderAgentState(GaugeColliderAgent* self, s32 arg)
 void EnterGaugeColliderAgentState(GaugeColliderAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         FaceAgentAlongPath(self);
     }
 }
@@ -1237,7 +1237,7 @@ void UpdateGaugeColliderAgentState(GaugeColliderAgent* self)
     f32 q[3];
     f32 r[2];
     UpdateAgentState(self);
-    if (self->f724 != 12) {
+    if (self->state != 12) {
         return;
     }
     for (s32 i = 0; i < 3; i++) {

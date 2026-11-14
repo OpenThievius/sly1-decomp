@@ -1320,7 +1320,7 @@ s32 IsWorld4BossFree(World4Boss* self)
 void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
 {
     UpdateAgentGoal(self, flag);
-    if (self->f724 == 0x10) {
+    if (self->state == 0x10) {
         void* r = ((VFn_1A9960*)self->desc)[102](self);
         if (r != 0)
             SetAgentGoalPoint(self, (Vec02*)((u8*)r + 0x140));
@@ -1330,14 +1330,14 @@ void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
 void UpdateWorld4BossState(World4Boss* self)
 {
     UpdateAgentState(self);
-    if (self->f724 == 0x10)
+    if (self->state == 0x10)
         FaceAgentTowardGoalPoint(self);
 }
 
 void EnterWorld4BossState(World4Boss* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    if (self->f724 == 0xB) {
+    if (self->state == 0xB) {
         MarkLevelDone(4);
         StartMemoryCardSave((MemoryCard*)g_memoryCard);
     }

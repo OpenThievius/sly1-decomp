@@ -133,7 +133,7 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
     MaskedCollider* n;
     s32 i;
     Slot20* e;
-    if (TestFlagTableBit((FlagTable*)g_flagTable, self->id688)) self->f678 = 1;
+    if (TestFlagTableBit((FlagTable*)g_flagTable, self->id688)) self->busy = 1;
     s32 l = (s32)&self->children;
     fr.cursor = l;
     fr.list = l;
@@ -146,7 +146,7 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
     fr.cursor = h + link;
     n = (MaskedCollider*)h;
     while (n != 0) {
-        if (self->f678) {
+        if (self->busy) {
             if (!IsObjectOfKind(n, 0x2E)) goto next;
             GetNumberedItemFlag((NumberedItem*)n, &fr.out);
             if (fr.out) goto next;
@@ -192,8 +192,8 @@ void UpdateCollider(Collider* self, f32 dt);
 void UpdateMaskedCollider(MaskedCollider* self, f32 dt)
 {
     UpdateCollider(self, dt);
-    if (self->f678 != 0) {
-        self->f678 = 0;
+    if (self->busy != 0) {
+        self->busy = 0;
         self->desc20()->m48(self);
     }
 }
@@ -399,7 +399,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 release.kind = 9;
                 release.owner = self;
                 release.f30 = self->f620;
-                release.f34 = radius;
+                release.radius = radius;
                 other->desc->m1B(other, &release);
             } else {
                 SendPointEventToWorldListener((Quad16*)&self->v140, radius);
@@ -654,11 +654,11 @@ void LatchContactObject(MassScalingCollider* self, u8* table, s32 index)
     if (self->hold != 0) return;
     one = 1;
     value = *(BaseObject**)(table + ((one - index) << 6));
-    if (self->f678 != 0) return;
+    if (self->busy != 0) return;
     if (IsObjectAccepted(self, value) == 0) return;
     if (self->sel6C4 != -1) SetColliderTurnAnchorPreset(self, self->sel6C4);
     if (self->sel6C8 != -1) SetColliderMoveAnchorPreset(self, self->sel6C8);
-    self->f678 = one;
+    self->busy = one;
     self->cur = value;
     self->mass = self->mass * self->scale;
 }

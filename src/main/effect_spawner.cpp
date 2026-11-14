@@ -887,7 +887,7 @@ void InitEffectSpawner(EffectSpawner* self)
     self->id304=-1;
     self->id300=-1;
     self->id30C=-1;
-    self->f2D4=-1;
+    self->mode=-1;
     self->delayMin=10.0f;
     self->activeUntil=-1.0f;
     self->sharedId=-1;
@@ -1044,18 +1044,18 @@ void StartEffectSpawner(EffectSpawner* self)
     StartPlacedObject(self);
     if (self->rec->f1B0 != -1)
         self->rec->f120 = 1;
-    if (self->f2D4 == -1) {
+    if (self->mode == -1) {
         if (self->chance != 0.0f || self->continuous != 0)
-            self->f2D4 = 3;
+            self->mode = 3;
         else if (self->targetCount != 0.0f)
-            self->f2D4 = 1;
+            self->mode = 1;
         else
-            self->f2D4 = 0;
+            self->mode = 0;
     }
-    switch (self->f2D4) {
+    switch (self->mode) {
     case 2:
         self->nextRateTime = 3.4028235e+38f;
-        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        self->rate = RandomFloatInRange(self->delay.lo, self->delay.hi);
         if (self->continuous != 0)
             SetEffectSpawnerActiveForever(self);
         else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
@@ -1063,7 +1063,7 @@ void StartEffectSpawner(EffectSpawner* self)
         break;
     case 3:
         self->nextRateTime = 3.4028235e+38f;
-        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi) * 60.0f;
+        self->rate = RandomFloatInRange(self->delay.lo, self->delay.hi) * 60.0f;
         if (self->continuous != 0)
             SetEffectSpawnerActiveForever(self);
         else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance)
@@ -1073,7 +1073,7 @@ void StartEffectSpawner(EffectSpawner* self)
     case 1:
         self->nextRateTime = 1.0f;
         self->rateInterval = 1.0f;
-        self->f328 = RandomFloatInRange(self->delay.lo, self->delay.hi);
+        self->rate = RandomFloatInRange(self->delay.lo, self->delay.hi);
         break;
     }
     self->volumeScale = 1.0f;
@@ -1101,7 +1101,7 @@ void StartEffectSpawner(EffectSpawner* self)
             copy->rec = (Rec50*)AllocateFrontMemory(0x200);
             *copy->rec = *self->rec;
             copy->rec->target = 0;
-            copy->f2D4 = self->f2D4;
+            copy->mode = self->mode;
             copy->remaining = self->remaining;
             copy->delay = self->delay;
             copy->scaleByVolume = self->scaleByVolume;
@@ -1292,9 +1292,9 @@ spawn:
         return;
     }
     s32 n = 0;
-    switch (self->f2D4) {
+    switch (self->mode) {
     case 3: {
-        f32 acc = self->spawnRemainder + self->f328 * self->volumeScale * dt;
+        f32 acc = self->spawnRemainder + self->rate * self->volumeScale * dt;
         n = (s32)acc;
         self->spawnRemainder = acc - (f32)n;
         if (1.0f < (f32)n) {
@@ -1306,16 +1306,16 @@ spawn:
             }
             if (self->continuous != 0) {
                 SetEffectSpawnerActiveForever(self);
-                self->f328 = RandomFloatInRange(self->delayMin, self->delayMax) * 60.0f;
+                self->rate = RandomFloatInRange(self->delayMin, self->delayMax) * 60.0f;
             } else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance) {
                 SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
-                self->f328 = RandomFloatInRange(self->delayMin, self->delayMax) * 60.0f;
+                self->rate = RandomFloatInRange(self->delayMin, self->delayMax) * 60.0f;
             }
         }
         break;
     }
     case 2:
-        n = (s32)self->f328;
+        n = (s32)self->rate;
         if (self->remaining >= 0) {
             if (!(n < self->remaining)) {
                 n = self->remaining;
@@ -1327,10 +1327,10 @@ spawn:
         } else if (RandomFloatInRange(0.0f, 1.0f) <= self->chance) {
             SetEffectSpawnerActiveFor(self, RandomFloatInRange(self->active.lo, self->active.hi));
         }
-        self->f328 = RandomFloatInRange(self->delayMin, self->delayMax);
+        self->rate = RandomFloatInRange(self->delayMin, self->delayMax);
         break;
     case 0: {
-        f32 acc = self->spawnRemainder + self->f328 * self->volumeScale * dt;
+        f32 acc = self->spawnRemainder + self->rate * self->volumeScale * dt;
         n = (s32)acc;
         self->spawnRemainder = acc - (f32)n;
         if (n == 0) {
@@ -1374,7 +1374,7 @@ spawn:
     }
 timer:
     if (self->nextRateTime <= g_gameClock[1]) {
-        self->f328 = RandomFloatInRange(self->delayMin, self->delayMax);
+        self->rate = RandomFloatInRange(self->delayMin, self->delayMax);
         self->nextRateTime = g_gameClock[1] + self->rateInterval;
     }
     WrapSpawnerParticlesIntoBox(self);
@@ -1417,8 +1417,8 @@ s32 IsEffectSpawnerActive(EffectSpawner* self)
     if (g_gameTime < self->activeUntil) {
         return 1;
     }
-    if (self->f2D4 < 2) {
-        if (self->f2D4 >= 0) {
+    if (self->mode < 2) {
+        if (self->mode >= 0) {
             if (self->remaining == 0) {
                 return 1;
             }
@@ -1459,9 +1459,9 @@ void RandomizeEffectSpawnerDelay(u8* self)
 
 void SetEffectSpawnerLimit(EffectSpawner* self, s32 a1)
 {
-    if (self->f2D4 == -1) {
+    if (self->mode == -1) {
         self->remaining = a1;
-    } else if (self->f2D4 == 0) {
+    } else if (self->mode == 0) {
         if (a1 == 0) {
             SetEffectSpawnerActiveForever();
         } else if (a1 == -1) {

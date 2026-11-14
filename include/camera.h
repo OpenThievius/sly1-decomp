@@ -21,7 +21,7 @@ struct Camera : BaseObject {
     f32 planes[3][4];       // 0x50: the rows of a 3x4 matrix whose columns are the normals of
                             //       four planes through f40 (func_00146038)
     union {
-        s32 f80[4];         // 0x80
+        s32 rotation[4];    // 0x80: the camera's rotation rows
         f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
     };
     s32 f90[4];             // 0x90
@@ -71,7 +71,7 @@ struct Camera : BaseObject {
     void* currentTarget;    // 0x2E0: the target object the camera last tracked
     u8 pad2E4[0x340 - 0x2E4];
     s32 objectCount;        // 0x340: how many objects are in the list at f344
-    void* f344[8];          // 0x344
+    void* objects[8];       // 0x344: up to eight objects the camera keeps in view
     f32 controllerSwitchTime; // 0x364: the game time the first controller last started
     u8 pad368[0x3A0 - 0x368];
     Mat02 rot3A0;           // 0x3A0: a rotation DrawPhasedEffect turns each piece of its strip by

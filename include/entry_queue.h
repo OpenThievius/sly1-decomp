@@ -28,7 +28,7 @@ typedef char check_QueueEntry[sizeof(QueueEntry) == 0x14 ? 1 : -1];
 struct EntryQueue : BaseObject {
     s32 entryCount;         // 0x34: the entries in the queue's buffer
     void* buffer;           // 0x38
-    void* f3C;              // 0x3C: the player it drives (func_0017CE20 binds it)
+    void* player;           // 0x3C: the player it drives (func_0017CE20 binds it)
     s32 entryIndex;         // 0x40: the index of the entry being run
     f32 entryStartTime;     // 0x44: a kind 4 entry is done once its value is below minus this
     void* pendingEntry;     // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)

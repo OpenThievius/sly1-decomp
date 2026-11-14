@@ -12,7 +12,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     f32 hiY;
     f32 loY;
 
-    if (self->f610 == 3 && HasSpareCount() != 0) {
+    if (self->mode == 3 && HasSpareCount() != 0) {
         World5ModeColliderSource* src = (World5ModeColliderSource*)self->modeAnimPlayer;
         if (src == 0 || src->f18 == 0.0f) {
             self->desc05()->m50(self);
@@ -37,7 +37,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         }
         SetStateWalkerTarget((StateWalker*)self->stateWalker, key);
     }
-    switch (self->f610) {
+    switch (self->mode) {
     case 2:
     case 3:
     case 4: {
@@ -56,7 +56,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         }
         f32 tx;
         f32 ty;
-        if (self->f610 == 2) {
+        if (self->mode == 2) {
             tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
@@ -85,7 +85,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         ApproachValueWithRamp(self->poseY, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
         ApproachValueWithRamp(self->poseY, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loY);
         RampProfile3 prof = *(RampProfile3*)D_00263C80;
-        if (self->f610 == 2) {
+        if (self->mode == 2) {
             tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {

@@ -21,7 +21,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         break;
     case 1:
         ok = 0;
-        if (g_player == 0 || g_player->f2220 != 13) {
+        if (g_player == 0 || g_player->state != 13) {
             ok = 1;
         }
         break;
@@ -32,7 +32,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
             break;
         }
         {
-            s32 state = g_player->f2220;
+            s32 state = g_player->state;
             if (state == 10) {
                 break;
             }
@@ -43,19 +43,19 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         ok = 1;
         break;
     case 5:
-        ok = g_player->f2220 != 14;
+        ok = g_player->state != 14;
         break;
     case 6:
         ok = 0;
-        if (g_player->f2220 != 15) {
+        if (g_player->state != 15) {
             ok = g_player->animSeekValue == 0;
         }
         break;
     case 3:
-        ok = g_player->f2220 != 16;
+        ok = g_player->state != 16;
         break;
     }
-    if (g_player != 0 && g_player->f2220 == 4) {
+    if (g_player != 0 && g_player->state == 4) {
         ok = 0;
     }
     if (((CaptionBox_1D2BB8_eu*)&g_typedTextCaptionBox)->mode != 0) {
@@ -82,7 +82,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
             self->slowDownHeld = 0;
         } else if (((CaptionBox_1D2BB8_eu*)&g_typedTextCaptionBox)->state == 3) {
             self->slowDownHeld = 0;
-        } else if (self->f2220 == 2) {
+        } else if (self->state == 2) {
             if (pad->flags & 0x10) {
                 ClearPadPressedBits(pad, 0x10);
                 self->slowDownHeld = 1;
@@ -103,7 +103,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         }
         break;
     case 1:
-        switch (self->f2220) {
+        switch (self->state) {
         case 0:
         case 1:
         case 2:
@@ -118,13 +118,13 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         }
         break;
     case 5:
-        if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->contactOwner != 0) {
+        if ((u32)self->state < 2 && (pad->flags & 0x10) && self->contactOwner != 0) {
             ClearPadPressedBits(pad, 0x10);
             SetPlayerState(self, 14, -1);
         }
         break;
     case 6:
-        if ((u32)self->f2220 < 2) {
+        if ((u32)self->state < 2) {
             if (pad->flags & 0x10) {
                 ClearPadPressedBits(pad, 0x10);
                 SetPlayerState(self, 15, -1);
@@ -135,12 +135,12 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         }
         break;
     case 3:
-        if ((u32)self->f2220 < 2 && (pad->flags & 0x10) && self->f1518 != 0) {
+        if ((u32)self->state < 2 && (pad->flags & 0x10) && self->f1518 != 0) {
             ClearPadPressedBits(pad, 0x10);
             if (IsObjectAttached((BaseObject*)self->f1518)) {
                 Vec02 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f1518)->v140), Vu0::Q(self->v140));
-                self->f638 = ArctangentOfRatio(d.y, d.x);
+                self->heading = ArctangentOfRatio(d.y, d.x);
                 TurnColliderTowardHeading(self);
                 SetPlayerState(self, 16, 0x3A);
             } else {

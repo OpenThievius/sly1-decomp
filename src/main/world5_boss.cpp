@@ -125,7 +125,7 @@ void InitSwitchedCollider(SwitchedCollider* self);
 void InitWorld5ModeCollider(World5ModeCollider* self)
 {
     InitSwitchedCollider(self);
-    self->f610 = -1;
+    self->mode = -1;
 }
 
 // The object the link at 0x650 of a World5ModeCollider resolves to: it keeps the frame object of the
@@ -183,7 +183,7 @@ void StepWorld5ModeCollider(World5ModeCollider* self, f32 f)
 {
     Vec02 a;
     Vec02 b;
-    s32 mode = self->f610;
+    s32 mode = self->mode;
     if (mode < 2) {
         goto single;
     }
@@ -268,7 +268,7 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
         self->flags538 = self->flags538 | (0x8000ULL << 27);
         ClearRootObjectStateBits(self->world, self, 7);
     }
-    if (self->pulseActive != 0 && self->f610 != 3) {
+    if (self->pulseActive != 0 && self->mode != 3) {
         if (g_gameTime - self->pulseFadeStart > 2.0f) {
             self->pulseActive = 0;
         }
@@ -373,7 +373,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     f32 hiY;
     f32 loY;
 
-    if (self->f610 == 3 && HasSpareCount() != 0) {
+    if (self->mode == 3 && HasSpareCount() != 0) {
         World5ModeColliderSource* src = (World5ModeColliderSource*)self->modeAnimPlayer;
         if (src == 0 || src->f18 == 0.0f) {
             self->desc05()->m50(self);
@@ -398,7 +398,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         }
         SetStateWalkerTarget((StateWalker*)self->stateWalker, key);
     }
-    switch (self->f610) {
+    switch (self->mode) {
     case 2:
     case 3:
     case 4: {
@@ -417,7 +417,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         }
         f32 tx;
         f32 ty;
-        if (self->f610 == 2) {
+        if (self->mode == 2) {
             tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
@@ -446,7 +446,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         ApproachValueWithRamp(self->poseY, D_00263C90[1], 0.0f, (RampProfile*)D_00263C58, &hiY);
         ApproachValueWithRamp(self->poseY, D_00263C90[0], 0.0f, (RampProfile*)D_00263C58, &loY);
         RampProfile3 prof = *(RampProfile3*)D_00263C80;
-        if (self->f610 == 2) {
+        if (self->mode == 2) {
             tx = loX + (pad->stickX + 1.0f) * ((hiX - loX) * 0.5f);
             ty = loY + (stickY + 1.0f) * ((hiY - loY) * 0.5f);
         } else {
@@ -563,7 +563,7 @@ void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
     if ((self->flags & 0x100000000ULL) != 0) return;
     *(u32*)col = 0x800000A0;
     if (self->pulseActive != 0) {
-        if (self->f610 != 3) {
+        if (self->mode != 3) {
             t = (g_gameClock[1] - self->pulseFadeStart) * 0.5f;
         } else {
             t = 0.0f;
@@ -604,9 +604,9 @@ s32 IsPadSelectFlagHeld(World* world);
 s32 IsWorld5ModeColliderRequestBlocked(World5ModeCollider* self, s32 a1)
 {
     if (a1 == 5) goto one;
-    if (self->f610 == 3) goto one;
-    if (self->f610 == 0) goto one;
-    if (self->f610 == 4) goto one;
+    if (self->mode == 3) goto one;
+    if (self->mode == 0) goto one;
+    if (self->mode == 4) goto one;
     if (self->pulseActive != 0) goto one;
     if (IsPadSelectFlagHeld(self->world) == 0) goto zero;
 one:
@@ -692,7 +692,7 @@ void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, Anima
 
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 {
-    s32 old = self->f610;
+    s32 old = self->mode;
     if (mode == old) return;
     switch (old) {
     case 3:
@@ -722,7 +722,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
         SetFollowObjects((PlacedObject*)self->f6E8, self, self);
         break;
     }
-    self->f610 = mode;
+    self->mode = mode;
     self->modeStartTime = g_gameClock[1];
     ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->modeAnimPlayer, 0.0f, 1.0f);
 }

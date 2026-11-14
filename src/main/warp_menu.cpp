@@ -691,7 +691,7 @@ void EnterWorld1BossState(World1Boss* self, s32 a, Animation* b)
     PlacedObject* key;
     s32 slot;
 
-    switch (self->f724) {
+    switch (self->state) {
     case 1:
         if (self->stateWalker != 0) {
             SetStateWalkerTarget((StateWalker*)self->stateWalker, self->stageKey);
@@ -793,7 +793,7 @@ s32 ChooseWorld1BossState(World1Boss* self)
     if (self->visitsLeft <= 0) {
         self->clip10Deadline = 3.4028235e+38f;
     }
-    a1 = self->f724;
+    a1 = self->state;
     if (a1 == 10) {
         a1 = (self->statePlayer == 0) ? 8 : 10;
     } else {
@@ -831,7 +831,7 @@ void SteerWorld1BossAlongPath(World1Boss* a0)
 
 void RestartWorld1BossClip(World1Boss* self)
 {
-    if (self->stageKey == 0x2DA && self->f724 == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
+    if (self->stageKey == 0x2DA && self->state == 0xC && FindColliderFloorContact(self, 0, 0) != 0) {
         PlacedObject* s = FindNearestAgentKey(self, (u8*)self + 0x140);
         if (s != self->nearestKeyRoot) {
             s32 n = self->visitsLeft - 1;
@@ -850,7 +850,7 @@ void RestartWorld1BossClip(World1Boss* self)
 void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
 {
     Vec4U loc;
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
         if (self->disabled != 0) {
             SetAgentGoalPoint(self, (Vec02*)((u8*)self + 0x190));
@@ -872,7 +872,7 @@ void UpdateWorld1BossGoal(World1Boss* self, s32 flag)
 
 void UpdateWorld1BossState(World1Boss* self)
 {
-    if (self->f724 == 8) {
+    if (self->state == 8) {
         FaceAgentTowardGoalPoint(self);
     } else {
         UpdateAgentState(self);
@@ -1334,12 +1334,12 @@ void UpdateWorldStepLists(World* self, f32 dt)
 void StepWorldValueTowardTarget(World* self, f32 x)
 {
     World* o = self;
-    f32 a = o->f234C;
+    f32 a = o->value;
     f32 b = o->valueTarget;
     if (b < a) {
-        o->f234C = ApproachValueWithRamp((RampProfile*)D_00275C18, 0, a, b, x);
+        o->value = ApproachValueWithRamp((RampProfile*)D_00275C18, 0, a, b, x);
     } else if (a < b) {
-        o->f234C = ApproachValueWithRamp((RampProfile*)D_00275C28, 0, a, b, x);
+        o->value = ApproachValueWithRamp((RampProfile*)D_00275C28, 0, a, b, x);
     }
 }
 
@@ -1907,7 +1907,7 @@ void ContinueWorld3BeatPressColliderRequest(PlacedObject* from, Player* self)
     Vec02 dir;
     Vu0::Q(dir) = Vu0::MulXSum(Vu0::Q(from->m110.r[0]), Vu0::Scalar(-D_00275CD0), Vu0::Q(from->m110.r[2]), Vu0::ScalarAt(D_00275CD4));
     self->desc02()->m20(self, &dir);
-    self->f638 = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
+    self->heading = WrapAngle(ArctangentOfRatio(dir.y, dir.x) + 3.1415927f);
     TurnColliderTowardHeading(self);
     SetPlayerState(self, 4, 0x2B);
 }
@@ -1941,10 +1941,10 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
             }
             ok = 0;
             if (self->nextEntry < self->entryCount) {
-                Ent1C* e = &self->f634[self->nextEntry];
+                Ent1C* e = &self->entries[self->nextEntry];
                 if (e->dir == dir) {
                     World3Boss* g = ((World3Boss*)self->tempoAgent);
-                    at = (f32)g->fC70 * 4.0f + g->barPosition;
+                    at = (f32)g->bar * 4.0f + g->barPosition;
                     if (__builtin_fabsf(e->t - at) < self->timingWindow * 0.5f) {
                         ok = 1;
                     }
@@ -1959,9 +1959,9 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
         }
     }
     if (self->nextEntry < self->entryCount) {
-        Ent1C* e = &self->f634[self->nextEntry];
+        Ent1C* e = &self->entries[self->nextEntry];
         World3Boss* g = ((World3Boss*)self->tempoAgent);
-        f32 at = (f32)g->fC70 * 4.0f + g->barPosition;
+        f32 at = (f32)g->bar * 4.0f + g->barPosition;
         f32 win = self->timingWindow;
         if (self->pressDirection == e->dir && __builtin_fabsf(e->t - self->pressBeat) < win * 0.5f) {
             SetStateWalkerTarget((StateWalker*)self->walker, D_00275CD8[self->pressDirection]);
@@ -2005,7 +2005,7 @@ void JudgeWorld3BeatPressInput(World3BeatPressCollider* self, PadRecord* in, f32
                     if (j < l->entryCount) {
                         Entry90* it = &((Entry90*)l->buffer)[j];
                         World3Boss* gg = ((World3Boss*)self->tempoAgent);
-                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->step * 4.0f + it->substep - ((f32)gg->fC70 * 4.0f + gg->barPosition)) * gg->beatLength;
+                        *(f32*)((u8*)g_player + 0x26D0) = ((f32)it->step * 4.0f + it->substep - ((f32)gg->bar * 4.0f + gg->barPosition)) * gg->beatLength;
                     }
                 }
             }
@@ -2094,9 +2094,9 @@ void InitWorld3Boss(World3Boss* self)
     *(s32*)((u8*)self + 0xC5C) = 0x3C;
     self->newBeatLength = 1.0f;
     self->spanSeconds = 8.0f;
-    self->fC70 = 0;
+    self->bar = 0;
     self->beatInBar = -1;
-    self->fC74 = -1;
+    self->beat = -1;
     self->spanBeats = 8;
     *(s32*)((u8*)self + 0xC6C) = (s32)AllocateFrontMemory(0x400);
     self->world->f2358 = 1;
@@ -2111,7 +2111,7 @@ void LoadWorld3Boss(World3Boss* self, void* reader)
 {
     LoadAgent(self, reader);
     for (s32 i = 0; i < 4; i++) {
-        self->fC10[i] = ResolveAgentClip(self, D_00275CF8[i]);
+        self->clips[i] = ResolveAgentClip(self, D_00275CF8[i]);
     }
 }
 
@@ -2388,7 +2388,7 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c)
 {
     u8 tmp[0x50];
     void* out = c;
-    if (self->f724 == 16) {
+    if (self->state == 16) {
         BuildPlacedObjectTransform(self, (Quad16*)c, (ScaledTransform*)tmp);
         *(s32*)(tmp + 0x44) = 0;
         out = tmp;
@@ -2404,10 +2404,10 @@ void DrawWorld3BossRing(DeferredRequest* self);
 void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2)
 {
     DrawAgent(self, cam, arg2);
-    if (self->f724 == 16) {
+    if (self->state == 16) {
         DeferredRequest r;
         FillMemory(&r, 0, 0x80);
-        f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)), Vu0::Q(cam->f80)));
+        f32 d = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)), Vu0::Q(cam->rotation)));
         r.group = 0xD;
         r.f04 = d;
         r.arg = self;
@@ -2421,7 +2421,7 @@ void LeaveWorld3BossState(World3Boss* self, s32 arg)
     s32 out;
     s32 sel;
     LeaveAgentState(self, arg);
-    s32 st = self->f724;
+    s32 st = self->state;
     if (st != 0xE) {
         if (st != 0x10) {
             return;
@@ -2456,7 +2456,7 @@ void DecrementWorld3BossGauge(World3Boss* self)
 void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
 {
     s32 r[3];
-    switch (self->f724) {
+    switch (self->state) {
     case 0xE:
         GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[0]);
         switch (r[0]) {
@@ -2479,7 +2479,7 @@ void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
         break;
     }
     EnterAgentState(self, a, (Animation*)b);
-    switch (self->f724) {
+    switch (self->state) {
     case 14: {
         GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[1]);
         f32 q;
@@ -2532,11 +2532,11 @@ void ScheduleWorld3BossBeatPress(World3Boss* self, Entry90* e)
     Ent1C entry;
     s32 clip;
     if (dir == 1) {
-        clip = self->fC10[1];
+        clip = self->clips[1];
     } else {
-        clip = self->fC10[0];
+        clip = self->clips[0];
     }
-    clip = self->fC10[dir];
+    clip = self->clips[dir];
     self->direction = dir;
     self->pendingClip = clip;
     self->pressScheduledTime = g_gameTime[0];
@@ -2657,7 +2657,7 @@ void SyncWorld3BossEntries(World3Boss* self)
         AnimationPlayer* o = e->player;
         f32 len = o->anim->length;
         f32 start = o->time;
-        f32 t = len / (f32)e->beats * (f32)((self->fC74 + 1) % e->beats);
+        f32 t = len / (f32)e->beats * (f32)((self->beat + 1) % e->beats);
         if (t <= start)
             t += len;
         o->speed = (t - start) / den;
@@ -2679,9 +2679,9 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
         sub = self->pendingTimeline;
         self->nextBeatTime = g_gameClock.time + self->beatLength;
         self->lastBeatTime = g_gameClock.time;
-        self->fC70 = 0;
+        self->bar = 0;
         self->beatInBar = 0;
-        self->fC74 = 0;
+        self->beat = 0;
         if (sub != 0) {
             self->pendingTimeline = 0;
             self->heldTimeline = sub;
@@ -2690,14 +2690,14 @@ void UpdateWorld3Boss(World3Boss* self, f32 dt)
         D_00275DB8 = 0;
     }
     if (self->nextBeatTime <= g_gameClock.time) {
-        s32 a = self->fC74 + 1;
+        s32 a = self->beat + 1;
         s32 b = self->beatInBar + 1;
         self->lastBeatTime = self->nextBeatTime;
-        self->fC74 = a;
+        self->beat = a;
         self->beatInBar = b;
         if (b >= 4) {
             self->beatInBar = 0;
-            self->fC70 = self->fC70 + 1;
+            self->bar = self->bar + 1;
             if (self->beatLength != self->newBeatLength) {
                 self->beatLength = self->newBeatLength;
                 self->spanSeconds = self->newBeatLength * (f32)self->spanBeats;
@@ -2733,7 +2733,7 @@ void ShowWorld3BossGauge(World3Boss* self)
 void UpdateWorld3BossGoal(World3Boss* self, s32 flag)
 {
     s32 loc[4];
-    s32 v = self->f724;
+    s32 v = self->state;
     if (v >= 14) goto tail;
     if (v < 12) goto tail;
     {
@@ -2774,8 +2774,8 @@ void UpdateWorld3BossState(World3Boss* self)
     case 0x4EF:
     case 0x4F2:
     case 0x4F5:
-        if (self->f724 >= 15) goto other;
-        if (self->f724 < 13) goto other;
+        if (self->state >= 15) goto other;
+        if (self->state < 13) goto other;
         if (self->faceObject == 0) goto other;
         GetObjectWorldRotation((BaseObject*)self->faceObject, (Mat02*)&rot);
         y = rot.m[0][1];
@@ -2785,8 +2785,8 @@ void UpdateWorld3BossState(World3Boss* self)
     case 0x4F1:
     case 0x4F4:
     case 0x4F7:
-        if (self->f724 >= 15) goto other;
-        if (self->f724 < 13) goto other;
+        if (self->state >= 15) goto other;
+        if (self->state < 13) goto other;
         p = GetActiveSwitchedCollider();
         Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(p->v140));
     fromDiff:
@@ -2814,7 +2814,7 @@ void EndHeldWorld3Timeline(World3Boss* self)
 
 void SetWorld3BossTempo(World3Boss* self, s32 v)
 {
-    self->fC5C = v;
+    self->tempo = v;
     self->newBeatLength = 60.0f / (f32)v;
 }
 
@@ -2866,7 +2866,7 @@ void FindWorld3TimelineTarget(World3Timeline* self)
 void RestartWorld3Timeline(World3Timeline* self)
 {
     self->index = 0;
-    self->timeOffset = ((World3Boss*)self->found)->fC70;
+    self->timeOffset = ((World3Boss*)self->found)->bar;
     TriggerScriptEvent(self, 0x1A, 0, 0);
 }
 
@@ -2886,8 +2886,8 @@ void RunWorld3TimelineEntries(World3Timeline* self)
 {
     Entry90* e;
     s32 v;
-    while (self->index < self->entryCount && (e = self->Cur(), v = e->step + self->timeOffset, !(((World3Boss*)self->found)->fC70 < v))) {
-        if (v == ((World3Boss*)self->found)->fC70 && ((World3Boss*)self->found)->barPosition < e->substep) return;
+    while (self->index < self->entryCount && (e = self->Cur(), v = e->step + self->timeOffset, !(((World3Boss*)self->found)->bar < v))) {
+        if (v == ((World3Boss*)self->found)->bar && ((World3Boss*)self->found)->barPosition < e->substep) return;
         RunWorld3TimelineEntry(self, e);
         self->index++;
     }
@@ -4458,7 +4458,7 @@ void AnnouncePendingWarpEntry(WarpPage* self)
     e->announce = 1;
     SetScreenElementHoldTime(e, 0.0f);
     e->vt->m16(e, 2);
-    Animation* sl = self->entries[D_00276250].f00;
+    Animation* sl = self->entries[D_00276250].animation;
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->length;
@@ -4534,7 +4534,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
             } else {
                 target = GetCurrentWarpEntry();
             }
-            Animation* anim = self->entries[target].f00;
+            Animation* anim = self->entries[target].animation;
             if (D_00275BF0 != 2) {
                 self->entries[GetCurrentWarpEntry()].cursorLevel = 0.0f;
                 self->entries[self->cursor].cursorLevel = 1.0f;
@@ -4703,7 +4703,7 @@ void SetWarpPageMode(WarpPage* self, u32 next)
                 ReplaceAnimationPlayer(a, self, 0, (AnimationPlayer**)&self->entryPlayer, fa, 0.0f);
             }
         } else {
-            Animation* a = self->entries[1].f00;
+            Animation* a = self->entries[1].animation;
             if (a) {
                 ReplaceAnimationPlayer(a, self, 0, (AnimationPlayer**)&self->entryPlayer, 0.0f, 0.0f);
             }
@@ -4858,7 +4858,7 @@ void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
     if (o != 0) {
         TransformPointBetweenFrames((PlacedObject*)o->parent, self, (Vec02*)((u8*)o + 0x40), &v);
         Camera* g = g_camera;
-        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
         Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;
@@ -5098,7 +5098,7 @@ void DrawWarpMenu(T217D_0F0* self)
         f32 b2 = self->blend * self->blend;
         Vu0::Q(v) = Vu0::Q(self->current->smoothPoint);
         Camera* g = g_camera;
-        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Rotate(g->rotation, Vu0::Q(v));
         Vu0::Q(v) = Vu0::Add(Vu0::Q(g->position), Vu0::Q(v));
         ProjectPointToCamera(g, &v, out);
         out[0] = out[0] * 320.0f + 320.0f;

@@ -316,8 +316,8 @@ s32 IsWorld2BossFree(World2Boss* self)
     s32 out;
     if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
     if (self->fC10 != 0) goto zero;
-    if (self->f724 == 0x10) goto zero;
-    if (self->f724 == 0xB) goto zero;
+    if (self->state == 0x10) goto zero;
+    if (self->state == 0xB) goto zero;
     if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
     GetStateWalkerCurrentKey((StateWalker*)self->walker, &out);
     if (out == 0x43C) goto one;
@@ -335,7 +335,7 @@ one:
 void EnterWorld2BossState(World2Boss* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
-    s32 st = self->f724;
+    s32 st = self->state;
     if (st != 0xB) {
         if (st == 0x10) {
             s32 n = self->hitsLeft;
@@ -350,7 +350,7 @@ void EnterWorld2BossState(World2Boss* self, s32 evt, Animation* arg)
 
 s32 ChooseWorld2BossState(World2Boss* self)
 {
-    if (self->f724 == 4) {
+    if (self->state == 4) {
         s32 kind;
         GetStateWalkerCurrentKey((StateWalker*)self->walker, &kind);
         if (kind == 0x438) {
@@ -402,7 +402,7 @@ void UpdateAgentGoal(Agent* self, s32 flag);
 
 void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
 {
-    switch (self->f724) {
+    switch (self->state) {
     case 4:
         if (self->fE14 != 0) {
             Vec02 pos;
@@ -462,7 +462,7 @@ void UpdateWorld2BossState(World2Boss* self)
 {
     typedef Vu0::Vec Vec;
     UpdateAgentState(self);
-    switch (self->f724) {
+    switch (self->state) {
     case 12: {
         if (self->statePlayer == 0) {
             break;
@@ -484,9 +484,9 @@ void UpdateWorld2BossState(World2Boss* self)
             weight = 1.0f;
         }
         f32 heading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
-        f32 turn = __builtin_fabsf(WrapAngle(heading - self->f638));
+        f32 turn = __builtin_fabsf(WrapAngle(heading - self->heading));
         f32 k = g_unitRange.Clamp(((QuadraticCurve*)D_00264A20)->Eval(turn));
-        SetPlayerBlendWeights(self->f638, weight * k, self, (TurnBlendRecords*)((u8*)self + 0xC20), self->blendView);
+        SetPlayerBlendWeights(self->heading, weight * k, self, (TurnBlendRecords*)((u8*)self + 0xC20), self->blendView);
         // One mover and one sequence variable for both objects: set twice, they are left to
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
         PoseSource* m;
@@ -536,7 +536,7 @@ void UpdateWorld2BossState(World2Boss* self)
 void LeaveWorld2BossState(World2Boss* self, s32 mode)
 {
     LeaveAgentState(self, mode);
-    if (self->f724 == 16) {
+    if (self->state == 16) {
         s32 token = self->pendingWalkerTarget;
         if (token == -1) return;
         SetStateWalkerTarget((StateWalker*)self->walker, token);

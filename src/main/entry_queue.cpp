@@ -67,7 +67,7 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     Vec02 a;
     Vec02 b;
     Vec02 c;
-    Player* s1 = (Player*)self->f3C;
+    Player* s1 = (Player*)self->player;
     f32 r;
 
     if (n == 0)
@@ -77,7 +77,7 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     if (IsObjectOfKind(n, 0x7E))
     {
         ConvertPositionToWorld(n, &v);
-        r = s1->f638;
+        r = s1->heading;
     }
     else if (IsObjectOfKind(n, 0x73))
     {
@@ -111,7 +111,7 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     tail:
         v = s1->pos;
         v.z -= 75.0f;
-        r = s1->f638;
+        r = s1->heading;
     }
     if (out)
     {
@@ -137,7 +137,7 @@ struct Aim_0017BB78 {
 
 void SetEntryQueueTargetNode(EntryQueue* self, BaseObject* target)
 {
-    Aim_0017BB78* p = (Aim_0017BB78*)self->f3C;
+    Aim_0017BB78* p = (Aim_0017BB78*)self->player;
     if (self->aimTarget != 0) {
         Vu0::Q(p->mark) = Vu0::Sub(Vu0::Q(p->aim), Vu0::Q(p->pos));
         p->targeting = 0;
@@ -174,7 +174,7 @@ void ReplaceQueueOnOffObject(EntryQueue* self, OnOffObject* next)
         if (isNull != 0) {
             next->desc->m02(next);
         }
-        next->switchedCollider = self->f3C;
+        next->switchedCollider = self->player;
         SetOnOffObjectForcedState(next, 1);
     }
 }
@@ -219,7 +219,7 @@ void StartNextQueueEntry(EntryQueue* self)
         return;
     }
     QueueEntry* e = &((QueueEntry*)self->buffer)[n];
-    Player* p = (Player*)self->f3C;
+    Player* p = (Player*)self->player;
     BaseObject* obj = (BaseObject*)FindFirstObjectById(self->world, 0x104, e->id, self->lastFoundObject);
     switch (e->kind) {
     case 0:
@@ -238,7 +238,7 @@ void StartNextQueueEntry(EntryQueue* self)
         pos.z += 75.0f;
         p->focusPoint = pos;
         p->desc02()->m1D(p, &pos);
-        p->f638 = heading;
+        p->heading = heading;
         BuildAxisAngleMatrix(&g_unitZVector, &rot, heading);
         p->desc02()->m1E(p, &rot);
         p->desc02()->m20(p, (Vec02*)&D_00248D30);
@@ -260,7 +260,7 @@ void StartNextQueueEntry(EntryQueue* self)
                 SetPlayerState(p, 6, t);
             }
         }
-        if (p->f2220 == 6 && p->targetMode == 4) {
+        if (p->state == 6 && p->targetMode == 4) {
             Vec02 pos;
             GetNodeAnchorAndHeading(self, obj, &pos, 0);
             TransformPointBetweenFrames(0, (PlacedObject*)(((QueueTargetHolder*)p->targetTrack)->frame), &pos, &pos);
@@ -305,7 +305,7 @@ void StartNextQueueEntry(EntryQueue* self)
         start = p->pos;
         rise = 0.0f;
         p->jumpKind = 0;
-        switch (p->f2220) {
+        switch (p->state) {
         case 1:
             p->jumpKind = 2;
             break;
@@ -356,7 +356,7 @@ void StartNextQueueEntry(EntryQueue* self)
             Vec02 d;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(goal), Vu0::Q(p->pos));
             f32 h = ArctangentOfRatio(d.y, d.x);
-            p->f638 = h;
+            p->heading = h;
             p->stickHeading = h;
         }
         p->f2250 = e->value10;
@@ -416,7 +416,7 @@ void SetPlayerState(Player* self, s32 a, s32 b);
 s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
 {
     s32 done;
-    Player* pl = (Player*)self->f3C;
+    Player* pl = (Player*)self->player;
     void* obj = FindFirstObjectById(pl->world, 0x104, e->id, self->lastFoundObject);
     switch (e->kind) {
     default:
@@ -426,7 +426,7 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         done = e->valueF < g_gameTime - self->entryStartTime;
         break;
     case 5:
-        done = pl->f2220 != 2;
+        done = pl->state != 2;
         break;
     case 6: {
         if (obj == 0) {
@@ -457,10 +457,10 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
             done = pl->aimMode == -1;
             break;
         case 4:
-            done = pl->f2220 != 2;
+            done = pl->state != 2;
             break;
         case 8:
-            done = pl->f2220 != 10;
+            done = pl->state != 10;
             break;
         default:
             done = 1;
@@ -468,9 +468,9 @@ s32 CheckQueueEntryDone(EntryQueue* self, QueueEntry* e)
         }
         break;
     case 12:
-        if (pl->f2220 == 2 && (u32)(pl->subState - 12) < 2) {
+        if (pl->state == 2 && (u32)(pl->subState - 12) < 2) {
             done = 0;
-        } else if (pl->f2220 == 6 && (u32)pl->targetMode < 2) {
+        } else if (pl->state == 6 && (u32)pl->targetMode < 2) {
             SetPlayerState(pl, 0, -1);
             done = 1;
         } else {
@@ -526,10 +526,10 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
     Vec02 dir;
     f32 heading;
     QueueEntry* e = (QueueEntry*)self->pendingEntry;
-    Player* p = (Player*)self->f3C;
+    Player* p = (Player*)self->player;
     if (e == 0) {
         p->stickLevel = 0.0f;
-        if (p->f2220 == 6) {
+        if (p->state == 6) {
             pad->buttons |= 0x20;
         }
         return;
@@ -540,15 +540,15 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
         case 4:
             if (o != 0) {
                 GetNodeAnchorAndHeading(self, o, 0, &heading);
-                p->stickHeading = p->f638 = heading;
+                p->stickHeading = p->heading = heading;
             }
             p->stickLevel = 0.0f;
-            if (p->f2220 == 6) {
+            if (p->state == 6) {
                 pad->buttons |= 0x20;
             }
             return;
         case 5:
-            if (p->f2220 == 2 && o != 0) {
+            if (p->state == 2 && o != 0) {
                 if ((p->subState == 2 && D_00263E40 < g_gameTime - p->subStateStartTime) || (p->subState == 3 && D_00263E44 < g_gameTime - p->subStateStartTime)) {
                     if (IsObjectOfKind(o, 0x81) || IsObjectOfKind(o, 0x71) || IsObjectOfKind(o, 0x6F) || IsObjectOfKind(o, 0x7F) || IsObjectOfKind(o, 0x70) || IsObjectOfKind(o, 0x76)) {
                         SetPlayerState(p, 2, ChoosePlayerTargetByCost((Chooser*)p, (TargetCand*)o));
@@ -562,7 +562,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
             return;
         case 6:
             if (o != 0) {
-                if (p->f2220 == 6 && p->targetMode == 4) {
+                if (p->state == 6 && p->targetMode == 4) {
                     TrackRecord_17C718* r = (TrackRecord_17C718*)p->targetTrack;
                     TrackShape_17C718* s = r->shape;
                     void* frame = r->frame;
@@ -602,7 +602,7 @@ void DrivePlayerFromEntryQueue(EntryQueue* self, PadRecord* pad)
                 }
             }
             p->stickLevel = __builtin_fabsf(e->valueF);
-            if (p->f2220 == 6 && p->targetMode < 2 && p->targetMode >= 0) {
+            if (p->state == 6 && p->targetMode < 2 && p->targetMode >= 0) {
                 pad->buttons |= 0x20;
             }
             return;
@@ -670,7 +670,7 @@ void UnbindEntryQueue(EntryQueue* self);
 
 void ResetEntryQueue(EntryQueue* self)
 {
-    if (self->f3C != 0) {
+    if (self->player != 0) {
         UnbindEntryQueue(self);
         self->entryCount = 0;
     } else {
@@ -687,7 +687,7 @@ void AcquirePadSelectFlag(World* a0);
 void BindEntryQueueToObject(EntryQueue* self, Player* player)
 {
     player->entryQueue = self;
-    self->f3C = player;
+    self->player = player;
     self->entryIndex = -1;
     TriggerScriptEvent(self, 0x17, 0, 0);
     if (self->flag68 != 0) {
@@ -704,7 +704,7 @@ void ReleasePadSelectFlag(World* self);
 
 void UnbindEntryQueue(EntryQueue* self)
 {
-    if (self->f3C != 0) {
+    if (self->player != 0) {
         ReplaceQueueOnOffObject(self, 0);
         SetEntryQueueTargetNode(self, 0);
         if (self->animationPlayer != 0) {
@@ -715,8 +715,8 @@ void UnbindEntryQueue(EntryQueue* self)
         self->entryIndex = self->entryCount;
         self->lastFoundObject = 0;
         self->pendingEntry = 0;
-        ((Player*)self->f3C)->entryQueue = 0;
-        self->f3C = 0;
+        ((Player*)self->player)->entryQueue = 0;
+        self->player = 0;
         TriggerScriptEvent(self, 25, 0, 0);
         if (self->flag68 != 0) {
             ClearPadSelectFlags(4);

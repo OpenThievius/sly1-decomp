@@ -496,22 +496,22 @@ void LoadStateWalkerGroup(StateWalkerGroup* self, BufferedStream* stream)
 void StartStateWalkerGroup(StateWalkerGroup* self)
 {
     StartPlacedObject(self);
-    self->objectCount = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objs304);
+    self->objectCount = GatherObjectsById(self->world, 1, 0x5C, self, 8, self->objects);
     s32 i;
     StateWalkerObject* e;
     for (i = 0; i < self->idCount; i++) {
-        e = (StateWalkerObject*)FindFirstObjectById(self->world, 4, self->ids2E0[i], self);
+        e = (StateWalkerObject*)FindFirstObjectById(self->world, 4, self->ids[i], self);
         if (e != 0) {
             u32 k = self->objectCount;
             if (k < 8) {
-                self->objs304[k] = (void*)e;
+                self->objects[k] = (void*)e;
                 self->objectCount = k + 1;
             }
         }
     }
     s32 s4 = (g_currentLevelRecord->f448 & self->flagMask) ? 0x22F : 0x22E;
     for (i = 0; i < self->objectCount; i++) {
-        e = (StateWalkerObject*)self->objs304[i];
+        e = (StateWalkerObject*)self->objects[i];
         e->f2D4 = CreateStateWalker((StateGraph*)e->f2D0, e, -1, 0);
         SetStateWalkerTarget((StateWalker*)e->f2D4, s4);
     }
@@ -528,7 +528,7 @@ void AddStateWalkerGroupId(StateWalkerGroup* queue, void* item)
 {
     u32 count = queue->idCount;
     if (count < 8) {
-        queue->ids2E0[count] = (s32)item;
+        queue->ids[count] = (s32)item;
         queue->idCount = count + 1;
     }
 }
@@ -1903,8 +1903,8 @@ void StartAimBlendGrid(AimBlendGrid* self)
     if (self->sampledObject == 0) return;
     for (i = 0; i < 24; i++) {
         s = &self->slots[i];
-        SlotObject* n = (SlotObject*)FindFirstObjectByIdMode1(self->world, s->fC, self->rootObject);
-        s->n4 = n;
+        SlotObject* n = (SlotObject*)FindFirstObjectByIdMode1(self->world, s->id, self->rootObject);
+        s->object = n;
         if (n != 0) n->vtbl[7](n);
     }
     ComputeWrappedDeltas(0x20, 0x18, (u8*)self->slots, 0x10, 2, D_0026ABD0);

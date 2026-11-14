@@ -559,7 +559,7 @@ void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream)
 
     }
     b = self->linkRecord;
-    b->fB0 |= 1;
+    b->flags |= 1;
     dst = (Quad16*)self->linkRecord;
     src = (Quad16*)&g_identityMatrix;
     dst[0] = src[0];

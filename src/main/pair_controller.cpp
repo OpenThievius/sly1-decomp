@@ -564,7 +564,7 @@ void StartWalkerCollider(WalkerCollider* self)
         if (self->subStateGraph != 0) {
             self->subStateWalker = CreateStateWalker((StateGraph*)self->subStateGraph, self, -1, 1);
         }
-        self->spawnerCount = GatherObjectsById(g_currentWorld, 1, 0x50, self->f664, 3, self->f66C);
+        self->spawnerCount = GatherObjectsById(g_currentWorld, 1, 0x50, self->f664, 3, self->spawners);
         SetWalkerColliderState(self, 2);
         SetWalkerColliderSubState(self, 0);
     } else {
@@ -583,7 +583,7 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src, f32 dt)
         self->stateAnimDone = 0;
     }
     ReadWalkerColliderInput(self, src);
-    ComputePolarOffset((Vec3*)&self->moveOffset, self->f618, self->stickLength * self->speedScale, 0.0f);
+    ComputePolarOffset((Vec3*)&self->moveOffset, self->heading, self->stickLength * self->speedScale, 0.0f);
     f.ramp = *(RampParams*)D_0024C9C0;
     f32 r = ArctangentOfRatio(((PlacedObject*)self->f64C)->m110.r[0].y, ((PlacedObject*)self->f64C)->m110.r[0].x);
     r = ApproachAngleWithRamp(r, self->aimHeading, g_frameDt, &f.ramp, 0);
@@ -638,7 +638,7 @@ void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
         }
         self->desc02()->m1D(self, &pos);
         self->desc02()->m20(self, &vel);
-        self->f618 = ArctangentOfRatio(vel.y, vel.x);
+        self->heading = ArctangentOfRatio(vel.y, vel.x);
     }
     s32 v;
     while ((v = ChooseWalkerColliderState(self)) != self->state) {
@@ -654,7 +654,7 @@ void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
 void ReadWalkerColliderInput(WalkerCollider* out, PadRecord* src)
 {
     if (0.3f < src->stickMagnitude) {
-        ComputeCameraRelativeStickHeading(g_camera, src, 0, &out->f618);
+        ComputeCameraRelativeStickHeading(g_camera, src, 0, &out->heading);
     }
     out->stickLength = src->stickMagnitude;
     if (0.8f < src->secondStickMagnitude) {
@@ -715,8 +715,8 @@ void SetWalkerColliderState(WalkerCollider* self, s32 n)
         break;
     }
     for (s32 i = 0; i < self->spawnerCount; i++) {
-        if (flag) SetEffectSpawnerActiveForever((EffectSpawner*)(((void**)self->f66C)[i]));
-        else SetEffectSpawnerInactive((EffectSpawner*)(((void**)self->f66C)[i]));
+        if (flag) SetEffectSpawnerActiveForever((EffectSpawner*)(((void**)self->spawners)[i]));
+        else SetEffectSpawnerInactive((EffectSpawner*)(((void**)self->spawners)[i]));
     }
     if (self->stateWalker) {
         if (old == -1) TeleportStateWalker((StateWalker*)self->stateWalker, snd);
@@ -830,7 +830,7 @@ void StepWalkerCollider(WalkerCollider* self, f32 dt)
 {
     f32 buf[12];
     StepCollider(self, dt);
-    BuildYawPitchMatrix(self->f618, 0.0f, (Mat02*)buf);
+    BuildYawPitchMatrix(self->heading, 0.0f, (Mat02*)buf);
     TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, D_0026B7D8);
 }
 

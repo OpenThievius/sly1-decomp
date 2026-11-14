@@ -191,7 +191,7 @@ struct World : BaseObject {
     void* activeFollower;   // 0x2324
     IopChannelSetting channel2[4]; // 0x2328: the stack of IOP channel 2 settings (func_001C08B0 pushes, func_001C0950 pops)
     s32 channel2Count;      // 0x2348
-    f32 f234C;              // 0x234C
+    f32 value;              // 0x234C: the value that approaches valueTarget
     f32 valueTarget;        // 0x2350
     s32 f2354;              // 0x2354
     s32 f2358;              // 0x2358: 1 after func_001EBEB0 (class 0x13)

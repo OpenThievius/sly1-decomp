@@ -58,7 +58,7 @@ struct TargetCameraController : CameraController {
         s32 f0C;            // 0x0C: 0
         f32 yawSpeed;       // 0x0C as a float: the yaw speed (func_00149760)
     };
-    f32 f10;                // 0x10: D_00261BF0
+    f32 pitch;              // 0x10: D_00261BF0
     union {
         s32 f14;            // 0x14
         f32 pitchSpeed;     // 0x14 as a float: the pitch speed (func_00149760)

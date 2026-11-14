@@ -389,7 +389,7 @@ void UpdateOnOffObjectState(OnOffObject* self, s32 unused1, s32 unused2) {
     } else {
         st = self->forcedState;
     }
-    if (self->f384 == 0 && p == (u8*)g_player && ((Player*)p)->f2220 == 2 &&
+    if (self->f384 == 0 && p == (u8*)g_player && ((Player*)p)->state == 2 &&
         g_camera->snapping == 0) {
         if (self->forcedState == -1) {
             return;
@@ -927,7 +927,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         } else {
             Vec02 fwd;
             Mat02 basis;
-            if (target == g_player && target->f2220 == 13) {
+            if (target == g_player && target->state == 13) {
                 fwd = target->v150;
             } else {
                 fwd = target->m110.r[0];
@@ -947,7 +947,7 @@ void UpdateOnOffCameraController(OnOffCameraController* self, CameraPlacement* e
         }
         f32 speed;
         if (g_player != 0) {
-            if (g_player->f2220 == 6 && g_player->targetMode == 0) {
+            if (g_player->state == 6 && g_player->targetMode == 0) {
                 f32 one = 1.0f;
                 speed = one <? Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(offset), Vu0::Q(offset)))) * 0.005f;
             } else {
