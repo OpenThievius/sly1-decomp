@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the walkers all get the first target only when the level record holds no more than the
 // host has and a flag only PAL has is clear (D_eu_0027F3A4); US tests the first alone.
+// The player's words by offset, as player.cpp wrote them before its fields were named.
+#define PS(T, o) (*(T*)((u8*)self + (o)))
 extern s32 D_eu_0027F3A4;
 void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
 {
@@ -248,3 +250,4 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
     }
     }
 }
+#undef PS
