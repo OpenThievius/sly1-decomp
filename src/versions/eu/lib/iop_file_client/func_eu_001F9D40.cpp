@@ -6,7 +6,7 @@
 // The name is copied as chars and the copy's value tested, so the test sign-extends the stored
 // byte (retail's sll by 24). As CloseFile does with its reply, one variable holds the reply word
 // and then the index returned (retail's copy into s1 before the last lock).
-struct Open_1F9D40 {
+struct FileOpenRequest {
     s32 sema;
     s32 result;
     s32 result_size;
@@ -20,8 +20,8 @@ s32 IsFileServiceVersionUnknown(void);
 
 s32 OpenFile(const char* name, u32 flags, ...)
 {
-    Open_1F9D40* g = (Open_1F9D40*)D_00627880;
-    Handle_1F84D8* p;
+    FileOpenRequest* g = (FileOpenRequest*)D_00627880;
+    FileHandleEntry* p;
     s32 mode;
     s32 h;
     s32 i;
