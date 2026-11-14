@@ -117,9 +117,9 @@ extern "C" void WriteBackDataCacheRange(void* data, s32 size);
 
 void InitCommandChannel(void);
 s32 GetChannelWord(s32 index);
-struct Packet_1FA068;
-struct Channel_1FA068;
-typedef void (*CommandHandler)(Packet_1FA068* packet, Channel_1FA068* channel);
+struct CommandPacket;
+struct CommandChannel;
+typedef void (*CommandHandler)(CommandPacket* packet, CommandChannel* channel);
 extern "C" void SetCommandHandler(s32 cmd, CommandHandler handler, void* arg);
 s32 ReadIopRegister(u32 reg);
 u32 WriteIopRegister(u32 reg, u32 value);
