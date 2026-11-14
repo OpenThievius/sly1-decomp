@@ -11,16 +11,19 @@
 #include "remote_call_client.h"
 #include "asm_func.h"
 
-struct Blob_1F9868 { u8 b[0xFC]; };
-struct Buf_1F9868 { s32 f0; s32 f4; Blob_1F9868 name; Blob_1F9868 data; };
+// A name or a block of data of the request: 0xFC bytes.
+struct ModuleBlob { u8 b[0xFC]; };
+// The buffer of the request and of its reply: the size of the data it carries (the reply's
+// result, in the same word), the reply's second word, the name and the data.
+struct ModuleLoadBuffer { s32 size; s32 word; ModuleBlob name; ModuleBlob data; };
 
 s32 g_moduleLoaderBound = -1;
 const char* D_002771D0 = "....";
 // A string no code reads.
 extern const char D_0024EB88[] = "all";
 
-static Buf_1F9868 g_moduleLoaderBuffer __attribute__((aligned(64)));
-static u8 g_moduleLoaderClient[0x28] __attribute__((aligned(64)));
+static ModuleLoadBuffer g_moduleLoaderBuffer __attribute__((aligned(64)));
+static RemoteCallClient g_moduleLoaderClient __attribute__((aligned(64)));
 static s32 g_moduleLoaderVersion;
 
 extern char D_00276970[16];
@@ -28,10 +31,11 @@ extern char D_00276970[16];
 s32 CompareMemory(const void* a, const void* b, s32 n);
 extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void* CopyStringBounded(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
+void* CopyStringBounded(ModuleBlob* dst, ModuleBlob* src, s32 n);
 s32 BindModuleLoader(void);
 
-struct __attribute__((packed)) Word_1F9690 { u32 v; };
+// A word read at any alignment.
+struct __attribute__((packed)) UnalignedWord { u32 v; };
 
 
 s32 BindModuleLoader(void)
@@ -41,16 +45,16 @@ s32 BindModuleLoader(void)
 
     if (g_moduleLoaderBound < 0) {
         for (;;) {
-            c = (RemoteCallClient*)g_moduleLoaderClient;
+            c = &g_moduleLoaderClient;
             if (BindRemoteService(c, 0x80000006, 0) < 0) {
                 return -1;
             }
             if (c->server != 0) {
                 g_moduleLoaderBound = 0;
-                if (CallRemoteService((RemoteCallClient*)g_moduleLoaderClient, 0xFF, 0, 0, 0, &g_moduleLoaderBuffer, 4, 0, 0) < 0) {
+                if (CallRemoteService(&g_moduleLoaderClient, 0xFF, 0, 0, 0, &g_moduleLoaderBuffer, 4, 0, 0) < 0) {
                     return 0xFFFEFFFF;
                 }
-                *(Word_1F9690*)&g_moduleLoaderVersion = *(Word_1F9690*)&g_moduleLoaderBuffer;
+                *(UnalignedWord*)&g_moduleLoaderVersion = *(UnalignedWord*)&g_moduleLoaderBuffer;
                 return 0;
             }
             for (i = 0x100000; i != -1; ) i--;
@@ -80,7 +84,7 @@ s32 ForgetModuleLoader(void)
 
 LINKER_REMNANT(func_001F9858);
 
-s32 SendModuleLoadRequest(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* out, s32 cmd)
+s32 SendModuleLoadRequest(ModuleBlob* src, s32 size, ModuleBlob* data, s32* out, s32 cmd)
 {
     if (BindModuleLoader() < 0) {
         return -0x10000;
@@ -88,33 +92,33 @@ s32 SendModuleLoadRequest(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* ou
     if (IsModuleLoaderMismatched() != 0) {
         return -0x10004;
     }
-    Blob_1F9868* p = &g_moduleLoaderBuffer.name;
+    ModuleBlob* p = &g_moduleLoaderBuffer.name;
     CopyStringBounded(p, src, 0xFC);
-    Buf_1F9868* q = (Buf_1F9868*)((u8*)p - 8);
+    ModuleLoadBuffer* q = (ModuleLoadBuffer*)((u8*)p - 8);
     q->name.b[0xFB] = 0;
     if (data != 0) {
         if (size >= 0xFD) {
             q->data = *data;
-            g_moduleLoaderBuffer.f0 = 0xFC;
+            g_moduleLoaderBuffer.size = 0xFC;
         } else {
             CopyBytes(&q->data, data, size);
-            q->f0 = size;
+            q->size = size;
         }
     } else {
         q->data.b[0] = 0;
-        q->f0 = 0;
+        q->size = 0;
     }
-    Buf_1F9868* buf = &g_moduleLoaderBuffer;
-    if (CallRemoteService((RemoteCallClient*)g_moduleLoaderClient, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
+    ModuleLoadBuffer* buf = &g_moduleLoaderBuffer;
+    if (CallRemoteService(&g_moduleLoaderClient, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
         return -0x10001;
     }
-    s32 v = buf->f4;
-    s32 ret = g_moduleLoaderBuffer.f0;
+    s32 v = buf->word;
+    s32 ret = g_moduleLoaderBuffer.size;
     *out = v;
     return ret;
 }
 
-s32 LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data)
+s32 LoadIopModuleFile(ModuleBlob* src, s32 size, ModuleBlob* data)
 {
     s32 out[4];
     return SendModuleLoadRequest(src, size, data, out, 0);
