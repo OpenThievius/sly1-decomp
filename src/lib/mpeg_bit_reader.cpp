@@ -10,26 +10,10 @@
 // padding decides either edge. Written for this project from
 // retail's code.
 #include "common.h"
+#include "mpeg_bit_reader.h"
 
-// The reader: the 64-bit window of bits not yet consumed, the byte the count of consumed bits
-// starts from, the next byte to load, how many bits of the window are loaded, the count of bits
-// consumed, and the ring buffer (its start, end and size).
-struct BitReader_2115C0 {
-    u64 window;
-    u32 origin;
-    u32 next;
-    u32 loaded;
-    u32 pad14;
-    u64 consumed;
-    u32 bufStart;
-    u32 bufEnd;
-    u32 bufSize;
-};
 
-s32 PeekBits(BitReader_2115C0* self, s32 n);
-u64 AdvanceBits(BitReader_2115C0* self, s32 n);
-
-void InitBitReader(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
+void InitBitReader(BitReader* self, u32 buf, u32 a, u32 b)
 {
     self->origin = buf;
     self->next = buf;
@@ -42,7 +26,7 @@ void InitBitReader(BitReader_2115C0* self, u32 buf, u32 a, u32 b)
     AdvanceBits(self, 0);
 }
 
-s32 PeekBits(BitReader_2115C0* self, s32 n)
+s32 PeekBits(BitReader* self, s32 n)
 {
     return self->window >> (64 - n);
 }
@@ -52,7 +36,7 @@ s32 PeekBits(BitReader_2115C0* self, s32 n)
 // the return, these are insns gcse still sees and later passes delete, and they give its
 // expression table the 21 buckets whose order gives n's widening its register before the
 // consumed count's (docs/TOOLCHAIN.md, "Sony's compiler: the same bucket order").
-u64 AdvanceBits(BitReader_2115C0* self, s32 n)
+u64 AdvanceBits(BitReader* self, s32 n)
 {
     self->window <<= n;
     u32 loaded = self->loaded -= n;
@@ -69,21 +53,21 @@ u64 AdvanceBits(BitReader_2115C0* self, s32 n)
     return self->consumed += n;
 }
 
-s64 ReadBits(BitReader_2115C0* self, s32 n)
+u32 ReadBits(BitReader* self, s32 n)
 {
-    s64 r = PeekBits(self, n);
+    u32 r = PeekBits(self, n);
     AdvanceBits(self, n);
     return r;
 }
 
-s64 ReadBit(BitReader_2115C0* self)
+s32 ReadBit(BitReader* self)
 {
-    s64 r = PeekBits(self, 1);
+    s32 r = PeekBits(self, 1);
     AdvanceBits(self, 1);
     return r;
 }
 
-void SkipBytes(BitReader_2115C0* self, s32 bytes)
+void SkipBytes(BitReader* self, s32 bytes)
 {
     self->window = 0;
     self->loaded = 0;
@@ -95,7 +79,7 @@ void SkipBytes(BitReader_2115C0* self, s32 bytes)
     AdvanceBits(self, 0);
 }
 
-u32 GetPositionAhead(BitReader_2115C0* stream, s32 amount)
+u32 GetPositionAhead(BitReader* stream, s32 amount)
 {
     u32 position = stream->origin + (amount >> 3);
     if (position >= stream->bufEnd) {
