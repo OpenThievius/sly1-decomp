@@ -14,6 +14,7 @@
 #include "asm_func.h"
 #include "system.h"
 #include "remote_call_client.h"
+#include "semaphore_params.h"
 
 // The library's identification string, 16 characters without a terminator.
 char D_0027AEB8[16] = { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'm', 'c', ' ', ' ', ' ', '2', '4', '3', '0' };
@@ -23,43 +24,88 @@ s32 g_cardRequestInFlight = 0;
 s32 g_cardSemaphore = -1;
 
 // The remote call's client record, bound to the server.
-static u8 g_cardClient[0x28] __attribute__((aligned(64)));
+static RemoteCallClient g_cardClient __attribute__((aligned(64)));
 // Where func_00209C60 stores the results of the request func_00209CB8 sent.
 static u32* D_0062AD68;
 static u32* D_0062AD6C;
 static u32* D_0062AD70;
 // A 64-byte aligned buffer no code reads: the data of a function the linker stripped.
 static u8 D_0062AD80[0x40] __attribute__((aligned(64)));
-// The request sent to the server.
-static u8 D_0062ADC0[0x30] __attribute__((aligned(64)));
-// A request that carries a name: five words, then the name (func_002095B0 addresses the name).
-static u8 D_0062ADF0[0x414];
+
+// The request sent to the server: 0x30 bytes, of which each command fills the words it uses.
+// The read and close commands send the file's descriptor first; the read adds its length and the
+// buffer and reply table.
+struct CardReadRequest {
+    s32 fd;           // 0x00
+    u8 pad04[8];
+    s32 size;         // 0x0C: the length asked for
+    u8 pad10[8];
+    void* buf;        // 0x18: the buffer the IOP fills
+    void* tab;        // 0x1C: the reply table the completion handler reads
+};
+// The write sends the first bytes (up to 16, to align the rest) inside the request, and the
+// address and length of the rest.
+struct CardWriteRequest {
+    s32 fd;           // 0x00
+    u8 pad04[8];
+    s32 restSize;     // 0x0C: the bytes after the head
+    u8 pad10[4];
+    u32 headSize;     // 0x14: the bytes carried in head
+    s32 restAddr;     // 0x18: the address the IOP reads the rest from
+    u8 pad1C[4];
+    u8 head[16];      // 0x20
+};
+// The query of a card's information: which of three results the caller wants, and where the
+// server writes them.
+struct CardInfoRequest {
+    s32 f00;
+    s32 port;         // 0x04
+    s32 slot;         // 0x08
+    s32 wantThird;    // 0x0C: 1 when the caller gave a destination for the third result
+    s32 wantSecond;   // 0x10
+    s32 wantFirst;    // 0x14
+    s32 f18;
+    s32 table;        // 0x1C: the address of the transfer buffer
+};
+struct CardFormatRequest {
+    s32 f0;
+    s32 port;         // 0x04
+    s32 slot;         // 0x08
+};
+union CardRequest {
+    CardReadRequest read;
+    CardWriteRequest write;
+    CardInfoRequest info;
+    CardFormatRequest format;
+    u8 bytes[0x30];
+};
+static CardRequest D_0062ADC0 __attribute__((aligned(64)));
+
+// A request that carries a name: five words, then the name.
+struct CardNameRequest {
+    s32 port;         // 0x00
+    s32 slot;         // 0x04
+    s32 f08;          // 0x08
+    s32 entryCount;   // 0x0C: the entries a directory read asks for
+    s32 entries;      // 0x10: the address the IOP writes the entries to
+    char name[0x400]; // 0x14
+};
+static CardNameRequest D_0062ADF0;
+
 // The transfer buffer the completion handlers read.
 static u8 D_0062B240[0x10C0] __attribute__((aligned(64)));
-// The server's reply.
-static u8 D_0062C300[0x40] __attribute__((aligned(64)));
 
-struct Req_2093F0 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    s32 f0C;
-    s32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
+// The server's reply: the result of the call, then the versions in the binding's reply.
+struct CardReply {
+    s32 result;           // 0x00
+    s32 serverVersion;    // 0x04
+    s32 managerVersion;   // 0x08
+    u8 pad0C[0x34];
 };
-struct Sema_2093F0 {
-    u8 pad00[0x24];
-    s32 f24;
-};
-struct Info_2093F0 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-};
+static CardReply D_0062C300 __attribute__((aligned(64)));
 
-extern "C" s32 NewSemaphore(Req_2093F0* r);
+extern "C" s32 NewSemaphore(SemaphoreParams* r);
+void* CopyStringBounded(char* dst, const char* src, s32 max);
 s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2);
 extern "C" s32 AwaitSemaphore(s32 sema);
 extern "C" s32 TrySemaphore(s32 sema);
@@ -70,44 +116,44 @@ extern "C" s32 PrintFormatted(const char* fmt, ...);
 s32 InitMemoryCardClient(void)
 {
     if (g_cardSemaphore < 0) {
-        Req_2093F0 req;
-        req.f14 = 0;
-        req.f08 = 1;
-        req.f04 = 1;
+        SemaphoreParams req;
+        req.option = 0;
+        req.initCount = 1;
+        req.maxCount = 1;
         g_cardSemaphore = NewSemaphore(&req);
     }
     SyncCardRequest(0, 0, 0);
     AwaitSemaphore(g_cardSemaphore);
     InitRemoteCalls(0);
     for (;;) {
-        if (BindRemoteService((RemoteCallClient*)g_cardClient, 0x80000400, 0) < 0) {
+        if (BindRemoteService(&g_cardClient, 0x80000400, 0) < 0) {
             PrintFormatted("bind error libmc \n");
             for (;;) {
             }
         }
-        if (((Sema_2093F0*)g_cardClient)->f24 != 0) {
+        if (g_cardClient.server != 0) {
             break;
         }
         for (s32 i = 0x100000; i != 0; i--) {
         }
     }
-    s32 r = CallRemoteService((RemoteCallClient*)g_cardClient, 0xFE, 0, D_0062ADC0, 0x30, (Info_2093F0*)D_0062C300, 0xC, 0, 0);
+    s32 r = CallRemoteService(&g_cardClient, 0xFE, 0, &D_0062ADC0, 0x30, &D_0062C300, 0xC, 0, 0);
     PostSemaphore(g_cardSemaphore);
     if (r < 0) {
-        ((Sema_2093F0*)g_cardClient)->f24 = 0;
+        g_cardClient.server = 0;
         return r - 100;
     }
-    if (((Info_2093F0*)D_0062C300)->f4 < 0x20A) {
+    if (D_0062C300.serverVersion < 0x20A) {
         PrintFormatted("libmc: too old release of mcserv.irx\n");
-        ((Sema_2093F0*)g_cardClient)->f24 = 0;
+        g_cardClient.server = 0;
         return -0x78;
     }
-    if (((Info_2093F0*)D_0062C300)->f8 < 0x20E) {
+    if (D_0062C300.managerVersion < 0x20E) {
         PrintFormatted("libmc: too old release of mcman.irx\n");
-        ((Sema_2093F0*)g_cardClient)->f24 = 0;
+        g_cardClient.server = 0;
         return -0x79;
     }
-    return ((Info_2093F0*)D_0062C300)->f0;
+    return D_0062C300.result;
 }
 
 // The message of a function the linker stripped.
@@ -115,19 +161,13 @@ extern const char D_00250008[] = "sceMcUdCheckNewCard RPC faild\n";
 
 LINKER_REMNANT(func_002095A8);
 
-struct Rec_2095B0 { s32 f00; s32 f04; s32 f08; u8 pad0C[8]; u8 name[0x400]; };
-struct Handle_2095B0;
-struct Name_2095B0;
-
-s32 CopyStringBounded(Name_2095B0* dst, const char* src, s32 max);
-
 s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
 {
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    u8* pool = g_cardClient;
-    if (*(s32*)(pool + 0x24) == 0) {
+    RemoteCallClient* pool = &g_cardClient;
+    if (pool->server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
@@ -135,14 +175,16 @@ s32 OpenCardFile(s32 a0, s32 a1, const char* a2, s32 a3)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    u8* name = D_0062ADF0 + 0x14;
-    CopyStringBounded((Name_2095B0*)name, a2, 0x3FF);
+    // The name is addressed first and the request through it: the original's pointer was the
+    // name's, and the words before it the request's.
+    char* name = D_0062ADF0.name;
+    CopyStringBounded(name, a2, 0x3FF);
     ((s32*)name)[-5] = a0;
-    Rec_2095B0* r = (Rec_2095B0*)(name - 0x14);
+    CardNameRequest* r = (CardNameRequest*)(name - 0x14);
     r->f08 = a3;
-    r->f04 = a1;
+    r->slot = a1;
     r->name[0x3FF] = 0;
-    s32 result = CallRemoteService((RemoteCallClient*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
+    s32 result = CallRemoteService(pool, 2, 1, r, 0x414, &D_0062C300, 4, 0, 0);
     if (result == 0) {
         g_cardRequestInFlight = 2;
     } else {
@@ -160,25 +202,20 @@ s32 MakeCardDirectory(s32 a0, s32 a1, const char* a2)
     return r;
 }
 
-struct Hdl_209720 { s32 v; };
-struct Elt_209720 { u8 pad[0x24]; s32 f24; };
-struct Slot_209720 { s32 v; };
-
-
 s32 CloseCardFile(s32 value)
 {
     s32 r;
-    Elt_209720* elt;
+    RemoteCallClient* elt;
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    elt = (Elt_209720*)g_cardClient;
-    if (elt->f24 == 0) {
+    elt = &g_cardClient;
+    if (elt->server == 0) {
         (void)PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Slot_209720*)&D_0062ADC0).v = value;
-    r = CallRemoteService((RemoteCallClient*)elt, 3, 1, ((Slot_209720*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    D_0062ADC0.read.fd = value;
+    r = CallRemoteService(elt, 3, 1, &D_0062ADC0, 0x30, &D_0062C300, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 3;
     } else {
@@ -189,7 +226,9 @@ s32 CloseCardFile(s32 value)
 
 LINKER_REMNANT(func_002097D8);
 
-struct Pkt_2097E0 {
+// What the server leaves in the transfer buffer for the completion handler: two runs of bytes,
+// each with its length and the destination it is copied to.
+struct CardReplyCopy {
     s32 n0;
     s32 n1;
     u8* dst0;
@@ -198,9 +237,9 @@ struct Pkt_2097E0 {
     u8 src1[0x40];
 };
 
-void CopyCardDirectoryReply(Pkt_2097E0* p)
+void CopyCardDirectoryReply(CardReplyCopy* p)
 {
-    Pkt_2097E0* q = (Pkt_2097E0*)((u32)p | 0x20000000);
+    CardReplyCopy* q = (CardReplyCopy*)((u32)p | 0x20000000);
     if (q->n0) {
         u8* d = q->dst0;
         for (s32 i = 0; i < q->n0; i++) {
@@ -215,35 +254,31 @@ void CopyCardDirectoryReply(Pkt_2097E0* p)
     }
 }
 
-// The record func_00209870 sends: the file's owner, the length and buffer it was given, and the
-// table of the reply's destinations.
-struct CardFileRequest { s32 fd; u8 pad0[8]; s32 size; u8 pad1[8]; void* buf; void* tab; };
-
 extern "C" void WriteBackDataCacheRange(void* a, s32 b);
 
 s32 ReadCardFile(s32 fd, void* buf, s32 size)
 {
     RemoteCallClient* ctl;
-    CardFileRequest* slot;
+    CardReadRequest* slot;
     void* tab;
     s32 r;
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    ctl = (RemoteCallClient*)g_cardClient;
+    ctl = &g_cardClient;
     if (ctl->server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
     tab = D_0062B240;
-    slot = (CardFileRequest*)D_0062ADC0;
+    slot = &D_0062ADC0.read;
     slot->fd = fd;
     slot->tab = tab;
     slot->buf = buf;
     slot->size = size;
     WriteBackDataCacheRange(buf, size);
     WriteBackDataCacheRange(tab, 0xC0);
-    r = CallRemoteService(ctl, 5, 1, slot, 0x30, D_0062C300, 4, (RemoteCallEndFn)CopyCardDirectoryReply, tab);
+    r = CallRemoteService(ctl, 5, 1, slot, 0x30, &D_0062C300, 4, (RemoteCallEndFn)CopyCardDirectoryReply, tab);
     if (r == 0) {
         g_cardRequestInFlight = 5;
     } else {
@@ -251,9 +286,6 @@ s32 ReadCardFile(s32 fd, void* buf, s32 size)
     }
     return r;
 }
-
-struct Pool_209990 { u8 pad000[0x24]; s32 f24; };
-struct Ctx_209990 { s32 f00; u8 p04[8]; s32 f0C; u8 p10[4]; u32 f14; s32 f18; u8 p1C[4]; u8 buf[16]; };
 
 extern "C" void SyncDataCache(s32 a);
 
@@ -263,30 +295,30 @@ s32 WriteCardFile(s32 self, const void* src, s32 n)
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    if ((*(Pool_209990*)&g_cardClient).f24 == 0) {
+    if (g_cardClient.server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Ctx_209990*)&D_0062ADC0).f00 = self;
+    D_0062ADC0.write.fd = self;
     if (n < 17) {
-        (*(Ctx_209990*)&D_0062ADC0).f14 = n;
-        (*(Ctx_209990*)&D_0062ADC0).f0C = 0;
-        (*(Ctx_209990*)&D_0062ADC0).f18 = 0;
+        D_0062ADC0.write.headSize = n;
+        D_0062ADC0.write.restSize = 0;
+        D_0062ADC0.write.restAddr = 0;
     } else {
         u32 lo = (u32)src - 16;
         s32 off = (((u32)src - 1) & ~0xF) - lo;
-        (*(Ctx_209990*)&D_0062ADC0).f0C = n - off;
-        (*(Ctx_209990*)&D_0062ADC0).f14 = off;
-        (*(Ctx_209990*)&D_0062ADC0).f18 = (u32)src + off; // the address the IOP reads the rest from
+        D_0062ADC0.write.restSize = n - off;
+        D_0062ADC0.write.headSize = off;
+        D_0062ADC0.write.restAddr = (u32)src + off; // the address the IOP reads the rest from
     }
     {
         u32 i;
-        for (i = 0; i < (*(Ctx_209990*)&D_0062ADC0).f14; i++) {
-            (*(Ctx_209990*)&D_0062ADC0).buf[i] = ((const u8*)src)[i];
+        for (i = 0; i < D_0062ADC0.write.headSize; i++) {
+            D_0062ADC0.write.head[i] = ((const u8*)src)[i];
         }
     }
     SyncDataCache(0);
-    r = CallRemoteService((RemoteCallClient*)&g_cardClient, 6, 1, ((Ctx_209990*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    r = CallRemoteService(&g_cardClient, 6, 1, &D_0062ADC0, 0x30, &D_0062C300, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 6;
     } else {
@@ -314,8 +346,6 @@ void WaitCardTicks(u16 id)
     SleepCurrentThread();
 }
 
-struct Dev_209B80;
-
 // With noWait zero it waits until the request in flight is done; with it set, it only tests.
 s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
 {
@@ -323,9 +353,9 @@ s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
     if (g_cardRequestInFlight == 0) {
         return -1;
     }
-    ok = IsRemoteCallPending((RemoteCallClient*)g_cardClient);
+    ok = IsRemoteCallPending(&g_cardClient);
     if (noWait == 0 && ok != 0) {
-        while (IsRemoteCallPending((RemoteCallClient*)g_cardClient) != 0) {
+        while (IsRemoteCallPending(&g_cardClient) != 0) {
             WaitCardTicks(60);
         }
         ok = 0;
@@ -337,7 +367,7 @@ s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2)
     if (ok != 0) {
         g_cardRequestInFlight = 0;
         if (a2 != 0) {
-            *a2 = (*(s32*)&D_0062C300);
+            *a2 = D_0062C300.result;
         }
         (void)PostSemaphore(g_cardSemaphore);
     }
@@ -352,45 +382,38 @@ void CopyCardInfoReply(u32 base)
     if (D_0062AD70) *D_0062AD70 = regs[0x24];
 }
 
-struct Rec_209CB8 { s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; s32 f1C; };
-struct Handle_209CB8;
-struct Pool_209CB8 { u8 pad[0x24]; s32 f24; };
-struct Blk_209CB8;
-typedef void (*Cb_209CB8)(u32 base);
-
-
 s32 GetCardInfo(s32 a0, s32 a1, s32* a2, s32* a3, s32* a4)
 {
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    if ((*(Pool_209CB8*)&g_cardClient).f24 == 0) {
+    if (g_cardClient.server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Rec_209CB8*)&D_0062ADC0).f04 = a0;
-    (*(Rec_209CB8*)&D_0062ADC0).f08 = a1;
-    (*(Rec_209CB8*)&D_0062ADC0).f1C = (s32)D_0062B240;
+    D_0062ADC0.info.port = a0;
+    D_0062ADC0.info.slot = a1;
+    D_0062ADC0.info.table = (s32)D_0062B240;
     if (a2) {
-        (*(Rec_209CB8*)&D_0062ADC0).f14 = 1;
+        D_0062ADC0.info.wantFirst = 1;
     } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f14 = 0;
+        D_0062ADC0.info.wantFirst = 0;
     }
     if (a3) {
-        (*(Rec_209CB8*)&D_0062ADC0).f10 = 1;
+        D_0062ADC0.info.wantSecond = 1;
     } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f10 = 0;
+        D_0062ADC0.info.wantSecond = 0;
     }
     if (a4) {
-        (*(Rec_209CB8*)&D_0062ADC0).f0C = 1;
+        D_0062ADC0.info.wantThird = 1;
     } else {
-        (*(Rec_209CB8*)&D_0062ADC0).f0C = 0;
+        D_0062ADC0.info.wantThird = 0;
     }
     D_0062AD68 = (u32*)a2;
     D_0062AD6C = (u32*)a3;
     D_0062AD70 = (u32*)a4;
     WriteBackDataCacheRange(D_0062B240, 0xC0);
-    s32 result = CallRemoteService((RemoteCallClient*)&g_cardClient, 1, 1, ((Rec_209CB8*)&D_0062ADC0), 0x30, D_0062C300, 4, (RemoteCallEndFn)CopyCardInfoReply, D_0062B240);
+    s32 result = CallRemoteService(&g_cardClient, 1, 1, &D_0062ADC0, 0x30, &D_0062C300, 4, (RemoteCallEndFn)CopyCardInfoReply, D_0062B240);
     if (result == 0) {
         g_cardRequestInFlight = 1;
     } else {
@@ -401,20 +424,14 @@ s32 GetCardInfo(s32 a0, s32 a1, s32* a2, s32* a3, s32* a4)
 
 LINKER_REMNANT(func_00209E40);
 
-struct Lock_9E48;
-struct Mgr_9E48;
-struct Rec_9E48 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 name[0x400]; };
-
-void* CopyStringBounded(u8* dst, const char* src, s32 max);
-
 s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5)
 {
     s32 status = TrySemaphore(g_cardSemaphore);
     if (status < 0) {
         return -200;
     }
-    Mgr_9E48* mgr = (Mgr_9E48*)g_cardClient;
-    if (*(s32*)(g_cardClient + 0x24) == 0) {
+    RemoteCallClient* mgr = &g_cardClient;
+    if (g_cardClient.server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
@@ -422,18 +439,18 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    Rec_9E48* rec = (Rec_9E48*)D_0062ADF0;
-    rec->f0 = a0;
-    rec->f4 = a1;
-    rec->f8 = a3;
-    rec->fC = a4;
-    rec->f10 = (s32)a5; // the address the IOP writes the entries to
-    CopyStringBounded((u8*)rec + 0x14, name, 0x3FF);
-    ((u8*)rec)[0x413] = 0;
+    CardNameRequest* rec = &D_0062ADF0;
+    rec->port = a0;
+    rec->slot = a1;
+    rec->f08 = a3;
+    rec->entryCount = a4;
+    rec->entries = (s32)a5;
+    CopyStringBounded(rec->name, name, 0x3FF);
+    rec->name[0x3FF] = 0;
     if (a4 >= 0) {
         WriteBackDataCacheRange(a5, a4 << 6);
     }
-    s32 r = CallRemoteService((RemoteCallClient*)mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
+    s32 r = CallRemoteService(mgr, 0xD, 1, rec, 0x414, &D_0062C300, 4, 0, 0);
     if (r == 0) {
         g_cardRequestInFlight = 0xD;
     } else {
@@ -444,11 +461,6 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
 
 LINKER_REMNANT(func_00209FA0);
 
-struct Pool_209FA8 { u8 pad[0x24]; s32 busy; };
-struct Req_209FA8 { s32 f0; s32 a; s32 b; };
-struct Handle_209FA8 { s32 h; };
-
-
 s32 RequestCardFormat(s32 a, s32 b)
 {
     s32 r = TrySemaphore(g_cardSemaphore);
@@ -456,13 +468,13 @@ s32 RequestCardFormat(s32 a, s32 b)
     if (r < 0) {
         return -200;
     }
-    if (((Pool_209FA8*)g_cardClient)->busy == 0) {
+    if (g_cardClient.server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
     }
-    (*(Req_209FA8*)&D_0062ADC0).b = b;
-    (*(Req_209FA8*)&D_0062ADC0).a = a;
-    res = CallRemoteService((RemoteCallClient*)&g_cardClient, 0x10, 1, ((Req_209FA8*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    D_0062ADC0.format.slot = b;
+    D_0062ADC0.format.port = a;
+    res = CallRemoteService(&g_cardClient, 0x10, 1, &D_0062ADC0, 0x30, &D_0062C300, 4, 0, 0);
     if (res == 0) {
         (*(u32*)&g_cardRequestInFlight) = 0x10;
     } else {
@@ -473,26 +485,16 @@ s32 RequestCardFormat(s32 a, s32 b)
 
 LINKER_REMNANT(func_0020A070);
 
-// The record func_0020A078 sends: two words and the path, copied to 0x14.
-struct CardPathRequest {
-    s32 f0;
-    s32 f4;
-    u8 pad8[0xC];
-    s8 text14[0x400];
-};
-
-void* CopyStringBounded(s8* dst, const char* src, s32 n);
-
 s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2)
 {
     RemoteCallClient* reg;
-    CardPathRequest* buf;
+    CardNameRequest* buf;
     s32 res;
 
     if (TrySemaphore(g_cardSemaphore) < 0) {
         return -200;
     }
-    reg = ((RemoteCallClient*)&g_cardClient);
+    reg = (&g_cardClient);
     if (reg->server == 0) {
         PostSemaphore(g_cardSemaphore);
         return -100;
@@ -501,12 +503,12 @@ s32 RequestCardSpaceForPath(s32 a0, s32 a1, const char* a2)
         PostSemaphore(g_cardSemaphore);
         return -210;
     }
-    buf = ((CardPathRequest*)&D_0062ADF0);
-    buf->f0 = a0;
-    buf->f4 = a1;
-    CopyStringBounded(buf->text14, a2, 0x3FF);
-    buf->text14[0x3FF] = 0;
-    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    buf = &D_0062ADF0;
+    buf->port = a0;
+    buf->slot = a1;
+    CopyStringBounded(buf->name, a2, 0x3FF);
+    buf->name[0x3FF] = 0;
+    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, &D_0062C300, 4, 0, 0);
     if (res == 0) {
         g_cardRequestInFlight = 0x12;
     } else {
