@@ -198,14 +198,14 @@ s32 SetMpegCallback(MpegHandle* obj, s32 index, s32 value, s32 second)
     return old;
 }
 
-s32 RunMpegCallback(MpegHandle* p, s32* idx) {
+s32 RunMpegCallback(MpegHandle* p, MpegMessage* idx) {
     s32 r = 0;
     if (p != 0) {
         MpegDecoder* t = p->decoder;
         if (t != 0) {
-            MpegCallbackFn fn = t->callbacks[*idx].fn;
+            MpegCallbackFn fn = t->callbacks[idx->kind].fn;
             if (fn != 0) {
-                r = fn(p, idx, t->callbacks[*idx].arg);
+                r = fn(p, idx, t->callbacks[idx->kind].arg);
             }
         }
     }
@@ -214,9 +214,9 @@ s32 RunMpegCallback(MpegHandle* p, s32* idx) {
 
 s32 RunMpegStallCallback(MpegHandle* q)
 {
-    s32 flag[8];
-    flag[0] = 1;
-    return RunMpegCallback(q, flag);
+    MpegSignal flag;
+    flag.kind = 1;
+    return RunMpegCallback(q, &flag);
 }
 
 LINKER_REMNANT(func_0020B208);
@@ -312,7 +312,6 @@ s32 RunMpegPictureLoop(MpegHandle* self)
 extern s32 SelectPictureBuffer(MpegDecoder* p, s32 flag);
 extern s32 DecodePictureData(MpegDecoder* self);
 extern void OutputPictureIfDecoded(MpegDecoder* self, s32 count, s32 flag);
-extern s32 RunMpegStallCallback(MpegHandle* q);
 
 struct FramePictureStep {
     static s8 Ready(MpegDecoder* e)
@@ -512,13 +511,6 @@ void ReportMpegErrorFormat(MpegDecoder* self, const char* fmt, s32 value)
     ReportMpegError(self, buf);
 }
 
-struct MpegErrorMessage {
-    s32 kind;
-    const char* text;
-};
-
-s32 RunMpegCallback(MpegHandle* sub, MpegErrorMessage* message);
-
 void ReportMpegError(MpegDecoder* self, const char* value)
 {
     MpegErrorMessage message;
@@ -664,7 +656,6 @@ void SetUpPictureBufferAddresses(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u3
     *p9 = v2;
 }
 
-s32 RunMpegCallback(MpegHandle* h, MpegMessage* out);
 void WaitIpuCommandDone(MpegDecoder* self); // stays void: retail returns a value, but declared so func_0020BEA0 differs in registers
 void SendIpuCommand(MpegDecoder* obj, u32 value);
 extern "C" s32 DisableInterrupts(void);
@@ -672,7 +663,7 @@ extern "C" s32 EnableInterrupts(void);
 
 void LoadIpuQuantiserMatrix(MpegDecoder* obj, u32 value, u32 mask)
 {
-    MpegMessage req;
+    MpegSignal req;
     req.kind = 2;
 
     RunMpegCallback(obj->handle, &req);

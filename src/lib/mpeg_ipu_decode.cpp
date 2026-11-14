@@ -26,15 +26,14 @@ void SetIpuMpeg1Mode(u32 value)
 }
 
 void WaitIpuCommandDone(MpegDecoder* o); // stays void: retail returns a value, but declared so func_0020DF10 and func_0020F708 differs in registers
-s32 RunMpegCallback(MpegHandle* q, MpegMessage* m);
 void ReportMpegError(MpegDecoder* self, const char* value);
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 
 s32 WaitIpuDecodeDone(MpegDecoder* o)
 {
-    MpegMessage m;
-    MpegMessage n;
+    MpegSignal m;
+    MpegSignal n;
     s32 result = 1;
     WaitIpuCommandDone(o);
     while (*(volatile u32*)0x1000B020 != 0 && (*(volatile u32*)0x10002010 & 0x4000) == 0) {
@@ -536,7 +535,6 @@ void SendIpuCommand(MpegDecoder* obj, u32 value)
     obj->windowInvalid = D_0027B040[index];
 }
 
-s32 RunMpegStallCallback(MpegHandle* q);
 
 void WaitIpuCommandDone(MpegDecoder* self)
 {
@@ -572,7 +570,6 @@ s64 WaitIpuCommandResult(MpegDecoder* p) {
 
 extern u32 D_0027B040[];
 
-s32 RunMpegStallCallback(MpegHandle* q);
 
 s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode)
 {
@@ -617,7 +614,6 @@ s16 DecodeIpuVariableLength(MpegDecoder* self, s32 mode)
 
 
 s64 WaitIpuCommandResult(MpegDecoder* obj);
-s32 RunMpegStallCallback(MpegHandle* q);
 
 extern u32 D_0027B040[];
 
@@ -640,7 +636,6 @@ s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
 }
 
 extern u32 D_0027B040[];
-extern s32 RunMpegStallCallback(MpegHandle* q);
 extern s64 WaitIpuCommandResult(MpegDecoder* c, u32* v);
 
 void SkipIpuBits(MpegDecoder* s0, u32 s1)
@@ -665,7 +660,6 @@ void SkipIpuBits(MpegDecoder* s0, u32 s1)
 
 
 s64 WaitIpuCommandResult(MpegDecoder* obj);
-s32 RunMpegStallCallback(MpegHandle* q);
 
 extern u32 D_0027B040[];
 
@@ -729,16 +723,11 @@ s32 ReadSliceQuantiser(MpegDecoder* self)
     return 0;
 }
 
-// The record func_0020F7F0 hands the callback to ask for the picture's time stamps: a kind, then
-// the two words the callback fills in (-1 when it has none).
-struct MpegPositionQuery { s32 kind; s64 pts; s64 dts; };
-
 void FindNextStartCode(MpegDecoder* self);
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void ReadSequenceHeader(MpegDecoder* d);
 void ReadGroupOfPicturesHeader(MpegDecoder* self);
 void ReadPictureHeader(MpegDecoder* self);
-s32 RunMpegCallback(MpegHandle* a0, MpegPositionQuery* out);
 
 s32 ParseMpegHeaders(MpegDecoder* self)
 {
@@ -1441,12 +1430,11 @@ void StartIpuOutputDma(u32 a, s32 b)
 
 
 void SendIpuCommand(MpegDecoder* obj, u32 value);
-s32 RunMpegCallback(MpegHandle* h, MpegMessage* p);
 
 void ConvertSmallPictureColours(MpegDecoder* self, u32 a1, u32 a2)
 {
 
-    MpegMessage tmp;
+    MpegSignal tmp;
     while (*(volatile s32*)0x10002010 < 0) { }
     (void)DisableInterrupts();
     *(volatile u32*)0x1000B010 = a1 & 0x0FFFFFFF;
@@ -1514,7 +1502,7 @@ void ReportMpegError(MpegDecoder* self, const char* value);
 void ConvertLargePictureColours(MpegDecoder* self, s32 addr, s32 size)
 {
     s32 chunk = 0x3FF;
-    MpegMessage msg;
+    MpegSignal msg;
     ColourOutputTransfer xfer;
     xfer.total = size / chunk + 1;
     xfer.addr = (addr + 0xFFC00) & 0xFFFFFFF;
@@ -1587,14 +1575,13 @@ s32 EnableDmaInterrupt(s32 channel);
 extern "C" s32 DisableInterrupts(void);
 extern "C" s32 EnableInterrupts(void);
 s32 ContinueColourConversionInput(s32 unused, PendingInput* p);
-s32 RunMpegCallback(MpegHandle* q, MpegMessage* m);
 void SendIpuCommand(MpegDecoder* obj, u32 value);
 void ConvertSmallPictureColours(MpegDecoder* self, u32 a1, u32 a2);
 void ConvertLargePictureColours(MpegDecoder* self, s32 addr, s32 size);
 
 void ConvertPictureColours(MpegDecoder* self, MpegPicture* d)
 {
-    MpegMessage msg;
+    MpegSignal msg;
     PendingInput xfer;
     s32 count = d->mbWidth * d->mbHeight;
     msg.kind = 2;

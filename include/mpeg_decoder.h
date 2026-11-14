@@ -11,6 +11,7 @@
 
 struct MpegHandle;
 struct MpegDecoder;
+struct MpegMessage;
 
 // The IPU and its DMA channels as func_002118A0 saves them (and func_00211988 restores them): the
 // input channel's address, tag address, quadword count and control, the output channel's
@@ -37,18 +38,36 @@ struct MpegRing {
 };
 
 // A callback of the decoder's table: func_0020B190 runs the one at an index with its argument.
-typedef s32 (*MpegCallbackFn)(MpegHandle*, s32*, s32);
+typedef s32 (*MpegCallbackFn)(MpegHandle*, MpegMessage*, s32);
 struct MpegCallback {
     MpegCallbackFn fn;      // 0x00
     s32 arg;                // 0x04
 };
 
-// A message the decoder passes to the callback of its kind (func_0020B190 runs it): the kind
-// first, then whatever that kind carries; the kinds that carry nothing leave the rest unused.
+// A message the decoder passes to the callback of its kind (RunMpegCallback runs it): the kind
+// first, then whatever that kind carries. 0 is an error (its text), 1 the decoder waiting on the
+// IPU, 2 and 3 the start and the end of a stretch of its DMA, 4 a colour conversion under way,
+// 5 a request for the time stamps of the picture just read.
 struct MpegMessage {
     s32 kind;               // 0x00
+};
+
+// The kinds that carry nothing (the rest of the record is unused).
+struct MpegSignal : MpegMessage {
     s32 pad04[7];           // 0x04
 };
+
+struct MpegErrorMessage : MpegMessage {
+    const char* text;       // 0x04
+};
+
+struct MpegPositionQuery : MpegMessage {
+    s64 pts;                // 0x08: the callback sets them, -1 when it has none
+    s64 dts;                // 0x10
+};
+
+s32 RunMpegCallback(MpegHandle* p, MpegMessage* message);
+s32 RunMpegStallCallback(MpegHandle* q);
 
 // A packet the demultiplexer hands to its stream's handler (src/lib/mpeg_demultiplexer.cpp): what
 // kind of event it is, where the packet and its payload start in the ring buffer, the payload's
