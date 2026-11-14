@@ -39,7 +39,7 @@ struct WorldListedObject : PlacedObject {
         Quad16 q300;        // 0x300: zeroed, then the source's +0x150 or a rate in f304 (func_0013A128)
         struct {
             f32 f300;
-            f32 f304;
+            f32 registerRate;
         };
     };
     u8 curve310[0x10];      // 0x310: remapped from the source's +0x160
@@ -52,7 +52,7 @@ struct WorldListedObject : PlacedObject {
     TextureRegWrite regs[32]; // 0x390: one for each texture entry, the first ones doubled to fill regCount
     s32 colorCount;         // 0x590: the colours in color: the source's (func_0013A128), or 1 taken from the record (func_00139F80)
     u8 color[32][4];        // 0x594: halved bytes: the source's colours last first, or the record's bytes 4..7
-    s32 f614;               // 0x614: copied from the source's +0x184 (func_0013A128)
+    s32 pairedColors;       // 0x614: copied from the source's +0x184 (func_0013A128)
     s32 particleMode;       // 0x618: from the source's +0x190
     f32 f61C;               // 0x61C: from the source's +0x194
     s32 particleCount;      // 0x620: cleared by func_00139D68
@@ -68,7 +68,7 @@ void LeaveWorldLists(WorldListedObject* self);                       // slot 6
 void ReleaseWorldListedObject(WorldListedObject* self);                       // slot 7
 void UpdateWorldListedObject(WorldListedObject* self, f32 dt);                       // slot 17
 void CopyWorldListedObject(WorldListedObject* self, BaseObject* src);             // slot 23
-struct Src_13AD08;
-void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src); // slot 37
+struct ScaledBlockSource;
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, ScaledBlockSource* src); // slot 37
 
 #endif

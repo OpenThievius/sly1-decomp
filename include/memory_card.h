@@ -40,7 +40,7 @@ struct MemoryCard {
     f32 nextPollTime;       // 0x20: func_0018BDC8, func_0018D0A0
     s32 f24;                // 0x24: func_0018D0A0
     s32 freeBlocks;         // 0x28: func_0018C250 (compared with the blocks a save needs), func_0018D0A0
-    s32 f2C;                // 0x2C: func_0018D0A0
+    s32 formatted;          // 0x2C: func_0018D0A0
     CardSlot slots[3];      // 0x30: the three save files read from the card (func_0018C420)
     union {
         GameProgress* image;     // 0x4F44: the block func_0018C568 writes (Data_18C568, 0x1A00 bytes)

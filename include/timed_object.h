@@ -29,7 +29,7 @@ struct TrackPlayer {
 
 // Class 0x30's descriptor: 0x03's slots, then six more (slot n at 0x10 + 4n; slot 72 is empty in
 // 0x30).
-struct Desc30 : Desc03 {
+struct TimedObjectDescriptor : ColliderDescriptor {
     void (*m48)(TimedObject* self, s32* state);     // 0x130: pick the next state (0x32: func_001B0C68)
     void (*m49)(TimedObject* self, s32 flag);       // 0x134: func_001B00E8, func_001B0EA8
     void (*m4A)(TimedObject* self);                 // 0x138: func_001B0120, func_001B0EE0
@@ -44,10 +44,10 @@ struct TimedObject : Collider {
     s32 state;              // 0x558: -1 at set-up
     f32 stateStartTime;     // 0x55C: the time the state was entered
     s32 initialState;       // 0x560: the state slot 77 is called with when the object is set up
-    Ids03 ids564;           // 0x564: object ids (func_001AF000)
-    Ids03 ids578;           // 0x578: object ids (func_001AF028)
-    Ids03 ids58C;           // 0x58C: class ids (func_001AF050)
-    Ids03 ids5A0;           // 0x5A0: class ids (func_001AF078)
+    ObjectIdList ids564;           // 0x564: object ids (func_001AF000)
+    ObjectIdList ids578;           // 0x578: object ids (func_001AF028)
+    ObjectIdList ids58C;           // 0x58C: class ids (func_001AF050)
+    ObjectIdList ids5A0;           // 0x5A0: class ids (func_001AF078)
     s32 acceptsAll;         // 0x5B4: when set, every object is accepted (func_001AED78)
     f32 beginDuration;      // 0x5B8
     f32 endDuration;        // 0x5BC
@@ -56,7 +56,7 @@ struct TimedObject : Collider {
     TrackPlayer* heldTrack;      // 0x5C8
     f32 heldValue;          // 0x5CC: the value kept out of f5C8's record
 
-    const Desc30* desc30() const { return (const Desc30*)desc; }
+    const TimedObjectDescriptor* desc30() const { return (const TimedObjectDescriptor*)desc; }
 };
 
 // A group of 0x31: a child object and the objects it was cloned from the first group for.
@@ -73,8 +73,8 @@ struct TimedGroupChild {
         s32 fC; // 0xC
         Collider* hit;  // 0xC: the object the group's line hit (UpdateTimedGroup)
     };
-    Vec02 f10; // 0x10
-    s32 f20; // 0x20
+    Vec4 hitPoint; // 0x10: where the group's line hit an object
+    s32 hitSegment; // 0x20: index of the line segment that was hit
     s32 count;              // 0x24
     TimedGroupEntry items[5];       // 0x28
 };
@@ -86,9 +86,9 @@ struct TimedGroup : TimedObject {
     s32 groupCount;         // 0x5D4
     u8 pad5D8[0x5E0 - 0x5D8];
     TimedGroupChild groups[16];     // 0x5E0
-    s32 fAE0; // 0xAE0
-    void* fAE4; // 0xAE4
-    void* fAE8; // 0xAE8
+    s32 widestCurveCount; // 0xAE0
+    void* firstBeamObject; // 0xAE4: the beam object drawn in states 0 to 3
+    void* secondBeamObject; // 0xAE8: the beam object drawn in states 4 to 7
     f32 repeatEndDuration;  // 0xAEC
     TimedGroup* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
     u8 padAF4[0xAF8 - 0xAF4];
@@ -130,13 +130,13 @@ struct BlinkObject : TimedObject {
     f32 blinkRate;          // 0x604
     f32 blinkDuration;      // 0x608
     f32 restartDelay;       // 0x60C
-    Elem02* blinkElem;      // 0x610: an entry of PlacedObject's list at 0x280 (a frame target for func_001B1898)
+    PlacedObjectElement* blinkElem;      // 0x610: an entry of PlacedObject's list at 0x280 (a frame target for func_001B1898)
     f32 savedStartTime;     // 0x614
     s32 resuming;           // 0x618
     u8 pad61C[0x620 - 0x61C];
 };
 
-typedef char check_Desc30[sizeof(Desc30) == 0x148 ? 1 : -1];
+typedef char check_Desc30[sizeof(TimedObjectDescriptor) == 0x148 ? 1 : -1];
 typedef char check_TimedObject[sizeof(TimedObject) == 0x5D0 ? 1 : -1];
 typedef char check_TimedGroupChild[sizeof(TimedGroupChild) == 0x50 ? 1 : -1];
 typedef char check_TimedGroup[sizeof(TimedGroup) == 0xB10 ? 1 : -1];

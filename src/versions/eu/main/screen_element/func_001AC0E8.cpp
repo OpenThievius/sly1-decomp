@@ -66,15 +66,15 @@ void DrawGauge(Self_eu_1ACEE0* self)
     f32 h = self->f584 * y;
     y -= h;
     f32 w = self->f598;
-    ((Layout_137228*)&out)->Pos(self->f52C + self->f590, self->f530 + self->f594);
-    ((Layout_137228*)&out)->Size(w, y);
+    ((TextBoxLayout*)&out)->Pos(self->f52C + self->f590, self->f530 + self->f594);
+    ((TextBoxLayout*)&out)->Size(w, y);
     {
         Col_eu_1ACEE0 tmp;
         tmp.v[0] = grey;
-        ((Layout_137228*)&out)->Color((s32*)&tmp);
+        ((TextBoxLayout*)&out)->Color((s32*)&tmp);
     }
-    ((Layout_137228*)&out)->SetF14(0);
-    ((Layout_137228*)&out)->SetF18(0);
+    ((TextBoxLayout*)&out)->SetF14(0);
+    ((TextBoxLayout*)&out)->SetF18(0);
     SetTextLayoutVerticalPlacement(&out, 0);
     {
     Rgba_eu_1ACEE0 col;

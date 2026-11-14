@@ -11,8 +11,8 @@ struct SpinningSprite_eu {
 void DrawSpinningSpriteElement(SpinningSprite_eu* self)
 {
     Rgba4 col;
-    Mat02 m;
-    Vec02 p;
+    Mat3 m;
+    Vec4 p;
     if (self->icon == 0) {
         return;
     }
@@ -20,7 +20,7 @@ void DrawSpinningSpriteElement(SpinningSprite_eu* self)
     if (g_camera->snapping != 0) {
         self->f288 = target;
     } else {
-        self->f288 = ApproachValueWithRamp((RampProfile*)D_002641B8, 0, self->f288, target, g_frameStep);
+        self->f288 = ApproachValueWithRamp((RampProfile*)g_walkerAlphaRamp, 0, self->f288, target, g_frameStep);
     }
     if (self->f288 == 0.0f) {
         return;
@@ -29,16 +29,16 @@ void DrawSpinningSpriteElement(SpinningSprite_eu* self)
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
     AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x30000);
     *(u32*)&col = 0x80FFFFFF;
-    BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * D_002641C4);
+    BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * g_walkerSpinRate);
     BeginGifTag(&g_gsPacketWriter, 0x5C, 3, 0x412);
     col.a = (u8)(s32)(self->f288 * (f32)col.a);
     for (u32 i = 0; i < 4; i++) {
         f32 sx = self->aim[0] * 320.0f + 320.0f;
         f32 sy = self->aim[1] * -234.305084f + 234.305084f;
-        Vu0::Q(p) = Vu0::Rotate(m, Vu0::Q(D_002641F0[i * 4]));
+        Vu0::Q(p) = Vu0::Rotate(m, Vu0::Q(g_walkerQuadCorners[i * 4]));
         p.x = p.x + sx;
         p.y = p.y + sy;
-        AddGifStEntry(&g_gsPacketWriter, D_002641C8[i * 2], D_002641C8[i * 2 + 1], 1.0f);
+        AddGifStEntry(&g_gsPacketWriter, g_walkerQuadTexCoords[i * 2], g_walkerQuadTexCoords[i * 2 + 1], 1.0f);
         AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&col);
         f32 left = 1728.0f;
         s32 px = (s32)((p.x + left) * 16.0f);

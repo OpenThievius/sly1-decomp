@@ -9,7 +9,7 @@
 struct BufferedStream;
 struct EntryTableObject;
 struct FollowableObject;
-struct Packet47;
+struct FollowerNotification;
 struct TargetFollower;
 
 void InitTargetFollower(TargetFollower* self);
@@ -25,7 +25,7 @@ void PlaceTargetFollowerOnFollowed(TargetFollower* self);
 void LaunchTargetFollowerAtFollowed(TargetFollower* self);
 void StartRandomStreamVoice(TargetFollower* self);
 void PlayPendingFollowerSound(TargetFollower* self);
-void HandleTargetFollowerNotification(TargetFollower* self, s32 type, Packet47* packet);
+void HandleTargetFollowerNotification(TargetFollower* self, s32 type, FollowerNotification* packet);
 void SetTargetFollowerMode(TargetFollower* self, s32 mode);
 void SetCurrentTargetFollower(TargetFollower* follower);
 void ClearCurrentTargetFollower(TargetFollower* follower);

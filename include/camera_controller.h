@@ -72,7 +72,7 @@ struct TargetCameraController : CameraController {
         s32 f1C;            // 0x1C
         f32 zoomSpeed;      // 0x1C as a float: g18's speed (func_00149760)
     };
-    f32 f20;                // 0x20: 10.0, the divisor func_001496C0 takes the rate by
+    f32 zoomDivisor;        // 0x20: 10.0, the divisor func_001496C0 takes the rate by
     f32 zoomMin;            // 0x24: the camera's f1C8 divided by f20
     f32 zoomMax;            // 0x28: the camera's f1C8; func_0014A7B8 gives it back
     f32 savedNearDistance;  // 0x2C: the camera's f1E4; func_0014A7B8 gives it back
@@ -85,7 +85,7 @@ struct TargetCameraController : CameraController {
         s32 f50;            // 0x50
         u8* keptObject;     // 0x50: an object kept in view, its position at +0x140 (func_00149760)
     };
-    f32 f54;                // 0x54: 0.5
+    f32 distanceFactor;     // 0x54: 0.5
     f32 sizeOverride;       // 0x58: -1.0
     void* anchorObject;     // 0x5C: the object whose place func_001493C8 reads, or 0
 };

@@ -6,8 +6,8 @@ struct Ann_eu_1F4AE0 { u8 pad[0x974]; s32 announce; };
 struct Cap_eu_1F4AE0 { u8 pad00[8]; u16 t8; u8 pad0A[0x570 - 0x0A]; s32 f570; };
 void UpdateObjectSubGroup(ObjectSubGroup* self, f32 dt)
 {
-    Vec02 local;
-    Vec02 radius;
+    Vec4 local;
+    Vec4 radius;
     UpdatePlacedObject(self, dt);
     switch (self->state) {
     case 5: {

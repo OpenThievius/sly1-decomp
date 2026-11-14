@@ -16,14 +16,14 @@ void UpdatePanelStick(Self_136040_eu* self, PadRecord* p)
 {
     switch (self->f260) {
     case 1: {
-        Vec_136040 va;
-        Vec_136040 vb;
-        Vec_136040 r;
+        StickVec4 va;
+        StickVec4 vb;
+        StickVec4 r;
         f32 lo = -1.0f;
         f32 hi = 1.0f;
         f32 sum = p->stickX + p->secondStickX;
-        StickLimits t0 = D_00249D00;
-        StickLimits t1 = D_00249D10;
+        StickLimits t0 = g_panelStickActiveRamp;
+        StickLimits t1 = g_panelStickIdleRamp;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
         f32 v = p->stickY;
         f32 lo2 = -1.0f;

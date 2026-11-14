@@ -8,8 +8,8 @@ void SetScreenFadeMode(ScreenFade* self, s32 mode)
 {
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
-        if (D_0026FA68 != 0) {
-            SetWarpPageMode((WarpPage*)D_0026FA68, 0);
+        if (g_currentWarpPage != 0) {
+            SetWarpPageMode((WarpPage*)g_currentWarpPage, 0);
         }
     }
     if (mode == 1) goto L02E0;
@@ -49,11 +49,11 @@ L0300:
         s32 v = GetEntryIdByKey((KeyedEntry*)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
-        if (D_0026FA68 == 0) goto L034C;
+        if (g_currentWarpPage == 0) goto L034C;
         if (v == -1) goto L034C;
         s32 a1 = 10;
         if (a3 != 0) a1 = a2;
-        SetWarpCursor((WarpPage*)D_0026FA68, a1, 3);
+        SetWarpCursor((WarpPage*)g_currentWarpPage, a1, 3);
         ShowCountedScreenElement(g_currentWorld);
         goto L0364;
     }

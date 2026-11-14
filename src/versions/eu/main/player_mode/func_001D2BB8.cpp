@@ -138,7 +138,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         if ((u32)self->state < 2 && (pad->flags & 0x10) && self->f1518 != 0) {
             ClearPadPressedBits(pad, 0x10);
             if (IsObjectAttached((BaseObject*)self->f1518)) {
-                Vec02 d;
+                Vec4 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f1518)->v140), Vu0::Q(self->v140));
                 self->heading = ArctangentOfRatio(d.y, d.x);
                 TurnColliderTowardHeading(self);

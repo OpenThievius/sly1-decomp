@@ -27,8 +27,8 @@
 #include "functions/texture_upload.h"
 #include "functions/world.h"
 #include "functions/zone_collider.h"
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -60,7 +60,7 @@ void PrepareRangeRecord(RangeRecord* self)
         s32 idx = g_meshQueueCount;
         if (idx < 0x4000) {
             u8* p = g_meshQueueEntries + idx * 16;
-            self->f2D0 = p;
+            self->meshQueueEntry = p;
             g_meshQueueCount = idx + 1;
             FillMemory(p, 0, 16);
         }
@@ -81,7 +81,7 @@ s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 // position.
 void UpdateRangeRecordBounds(RangeRecord* self)
 {
-    Vec02 scaled;
+    Vec4 scaled;
     f32 half;
     f32 t;
     if (AreFloatsNearlyEqual(self->nearRange, self->farRange, 1e-4f)) {
@@ -161,7 +161,7 @@ static inline s32 IsNearlyEqual(f32 a, f32 b)
 
 // Sets the record's position (v10) if the new one differs in any component, then recomputes its
 // bounds and invalidates its cached packet.
-void SetRangeRecordPosition(RangeRecord* self, Vec02* v)
+void SetRangeRecordPosition(RangeRecord* self, Vec4* v)
 {
     u128 a = Vu0::Q(self->v10);
     u128 b = Vu0::Q(*v);
@@ -177,7 +177,7 @@ void SetRangeRecordPosition(RangeRecord* self, Vec02* v)
 
 // Sets the record's direction (v20) if the new one differs in any component, then recomputes its
 // bounds and invalidates its cached packet.
-void SetRangeRecordDirection(RangeRecord* self, Vec02* v)
+void SetRangeRecordDirection(RangeRecord* self, Vec4* v)
 {
     u128 a = Vu0::Q(self->v20);
     u128 b = Vu0::Q(*v);
@@ -231,7 +231,7 @@ s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits)
     if (self->link != 0) {
         u32 flags = self->link->maskC;
         Camera* g = g_camera;
-        u32 mask = g->f21C;
+        u32 mask = g->areaMask;
         s32 ok = 0;
         if ((flags & 0x10000000) != 0 || (mask & flags) == mask) {
             ok = 1;
@@ -272,8 +272,8 @@ typedef s32 (*RangeBodyFilter)(void*, Collider*);
 // match. Slots are reset when their stamp differs from the clock time.
 void UpdateRangeRecord(RangeRecord* self, f32 dt)
 {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     s32 count;
     Collider** list;
     PushBackMemoryMark();
@@ -340,7 +340,7 @@ void BuildRangeRecordPacket(RangeRecord* self)
     if (self->link != 0) {
         Camera* g = g_camera;
         s32 bits = self->link->maskC;
-        s32 need = g->f21C;
+        s32 need = g->areaMask;
         s32 ok = 0;
         if ((bits & 0x10000000) != 0 || (need & bits) == need) {
             ok = 1;
@@ -348,13 +348,13 @@ void BuildRangeRecordPacket(RangeRecord* self)
         if (ok != 0) {
             PacketWriter pw;
             u8 spare[16];
-            Vec02 pos;
-            Mat02 basis;
+            Vec4 pos;
+            Mat3 basis;
             Mat4A proj;
-            Vec02 axis;
+            Vec4 axis;
             RangeUniforms* p;
             InitPacketWriter(&pw);
-            u8* dst = self->f2D0;
+            u8* dst = self->meshQueueEntry;
             if (dst == 0) {
                 dst = spare;
             }
@@ -414,7 +414,7 @@ void QueueRangeRecordPacket(RangeRecord* o)
     if (o->link != 0) {
         Camera* c = g_camera;
         s32 bits = o->link->maskC;
-        s32 need = c->f21C;
+        s32 need = c->areaMask;
         s32 a2 = 0;
         if ((bits & 0x10000000) != 0) {
             goto set;

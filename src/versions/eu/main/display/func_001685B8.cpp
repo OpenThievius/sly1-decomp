@@ -10,7 +10,7 @@ void ResetDisplayBuffers(void)
     ResetGs(0, 1, 3, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
     s32 cnt = g_displayFrameCounter;
-    D_002626CC = 0;
+    g_fieldOffsetMode = 0;
     g_displayFieldCountdown = 0;
     g_displayFieldParity = flag;
     g_drawFieldParity = (flag == 0);

@@ -26,7 +26,7 @@
 #include "functions/warp_menu.h"
 struct BaseObject;
 struct TransformObject;
-struct Vec02;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -172,7 +172,7 @@ s32 IsPointInsideFaceTree(void* self, void* value);
 s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
 {
     Quad_00141170 local;
-    ConvertPointIntoObjectFrame((TransformObject*)self, (Vec02*)value, (Vec02*)&local);
+    ConvertPointIntoObjectFrame((TransformObject*)self, (Vec4*)value, (Vec4*)&local);
     return IsPointInsideFaceTree(self->f8C, &local);
 }
 
@@ -274,7 +274,7 @@ void StartFlaggedObject(FlaggedObject* self)
     if (self->childId == -1) {
         ListFrame it;
         u8* obj;
-        ListWalkBegin::Of(&it, (List01*)&self->children);
+        ListWalkBegin::Of(&it, (ObjectList*)&self->children);
         while ((obj = ListWalkNext::Of(&it)) != 0) {
             if (IsObjectOfKind((BaseObject*)obj, 0x74) != 0) {
                 self->childId = GetAliasId((BaseObject*)obj);
@@ -287,8 +287,8 @@ void StartFlaggedObject(FlaggedObject* self)
     } else {
         self->child = FindFirstObjectByIdMode4(self->world, self->childId, self);
     }
-    if (self->f5A8 != 0) {
-        self->handle = (StateWalker*)CreateStateWalker((StateGraph*)self->f5A8, self, 0x546, 0);
+    if (self->stateGraph != 0) {
+        self->handle = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, 0x546, 0);
 
         if (TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) != 0)
             SetStateWalkerTarget(self->handle, 0x547);
@@ -344,7 +344,7 @@ void UpdateFlaggedObject(FlaggedObject* self, f32 dt)
     for (s32 i = 0; i < self->countB; i++) {
         void* obj = self->objsB[i];
         if (TestPointAgainstObjectShape((ObjectGatherer*)obj, &player->v140)) {
-            GetObjectWorldPosition((BaseObject*)obj, (Vec02*)g_flagTableSaved);
+            GetObjectWorldPosition((BaseObject*)obj, (Vec4*)g_flagTableSaved);
             RaiseObjectFlag(self);
             break;
         }
@@ -390,7 +390,7 @@ void RaiseObjectFlag(FlaggedObject* self)
     SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
     if (IsObjectDescendantOf((BaseObject*)self->child, self)) {
         for (BaseObject* n = self; n != 0; n = n->parent) {
-            Alias01* sl = n->alias;
+            ObjectAlias* sl = n->alias;
             if (sl != 0) {
                 idx = sl->id;
             }

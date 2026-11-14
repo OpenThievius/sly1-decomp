@@ -55,7 +55,7 @@ What is still open, on 2026-11-14 (the README's table and `tools/progress.py` ha
      (`D_eu_XXXXXXXX`), which `tools/names.py` does not take yet;
    - 486 fields of `include/` and 303 of the sources' local types still named by offset, where
      the code shows no role, and PAL's per-function copies of local types (`src/versions/eu/`);
-   - local view types named by role with an address suffix (`Bone_166690`), 97 in game code:
+   - local view types named by role with an address suffix (`ModelBone`), 97 in game code:
      views of a class kept for a stated reason or a type still to share;
    - two class headers by id, `c35.h` and `c52.h`, whose classes only forward their draw slot.
 3. **The disc's data**, each format from the code that reads it ([DISC.md](DISC.md)). How the

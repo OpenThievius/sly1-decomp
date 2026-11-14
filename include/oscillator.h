@@ -10,7 +10,7 @@
 
 // Four rows an oscillator entry writes (EvaluateOscillator): a kind-1 entry the three of a matrix.
 struct OscillatorFrame {
-    Vec02 r[4];
+    Vec4 r[4];
 };
 
 // 0x8D: a set of 0xD0-byte entries (at +0x50) that EvaluateOscillator turns by a sine (kind 0)

@@ -6,7 +6,7 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
     SetFollowObjects((PlacedObject*)self->f6E8, self->f680, self->f680);
-    ((World5ModeColliderLinked*)self->f650)->frame = self->f660;
+    ((World5ModeColliderLinked*)self->f650)->frame = self->aimFrame;
     self->stateWalker = CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 0);
     BuildCombinedBlendAnimation(self, 0xC, 5, (u8*)&self->restWeight, 0, 0, 0, (BlendAnimation**)&self->weightBlend);
     self->restWeight = 1.0f;

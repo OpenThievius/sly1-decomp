@@ -24,7 +24,7 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
 - **A fallback's address in the block before the test.** Where retail forms a
   fallback vector's address (`lui; addiu`) among the length's VU0 code and
   only its `lq` in the short arm, the source named the address first: `const
-  Vec02* fb = &g_unitXVector;` before the length, then `dir = *fb;` in the
+  Vec4* fb = &g_unitXVector;` before the length, then `dir = *fb;` in the
   arm. The pointer is a pseudo set where it is written, so its two insns stay
   in the earlier block and sched1 puts the `lui` first; `dir =
   g_unitXVector;` expands the address inside the arm (func_001DF700, as
@@ -313,7 +313,7 @@ func_00146518, func_001CC818, func_0019ED58, func_00134B48):
       it ($f6 here). The emulator with the variable global finds no
       schedule at all that gives retail's registers.
     - **Written as the file's real static initialiser** (inline functions
-      returning each record by value, `static Blk05 D_00604700 = MakeA();`,
+      returning each record by value, `static EffectSpawnData D_00604700 = MakeA();`,
       checked against the generated `__static_initialization_and_destruction_0`)
       the code is the near miss's exactly: the first record exact, the same
       34 lines in the second. An aggregate initialiser instead stores the
@@ -511,8 +511,8 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   stores come out in two groups with the second group's constants loaded late: a brace
   initialiser with a union member at the first offset of the second group.
 - **func_001930B8, the file-scope records (matched the same day).** switched_collider.cpp's
-  static initialiser is the compiler's own, made from `static Blk05 D_00604700 = { ... };` and
-  `Blk05 D_00269C10 = { ... };` (config/us/generated.tsv names it and its `_GLOBAL_$I$`). A
+  static initialiser is the compiler's own, made from `static EffectSpawnData D_00604700 = { ... };` and
+  `EffectSpawnData D_00269C10 = { ... };` (config/us/generated.tsv names it and its `_GLOBAL_$I$`). A
   vector member copied from a global (`*(Quad16*)&g_unitZVector`) is not safe to store straight
   into the target (expr.c's safe_from_p: an INDIRECT_REF against a MEM), so each record is built
   in a stack temporary and copied, as retail's are. Which members are unions was read off
@@ -524,7 +524,7 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   0x50 (0.5, 2.0) have a non-zero first float and no CLOBBER: they are plain (with either as a
   union, 1 to 3 of 8).
 - **func_001549C8, two function-local statics built the same way.** Its vectors and its spawn
-  block (the same Blk05, with 750, 750, 1.0 and 1.0, 0, -1.0 in the two Quadratic16s) are
+  block (the same EffectSpawnData, with 750, 750, 1.0 and 1.0, 0, -1.0 in the two Quadratic16s) are
   `static` brace initialisers behind two guards, each through a temporary; the CLOBBER at 0x70
   is what held f70 and f78 behind the other stores (docs/toolchain/alias-classes.md, "A constant
   set in an earlier block and used once").
@@ -535,7 +535,7 @@ cp/semantics.c and cp/decl.c read; `-dr -dN -dS -dR -fsched-verbose-6` dumps):
   quadratic's coefficients (include/shapes.h's Quadratic16), which the ring's rows and the spawn
   block's first and last vectors are too.
 - **A CLOBBER raises the stores before it to the constants' priority (func_00156288, matched
-  2026-11-12, w40-fa).** The splash's burst block is the same Blk05 as a local, with the
+  2026-11-12, w40-fa).** The splash's burst block is the same EffectSpawnData as a local, with the
   gravity (0x10) and the up vector (0x30) copied from memory and two angles at 0x44 and 0x48.
   Retail stores the up vector before the gravity. With plain floats at 0x40 both stores have
   priority 4 (store, the CLOBBER at 0x70, its two stores) against 6 for the loads of the

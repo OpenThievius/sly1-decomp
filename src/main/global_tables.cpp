@@ -354,7 +354,7 @@ extern const SoundEntry g_soundEntries[771] = {
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
 extern const s32 g_soundEntryForcedAvailable[772] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-extern ClassHead D_002505B8;  // in .data, below
+extern ClassHead g_emptyClass;  // in .data, below
 extern const void* const g_classDescriptorTable[149] = {
     &g_classRoot,
     &g_objectClass,
@@ -504,7 +504,7 @@ extern const void* const g_classDescriptorTable[149] = {
     &D_00220C40,
     &g_animationPlayerMethods,
     &g_stateWalkerMethods,
-    &D_002505B8
+    &g_emptyClass
 };
 extern const u32 g_crc32Table[256] = {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -603,7 +603,7 @@ extern const KeyRecord g_streamVoiceKeys[7] = {
     {0x3909A2A2, 0xDA5D87C2, 0xC3446569, 0x59D126B9, 0x6943323B, 0x390995E6, 0xC344672C, 0xDA5DAE02}
 };
 extern const char g_scrambledPassword[24] = "@KFWHJGL";
-extern const Mat02 g_identityMatrix = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
+extern const Mat3 g_identityMatrix = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
 extern const f32 g_identityMatrix4[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 extern const KeyRecord g_memoryCardIconKey = { 0x80CFADA9, 0x930F4F53, 0x7F1AF6BE, 0x5EAA1EBC, 0xDDC30E98, 0x80DB63DE, 0x7F1AF5F2, 0x930F1BCB };
 extern const IdentityKey g_watchedMovieKey = { { { 0xEF312076, 0x53B6BFB5, 0x4846D1FF, 0x0EAD57EE, 0x9E3389D7, 0xEF3E4A62, 0x4846D2BB, 0x531DFFB1 } } };
@@ -652,15 +652,15 @@ extern void* const g_screenElements[38] = {
     (void*)&g_selectionCaption,
     (void*)&g_gridSelector,
     (void*)&g_pauseMenuElement,
-    (void*)&D_002708E0,
-    (void*)&D_00271558,
+    (void*)&g_leftArcElement,
+    (void*)&g_rightArcElement,
     (void*)&g_firstTallyCaption,
     (void*)&g_secondTallyCaption,
     (void*)&g_titleElement,
     (void*)&g_promptElement,
     (void*)&g_stackedCaptionGroup,
-    (void*)&D_002739F0,
-    (void*)&D_00273C50,
+    (void*)&g_bossBeatGlyphElement,
+    (void*)&g_beatPressGlyphElement,
     (void*)&g_cyclingGlyphElement,
     (void*)&g_completionPercentCaption,
     0,
@@ -700,17 +700,17 @@ extern const LevelEntry g_levelEntries[33] = {
     { 0x00000505, 0.0f, { 0x166B5E9F, 0xD83C11E9, 0x64ED4809, 0x9F137E03, 0x544B9C1C, 0x167F901D, 0x64ED4AAC, 0xD82147F9 }, g_levelCredits0505 },
     { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, g_levelCredits0506 },
 };
-extern const Vec02 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
-extern const Vec02 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
-extern const Vec02 g_unitZVector = { 0.0f, 0.0f, 1.0f, 0.0f };
-extern const Vec02 D_00248D30 = { 0.0f, 0.0f, 0.0f, 0.0f };
-extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
+extern const Vec4 g_unitXVector = { 1.0f, 0.0f, 0.0f, 0.0f };
+extern const Vec4 g_unitYVector = { 0.0f, 1.0f, 0.0f, 0.0f };
+extern const Vec4 g_unitZVector = { 0.0f, 0.0f, 1.0f, 0.0f };
+extern const Vec4 g_zeroVector = { 0.0f, 0.0f, 0.0f, 0.0f };
+extern const f32 g_unitScale[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 // Read only by func_001B8540, which is original assembly (16 bytes, then 16 no code reads).
 extern const u32 D_00248D60[8] = { 0xFF7FFFFF, 0xFF7FFFFF, 0xFF7FFFFF, 0, 0x53DE6B03, 0xF1409707, 0x45DE6074, 0xD41837D9 };
 // The file's .data.
 u8 D_00250580[56] = { 0 };
 // The descriptor of class 0x94, the last of D_00247448: two zero words.
-ClassHead D_002505B8 = { 0, 0 };
+ClassHead g_emptyClass = { 0, 0 };
 // The method table warp_menu.cpp's objects take (state_reset_object.h), zero in the image.
 void* g_stateResetGroupMethods[6] = { 0 };

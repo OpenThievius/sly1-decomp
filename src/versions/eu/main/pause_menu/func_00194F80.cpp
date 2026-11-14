@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: draws a menu box with its title (laid out into the owner's line table), its items and a separator line.
-// PAL's layout record is 0x20 bytes (its setters differ): its own type, not Layout_137228.
+// PAL's layout record is 0x20 bytes (its setters differ): its own type, not TextBoxLayout.
 struct Out_eu_194F80 { u8 b[0x20]; };
 struct Menu_eu_194F80 { s32 title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
 struct Buf_eu_194F80 { u8 b[0xC0]; };
@@ -40,13 +40,13 @@ void* GetMenuChoiceLabel(s32 menu, s32 id);
 
 struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, Lines_eu_194F80* lines, s32 flag)
 {
-    ((Layout_137228*)out)->Pos(x, y);
-    ((Layout_137228*)out)->Size(w, h);
-    Rgba_137248 tmp;
+    ((TextBoxLayout*)out)->Pos(x, y);
+    ((TextBoxLayout*)out)->Size(w, h);
+    LayoutRgba tmp;
     tmp.value = color;
-    ((Layout_137228*)out)->Color((s32*)&tmp);
+    ((TextBoxLayout*)out)->Color((s32*)&tmp);
     SetTextLayoutHorizontalAlign(out, lines);
-    ((Layout_137228*)out)->SetF18(flag);
+    ((TextBoxLayout*)out)->SetF18(flag);
     SetTextLayoutVerticalPlacement(out, 0);
 } };
 
@@ -92,15 +92,15 @@ void DrawPauseMenu(Self_eu_194F80* self)
     if (self->f210 != 0) {
         Out_eu_194F80 out;
         s32 backColor = 0xFF808080;
-        ((Layout_137228*)&out)->Pos(cx, cy);
-        ((Layout_137228*)&out)->Size(w, h);
+        ((TextBoxLayout*)&out)->Pos(cx, cy);
+        ((TextBoxLayout*)&out)->Size(w, h);
         {
-            Rgba_137248 tmp;
+            LayoutRgba tmp;
             tmp.value = backColor;
-            ((Layout_137228*)&out)->Color((s32*)&tmp);
+            ((TextBoxLayout*)&out)->Color((s32*)&tmp);
         }
-        ((Layout_137228*)&out)->SetF14(0);
-        ((Layout_137228*)&out)->SetF18(0);
+        ((TextBoxLayout*)&out)->SetF14(0);
+        ((TextBoxLayout*)&out)->SetF18(0);
         SetTextLayoutVerticalPlacement(&out, 0);
         Rgba4 saved = self->f210->color;
         {
@@ -119,7 +119,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
             LerpColor::Do(&res, cur->color, gray, pulse * pulse);
             cur->color = res;
         }
-        DrawBoxWithFont::Do(self->f210, (Layout_137228*)&out, g_gsPacketWriter);
+        DrawBoxWithFont::Do(self->f210, (TextBoxLayout*)&out, g_gsPacketWriter);
         self->f210->color = saved;
     }
     if (menu->title != -1) {

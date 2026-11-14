@@ -40,11 +40,11 @@ static inline void ClearArcQueueRequest(ArcQueueRequest_eu_1E7C60* request)
 
 void QueueArcDraw(Arc_eu_1E7C60* self)
 {
-    Vec02 screen;
-    Vec02 world;
-    Vec02 aim;
-    Vec02 dir;
-    Mat02 basis;
+    Vec4 screen;
+    Vec4 world;
+    Vec4 aim;
+    Vec4 dir;
+    Mat3 basis;
     ArcPlacement place;
     s32 first;
     s32 last;
@@ -95,19 +95,19 @@ void QueueArcDraw(Arc_eu_1E7C60* self)
                 dist = -dist;
             }
             cam = g_camera;
-            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
-            Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->rotationRow2), Vu0::Scalar(height)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->rotationRow1), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
-            BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
+            BuildBasisFromXAndZHint(&dir, (const Vec4*)&cam->rotationRow2, &basis);
             BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
-            Vec02 pos;
-            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));
+            Vec4 pos;
+            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat3*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
             break;
         }
         case 4: {
             PlacedObject* special = (PlacedObject*)self->special;
-            Vec02 pos;
+            Vec4 pos;
             if (special == 0) {
                 goto done;
             }

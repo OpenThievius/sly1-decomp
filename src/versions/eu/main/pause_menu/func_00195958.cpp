@@ -21,7 +21,7 @@ extern CardSlot D_eu_00255538[];
 
 void CancelPauseMenuPage(Menu_195958_eu* self);
 void SetPauseMenuLayerPage(Menu_195958_eu* self, s32 a, s32 b);
-void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
+void ExitLevelFromPauseMenu(PauseMenu* a0, s32 a1, s32 a2);
 void BuildPauseMenuPage(Menu_195958_eu* self);
 void PushStackElement(ElementStack* self, ScreenElement* node);
 void SelectLanguage(s32 a);
@@ -68,7 +68,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
         }
         case 19:
         case 20:
-            ExitLevelFromPauseMenu((T217D_6D0*)self, 1, 1);
+            ExitLevelFromPauseMenu((PauseMenu*)self, 1, 1);
             return;
         case 21:
             SetPauseMenuLayerPage(self, 0, -1);
@@ -149,14 +149,14 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             FadeOutAndQueueMovie(8);
             return;
         }
-        ExitLevelFromPauseMenu((T217D_6D0*)self, 0, 2);
+        ExitLevelFromPauseMenu((PauseMenu*)self, 0, 2);
         return;
     case 1:
     case 26:
     case 28:
     case 29:
     case 30:
-        ExitLevelFromPauseMenu((T217D_6D0*)self, (u32)sel < 1, 1);
+        ExitLevelFromPauseMenu((PauseMenu*)self, (u32)sel < 1, 1);
         return;
     case 25: {
         s32 a = self->f280;

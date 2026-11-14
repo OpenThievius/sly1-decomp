@@ -6,22 +6,22 @@
 
 #include "common.h"
 
+struct AimAttachment;
 struct LightObject;
-struct Mat02;
+struct Mat3;
 struct PlacedObject;
 struct SortKeyedObject;
-struct T2195_790;
-struct Vec02;
+struct Vec4;
 struct World;
 
 s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b);
 void UploadLightVolumes(World* world);
-s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount, LightObject** out);
-void InitAim(T2195_790* self, PlacedObject* owner);
-void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
-void* ResolveAimTarget(T2195_790* a0);
-void SwitchAimByTargetDistance(T2195_790* self);
-void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec);
+s32 CollectLightsForSphere(World* world, const Vec4* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount, LightObject** out);
+void InitAim(AimAttachment* self, PlacedObject* owner);
+void AssignAimTarget(AimAttachment* self, void* obj, Vec4* src);
+void* ResolveAimTarget(AimAttachment* a0);
+void SwitchAimByTargetDistance(AimAttachment* self);
+void GetAimRotation(AimAttachment* self, f32 dt, Mat3* rot, Vec4* vec);
 void RunMainLoop(s32 a, s32 b);
 void LoadIopModules();
 void SendVif0StartupPacket(void);

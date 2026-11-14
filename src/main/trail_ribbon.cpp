@@ -15,8 +15,8 @@
 #include "functions/placed_object.h"
 #include "functions/pooled_object.h"
 #include "functions/trail_ribbon.h"
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // A point of the ring: the time it was added, its alpha, and the ribbon's two edges.
@@ -33,14 +33,14 @@ struct TrailRing {
     f32 edgeSpread;         // 0x14: when above 0, the two edges are pushed apart along the camera's 0xA0
     s32 edgeCount;          // 0x18: the edges in use (1 or 2)
     u8 pad1C[4];
-    Vec02 edgeOffsets[2];   // 0x20: the edges' offsets in the object's frame
+    Vec4 edgeOffsets[2];   // 0x20: the edges' offsets in the object's frame
     TimePolynomial poly40;  // 0x40: a new point's alpha over the trail's speed
     u8 pad4C[4];
     TimePolynomial poly;
     u8 pad5C[4];
     TrailPoint elems[0x40];
-    Vec02 vC60;             // 0xC60: the position of the last update (func_001C29F8)
-    Mat02 mC70;             // 0xC70: and its rotation
+    Vec4 vC60;             // 0xC60: the position of the last update (func_001C29F8)
+    Mat3 mC70;             // 0xC70: and its rotation
 };
 // The object that draws a trail: an alpha scale at +0x50 and its ring at +0x60.
 struct TrailOwner {
@@ -74,7 +74,7 @@ void ResetTrailRing(TrailRing* o)
 
 
 // A point's frame as func_001C29F8 steps it from the last placement to the new one.
-struct TrailFrame { Mat02 rot; Vec02 pos; };
+struct TrailFrame { Mat3 rot; Vec4 pos; };
 
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
@@ -82,10 +82,10 @@ static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 // (the target's frame by default) and added to pos, the motion of each edge in the target's root
 // frame gives the speed, and the speed sets the point's alpha and width; nothing is done without a
 // batch mode, a target or a time step.
-void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale, f32 dt)
+void AddTrailPoint(TrailRing* self, Vec4* pos, Mat3* mat, s32 flag, f32 scale, f32 dt)
 {
-    Vec02 pts[2];
-    Vec02 motion[2];
+    Vec4 pts[2];
+    Vec4 motion[2];
     TrailPoint* e;
     s32 i;
     f32 speed;
@@ -128,12 +128,12 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
     }
     if (0.0f < self->edgeSpread) {
         f32 f = self->edgeSpread;
-        Vu0::Q(pts[0]) = Vu0::MulAddX(Vu0::Q(pts[0]), Vu0::Q(g_camera->fA0), Vu0::Scalar(f));
-        Vu0::Q(pts[1]) = Vu0::MulAddX(Vu0::Q(pts[1]), Vu0::Q(g_camera->fA0), Vu0::Scalar(-f));
+        Vu0::Q(pts[0]) = Vu0::MulAddX(Vu0::Q(pts[0]), Vu0::Q(g_camera->rotationRow2), Vu0::Scalar(f));
+        Vu0::Q(pts[1]) = Vu0::MulAddX(Vu0::Q(pts[1]), Vu0::Q(g_camera->rotationRow2), Vu0::Scalar(-f));
     }
     {
-        Mat02 step;
-        Vec02 axis;
+        Mat3 step;
+        Vec4 axis;
         f32 angle;
         MultiplyMatrices3x3(&self->mC70, mat, &step);
         MatrixToAxisAngle(&step, &angle, &axis);
@@ -141,9 +141,9 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
             s32 n = (s32)(__builtin_fabsf(angle) * 5.0f) + 1;
             f32 fn;
             s32 k;
-            Mat02 cur = self->mC70;
+            Mat3 cur = self->mC70;
             TrailFrame frame;
-            Vec02 dp;
+            Vec4 dp;
             fn = (f32)n;
             BuildAxisAngleMatrix(&axis, &step, angle / fn);
             Vu0::Q(frame.pos) = Vu0::Q(self->vC60);
@@ -153,8 +153,8 @@ void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale,
             u128 end = Vu0::Q(*pos);
             Vu0::Q(dp) = Vu0::MulXSum(end, w, Vu0::Q(frame.pos), Vu0::Scalar(ninv));
             for (k = 0; k < n; k++) {
-                Mat02 a;
-                Mat02 b;
+                Mat3 a;
+                Mat3 b;
                 Vu0::Q(a.r[0]) = Vu0::Q(b.r[0]) = Vu0::RotateRows(Vu0::Q(step.r[0]), Vu0::Q(step.r[1]), Vu0::Q(step.r[2]), Vu0::Q(cur.r[0]));
                 Vu0::Q(a.r[1]) = Vu0::Q(b.r[1]) = Vu0::RotateRows(Vu0::Q(step.r[0]), Vu0::Q(step.r[1]), Vu0::Q(step.r[2]), Vu0::Q(cur.r[1]));
                 Vu0::Q(a.r[2]) = Vu0::Q(b.r[2]) = Vu0::RotateRows(Vu0::Q(step.r[0]), Vu0::Q(step.r[1]), Vu0::Q(step.r[2]), Vu0::Q(cur.r[2]));
@@ -203,7 +203,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
 {
     DeferredRequest req;
-    Vec02 diff;
+    Vec4 diff;
     s32 count = self->next - self->oldest;
     if (count < 0) {
         count += 0x40;
@@ -212,8 +212,8 @@ void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
         FillMemory(&req, 0, sizeof(DeferredRequest));
         req.callback = (void*)DrawTrailRibbon;
         req.group = 0xD;
-        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->target->v140), Vu0::Q(*(Vec02*)(cam + 0x40)));
-        req.f04 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(*(Vec02*)(cam + 0x80))));
+        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->target->v140), Vu0::Q(*(Vec4*)(cam + 0x40)));
+        req.f04 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(*(Vec4*)(cam + 0x80))));
         *(f32*)&req.block.q[4] = 1.0f;
         req.arg = self;
         QueueDeferredRequest(&req);
@@ -237,9 +237,9 @@ void DrawTrailRibbon(TrailOwner* self)
     *(u32*)&c = 0xFFFFFFFF;
     BeginDmaTag(&g_vifPacketWriter);
     b.f98 = 0;
-    SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
+    SetVertexBatchTransform(&b, ((u8*)&g_zeroVector), (u8*)&g_identityMatrix);
     SetVertexBatchMode(&b, r->batchMode);
-    SelectVertexBatchLights(&b, ((u8*)&D_00248D30), r->target->boundRadius);
+    SelectVertexBatchLights(&b, ((u8*)&g_zeroVector), r->target->boundRadius);
     idx = r->oldest;
     if (idx != r->next) {
         do {

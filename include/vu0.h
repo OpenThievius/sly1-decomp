@@ -12,7 +12,7 @@
 //   A vector in memory (any 16-aligned 16-byte object) is read and written through Vu0::Q: one
 //   lqc2, one sqc2. A helper's result that is never named stays in its register. A local also
 //   passed by address is written with Vu0::Set where retail forms its address afresh for the call.
-// - A vector local (Vec02, Quad16) lives on the stack, so a result assigned to it is stored
+// - A vector local (Vec4, Quad16) lives on the stack, so a result assigned to it is stored
 //   there even when nothing reads it back: retail's stores to the stack that nothing loads. A
 //   float made a vector (FromFloat) is always stored so in retail: it goes into a local.
 // - A float weight retail stores in a slot of its own that later weights reuse goes through
@@ -174,7 +174,7 @@ struct Vu0 {
     // behind it, which retail's schedules never do (docs/TOOLCHAIN.md, "The weight slot is a
     // cast's copy"). The address is taken here, not through Q: Q returns a reference, which
     // leaves the slot's address in a pseudo of its own that CSE then keeps as the canonical
-    // register for that frame address, and a later local given the freed slot (a block's Vec02
+    // register for that frame address, and a later local given the freed slot (a block's Vec4
     // passed by address) is read through that pseudo across the calls in between, one saved
     // register more than retail (func_0017BCD0; docs/TOOLCHAIN.md, "A weight slot's address
     // must not outlive the statement").

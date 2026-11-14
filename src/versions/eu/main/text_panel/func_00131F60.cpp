@@ -11,7 +11,7 @@ struct Obj_eu_131F60 {
     s32 state;
 };
 
-struct Layout_eu_131F60 : Layout_137228 {
+struct Layout_eu_131F60 : TextBoxLayout {
     void* f1C;
 };
 
@@ -20,8 +20,8 @@ struct TextReader_eu_131F60 { u8 bytes[0xC0]; };
 extern const char D_eu_0024C520[]; // "%c", US D_00249CE0
 
 void InitTextReaderFromTextTable(TextReader_eu_131F60* out, s32 id, Font* font, s32 zero);
-void DrawWrappedAlignedText(TextReader_eu_131F60* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
-void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
+void DrawWrappedAlignedText(TextReader_eu_131F60* reader, TextBoxLayout* layout, s32 zero, PacketWriter* gs);
+void SetTextLayoutVerticalPlacement(TextBoxLayout* layout, s32 value);
 
 struct Gfx_eu_131F60 {
     static s32 ScreenX(f32 x)
@@ -42,7 +42,7 @@ struct Gfx_eu_131F60 {
 // so retail forms it again (addiu a1, sp, 0x40) and stores at 0x40(sp); with `col.w` at each use
 // the pseudo carries the address across Pos and Size in a saved register.
 struct ScreenLayout_eu_131F60 {
-    static void Reset(Layout_137228* l, s32 color)
+    static void Reset(TextBoxLayout* l, s32 color)
     {
         Quad4 col;
         l->Pos(0.0f, 0.0f);
@@ -63,7 +63,7 @@ void DrawTextPanelControlLabels(Obj_eu_131F60* self, PacketWriter* gs)
     AddGifRegisterWrite(gs, 0x42, 0x44);
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
-        f32 zoom = g_camera->f478;
+        f32 zoom = g_camera->zoomFraction;
         const PanelColor* const lit = &g_arcTickColorFrom;
         const PanelColor* const dim = &g_arcTickColorTo;
         f32 step = 1.0f / 15.0f;

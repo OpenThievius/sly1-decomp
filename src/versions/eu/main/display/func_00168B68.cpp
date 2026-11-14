@@ -9,7 +9,7 @@ void FadeScreenToBlack(f32 t)
     InitGifPacket(&f);
     n = (s32)(t * 50.0f);
     SignalDisplaySync();
-    D_002626CC = 0;
+    g_fieldOffsetMode = 0;
     if (n > 0) {
         do {
             f32 x = ((f32)i + 1.0f) / (f32)n;

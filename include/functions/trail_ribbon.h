@@ -6,13 +6,13 @@
 
 #include "common.h"
 
-struct Mat02;
+struct Mat3;
 struct TrailOwner;
 struct TrailRing;
-struct Vec02;
+struct Vec4;
 
 void ResetTrailRing(TrailRing* o);
-void AddTrailPoint(TrailRing* self, Vec02* pos, Mat02* mat, s32 flag, f32 scale, f32 dt);
+void AddTrailPoint(TrailRing* self, Vec4* pos, Mat3* mat, s32 flag, f32 scale, f32 dt);
 void QueueTrailRibbonDraw(TrailRing* self, u8* cam);
 void DrawTrailRibbon(TrailOwner* self);
 

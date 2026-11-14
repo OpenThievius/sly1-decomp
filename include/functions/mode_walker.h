@@ -6,11 +6,11 @@
 
 #include "common.h"
 
+struct AimReticle;
 struct ListedKeepObject;
 struct MessageBody;
 struct ModeWalker;
 struct PadStick;
-struct T217D_BF0;
 
 void RegisterListedKeepObject(ListedKeepObject* self);
 void UnregisterListedKeepObject(ListedKeepObject* self);
@@ -31,7 +31,7 @@ s32 AcceptModeWalkerRequest(ModeWalker* self, s32* arg);
 void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec);
 void ExtractModeWalkerContacts(ModeWalker* self);
 void SetModeWalkerMode(ModeWalker* self, s32 mode);
-void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad);
-void DrawSpinningSpriteElement(T217D_BF0* self);
+void SteerWalkerAimAtNearestTarget(AimReticle* self, PadStick* pad);
+void DrawSpinningSpriteElement(AimReticle* self);
 
 #endif

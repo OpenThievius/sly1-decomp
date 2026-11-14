@@ -23,7 +23,7 @@ void FinishMovie(MoviePlayer* self_)
         do {
         } while (*(volatile s32*)&self->f148 != 0);
     }
-    D_002626CC = 3;
+    g_fieldOffsetMode = 3;
     SendResidentImages();
     if ((u32)self->f00 >= 16) {
         mask = 0;

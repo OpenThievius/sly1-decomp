@@ -18,7 +18,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 1:
         if (self->mode2D0 != cur) {
-            D_00261D38 = D_00261D38 - 1;
+            g_controlBlockingElementCount = g_controlBlockingElementCount - 1;
         }
         break;
     case 3:
@@ -33,7 +33,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         if ((self->waitFlags & 0x10) != 0 && self->player2F8 != 0) {
             StopAnimationPlayer(self->player2F8);
         }
-        if (self->mode2D0 == 2 && self->f330 != 0) {
+        if (self->mode2D0 == 2 && self->dimsVolume != 0) {
             f32 f = 1.0f;
             SetVolumeChannelFactor(9, 0, f);
             SetVolumeChannelFactor(9, 1, f);
@@ -54,7 +54,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         break;
     case 1:
         if (self->mode2D0 != next) {
-            D_00261D38 = D_00261D38 + 1;
+            g_controlBlockingElementCount = g_controlBlockingElementCount + 1;
         }
         self->state2D4 = next;
         break;
@@ -66,7 +66,7 @@ void SetStepSequenceState(StepSequence* self, s32 next)
             PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
             AcquirePadSelectFlag(g_currentWorld);
             SetTextPanelSubject(&g_typedTextCaptionBox, 0);
-            if (self->f330 != 0) {
+            if (self->dimsVolume != 0) {
                 f32 f = 0.6f;
                 SetVolumeChannelFactor(9, 0, f);
                 SetVolumeChannelFactor(9, 1, f);
@@ -84,10 +84,10 @@ void SetStepSequenceState(StepSequence* self, s32 next)
         self->state2D4 = next;
         break;
     case 4:
-        SetArcTarget(&D_002708E0, 0);
-        SetArcSpecialObject(&D_002708E0, 0);
-        SetArcTarget(&D_00271558, 0);
-        SetArcSpecialObject(&D_00271558, 0);
+        SetArcTarget(&g_leftArcElement, 0);
+        SetArcSpecialObject(&g_leftArcElement, 0);
+        SetArcTarget(&g_rightArcElement, 0);
+        SetArcSpecialObject(&g_rightArcElement, 0);
         self->state2D4 = next;
         break;
     default:

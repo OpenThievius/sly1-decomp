@@ -24,7 +24,7 @@ extern f32 g_elapsedTime;
 f32 Sine(f32 x);
 void PushFontScale(s32 handle, f32 a, f32 b);
 void* InitTextReader(TextReader* self, char* text, Font* font);
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(s32 handle);
 
 void InitWideTextReader(void* out, void* p, s32 handle, s32 z);

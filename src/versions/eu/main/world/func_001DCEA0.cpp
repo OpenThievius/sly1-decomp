@@ -52,8 +52,8 @@ void LoadWorld(World* self, BufferedStream* s)
     self->fillAlpha = 0x80;
     color = self->color1D64;
     FillScreenColor(g_screenClearPacketA, &color, 0);
-    self->f1D68 *= 0.003921569f;
-    self->f1D6C *= 0.003921569f;
+    self->lightingParamB *= 0.003921569f;
+    self->lightingParamA *= 0.003921569f;
     SpawnListedObjectCopies(self);
     RunQueuedCalls(self);
     for (BaseObject* o = (BaseObject*)self->list48.head; o != 0; o = o->next) {
@@ -62,7 +62,7 @@ void LoadWorld(World* self, BufferedStream* s)
         }
     }
     RunQueuedCalls(self);
-    List01* list = &self->list48;
+    ObjectList* list = &self->list48;
     frame.list = list;
     frame.offset = list->offset;
     frame.prev = g_activeListFrames;

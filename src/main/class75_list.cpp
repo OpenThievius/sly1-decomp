@@ -17,14 +17,14 @@ u8 g_class75List[16] = {0};
 
 void InitClass75List()
 {
-    SetListLinkOffset((List01*)g_class75List, 0x80);
+    SetListLinkOffset((ObjectList*)g_class75List, 0x80);
 }
 
 
 
 void ClearClass75List()
 {
-    ClearList((List01*)g_class75List);
+    ClearList((ObjectList*)g_class75List);
 }
 
 
@@ -42,7 +42,7 @@ void InitClass75Object(void* self)
 void RegisterClass75Object(void* self)
 {
     RegisterObject((BaseObject*)self);
-    AppendToList((List01*)g_class75List, self);
+    AppendToList((ObjectList*)g_class75List, self);
 }
 
 
@@ -50,7 +50,7 @@ void RegisterClass75Object(void* self)
 void UnregisterClass75Object(void* self)
 {
     UnregisterObject((BaseObject*)self);
-    RemoveFromList((List01*)g_class75List, self);
+    RemoveFromList((ObjectList*)g_class75List, self);
 }
 
 

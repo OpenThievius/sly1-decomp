@@ -169,13 +169,13 @@ void StartWorld5ModeCollider(World5ModeCollider* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
     SetFollowObjects((PlacedObject*)self->f6E8, self->f680, self->f680);
-    ((World5ModeColliderLinked*)self->f650)->frame = self->f660;
+    ((World5ModeColliderLinked*)self->f650)->frame = self->aimFrame;
     self->stateWalker = CreateStateWalker((StateGraph*)self->stateGraph, self, -1, 0);
     BuildCombinedBlendAnimation(self, 0xC, 5, (u8*)&self->restWeight, 0, 0, 0, (BlendAnimation**)&self->weightBlend);
     self->restWeight = 1.0f;
     SetBlendItemWeights((BlendAnimationView*)self->weightBlend, 0xC, 5, &self->restWeight);
     SetWorld5ModeColliderMode(self, 2);
-    T217D_BF0* base = &g_spinningSpriteElement;
+    AimReticle* base = &g_spinningSpriteElement;
     ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
@@ -188,15 +188,15 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec02* a, Vec02* b);
+void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec4* a, Vec4* b);
 
 // Per-frame forces of the world 5 mode collider: in modes 0 and 1 the ordinary collider step; in
 // modes 2 and 3 it steers toward the anchor point (taken to the frame of its parent object), in
 // mode 4 toward its own current position, and always turns toward its target rotation.
 void StepWorld5ModeCollider(World5ModeCollider* self, f32 f)
 {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     s32 mode = self->mode;
     if (mode < 2) {
         goto single;
@@ -212,12 +212,12 @@ single:
     return;
 path2:
     ComputeWorld5ModeColliderAnchors(self, &a, &b);
-    b = D_00248D30;
+    b = g_zeroVector;
     TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, &a, 0, &b, 0);
     goto tail;
 path3:
-    a = *(Vec02*)&self->pos;
-    b = D_00248D30;
+    a = *(Vec4*)&self->pos;
+    b = g_zeroVector;
 tail:
     SteerColliderTowardPosition(self, &a, D_00263C20, &b, D_00263C30, f);
     TurnColliderTowardRotation(self, f, &self->m620, D_00263C40);
@@ -232,7 +232,7 @@ void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
     if (fn != 0) fn(self);
 }
 
-extern T217D_BF0 g_spinningSpriteElement;
+extern AimReticle g_spinningSpriteElement;
 extern f32 g_gameTime;
 extern s32 g_padSelectFlags;
 struct OwnerMessage;
@@ -254,9 +254,9 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 // its five-way blend animation.
 void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
 {
-    Vec02 a;
-    Vec02 d;
-    Vec02 tmp;
+    Vec4 a;
+    Vec4 d;
+    Vec4 tmp;
     f32 wx;
     f32 wy;
     UpdateSwitchedCollider(self, dt);
@@ -266,13 +266,13 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
             g_player->desc->m02(g_player);
             SetSwitchedColliderEnabled(g_player, 1);
             SetPlayerState(g_player, 2, 2);
-            g_player->desc02()->m1F(g_player, (PlacedObject*)self->f6E4);
+            g_player->desc02()->m1F(g_player, (PlacedObject*)self->playerFrameObject);
             g_player->focusPoint = g_player->v140;
             ActivateSwitchedCollider(g_player);
             InitOwnerMessage((OwnerMessage*)&a, 5, self);
             g_player->desc05()->m4C(g_player, &a);
         }
-        ((BaseObject*)self->f6E4)->desc->m03((BaseObject*)self->f6E4);
+        ((BaseObject*)self->playerFrameObject)->desc->m03((BaseObject*)self->playerFrameObject);
         self->flags538 = self->flags538 | (0x8000ULL << 27);
         ClearRootObjectStateBits(self->world, self, 7);
     }
@@ -295,7 +295,7 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
     f32 m = 1.0f - k;
     wx = k * wx + m * self->poseRateX;
     wy = k * wy + m * self->poseRateY;
-    TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->f660)->v140, &tmp);
+    TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->aimFrame)->v140, &tmp);
     if (tmp.x < 0.0f) {
         wx = -wx;
     }
@@ -333,23 +333,23 @@ struct RampProfile3 {
 };
 
 struct RampProfile;
-struct Vec02;
-struct Mat02;
+struct Vec4;
+struct Mat3;
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, f32 limit, Mat02* outRot, Vec02* outSpin);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 
 // The product a b of two rotations into out: a's rows loaded once, b's rows each rotated by
 // them, each result row stored to its vector local and then to out's row.
-static inline void RotationProductInto(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void RotationProductInto(Mat3* out, const Mat3& a, const Mat3& b)
 {
     Vu0::Vec a0 = Vu0::Vec::Of(a.r[0]);
     Vu0::Vec a1 = Vu0::Vec::Of(a.r[1]);
     Vu0::Vec a2 = Vu0::Vec::Of(a.r[2]);
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(out->r[0]) = Vu0::Q(x) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[0]));
     Vu0::Q(out->r[1]) = Vu0::Q(y) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[1]));
     Vu0::Q(out->r[2]) = Vu0::Q(z) = Vu0::RotateRows(a0.q, a1.q, a2.q, Vu0::Q(b.r[2]));
@@ -362,9 +362,9 @@ static inline void RotationProductInto(Mat02* out, const Mat02& a, const Mat02& 
 // spill slots: the last `to` stored through Vu0::Q keeps it in retail's range.
 void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
 {
-    Mat02 mats[2];
+    Mat3 mats[2];
     s32 i;
-    Mat02 aim;
+    Mat3 aim;
     s32 key;
     f32 hiX;
     f32 loX;
@@ -380,7 +380,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
                 ClearPadPressedBits(pad, 0x40);
                 self->buttonPressTime = g_gameTime;
             }
-            if (self->f6E0 != 0 && g_gameTime - self->buttonPressTime < g_world5ButtonWindow[0]) {
+            if (self->pressArmed != 0 && g_gameTime - self->buttonPressTime < g_world5ButtonWindow[0]) {
                 self->desc05()->m50(self);
             }
         }
@@ -400,9 +400,9 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     case 2:
     case 3:
     case 4: {
-        Vec02 at;
-        Vec02 pos;
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &self->f664->v140, &at);
+        Vec4 at;
+        Vec4 pos;
+        TransformPointBetweenFrames(0, (PlacedObject*)self->aimFrame, &self->aimTargetObject->v140, &at);
         f32 u = (at.y - g_world5AimMapY[0]) / g_world5AimMapY[1];
         f32 v = (at.z - g_world5AimMapZ[0]) / g_world5AimMapZ[1];
         ApproachValueWithRamp(self->aimX, u + g_world5AimMargin[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiX);
@@ -430,14 +430,14 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         f32 h = self->aimX;
         Vu0::Q(pos) = Vu0::FromFloats(at.x, g_world5AimMapY[0] + h * (g_world5AimMapY[1] + h * g_world5AimMapY[2]),
                                       g_world5AimMapZ[0] + w * (g_world5AimMapZ[1] + w * g_world5AimMapZ[2]));
-        TransformPointBetweenFrames((PlacedObject*)self->f660, 0, &pos, &pos);
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &pos, &((PlacedObject*)self->f650)->rot.r[2]);
+        TransformPointBetweenFrames((PlacedObject*)self->aimFrame, 0, &pos, &pos);
+        TransformPointBetweenFrames(0, (PlacedObject*)self->aimFrame, &pos, &((PlacedObject*)self->f650)->rot.r[2]);
         ProjectPointToCamera(g_camera, &pos, g_spinningSpriteElement.aim);
         for (i = 0; i < 2; i++) {
-            Vec02 dir;
-            *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f674[i]->v140));
+            Vec4 dir;
+            *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->turnedParts[i]->v140));
             BuildBasisFromXAndZHint(&dir, &g_unitZVector, &mats[i]);
-            TransformRotationBetweenFrames(0, (PlacedObject*)self->f674[i]->parent, &mats[i], &mats[i]);
+            TransformRotationBetweenFrames(0, (PlacedObject*)self->turnedParts[i]->parent, &mats[i], &mats[i]);
         }
         ApproachValueWithRamp(self->poseX, g_world5SteerLimits[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiX);
         ApproachValueWithRamp(self->poseX, g_world5SteerLimits[0], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &loX);
@@ -461,14 +461,14 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         self->poseX = ClampBetween(self->poseX + dt * self->poseRateX, g_world5SteerLimits[0], g_world5SteerLimits[1]);
         self->poseY = ClampBetween(self->poseY + dt * self->poseRateY, g_world5SteerLimits[0], g_world5SteerLimits[1]);
 
-        Mat02 pitch;
-        Mat02 yaw;
-        Mat02 face;
-        Vec02 to;
-        Vec02 rel;
-        Mat02 tilt;
-        Vec02 axis;
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->f660)->v140, &rel);
+        Mat3 pitch;
+        Mat3 yaw;
+        Mat3 face;
+        Vec4 to;
+        Vec4 rel;
+        Mat3 tilt;
+        Vec4 axis;
+        TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->aimFrame)->v140, &rel);
         f32 sx = pad->stickX;
         if (rel.x < 0.0f) {
             sx = -sx;
@@ -476,7 +476,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         BuildAxisAngleMatrix(&g_unitXVector, &pitch, g_world5PitchCoefficients[0] + sx * (g_world5PitchCoefficients[1] + sx * g_world5PitchCoefficients[2]));
         f32 sy = pad->stickY;
         BuildAxisAngleMatrix(&g_unitYVector, &yaw, g_world5YawCoefficients[0] + sy * (g_world5YawCoefficients[1] + sy * g_world5YawCoefficients[2]));
-        *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->f660)->v140), Vu0::Vec::Of(self->v140));
+        *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->aimFrame)->v140), Vu0::Vec::Of(self->v140));
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &face);
         f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
         f32 angle = ClampBetween(g_world5TiltCoefficients[0] + speed * (g_world5TiltCoefficients[1] + speed * g_world5TiltCoefficients[2]), g_world5TiltLimits[0], g_world5TiltLimits[1]);
@@ -485,35 +485,35 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         *(Vu0::Vec*)&axis = n;
         *(Vu0::Vec*)&axis = Vu0::NormalizeOr(Vu0::Vec::Of(axis), Vu0::Vec::Of(g_unitXVector));
         BuildAxisAngleMatrix(&axis, &tilt, angle);
-        Mat02 m3;
-        Mat02 m2;
-        Mat02 m1;
+        Mat3 m3;
+        Mat3 m2;
+        Mat3 m1;
         RotationProductInto(&m1, tilt, face);
         RotationProductInto(&m2, m1, yaw);
         RotationProductInto(&m3, m2, pitch);
         self->m620 = m3;
-        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f67C->v140)).q;
+        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->thirdTurnedPart->v140)).q;
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &aim);
-        TransformRotationBetweenFrames(0, (PlacedObject*)self->f67C->linkRecord->p60, &aim, &aim);
+        TransformRotationBetweenFrames(0, (PlacedObject*)self->thirdTurnedPart->linkRecord->p60, &aim, &aim);
         break;
     }
     default:
         BuildAxisAngleMatrix(&g_unitZVector, &self->m620, self->heading);
         for (i = 0; i < 2; i++) {
-            mats[i] = self->f674[i]->m1A0;
+            mats[i] = self->turnedParts[i]->m1A0;
         }
         aim = g_identityMatrix;
         break;
     }
-    Mat02 rot;
+    Mat3 rot;
     for (i = 0; i < 2; i++) {
-        ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
-        self->f674[i]->desc02()->m1E(self->f674[i], &rot);
+        ApproachRotationWithRamp(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
+        self->turnedParts[i]->desc02()->m1E(self->turnedParts[i], &rot);
     }
-    if (self->f67C->orientationAttachment == 0) {
-        MulRotationRowsIndexed(&aim, aim, self->f67C->m1A0);
-        ApproachRotationWithRamp(&self->f67C->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
-        self->f67C->desc02()->m1E(self->f67C, &rot);
+    if (self->thirdTurnedPart->orientationAttachment == 0) {
+        MulRotationRowsIndexed(&aim, aim, self->thirdTurnedPart->m1A0);
+        ApproachRotationWithRamp(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
+        self->thirdTurnedPart->desc02()->m1E(self->thirdTurnedPart, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);
     ClearRootTries(self);
@@ -541,7 +541,7 @@ void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
         self->pulseActive = 0;
     }
 }
-extern Rgba4 D_002623E0;
+extern Rgba4 g_defaultModelColor;
 
 extern "C" f32 Cosine(f32 x);
 
@@ -588,12 +588,12 @@ void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
             b = hi;
         }
         k = c1 * b;
-        res.r = (s32)((1.0f - k) * D_002623E0.r + k * col[0]);
-        res.g = (s32)((1.0f - k) * D_002623E0.g + k * col[1]);
-        res.b = (s32)((1.0f - k) * D_002623E0.b + k * col[2]);
-        res.a = D_002623E0.a;
+        res.r = (s32)((1.0f - k) * g_defaultModelColor.r + k * col[0]);
+        res.g = (s32)((1.0f - k) * g_defaultModelColor.g + k * col[1]);
+        res.b = (s32)((1.0f - k) * g_defaultModelColor.b + k * col[2]);
+        res.a = g_defaultModelColor.a;
     } else {
-        res = D_002623E0;
+        res = g_defaultModelColor;
     }
     SetObjectTreeRecordValue(self, *(u32*)&res);
     ApplyPlacedObjectTransform(self, (Camera*)s, (ScaledTransform*)out);
@@ -647,8 +647,8 @@ s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
         self->poseRateX = 0.0f;
         self->poseRateY = 3.0f;
         ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
-        TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec02*)bufA, 0, (Vec02*)bufB, 0);
-        self->desc02()->m20(self, (Vec02*)bufB);
+        TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec4*)bufA, 0, (Vec4*)bufB, 0);
+        self->desc02()->m20(self, (Vec4*)bufB);
     }
     if (HasSpareCount() != 0) {
         SetWorld5ModeColliderMode(self, 3);
@@ -673,10 +673,10 @@ void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, Me
     if (kind == 0x13 && rec->sourceId == self->modeAnimPlayer) {
         switch (rec->code) {
         case 0x15E:
-            self->f6E0 = 1;
+            self->pressArmed = 1;
             break;
         case 0x15F:
-            self->f6E0 = 0;
+            self->pressArmed = 0;
             break;
         case 0x467:
             self->releasePending = 1;
@@ -710,7 +710,7 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     switch (mode) {
     case 2: {
         Vu0::Q(g_spinningSpriteElement.aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
-        *(Vec02*)&g_spinningSpriteElement.rateX = D_00248D30;
+        *(Vec4*)&g_spinningSpriteElement.rateX = g_zeroVector;
         g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 2);
         anim = self->weightBlend;
         break;
@@ -742,9 +742,9 @@ void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
     u8 bufA[16];
     u8 bufB[16];
     ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
-    TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec02*)bufA, 0, (Vec02*)bufB, 0);
-    self->desc02()->m1D(self, (Vec02*)bufA);
-    self->desc02()->m20(self, (Vec02*)bufB);
+    TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec4*)bufA, 0, (Vec4*)bufB, 0);
+    self->desc02()->m1D(self, (Vec4*)bufA);
+    self->desc02()->m20(self, (Vec4*)bufB);
 }
 
 
@@ -790,12 +790,12 @@ static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 // stores before the scaling stay until flow2, so the remainder's product takes k's register.
 void UpdateWorld5Boss(World5Boss* self, f32 dt)
 {
-    Vec02 v0;
-    Vec02 local;
-    Vec02 vel;
-    Vec02 local2;
-    Vec02 pos;
-    Mat02 rot;
+    Vec4 v0;
+    Vec4 local;
+    Vec4 vel;
+    Vec4 local2;
+    Vec4 pos;
+    Mat3 rot;
 
     UpdateCollider(self, dt);
     if (self->mode >= 0) {
@@ -835,7 +835,7 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt)
     PlacedObject* p = (PlacedObject*)GetActiveSwitchedCollider();
     if (p != 0) {
         TransformPointBetweenFrames(0, self, &p->v140, &v0);
-        f32 t = ComputeAngleBetweenVectors((Vec02*)&g_unitXVector, &v0, &local);
+        f32 t = ComputeAngleBetweenVectors((Vec4*)&g_unitXVector, &v0, &local);
         t = MinF(1.0f, t);
         f32 y = -t * local.y;
         f32 z = t * local.z;
@@ -859,7 +859,7 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt)
     }
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
 
@@ -872,7 +872,7 @@ void ShowWorld5BossBar(World5Boss* self)
     if (mode < 2) {
         if (mode >= 0) {
             if (AreMenusAndFadeClear() != 0) {
-                if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
+                if (g_displayMode != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
             }
         }
     }
@@ -919,14 +919,14 @@ void SetWorld5BossMode(World5Boss* self, s32 mode)
     }
     if (mode >= 0) {
         if (mode < 2) {
-            T217D_2E0* sys = &g_gaugeBarElement;
+            GaugeBar* sys = &g_gaugeBarElement;
             sys->fillTarget = 1.0f;
             sys->segmentsLeft = sys->segmentCount;
             sys->cellsLeft = sys->cellsPerSegment;
             sys->fill = 0.0f;
             SetWorldActiveFollower(self->world, self);
         } else if (mode < 4) {
-            T217D_2E0* sys = &g_gaugeBarElement;
+            GaugeBar* sys = &g_gaugeBarElement;
             sys->vt->m15(sys);
             SetWorldActiveFollower(self->world, 0);
         }
@@ -1015,7 +1015,7 @@ void UpdateWorld5Countdown(World5Countdown* self, f32 dt)
     }
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
 
@@ -1024,7 +1024,7 @@ void UpdateWorld5CountdownVisibility(World5Countdown* self)
 {
     s32 busy = 0;
     if (self->mode == 1 && AreMenusAndFadeClear() != 0) {
-        if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
+        if (g_displayMode != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
     }
     if (busy) g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
@@ -1089,7 +1089,7 @@ void SetWorld5CountdownState(World5Countdown* self, s32 state)
     switch (state) {
     case 1:
         {
-            T217D_2E0* bar = &g_gaugeBarElement;
+            GaugeBar* bar = &g_gaugeBarElement;
             bar->segmentsLeft = bar->segmentCount = 4;
             bar->cellsLeft = bar->cellsPerSegment = 4;
             bar->cellCount = 0x10;

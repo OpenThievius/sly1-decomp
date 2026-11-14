@@ -22,7 +22,7 @@ struct ConeVolume : PlacedObject {
     u8 pad2D8[0x2E0 - 0x2D8];
     union {
         u32 color[4];       // 0x2E0: as words (SetConeVolumeColor)
-        Vec02 hsv;          // 0x2E0: hue, saturation and value, 0 to 255 (ConvertHsv255ToRgb255); the value is the first level
+        Vec4 hsv;          // 0x2E0: hue, saturation and value, 0 to 255 (ConvertHsv255ToRgb255); the value is the first level
     };
     f32 secondLevel;        // 0x2F0: paired with secondAngle
     f32 thirdLevel;         // 0x2F4: paired with 360 less thirdAngle
@@ -41,17 +41,17 @@ struct ConeVolume : PlacedObject {
     f32 tangentX;           // 0x350
     f32 tangentY;           // 0x354
     f32 innerRatioRoot;     // 0x358
-    f32 f35C;               // 0x35C
+    f32 innerRatioRootEnd;  // 0x35C: 1.0 at set-up
     f32 innerRatioX;        // 0x360
-    f32 f364;               // 0x364
+    f32 innerRatioXEnd;     // 0x364: 1.0 at set-up
     f32 innerRatioY;        // 0x368
-    f32 f36C;               // 0x36C
-    Vec02 planes[6];        // 0x370: the four sides (func_001443C8), the far and the near plane, each with its distance in w
+    f32 innerRatioYEnd;     // 0x36C: 1.0 at set-up
+    Vec4 planes[6];        // 0x370: the four sides (func_001443C8), the far and the near plane, each with its distance in w
     s32 mask;               // 0x3D0: the value lists' mask where it is (QueryValueListMask; all 28 bits in mode 0)
     u8 pad3D4[0x3E0 - 0x3D4];
     union {
         Quad16 axis;        // 0x3E0: the cone's axis, scaled by half the range to its middle (func_00184B58)
-        Mat02 basis;        // 0x3E0: the frame RefreshConeVolumeShape builds from the direction and the up hint
+        Mat3 basis;        // 0x3E0: the frame RefreshConeVolumeShape builds from the direction and the up hint
     };
     ConeVolumeSaved saved;  // 0x410: kept through a copy
     u32 packetSize;         // 0x418: DetachPacketBuffer's count for the packet below

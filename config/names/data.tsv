@@ -1,6 +1,7 @@
 symbol	name	evidence
 D_00000000	g_listedParticleProgram0	VU1 micro-memory address WriteListedObjectParticlePacket gives WriteVifMscal when the object's f618 is 0
 D_00000010	g_litBatchFinishProgram	WriteVifMscalf address that ends BuildLitVertexPacket (2170)
+D_000000F0	g_litBatchSecondFinishProgram	VU1 microprogram address the second buffer of the lit-vertex finish (the function after g_litBatchFinishProgram, with its stcycl 1,4 unpacks at lo+2 and hi) ends with WriteVifMscal; inferred role from the calling function
 D_00000288	g_litBatchProgram	VU1 microprogram address BuildLitVertexPacket gives WriteVifMscal first (2112)
 D_000002F8	g_unlitBatchFinishProgram	VU1 microprogram address BuildUnlitVertexPacket gives WriteVifMscalf (2068)
 D_00000398	g_listedParticleProgram1	VU1 micro-memory address WriteListedObjectParticlePacket gives WriteVifMscal when the object's f618 is 1
@@ -8,16 +9,38 @@ D_000003B0	g_rangeRecordProgram	VU1 micro-memory address BuildRangeRecordPacket 
 D_00000880	g_listedParticleProgram2	VU1 micro-memory address WriteListedObjectParticlePacket gives WriteVifMscal when the object's f618 is 2
 D_00000BF0	g_coneProgramMode0	VU0 microprogram entry RefreshConeVolumeShape sends with WriteVifMscal for mode 0 (after the direction)
 D_00000D30	g_coneProgramMode1	VU0 microprogram entry RefreshConeVolumeShape sends for mode 1 (after the reciprocal fit and position)
+D_00000ED8	g_morphTargetEndProgram	last of the two WriteVifMscal calls that end the morph-target packet builder (after WriteMorphTargetMscal)
 D_00000EF0	g_coneProgramMode23	VU0 microprogram entry RefreshConeVolumeShape sends for modes 2 and 3 (after the ramps and view)
+D_00000FA0	g_morphTargetMode0Program	WriteMorphTargetMscal gives WriteVifMscal this address for mode 0
+D_00000FD8	g_morphTargetMode1Program	WriteMorphTargetMscal gives WriteVifMscal this address for mode 1
 D_00001210	g_litBatchSecondProgram	second WriteVifMscal address of BuildLitVertexPacket (2142)
+D_00001298	g_morphTargetBlendProgram	WriteVifMscal address given after each target's vertex deltas are unpacked in the morph-target packet builder, before WriteVifFlushE
+D_00001368	g_morphTargetTailProgram	first of the two WriteVifMscal calls that end the morph-target packet builder (after WriteMorphTargetMscal)
 D_000018C0	g_flushBatchProgram	WriteVifMscal address FlushVertexBatch uses (2189)
+D_000018F8	g_stripMeshMode1Program	WriteStripMeshMscal gives WriteVifMscal this address for mode 1 (mode 0 is g_flushBatchProgram)
 D_00001A50	g_unlitBatchProgram	VU1 microprogram address BuildUnlitVertexPacket gives WriteVifMscal (2042); inferred role from the calling function
+D_00001A80	g_unlitKind4BatchProgram	the tail program BuildStripMeshPacket picks for mesh kind 4 where kinds 1,5-8,10 take g_unlitBatchProgram
 D_00001AB0	g_litBatchThirdProgram	third WriteVifMscal address of BuildLitVertexPacket (2147)
+D_00002008	g_skinWeightProgram	WriteVifMscal address after the skin weights (hdr->count per vertex) are unpacked in the unlit and lit strip-mesh builders
+D_00002088	g_litSkinWeightProgram	WriteVifMscal address of the lit strip-mesh builder's normal packet when the mesh has skin weights (hdr->count > 0)
+D_000023B8	g_positionDeltaProgram	WriteVifMscal address after each blend target's position deltas (vertex minus base) are written, in both strip-mesh builders
+D_000023D8	g_normalDeltaProgram	WriteVifMscal address after each blend target's normal deltas are written in the lit strip-mesh builder
+D_000023F0	g_normalDeltaFinishProgram	WriteVifMscal address sent once after the loop over the blend targets' normal deltas in the lit strip-mesh builder
+D_000027C0	g_nodeLinkProgram	WriteVifMscal address sent after QueueNodeLink queues the animation node's link in both strip-mesh builders
+D_000036D0	g_unlitKind4BatchFinishProgram	the head program BuildStripMeshPacket picks for mesh kind 4 where kinds 1,5-8,10 take g_unlitBatchFinishProgram
+D_00003A80	g_extraStreamFirstProgram	WriteVifMscal address after the first extra stream (link->f18) is unpacked, same in unlit and lit builders
+D_00003A90	g_unlitExtraStreamSecondProgram	WriteVifMscal address after the second extra stream (link->f14) in the unlit strip-mesh builder
+D_00003AA0	g_litExtraStreamSecondProgram	WriteVifMscal address after the second extra stream (link->f14) in the lit strip-mesh builder
+D_00148D64	g_codeChecksumEnd	end of the address range (0x100018 up) that the CodeChecksum object (placed_object.cpp, its init after InitPlacedObject) stores in its end field before the CRC table is built; a code address
+D_00148D68	g_moviePlayerChecksumEnd	InitMoviePlayer stores it as the remaining length of the CRC range that starts at 0x100010 (g_moviePlayer.cur/remain/crc); a code address
 D_00148D74	g_codeChecksumSize	a code address used only as a number: VerifyCodeChecksum takes (s32) of its address, 0x148D74, as the count of bytes to CRC from 0x100000
+D_00148D7C	g_memoryChecksumEnd	StepMemoryChecksum stores it as g_memoryChecksumRemaining when a new pass starts at 0x100004; a code address
 D_00211E10	g_vu0ProgramChain	start of the .vutext block, the DMA chain main_loop starts on the VIF0 channel (StartDmaChain) to load the VU0 microprogram
 D_00212110	g_vu1ProgramChain	the DMA chain main_loop starts on the VIF1 channel (StartDmaChain) to load the VU1 microprogram
 D_00212160	g_groupMicroprogram	start of the VU1 microprogram block (inside .vutext, 0x211E10 to 0x217360) the group preparation functions (PrepareBasicGroup and its siblings) and SubmitRenderFrame's setup reference with AddDmaRefTagIfChanged as the DMA range begin
 D_00215C50	g_groupMicroprogramEnd	end of that microprogram block: the second argument (range end) of every AddDmaRefTagIfChanged(writer, g_groupMicroprogram, ...) call
+D_00215C60	g_alternateMicroprogram	start of the second VU1 microprogram block, the DMA range begin PrepareAlternateBlockGroup passes to AddDmaRefTagIfChanged
+D_00217348	g_alternateMicroprogramEnd	end of that block: the range end PrepareAlternateBlockGroup passes to AddDmaRefTagIfChanged
 D_00217398	g_cameraControllerMethods	method table InitCamera stores in the vt of ctl454 (the idle controller); its only own method is UpdateIdleCameraController (defined in class_descriptors.cpp)
 D_002173B0	g_targetCameraControllerMethods	method table InitCamera stores in the vt of ctl460, the TargetCameraController (Activate, Deactivate and UpdateTargetCameraController are its methods)
 D_002173C8	g_frameCameraControllerMethods	method table InitCamera stores in the vt of ctl4C0, the FrameCameraController
@@ -38,8 +61,20 @@ D_002179C0	g_objectSubGroupClass	class descriptor of ObjectSubGroup (class_descr
 D_00217A90	g_lookupObjectClass	class descriptor of LookupObject (class_descriptors.cpp defines it; the class's own methods in config/us/classes.tsv are named LookupObject methods and its parent chain is read from the descriptor)
 D_00217B60	g_coneVolumeClass	class descriptor of ConeVolume (class_descriptors.cpp defines it; the class's own methods in config/us/classes.tsv are named ConeVolume methods and its parent chain is read from the descriptor)
 D_00217C30	g_switchedColliderClass	class descriptor of SwitchedCollider (class_descriptors.cpp defines it; the class's own methods in config/us/classes.tsv are named SwitchedCollider methods and its parent chain is read from the descriptor)
+D_00217E30	g_reserveCountCaptionMethods	plain-caption table InstallScreenElements (object_pool.cpp) stores in g_reserveCountCaption
+D_00217E80	g_collectedItemCaptionMethods	plain-caption table InstallScreenElements stores in g_collectedItemCaption
+D_00217F70	g_pairControllerCountCaptionMethods	plain-caption table InstallScreenElements stores in g_pairControllerCountCaption
 D_00217FC0	g_gaugeAmountCaptionMethods	plain-caption table object_pool.cpp stores in g_gaugeAmountCaption
+D_00218060	g_pathFollowerSecondCountCaptionMethods	plain-caption table InstallScreenElements stores in g_pathFollowerSecondCountCaption
+D_002180B0	g_pathFollowerFirstCountCaptionMethods	plain-caption table InstallScreenElements stores in g_pathFollowerFirstCountCaption
+D_00218100	g_hitCountCaptionAMethods	plain-caption table InstallScreenElements stores in g_hitCountCaptionA
+D_00218150	g_hitCountCaptionBMethods	plain-caption table InstallScreenElements stores in g_hitCountCaptionB
+D_002181A0	g_gaugeColliderCaptionMethods	plain-caption table InstallScreenElements stores in g_gaugeColliderCaption
+D_002181F0	g_completionPercentCaptionMethods	plain-caption table InstallScreenElements stores in g_completionPercentCaption
+D_00218240	g_firstTallyCaptionMethods	plain-caption table InstallScreenElements stores in g_firstTallyCaption
+D_00218290	g_secondTallyCaptionMethods	plain-caption table InstallScreenElements stores in g_secondTallyCaption
 D_002182E0	g_gaugeBarElementMethods	screen-element table (InitGauge, DrawGauge) object_pool.cpp stores in g_gaugeBarElement
+D_00218330	g_buttonHintElementMethods	base screen-element table (no fields of its own, screen_element.h) InstallScreenElements stores in g_buttonHintElement; item_column.cpp also gives it to its sub-elements and calls its slot 0 with 0x12
 D_00218380	g_pointerTextCaptionMethods	screen-element table (InitPointerTextCaption, SetElementTextAfterSlideOut) for the caption at D_0026EED0
 D_002183D0	g_copiedTextCaptionMethods	screen-element table (InitCopiedTextCaption, SetElementTextCopiedAfterSlideOut) for the caption at D_0026F138
 D_00218420	g_hintGlyphElementMethods	screen-element table (InitHintGlyphElement, UpdateHintGlyphElement, DrawHintGlyphElement)
@@ -231,28 +266,134 @@ D_00221380	g_timerCaptionMethods	screen-element table (InitCommentaryPromptEleme
 D_002213D0	g_codeChecksumClass	class descriptor of CodeChecksum (include/code_checksum.h names it as the descriptor of that class; class_descriptors.cpp defines it and lists it among the class descriptors)
 D_002214A0	g_worldClass	class descriptor of World (class_descriptors.cpp defines it; the class's own methods in config/us/classes.tsv are named World methods and its parent chain is read from the descriptor)
 D_00221520	g_cameraClass	class descriptor of Camera (class_descriptors.cpp defines it; the class's own methods in config/us/classes.tsv are named Camera methods and its parent chain is read from the descriptor)
+D_002215A0	g_classRootProperties	the 2 (property id, descriptor) pairs (ids 1 and 2) in g_classPropertyLists[0], the entry of class index 0, the root
+D_002215B0	g_objectProperties	the 21 (property id, descriptor) pairs of class g_objectClass in g_classPropertyLists[1]; ObjectProperties indexes that registry by the object's class id
+D_00221658	g_placedObjectProperties	the 127 (property id, descriptor) pairs of class g_placedObjectClass in g_classPropertyLists[2]; ObjectProperties indexes that registry by the object's class id
+D_00221A50	g_colliderProperties	the 149 (property id, descriptor) pairs of class g_colliderClass in g_classPropertyLists[3]; ObjectProperties indexes that registry by the object's class id
+D_002223A0	g_switchedColliderProperties	the 153 (property id, descriptor) pairs of class g_switchedColliderClass in g_classPropertyLists[5]; ObjectProperties indexes that registry by the object's class id
+D_00222868	g_turningColliderProperties	the 156 (property id, descriptor) pairs of class g_turningColliderClass in g_classPropertyLists[6]; ObjectProperties indexes that registry by the object's class id
+D_00222D48	g_playerProperties	the 170 (property id, descriptor) pairs of class g_playerClass in g_classPropertyLists[7]; ObjectProperties indexes that registry by the object's class id
+D_00223298	g_agentProperties	the 198 (property id, descriptor) pairs of class g_agentClass in g_classPropertyLists[8]; ObjectProperties indexes that registry by the object's class id
+D_002238C8	g_companionAgentProperties	the 211 (property id, descriptor) pairs of class g_companionAgentClass in g_classPropertyLists[9]; ObjectProperties indexes that registry by the object's class id
+D_00223F60	g_coneAgentProperties	the 208 (property id, descriptor) pairs of class g_coneAgentClass in g_classPropertyLists[10]; ObjectProperties indexes that registry by the object's class id
+D_002245E0	g_world1BossProperties	the 208 (property id, descriptor) pairs of class g_world1BossClass in g_classPropertyLists[11]; ObjectProperties indexes that registry by the object's class id
+D_00224C60	g_world2BossProperties	the 203 (property id, descriptor) pairs of class g_world2BossClass in g_classPropertyLists[12]; ObjectProperties indexes that registry by the object's class id
+D_002252B8	g_world4BossProperties	the 201 (property id, descriptor) pairs of class g_world4BossClass in g_classPropertyLists[13]; ObjectProperties indexes that registry by the object's class id
+D_00225900	g_seekingAgentProperties	the 201 (property id, descriptor) pairs of class g_seekingAgentClass in g_classPropertyLists[14]; ObjectProperties indexes that registry by the object's class id
+D_00225F48	g_gaugeColliderAgentProperties	the 198 (property id, descriptor) pairs of class g_gaugeColliderAgentClass in g_classPropertyLists[15]; ObjectProperties indexes that registry by the object's class id
+D_00226578	g_worldListedAgentProperties	the 198 (property id, descriptor) pairs of class g_worldListedAgentClass in g_classPropertyLists[16]; ObjectProperties indexes that registry by the object's class id
+D_00226BA8	g_numberedAgentProperties	the 199 (property id, descriptor) pairs of class g_numberedAgentClass in g_classPropertyLists[17]; ObjectProperties indexes that registry by the object's class id
+D_002271E0	g_contactAgentProperties	the 198 (property id, descriptor) pairs of class g_contactAgentClass in g_classPropertyLists[18]; ObjectProperties indexes that registry by the object's class id
+D_00227810	g_world3BossProperties	the 207 (property id, descriptor) pairs of class g_world3BossClass in g_classPropertyLists[19]; ObjectProperties indexes that registry by the object's class id
+D_00227E88	g_tintBlendColliderProperties	the 158 (property id, descriptor) pairs of class g_tintBlendColliderClass in g_classPropertyLists[20]; ObjectProperties indexes that registry by the object's class id
+D_00228378	g_walkerColliderProperties	the 154 (property id, descriptor) pairs of class g_walkerColliderClass in g_classPropertyLists[21]; ObjectProperties indexes that registry by the object's class id
+D_00228848	g_playerLinkedColliderProperties	the 160 (property id, descriptor) pairs of class g_playerLinkedColliderClass in g_classPropertyLists[22]; ObjectProperties indexes that registry by the object's class id
+D_00229238	g_gaugeColliderProperties	the 156 (property id, descriptor) pairs of class g_gaugeColliderClass in g_classPropertyLists[24]; ObjectProperties indexes that registry by the object's class id
+D_00229718	g_pathFollowerProperties	the 176 (property id, descriptor) pairs of class g_pathFollowerClass in g_classPropertyLists[25]; ObjectProperties indexes that registry by the object's class id
+D_00229C98	g_modeWalkerObjectProperties	the 177 (property id, descriptor) pairs of class g_modeWalkerObjectClass in g_classPropertyLists[26]; ObjectProperties indexes that registry by the object's class id
+D_0022A220	g_world5ModeColliderProperties	the 156 (property id, descriptor) pairs of class g_world5ModeColliderClass in g_classPropertyLists[27]; ObjectProperties indexes that registry by the object's class id
+D_0022A700	g_world3BeatPressColliderProperties	the 155 (property id, descriptor) pairs of class g_world3BeatPressColliderClass in g_classPropertyLists[28]; ObjectProperties indexes that registry by the object's class id
+D_0022ABD8	g_hitCountColliderProperties	the 159 (property id, descriptor) pairs of class g_hitCountColliderClass in g_classPropertyLists[29]; ObjectProperties indexes that registry by the object's class id
+D_0022B0D0	g_effectOwnerProperties	the 149 (property id, descriptor) pairs of class g_effectOwnerClass in g_classPropertyLists[30]; ObjectProperties indexes that registry by the object's class id
+D_0022B578	g_attachedSetProperties	the 160 (property id, descriptor) pairs of class g_attachedSetClass in g_classPropertyLists[31]; ObjectProperties indexes that registry by the object's class id
+D_0022BA78	g_maskedColliderProperties	the 179 (property id, descriptor) pairs of class g_maskedColliderClass in g_classPropertyLists[32]; ObjectProperties indexes that registry by the object's class id
+D_0022C010	g_playerFlaggedColliderProperties	the 179 (property id, descriptor) pairs of class g_playerFlaggedColliderClass in g_classPropertyLists[33]; ObjectProperties indexes that registry by the object's class id
+D_0022CB48	g_pooledHolderProperties	the 186 (property id, descriptor) pairs of class g_pooledHolderClass in g_classPropertyLists[35]; ObjectProperties indexes that registry by the object's class id
+D_0022D6D8	g_massScalingColliderProperties	the 183 (property id, descriptor) pairs of class g_massScalingColliderClass in g_classPropertyLists[37]; ObjectProperties indexes that registry by the object's class id
+D_0022DC90	g_latchedSwitchColliderProperties	the 184 (property id, descriptor) pairs of class g_latchedSwitchColliderClass in g_classPropertyLists[38]; ObjectProperties indexes that registry by the object's class id
+D_0022E250	g_timedStateProperties	the 153 (property id, descriptor) pairs of class g_timedStateClass in g_classPropertyLists[39]; ObjectProperties indexes that registry by the object's class id
+D_0022E718	g_triggerZoneProperties	the 165 (property id, descriptor) pairs of class g_triggerZoneClass in g_classPropertyLists[40]; ObjectProperties indexes that registry by the object's class id
+D_0022EC40	g_zoneColliderProperties	the 163 (property id, descriptor) pairs of class g_zoneColliderClass in g_classPropertyLists[41]; ObjectProperties indexes that registry by the object's class id
+D_0022F158	g_followableObjectProperties	the 167 (property id, descriptor) pairs of class g_followableObjectClass in g_classPropertyLists[42]; ObjectProperties indexes that registry by the object's class id
+D_0022FB38	g_objectSetProperties	the 152 (property id, descriptor) pairs of class g_objectSetClass in g_classPropertyLists[44]; ObjectProperties indexes that registry by the object's class id
+D_0022FFF8	g_flaggedObjectSetProperties	the 152 (property id, descriptor) pairs of class g_flaggedObjectSetClass in g_classPropertyLists[45]; ObjectProperties indexes that registry by the object's class id
+D_002304B8	g_numberedItemProperties	the 155 (property id, descriptor) pairs of class g_numberedItemClass in g_classPropertyLists[46]; ObjectProperties indexes that registry by the object's class id
+D_00230990	g_stateTriggerProperties	the 158 (property id, descriptor) pairs of class g_stateTriggerClass in g_classPropertyLists[47]; ObjectProperties indexes that registry by the object's class id
+D_00230E80	g_timedObjectProperties	the 163 (property id, descriptor) pairs of class g_timedObjectClass in g_classPropertyLists[48]; ObjectProperties indexes that registry by the object's class id
+D_00231398	g_timedGroupProperties	the 167 (property id, descriptor) pairs of class g_timedGroupClass in g_classPropertyLists[49]; ObjectProperties indexes that registry by the object's class id
+D_002318D0	g_sequencedObjectProperties	the 167 (property id, descriptor) pairs of class g_sequencedObjectClass in g_classPropertyLists[50]; ObjectProperties indexes that registry by the object's class id
+D_00231E08	g_blinkObjectProperties	the 179 (property id, descriptor) pairs of class g_blinkObjectClass in g_classPropertyLists[51]; ObjectProperties indexes that registry by the object's class id
 D_002323A0	g_idFilterObjectProperties	the 153 (property id, descriptor) pairs of class g_idFilterObjectClass in g_classPropertyLists[52]; ObjectProperties indexes that registry by the object's class id
+D_00232D10	g_contactTrackerProperties	the 156 (property id, descriptor) pairs of class g_contactTrackerClass in g_classPropertyLists[54]; ObjectProperties indexes that registry by the object's class id
 D_002336D0	g_flaggedObjectProperties	the 152 (property id, descriptor) pairs of class g_flaggedObjectClass in g_classPropertyLists[56]; ObjectProperties indexes that registry by the object's class id
 D_00233B90	g_scaledOffsetObjectProperties	the 150 (property id, descriptor) pairs of class g_scaledOffsetObjectClass in g_classPropertyLists[57]; ObjectProperties indexes that registry by the object's class id
+D_00234040	g_listedCollisionPartProperties	the 152 (property id, descriptor) pairs of class g_listedCollisionPartClass in g_classPropertyLists[58]; ObjectProperties indexes that registry by the object's class id
+D_00234500	g_childGroupObjectProperties	the 169 (property id, descriptor) pairs of class g_childGroupObjectClass in g_classPropertyLists[59]; ObjectProperties indexes that registry by the object's class id
+D_00234A48	g_contactListObjectProperties	the 175 (property id, descriptor) pairs of class g_contactListObjectClass in g_classPropertyLists[60]; ObjectProperties indexes that registry by the object's class id
+D_00234FC0	g_contactListObjectWithoutGravityProperties	the 178 (property id, descriptor) pairs of class g_contactListObjectWithoutGravityClass in g_classPropertyLists[61]; ObjectProperties indexes that registry by the object's class id
+D_00235550	g_timedContactListObjectProperties	the 179 (property id, descriptor) pairs of class g_timedContactListObjectClass in g_classPropertyLists[62]; ObjectProperties indexes that registry by the object's class id
+D_00235AE8	g_standInProperties	the 169 (property id, descriptor) pairs of class g_standInClass in g_classPropertyLists[63]; ObjectProperties indexes that registry by the object's class id
 D_00236030	g_objectCyclerProperties	the 167 (property id, descriptor) pairs of class g_objectCyclerClass in g_classPropertyLists[64]; ObjectProperties indexes that registry by the object's class id
 D_00236568	g_objectGathererProperties	the 160 (property id, descriptor) pairs of class g_objectGathererClass in g_classPropertyLists[65]; ObjectProperties indexes that registry by the object's class id
 D_00236A68	g_pairedObjectProperties	the 150 (property id, descriptor) pairs of class g_pairedObjectClass in g_classPropertyLists[66]; ObjectProperties indexes that registry by the object's class id
 D_00236F18	g_hitTargetProperties	the 153 (property id, descriptor) pairs of class g_hitTargetClass in g_classPropertyLists[67]; ObjectProperties indexes that registry by the object's class id
 D_002373E0	g_soundStateObjectProperties	the 149 (property id, descriptor) pairs of class g_soundStateObjectClass in g_classPropertyLists[68]; ObjectProperties indexes that registry by the object's class id
 D_00237888	g_objectCreatorProperties	the 149 (property id, descriptor) pairs of class g_objectCreatorClass in g_classPropertyLists[69]; ObjectProperties indexes that registry by the object's class id
+D_00237D30	g_pooledObjectProperties	the 155 (property id, descriptor) pairs of class g_pooledObjectClass in g_classPropertyLists[70]; ObjectProperties indexes that registry by the object's class id
+D_00238208	g_targetFollowerProperties	the 156 (property id, descriptor) pairs of class g_targetFollowerClass in g_classPropertyLists[71]; ObjectProperties indexes that registry by the object's class id
+D_002386E8	g_gaugeCountedObjectProperties	the 149 (property id, descriptor) pairs of class g_gaugeCountedObjectClass in g_classPropertyLists[72]; ObjectProperties indexes that registry by the object's class id
+D_00238B90	g_boxColliderProperties	the 152 (property id, descriptor) pairs of class g_boxColliderClass in g_classPropertyLists[73]; ObjectProperties indexes that registry by the object's class id
+D_00239050	g_world5BossProperties	the 154 (property id, descriptor) pairs of class g_world5BossClass in g_classPropertyLists[74]; ObjectProperties indexes that registry by the object's class id
 D_00239520	g_countdownColliderProperties	the 151 (property id, descriptor) pairs of class g_countdownColliderClass in g_classPropertyLists[75]; ObjectProperties indexes that registry by the object's class id
+D_002399D8	g_countedColliderProperties	the 152 (property id, descriptor) pairs of class g_countedColliderClass in g_classPropertyLists[76]; ObjectProperties indexes that registry by the object's class id
+D_00239E98	g_worldListedObjectProperties	the 127 (property id, descriptor) pairs of class g_worldListedObjectClass in g_classPropertyLists[77]; ObjectProperties indexes that registry by the object's class id
+D_0023A290	g_lookupObjectProperties	the 133 (property id, descriptor) pairs of class g_lookupObjectClass in g_classPropertyLists[78]; ObjectProperties indexes that registry by the object's class id
+D_0023AAB0	g_effectSpawnerProperties	the 200 (property id, descriptor) pairs of class g_effectSpawnerClass in g_classPropertyLists[80]; ObjectProperties indexes that registry by the object's class id
+D_0023B0F0	g_coneVolumeProperties	the 149 (property id, descriptor) pairs of class g_coneVolumeClass in g_classPropertyLists[81]; ObjectProperties indexes that registry by the object's class id
+D_0023B990	g_objectGroupProperties	the 127 (property id, descriptor) pairs of class g_objectGroupClass in g_classPropertyLists[83]; ObjectProperties indexes that registry by the object's class id
+D_0023BD88	g_cameraPositionedObjectProperties	the 128 (property id, descriptor) pairs of class g_cameraPositionedObjectClass in g_classPropertyLists[84]; ObjectProperties indexes that registry by the object's class id
 D_0023C188	g_stateNotifierProperties	the 133 (property id, descriptor) pairs of class g_stateNotifierClass in g_classPropertyLists[85]; ObjectProperties indexes that registry by the object's class id
+D_0023C5B0	g_soundNotifierProperties	the 133 (property id, descriptor) pairs of class g_soundNotifierClass in g_classPropertyLists[86]; ObjectProperties indexes that registry by the object's class id
+D_0023C9D8	g_countdownNotifierProperties	the 134 (property id, descriptor) pairs of class g_countdownNotifierClass in g_classPropertyLists[87]; ObjectProperties indexes that registry by the object's class id
+D_0023CE08	g_timeRangeNotifierProperties	the 134 (property id, descriptor) pairs of class g_timeRangeNotifierClass in g_classPropertyLists[88]; ObjectProperties indexes that registry by the object's class id
+D_0023D238	g_saveNotifierProperties	the 133 (property id, descriptor) pairs of class g_saveNotifierClass in g_classPropertyLists[89]; ObjectProperties indexes that registry by the object's class id
+D_0023D660	g_deadlineNotifierProperties	the 134 (property id, descriptor) pairs of class g_deadlineNotifierClass in g_classPropertyLists[90]; ObjectProperties indexes that registry by the object's class id
+D_0023DA90	g_armedStateNotifierProperties	the 133 (property id, descriptor) pairs of class g_armedStateNotifierClass in g_classPropertyLists[91]; ObjectProperties indexes that registry by the object's class id
+D_0023DEB8	g_stateWalkerObjectProperties	the 127 (property id, descriptor) pairs of class g_stateWalkerObjectClass in g_classPropertyLists[92]; ObjectProperties indexes that registry by the object's class id
+D_0023E2B0	g_stateWalkerGroupProperties	the 130 (property id, descriptor) pairs of class g_stateWalkerGroupClass in g_classPropertyLists[93]; ObjectProperties indexes that registry by the object's class id
 D_0023E6C0	g_redirectObjectProperties	the 135 (property id, descriptor) pairs of class g_redirectObjectClass in g_classPropertyLists[94]; ObjectProperties indexes that registry by the object's class id
 D_0023EAF8	g_pairControllerProperties	the 160 (property id, descriptor) pairs of class g_pairControllerClass in g_classPropertyLists[95]; ObjectProperties indexes that registry by the object's class id
+D_0023EFF8	g_scalingVolumeProperties	the 128 (property id, descriptor) pairs of class g_scalingVolumeClass in g_classPropertyLists[96]; ObjectProperties indexes that registry by the object's class id
+D_0023F3F8	g_textureRenderObjectProperties	the 127 (property id, descriptor) pairs of class g_textureRenderObjectClass in g_classPropertyLists[97]; ObjectProperties indexes that registry by the object's class id
+D_0023F7F0	g_stateResetObjectProperties	the 130 (property id, descriptor) pairs of class g_stateResetObjectClass in g_classPropertyLists[98]; ObjectProperties indexes that registry by the object's class id
+D_0023FC00	g_onOffObjectProperties	the 163 (property id, descriptor) pairs of class g_onOffObjectClass in g_classPropertyLists[99]; ObjectProperties indexes that registry by the object's class id
 D_00240118	g_entryTableObjectProperties	the 136 (property id, descriptor) pairs of class g_entryTableObjectClass in g_classPropertyLists[100]; ObjectProperties indexes that registry by the object's class id
+D_00240558	g_stepSequenceProperties	the 140 (property id, descriptor) pairs of class g_stepSequenceClass in g_classPropertyLists[101]; ObjectProperties indexes that registry by the object's class id
 D_002409B8	g_idLinkedObjectProperties	the 139 (property id, descriptor) pairs of class g_idLinkedObjectClass in g_classPropertyLists[102]; ObjectProperties indexes that registry by the object's class id
+D_00240E10	g_warpPageProperties	the 127 (property id, descriptor) pairs of class g_warpPageClass in g_classPropertyLists[103]; ObjectProperties indexes that registry by the object's class id
+D_00241208	g_gaugeManagerProperties	the 149 (property id, descriptor) pairs of class g_gaugeManagerClass in g_classPropertyLists[104]; ObjectProperties indexes that registry by the object's class id
 D_002416B0	g_currentPlacedObjectProperties	the 127 (property id, descriptor) pairs of class g_currentPlacedObjectClass in g_classPropertyLists[105]; ObjectProperties indexes that registry by the object's class id
 D_00241AA8	g_partHolderObjectProperties	the 127 (property id, descriptor) pairs of class g_partHolderObjectClass in g_classPropertyLists[106]; ObjectProperties indexes that registry by the object's class id
 D_00241EA0	g_codeChecksumProperties	the 127 (property id, descriptor) pairs of class g_codeChecksumClass in g_classPropertyLists[107]; ObjectProperties indexes that registry by the object's class id
+D_00242298	g_worldProperties	the 81 (property id, descriptor) pairs of class g_worldClass in g_classPropertyLists[108]; ObjectProperties indexes that registry by the object's class id
+D_00242520	g_cameraProperties	the 39 (property id, descriptor) pairs of class g_cameraClass in g_classPropertyLists[109]; ObjectProperties indexes that registry by the object's class id
+D_00242658	g_pathCurveObjectProperties	the 21 (property id, descriptor) pairs of class g_pathCurveObjectClass in g_classPropertyLists[110]; ObjectProperties indexes that registry by the object's class id
+D_00242700	g_targetCurveProperties	the 28 (property id, descriptor) pairs of class g_targetCurveClass in g_classPropertyLists[111]; ObjectProperties indexes that registry by the object's class id
+D_002427E0	g_targetVectorProperties	the 30 (property id, descriptor) pairs of class g_targetVectorClass in g_classPropertyLists[112]; ObjectProperties indexes that registry by the object's class id
+D_002429B0	g_listedKeepObjectProperties	the 21 (property id, descriptor) pairs of class g_listedKeepObjectClass in g_classPropertyLists[114]; ObjectProperties indexes that registry by the object's class id
+D_00242A58	g_transformObjectProperties	the 25 (property id, descriptor) pairs of class g_transformObjectClass in g_classPropertyLists[115]; ObjectProperties indexes that registry by the object's class id
+D_00242B20	g_arrivalPointProperties	the 35 (property id, descriptor) pairs of class g_arrivalPointClass in g_classPropertyLists[116]; ObjectProperties indexes that registry by the object's class id
+D_00242E30	g_memberObjectProperties	the 25 (property id, descriptor) pairs of class g_memberObjectClass in g_classPropertyLists[119]; ObjectProperties indexes that registry by the object's class id
+D_00242EF8	g_groupMembersProperties	the 27 (property id, descriptor) pairs of class g_groupMembersClass in g_classPropertyLists[120]; ObjectProperties indexes that registry by the object's class id
+D_00242FD0	g_recordMemberProperties	the 44 (property id, descriptor) pairs of class g_recordMemberClass in g_classPropertyLists[121]; ObjectProperties indexes that registry by the object's class id
+D_00243130	g_holdingMemberProperties	the 93 (property id, descriptor) pairs of class g_holdingMemberClass in g_classPropertyLists[122]; ObjectProperties indexes that registry by the object's class id
+D_002435B8	g_objectSubGroupProperties	the 34 (property id, descriptor) pairs of class g_objectSubGroupClass in g_classPropertyLists[125]; ObjectProperties indexes that registry by the object's class id
 D_002436C8	g_pointObjectProperties	the 23 (property id, descriptor) pairs of class g_pointObjectClass in g_classPropertyLists[126]; ObjectProperties indexes that registry by the object's class id
+D_00243780	g_targetPointProperties	the 30 (property id, descriptor) pairs of class g_targetPointClass in g_classPropertyLists[127]; ObjectProperties indexes that registry by the object's class id
+D_00243938	g_listedPointObjectProperties	the 25 (property id, descriptor) pairs of class g_listedPointObjectClass in g_classPropertyLists[129]; ObjectProperties indexes that registry by the object's class id
+D_00243A00	g_textPointObjectProperties	the 23 (property id, descriptor) pairs of class g_textPointObjectClass in g_classPropertyLists[130]; ObjectProperties indexes that registry by the object's class id
+D_00243AB8	g_animationProperties	the 33 (property id, descriptor) pairs of class g_animationClass in g_classPropertyLists[131]; ObjectProperties indexes that registry by the object's class id
+D_00243BC0	g_skipAnimationPlayerProperties	the 33 (property id, descriptor) pairs of class g_skipAnimationPlayerClass in g_classPropertyLists[132]; ObjectProperties indexes that registry by the object's class id
+D_00243D70	g_valueListObjectProperties	the 21 (property id, descriptor) pairs of class g_valueListObjectClass in g_classPropertyLists[134]; ObjectProperties indexes that registry by the object's class id
+D_00243EC8	g_stateGraphProperties	the 23 (property id, descriptor) pairs of class g_stateGraphClass in g_classPropertyLists[136]; ObjectProperties indexes that registry by the object's class id
 D_00243F80	g_itemKeeperProperties	the 23 (property id, descriptor) pairs of class g_itemKeeperClass in g_classPropertyLists[137]; ObjectProperties indexes that registry by the object's class id
 D_00244038	g_pointGraphObjectProperties	the 22 (property id, descriptor) pairs of class g_pointGraphObjectClass in g_classPropertyLists[138]; ObjectProperties indexes that registry by the object's class id
+D_002440E8	g_aimBlendGridProperties	the 27 (property id, descriptor) pairs of class g_aimBlendGridClass in g_classPropertyLists[139]; ObjectProperties indexes that registry by the object's class id
+D_002441C0	g_objectPoolProperties	the 62 (property id, descriptor) pairs of class g_objectPoolClass in g_classPropertyLists[140]; ObjectProperties indexes that registry by the object's class id
+D_002443B0	g_oscillatorProperties	the 41 (property id, descriptor) pairs of class g_oscillatorClass in g_classPropertyLists[141]; ObjectProperties indexes that registry by the object's class id
 D_002444F8	g_coloredTriangleSetProperties	the 21 (property id, descriptor) pairs of class g_coloredTriangleSetClass in g_classPropertyLists[142]; ObjectProperties indexes that registry by the object's class id
+D_002445A0	g_entryQueueProperties	the 38 (property id, descriptor) pairs of class g_entryQueueClass in g_classPropertyLists[143]; ObjectProperties indexes that registry by the object's class id
+D_002446D0	g_world3TimelineProperties	the 27 (property id, descriptor) pairs of class g_world3TimelineClass in g_classPropertyLists[144]; ObjectProperties indexes that registry by the object's class id
 D_00244890	g_animationPlayerProperties	the 13 (property id, descriptor) pairs of class g_animationPlayerMethods in g_classPropertyLists[146]; ObjectProperties indexes that registry by the object's class id
 D_002448F8	g_stateWalkerProperties	the 11 (property id, descriptor) pairs of class g_stateWalkerMethods in g_classPropertyLists[147]; ObjectProperties indexes that registry by the object's class id
 D_00244950	g_classPropertyLists	property registry indexed by class id, each record a count and a list of (id, descriptor); ApplyObjectClassDefaults walks it and FindPropertyDescriptor binary-searches it
@@ -281,6 +422,8 @@ D_00248748	g_levelEntries	the 33 LevelEntry records func_001DFE80 searches by th
 D_00248D00	g_unitXVector	constant quad (1,0,0,0) copied into object axis fields (InitTargetVector and others)
 D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in collider.cpp
 D_00248D20	g_unitZVector	constant quad (0,0,1,0) used as the rotation axis of the heading matrix (BuildTurningColliderHeadingMatrix) and copied into direction fields
+D_00248D30	g_zeroVector	all-zero quad: the default velocity and spin (SetPlacedObjectVelocity/Spin in pose_source.cpp, ComputeObjectSteeringHeading when an attachment is absent), and the camera fallbacks in pose_source.cpp
+D_00248D40	g_unitScale	quad (1,1,1,0): the scale BuildScaledTransformMatrix gets in placed_object.cpp, and the factor the bounding box corners are made with (centre -/+ radius, state_notifier.cpp; camera.cpp's corner shift)
 D_00248D80	g_createScriptObjectCopyArgKinds	argument-kind list the script host function CreateScriptObjectCopy hands to StoreScriptArguments (object_host_functions.cpp); also read by SetScriptFollowObjects
 D_00248D88	g_setScriptExtraObjectPropertyBoolArgKinds	argument-kind list the script host function SetScriptExtraObjectPropertyBool hands to StoreScriptArguments (object_host_functions.cpp)
 D_00248D90	g_setScriptExtraObjectPropertyIntArgKinds	argument-kind list the script host function SetScriptExtraObjectPropertyInt hands to StoreScriptArguments (object_host_functions.cpp)
@@ -341,8 +484,11 @@ D_00249838	g_iopContinueMessage	"continueing (%d)." printed by QueueIopCommand w
 D_00249CE0	g_characterFormat	"%c" format DrawTextPanel's hint code prints characters 0x28 and 0x29 with (FormatToString, text_panel.cpp 739 and 754)
 D_00249CE8	g_moveLabel	the text "Move" the panel hint row draws left of the centre at 320 - D_00261090[0]
 D_00249CF0	g_zoomLabel	the text "Zoom" the panel hint row draws right of the centre at 320 + D_00261090[0]
+D_00249D00	g_panelStickActiveRamp	RampProfile UpdatePanelStick (state 1) passes to ApproachPointWithRamp when the sticks' magnitudes sum above 0.0001 (80, 50, 0.5)
+D_00249D10	g_panelStickIdleRamp	RampProfile UpdatePanelStick passes to ApproachPointWithRamp when the sticks are at rest (250, 200, 0.1)
 D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods
 D_00249D98	g_memoryReaderMethods	method table installed in the MemoryReader FillRingBufferFromMemory builds; slot 1 is ReadMemoryReader
+D_00249E20	g_discPathRootPrefix	the u16 0x005C (a backslash and a NUL) FormatDiscPath copies to the start of its buffer before appending the name
 D_00249E28	g_discPathFormat	the format string "%s\\%s" FormatToString builds the path with (disc_access.cpp 208)
 D_00249E30	g_discDevicePrefix	the string "cdrom0:" used as the path's first part when the flag is set (209)
 D_00249E38	g_emptyPathPrefix	the empty string used as the path's first part when the flag is clear (209)
@@ -446,6 +592,7 @@ D_0024E0A8	g_levelCredits0503	the credits text of the LevelEntry for level 0x050
 D_0024E0C8	g_levelCredits0504	the credits text of the LevelEntry for level 0x0504 (g_levelEntries record in global_tables.cpp; LevelEntry::credits, read by the commentary screen through FindLevelEntry)
 D_0024E0F8	g_levelCredits0505	the credits text of the LevelEntry for level 0x0505 (g_levelEntries record in global_tables.cpp; LevelEntry::credits, read by the commentary screen through FindLevelEntry)
 D_0024E118	g_levelCredits0506	the credits text of the LevelEntry for level 0x0506 (g_levelEntries record in global_tables.cpp; LevelEntry::credits, read by the commentary screen through FindLevelEntry)
+D_0024E808	g_warpMenuHint	text InitWarpMenu gives the screen element: the button hints (Back, Move, Warp)
 D_0024E878	g_charClassTable	257-byte character class table (char_class_table.c)
 D_0024E879	g_charClassFlags	per-character class bits; UppercaseString shifts letters with bit 2, number parsing tests bit 1 and the text formatter tests bit 4
 D_0024E988	g_requestThreadErrorText	the message RunRequestThread prints with PrintToOutputHook for a request of an unknown kind
@@ -464,8 +611,10 @@ D_0024FF78	g_mathErrorMode	the math library's error mode, 1; the checked functio
 D_00250008	g_cardNewCardFailureMessage	the string "sceMcUdCheckNewCard RPC faild" the card library prints (memory_card_client.cpp 114)
 D_00250028	g_packetOptionalFieldLengths	16 byte lengths (0x00, 0x10, 0x08, 0x18, ...) ParsePacketHeader copies and indexes with the header's flags for the length of each optional field the header announces
 D_00250430	g_mpegExtensionHandlers	the table of 12 extension handlers (RejectUnknownExtension, ReadSequenceExtension, ...) ReadExtensionsAndUserData copies (mpeg_ipu_decode.cpp 973-979)
+D_002505B8	g_emptyClass	the last entry of g_classDescriptorTable: a class head with no parent and no methods (kind empty in config/us/classes.tsv)
 D_002505C0	g_stateResetGroupMethods	method table CreateRecord2505C0 stores in the StateResetGroup it allocates (state_reset_object.h vtbl; zero in the image)
 D_002505D8	g_objectPropertyDescriptors	the 1,179 property descriptors FillObjectPropertyTable fills (object_host_functions.cpp)
+D_002542D8	g_cardSlots	array of CardSlot records the pause menu's save pages index by the row's item id or the selection (f0C is 0 for an empty slot); selecting one stores it in g_memoryCard.f4F44 or g_cardSlotInAction
 D_00259938	g_scriptMathFunctions	table of eight one-float functions; CallScriptMathFunction calls D_00259938[index]
 D_00259958	g_scriptBuiltins	the built-ins' table (script_builtin.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
 D_00259F38	g_markStacks	the collector's roots and mark stacks (0x2318 bytes): ResetMarkRoots, AddMarkRootList and the Push/PopMark functions use it, DrainMarkStacks walks it and CollectScriptPools runs it
@@ -510,7 +659,15 @@ D_00260DC0	g_iopSharedPacket	the packet whose address InitIopCommandChannels sen
 D_00260E00	g_iopChannel2Result	reply word of the RPC channel D_0027B4F0: set to 0xFFFFFFFF while a command is pending, polled by PollIopCommands, cleared when its callback ran
 D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at iop_commands.cpp:263 sends as command 3 over channel D_0027B4F0
 D_00260E60	g_valueRampProfile	three-float profile (3.0, 1.0, 0.1) passed to ApproachValueWithRamp for the pose-source indexed value in ApplyPoseSourceIndexedValue
+D_00260E70	g_defaultPositionSpring	the position spring PlacedObject starts with (p20C); copied to front memory when changed, and the setter that scales it compares against it
+D_00260E80	g_defaultVelocitySpring	the velocity spring PlacedObject starts with (p210)
+D_00260E90	g_defaultRotationSpring	the rotation spring PlacedObject starts with (p214)
+D_00260EA0	g_defaultSpinSpring	the spin spring PlacedObject starts with (p218)
+D_00260EB0	g_defaultPositionRamp	the position ramp PlacedObject starts with (p21C); the setter scales its first, second and fourth values
+D_00260EC0	g_defaultRotationRamp	the rotation ramp PlacedObject starts with (p220); the setter scales its first, second and fourth values
 D_00260ED0	g_fadeRampProfile	three-float profile (2.0, 0, 0.1) passed to ApproachValueWithRamp for the fade value in pause_menu.cpp:1129
+D_00260EE0	g_steeringHeadingCurve	the coefficients (-50, 4, 0) ComputeObjectSteeringHeading uses when p1 is null: evaluated at the distance as a + len*(b + len*c)
+D_00260EF0	g_steeringHeadingLimits	the range (0, 400) ComputeObjectSteeringHeading clamps that curve's value to when p3 is null
 D_00260F00	g_colorPresets	the 64-byte colour records SetColorPreset copies over an object's colour record by index
 D_00261000	g_defaultColorRecord	the 64-byte colour record EnsureColorRecord copies into a new record
 D_00261080	g_checksumMismatch	written with 1 by UpdateCodeChecksum when the finished sum is nonzero; no other reader in src
@@ -533,6 +690,7 @@ D_00261148	g_panelFrameStyle	PanelStyle(2.0) a panel stores as its frame (self->
 D_00261168	g_objectLabelStyle	PanelStyle(32, 16) the object labels copy into their local style before drawing
 D_00261184	g_nearestLabelScale	scale 1.0 the label of the nearest object approaches (f58); others approach D_00261188
 D_00261188	g_otherLabelScale	scale 0.5 the labels of objects other than the nearest approach
+D_00261190	g_panelFocusPoint	screen point (0, 0.3) subtracted from each projected object's screen position; the object nearest to it by length is the panel's nearest (text_panel.cpp, 1129)
 D_002611A0	g_labelAlphaCoefficients	quadratic coefficients (1.5, -1.5) applied to the screen distance of the label point to get its alpha
 D_002611B0	g_labelAlphaRamp	RampProfile the label's alpha (f54) approaches its target with
 D_002611BC	g_otherLabelAlphaFactor	0.5 the alpha is multiplied by for labels that are not the nearest object
@@ -546,6 +704,7 @@ D_002611E0	g_panelBlockCornersX	x of the four corners of each of the four blocks
 D_00261220	g_panelBlockCornersY	y of the four corners of each of the four blocks the panel pulses
 D_00261260	g_panelBlockPulseRate	pulse rate (8) its first word multiplies the clock by inside the block colour cosine
 D_00261268	g_panelBlockFadeRamp	RampProfile blockB[i] approaches 1 or 0 with, depending on blockA[i]
+D_00261274	g_panelStartCooldown	0.25: seconds that must pass since the panel's last start (countA) before a new entry may start (mayStart)
 D_00261280	g_panelEdgeCurveA	curve span set up from D_002610A0 and evaluated at 24 steps along the panel's upper edge
 D_002612B0	g_panelEdgeCurveB	curve span set up from D_002610B0 and evaluated at 24 steps along the panel's lower edge
 D_002612E0	g_panelEdgeCurveC	curve span set up from D_002610C0 and evaluated at 24 steps along the panel's side strip
@@ -629,6 +788,19 @@ D_00261B50	g_scatterLiftRange	range (1000, 1300) ScatterObjectsAroundCircle draw
 D_00261B60	g_countdownNotifierParams	28-word effect parameter table SetCountdownNotifierState gives the effect (kind 0x10) it creates as params
 D_00261BD0	g_armedProbeOffset	vector (0, 0, 200, 0) UpdateArmedNotifier adds to its position for the probe point of the mesh hit test
 D_00261BE0	g_armedPushScale	0.75: UpdateArmedNotifier multiplies the hit object's velocity by it for the push
+D_00261BF4	g_cameraPlacementEase	0.3: the ease UpdateTargetCameraController passes as the ninth argument of UpdateOrbitCameraPlacement (0 in case 2)
+D_00261BF8	g_cameraTargetHeight	70.0: GetCameraControllerTargetPoint adds it to the z of the active switched collider's position
+D_00261BFC	g_cameraPitchMin	-1.0: the lower clamp of the target camera controller's pitch (UpdateTargetCameraController)
+D_00261C00	g_cameraPitchMax	1.0: the upper clamp of the target camera controller's pitch
+D_00261C10	g_cameraEyeOffset	the offset (-150,0,0) GetTargetCameraControllerEyePoint rotates by the yaw and pitch and adds to the target point, except while the player's subState is 0x22 (g_cameraEyeOffsetSubState22)
+D_00261C20	g_cameraEyeOffsetSubState22	Vec -25,0,0: GetTargetCameraControllerEyePoint uses it as the eye offset instead of D_00261C10 while the player's subState is 0x22; the camera code also takes its length as the back-off distance
+D_00261C30	g_cameraStickSpeedCurve	coefficients 2,0,-1 of the quadratic the camera controller evaluates at t and multiplies by secondStickY*|secondStickY| for a speed
+D_00261C40	g_cameraZoomRampFar	RampProfile copied and scaled (accel, speed, end speed) by the gap, for the zoom approach when the target is not near
+D_00261C50	g_cameraZoomRampNear	RampProfile passed as is to ApproachValueClampingVelocity for the zoom when near
+D_00261C60	g_cameraZoomSpeedDecayRamp	RampProfile that ApproachValueWithRamp uses to bring zoomSpeed to 0 when the zoom is not approaching a target
+D_00261C70	g_cameraZoomFractionRamp	RampProfile for ApproachValueWithRamp on zoomFraction in case 3 of the camera controller update
+D_00261C80	g_cameraTurnSpeedDecayRamp	RampProfile that brings yawSpeed and pitchSpeed to 0 each frame before the stick input is added
+D_00261C8C	g_cameraAimPushSpeed	24.0: times dt it scales the stick push added to the projected screen point in the camera controller
 D_00261C90	g_agentGoalPeriod	4: UpdateNumberedAgentGoal does its search only on frames where the frame count modulo this equals the agent's fC2C modulo this
 D_00261C94	g_agentNearRadius	900.0: IsNumberedAgentFree sets the agent's active flag fC20 when its target is closer than this
 D_00261C98	g_agentFarRadius	1200.0: IsNumberedAgentFree clears the active flag fC20 when the target is farther than this
@@ -639,6 +811,7 @@ D_00261CD8	g_launchLiftSpeed	800.0: LaunchObjectFromPooledObject adds this much 
 D_00261CE0	g_takerLinks	three-entry link table StartTaker (class 0x23) resolves through func_00124DF8
 D_00261D08	g_stepWaitButtonMasks	16 pad flag masks TestStepWaitConditions ANDs with the pad record's flags (default case, indexed by the wait kind k): 0x40, 0x40, 0x80, 0x20, 0x10, 4, 1, 8, 2 and zeros
 D_00261D28	g_stepWaitButtonGlyphs	16 character codes TestStepWaitConditions stores into the typed-text caption box (f2F8) while the wait of kind k is not met, one per kind (0x58, 0x58, 0x53, 0x4F, 0x54, ...)
+D_00261D38	g_controlBlockingElementCount	incremented when a screen element enters state 1 and decremented when it leaves it (pooled_object.cpp); ControlPlayer treats a count above 0 like an activation queued and gives the player a blank pad
 D_00261D40	g_thresholdRanges	four ThresholdRange entries that func_00151A88 scans for the first whose threshold is <= the value, then draws a count from low..high
 D_00261D70	g_scatterTablesPlain	two ScatterTables ResetScatterController selects when the save is past the early game and the current entry's flag 2 is clear
 D_00261E30	g_scatterTableFlagged	the ScatterTable ResetScatterController selects when the save is past the early game and the current entry's flag 2 is set
@@ -700,6 +873,7 @@ D_002623C8	g_currentEntry	the record at base + lo * 0x78 that func_00160690 sele
 D_002623CC	g_previousLevelIndex	func_00160690 stores the old level index (word 0x19D8) here before overwriting it; reset to -1 by func_00160880
 D_002623D0	g_missingEntryName	the string "<none>" GetEntryName returns when FindEntryById finds no entry (game_progress.cpp 1228)
 D_002623DC	g_timerRateExponent	the exponent the best-time screen's timer rate is -2 to the power of (SetTimerRate(o, -Power(2, D_002623DC)) in UpdateBestTimeState and its sibling; game_progress.cpp defines it as 0)
+D_002623E0	g_defaultModelColor	0x80101010 RGBA word placed_object_model.cpp writes as the colour register value of its GIF packets (r|g<<8|b<<16|a<<24)
 D_002623E8	g_morphStmasks	VIF STMASK words (0, 0x54545454, 0x50505050, 0x40404040, 0, 0) BuildMorphTargetPacket indexes by the header's count and writes before the data copy
 D_00262400	g_morphUnpackAddresses	offsets (-1, 0, 4, 8, 12, 0) BuildMorphTargetPacket indexes by the header's count as the first argument of CopyWordsToWriter
 D_00262418	g_stripStmasks	the same STMASK words BuildStripMeshPacket indexes by the header's count before ReserveVifUnpack
@@ -711,11 +885,14 @@ D_00262484	g_displayFieldCountdown	count of fields: reloaded from g_displayField
 D_00262490	g_displayRegisters	two 0x28-byte display register records (double buffered): InitDisplay sets them up, HandleVblankStart writes the one chosen by the frame counter's low bit (WriteDisplayRegisters), ApplyFieldDisplayOffset reads their pmode, display and dispfb, and the pause menu's screen-position page edits them
 D_002624E0	g_drawEnvPacket0	16-byte packet SendPacketToBothBuffers and ApplyPendingDisplayFlip pass to SendDrawEnvironment for one frame-counter parity
 D_002624F0	g_fieldOffsetPacket0	16-byte packet FlipDisplayFrame, ApplyPendingDisplayFlip and ResetDisplayBuffers pass to SetFieldDrawOffset (offset 0x800, 0x800, field parity) for one frame-counter parity
+D_00262500	g_drawEnvBlockEven	208-byte block whose first u64 is the frame register value the render-frame packet reads when g_displayFrameCounter is even
 D_002625D0	g_drawEnvPacket1	16-byte packet SendPacketToBothBuffers and ApplyPendingDisplayFlip pass to SendDrawEnvironment for the other frame-counter parity
 D_002625E0	g_fieldOffsetPacket1	16-byte packet passed to SetFieldDrawOffset for the other frame-counter parity
+D_002625F0	g_drawEnvBlockOdd	208-byte block whose first u64 is the frame register value the render-frame packet reads when g_displayFrameCounter is odd
 D_002626C0	g_displayFrameCounter	incremented in func_001685B8 and FlipDisplayFrame; its parity selects the display record
 D_002626C4	g_drawFieldParity	the field parity FlipDisplayFrame, ApplyPendingDisplayFlip and ResetDisplayBuffers set from the GS field flag (CSR bit 13 clear) and give SetFieldDrawOffset
 D_002626C8	g_displayFieldParity	the draw field parity of the frame being shown: FlipDisplayFrame copies g_drawFieldParity into it and ApplyFieldDisplayOffset reads it
+D_002626CC	g_fieldOffsetMode	field-offset mode: display.cpp switches on it, FlipDisplayFrame applies the offset while it is 1 or 2, render_frame sets 1 or 3, anim_record 2, ResetDisplayBuffers clears it
 D_002626D0	g_meshQueueCount	count of entries QueueMeshStrip and QueueNodeLink append to D_0027DC20; zeroed by InitMeshQueue
 D_002626D8	g_bumpAllocator	a bump allocator set to 0x1E00..0x4000 by func_00168D00, reset by func_00168D78 and read by func_001B3040
 D_002626E8	g_targetCurveList	list RegisterTargetCurve appends class 0x6F objects to and UnregisterTargetCurve removes them from
@@ -732,6 +909,7 @@ D_002629A8	g_gridSelectorFrame	BoxStyle InitGridSelector stores as its frame (a 
 D_002629C8	g_currentTargetFollower	set by SetCurrentTargetFollower, cleared by ClearCurrentTargetFollower; FollowableObject messages and InitTargetFollower use it
 D_002629D0	g_targetFollowerLoadLinks	five-entry id table LoadTargetFollowerRecords (class 0x47 slot 10) loads
 D_00262A10	g_targetFollowerResolveLinks	two-entry table ResolveTargetFollowerLinks (class 0x47 slot 20) loads
+D_00262A30	g_stickDirectionAxes	four 2D directions (1,0) (0,1) (.7,.7) (.7,-.7) the pad code dots with the stick to find the nearest of its directions
 D_00262A50	g_padButtonMasks	button mask for each of 12 indices that GetPadButtonAnalog tests against the pad's key word
 D_00262A68	g_worldLoadButtonSequence	button sequence of g_worldLoadButtonCode
 D_00262A80	g_worldLoadButtonCode	button-code slot whose callback is RequestWorldLoadByMode; RegisterButtonCodes adds it
@@ -759,6 +937,9 @@ D_00262D38	g_blankPadRecord	the second pad record, defined as zeros and never in
 D_00262DFC	g_buttonCodes	the head of the button-code list: AddButtonCode pushes onto it, AdvanceButtonCodes and RunCompletedButtonCode walk it
 D_00262E00	g_buttonCodeTimer	ButtonCodeTimer: its time is set one second ahead when a code completes (RunCompletedButtonCode) and AdvanceButtonCodes waits on it
 D_00262E10	g_player	singleton LoadPlayerCharacter (class 0x07 slot 10) stores itself in; ShowModeLabel and others read it
+D_00262E14	g_jumpSpeedBase	455.0: jumpSpeed = it * sqrt(gravityScale) in the two places that start a jump
+D_00262E18	g_jumpKind3SpeedScale	0.7: multiplies jumpSpeed when jumpKind is 3
+D_00262E1C	g_jumpKind4SpeedScale	0.6: multiplies jumpSpeed when jumpKind is 4
 D_00262E20	g_soundEffect94Volume	the volume argument (0.7) of the StartSoundEffect(0x94) calls in player.cpp (the sound played when HasNoActiveObject89 holds)
 D_00262E24	g_soundEffect7EVolume	the volume argument (0.6) of the StartSoundEffect(0x7E) calls in player.cpp and player_target.cpp
 D_00262E34	g_slideRateFirst	ComputePlayerSlideRates loads it into its first output when the player state f2220 is 0xD (read)
@@ -766,6 +947,12 @@ D_00262E38	g_slideRateSecond	ComputePlayerSlideRates loads it into its second ou
 D_00262E3C	g_state13ExitDelay	player state 13 may only leave when g_gameTime minus f2224 exceeds it (0.25 s); read in player.cpp
 D_00262E40	g_playerCharacterLinks	0x97-entry link table LoadPlayerCharacter (class 0x07 slot 10) installs through func_00124DF8
 D_00263558	g_playerObjectLinks	the 27-entry ObjectLink table InitPlayer-time LoadPlayer-side code passes to ResolveObjectLinks(self, 27, ...) (player.cpp:444)
+D_002636A0	g_phaseSoundInitial0	first of five 4-float records InitPlayer copies whole into phaseSoundStates[0]
+D_002636B0	g_phaseSoundInitial1	record InitPlayer copies whole into phaseSoundStates[1]
+D_002636C0	g_phaseSoundInitial2	record InitPlayer copies whole into phaseSoundStates[2]
+D_002636D0	g_phaseSoundInitial3	record InitPlayer copies whole into phaseSoundStates[3]
+D_002636E0	g_phaseSoundInitial4	record InitPlayer copies whole into phaseSoundStates[4]
+D_002636F0	g_ledgeHandOffsetInitial	vector InitPlayer copies into ledgeHandOffset
 D_00263700	g_playerGravityScale	passed to SetTurningColliderGravityScale in the player's start-up
 D_00263704	g_playerMass	passed to SetColliderMass in the player's start-up
 D_00263730	g_playerTiltRampProfile	the RampProfile ApproachValueClampingVelocity uses for the tilt speed in ApplyPlayerDefaultSteering
@@ -774,17 +961,29 @@ D_00263750	g_steeringRampProfileFast	the other end of the BlendRamp in ApplyPlay
 D_00263760	g_steeringBlendBySpeedCurve	EvalCurve3 curve turning the ground speed into the blend fraction t of the two steering ramp profiles
 D_00263770	g_steeringBlendByLeanCurve	EvalCurve3 curve of f634 whose result scales the ramp's maxSpeed and endSpeed in ApplyPlayerDefaultSteering
 D_00263780	g_turnTowardRotationRates	rate vector passed to TurnColliderTowardRotation for state 0x38 (read)
+D_002637D0	g_spinTargetRateDefault	50: spinTargetRate as a float in the 0x13C case when subState is not 8
+D_002637D4	g_spinTargetRateSubState8	100: spinTargetRate as a float in the 0x13C case when subState is 8
 D_002637D8	g_motionLookaheadTime	the time step (0.1 s) TransformPointAtTime moves a point by and the divisor of the velocity estimate (player.cpp around 1415)
 D_002637DC	g_followPullRange	distance divisor (1000) clamped to 1 before the EvalCurve3 of the pull strength; also scales the turn input (player.cpp 1389, 1419)
 D_002637F0	g_followPullCurve	EvalCurve3 curve of the clamped distance ratio, giving the pull factor g (player.cpp 1419)
 D_00263858	g_hookTurnRamp	ramp profile for ApproachValueClampingVelocity of f1098 (player.cpp 1392)
 D_00263888	g_scaleApproachRamp	RampProfile for ApproachValueWithRamp of f2724/f2728 (player.cpp 1686, 1689)
 D_002638A0	g_spinRampParams	SpinRampParams passed to ApproachValueWithRamp to return the spin angle f2434 to a full turn (player.cpp 1829)
+D_002638B8	g_cameraPoseMaxOffset	75: upper clamp of the camera pose z relative to the player's pos.z (zhi)
+D_002638BC	g_cameraPoseMinOffset	-325: lower clamp of the camera pose z relative to the player's pos.z (zlo)
+D_002638C0	g_cameraHeightMaxOffset	-50: upper clamp of cameraHeight relative to the player's pos.z
+D_002638C4	g_cameraHeightMinOffset	-350: lower clamp of cameraHeight relative to the player's pos.z
+D_002638C8	g_cameraHeightStartOffset	-300 in [0]: cameraHeight is set to pos.z plus it
 D_002638E0	g_pivotApproachRamp	RampProfile for ApproachPointWithRamp moving v2530 to the origin (player.cpp 2170)
 D_002638F0	g_heightApproachRamp	RampProfile for ApproachValueWithRamp following the height z (player.cpp 2152)
 D_00263900	g_forceApproachRamp	RampProfile for ApproachValueWithRamp of the force stored at 0x300 of f2678 (player.cpp 2365)
+D_00263910	g_playerCallbackWindow	0.15: ControlPlayer runs the player's callback while g_gameTime is within it of f2734
 D_00263918	g_positionApproachRamp	RampProfile for ApproachPointWithRamp moving v24D0 to the origin (player.cpp 3036)
+D_00263924	g_uprightThreshold	0.9: the player's rot z axis must have z above it for the branch of state code at player.cpp 3088
+D_00263930	g_stateFallbackChain	16-entry table of states: ChoosePlayerState walks it from state 0x24 on to fall back when a node is missing
 D_002639E8	g_targetArcDurations	nine candidate durations the target-arc search in player.cpp (around 5303) tries in turn, keeping the one with the lowest score
+D_00263A10	g_hitRingOffsets	eight 2D offsets (radius 40, every 45 degrees) added to the hit point to probe around it
+D_00263A90	g_searchBoxMargin	200,200,200: subtracted from the low corner and added to the high corner of a search box
 D_00263AC8	g_modeColliderLinks	26-entry link table StartWorld5ModeCollider (class 0x1B) installs through func_00124DF8
 D_00263C4C	g_world5AimSmoothing	0.7: UpdateWorld5ModeCollider blends the new aim deltas with the stored f704/f708 as k*new + (1-k)*old
 D_00263C50	g_world5ButtonWindow	0.15 s: ControlWorld5ModeCollider calls the m50 method while less than this time has passed since the 0x40 pad button was pressed (f6DC)
@@ -809,6 +1008,12 @@ D_00263E2C	g_world5CountdownRequest	world5_boss.cpp resets it to -1, sets it to 
 D_00263E30	g_timeoutFired	defined in world5_boss.cpp only: InitWorld5Countdown clears it and UpdateWorld5Countdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
 D_00263E38	g_queueGoalReachDistance	entry-queue completion test for the case that compares the player's distance to a node anchor with it (entry_queue.cpp 439)
 D_00263E3C	g_queuePathReachTolerance	entry-queue completion test for case 7: |f2410 - f64| below it (entry_queue.cpp 443)
+D_00263E40	g_entrySubState2Delay	0.2: seconds in subState 2 before the entry queue lets the player pick a target
+D_00263E44	g_entrySubState3Delay	0.5: seconds in subState 3 before the entry queue lets the player pick a target
+D_00263E80	g_jumpKind1SpeedBase	700: ComputePlayerJumpVelocity z = it * sqrt(gravityScale) for jumpKind 1
+D_00263E84	g_jumpApexHeight	245: ComputePlayerJumpVelocity (kinds 0 and 2) aims for an apex this far above the ground contact point
+D_00263E88	g_jumpKind3SpeedBase	900: ComputePlayerJumpVelocity z = it * sqrt(gravityScale) for jumpKind 3
+D_00263E8C	g_jumpKind4SpeedBase	800: ComputePlayerJumpVelocity z = it * sqrt(gravityScale) for jumpKind 4
 D_00263EC0	g_probeSegmentEndpoints	22 points (11 pairs) TestProbeSegmentsAgainstColliders transforms by the probe matrix two at a time (player_state2.cpp 467)
 D_0026402C	g_kind58SearchRadius	the larger range used instead when an ancestor of the object is of kind 0x58 (player_state2.cpp 751)
 D_00264088	g_pointObjects	the list head RegisterPointObject and UnregisterPointObject append to and unlink from for the 0x80 class (ClearPointObjectList empties it)
@@ -816,6 +1021,15 @@ D_00264098	g_triangleGroupGrey	the colour (0xBF, 0xBF, 0xBF, 0x7F) DrawTriangleG
 D_002640A0	g_triangleGroupBlue	the colour (0x00, 0x87, 0xFF, 0x7F) DrawTriangleGroups gives the other groups
 D_002640A4	g_coloredTriangleSet	the single object InitColoredTriangles (class 0x8E) stores itself in; func_001EFEE0 passes it to func_00180398 with its opacity and the teardown code clears it
 D_002640B0	g_modeWalkerLinks	the ten-entry ObjectLink table StartModeWalkerObject passes to ResolveObjectLinks
+D_00264128	g_walkerButtonPressWindow	0.15: the walker mode acts while g_gameTime - buttonPressTime is under it
+D_00264130	g_walkerRotationRamp	RampProfile for ApproachRotationWithRamp on the walker's rotation
+D_00264198	g_walkerAimRateRamp	RampProfile for ApproachValueWithRamp on rateX and rateY
+D_002641A4	g_walkerAimRateScale	1.5: rateX and rateY times dt times it are added to aim[0], aim[1]
+D_002641A8	g_walkerAimDistanceRamp	RampProfile that moves aim[2] toward the farther of the far plane and the nearest hit
+D_002641B8	g_walkerAlphaRamp	RampProfile that moves alphaScale toward its target
+D_002641C4	g_walkerSpinRate	3.0: g_gameTime times it is the angle of the matrix that turns the walker's quad corners
+D_002641C8	g_walkerQuadTexCoords	five ST pairs AddGifStEntry writes, one per vertex of the quad
+D_002641F0	g_walkerQuadCorners	four corners (+-24, +-24) rotated by the spin matrix to make the quad
 D_00264230	g_pathSpeedColliderLinks	the two ObjectLink entries StartC24Object passes to ResolveObjectLinks
 D_00264250	g_pathSpeedColliderRotationRamp	RampProfile MoveC24Object approaches the object's rotation with
 D_00264260	g_lightingChangeFrame	set to the frame count D_002622CC whenever a lighting setting changes (NoteConeVolumeLightingChange, func_001DD5F8 and func_001DD610 for the world's +0x1D6C and +0x1D68); func_00166690 reads it
@@ -832,8 +1046,11 @@ D_00264928	g_world2BossStartLinks	the 3-entry ObjectLink table StartWorld2Boss r
 D_00264950	g_world2BossClipIds	the three animation ids StartWorld2Boss resolves with ResolveAgentClip into fE30 (105)
 D_00264960	g_world2BossGaugeTargets	the 6 GaugeTarget records copied to front memory into fE24 (CopyToFrontMemory(0x48, ...), 107)
 D_002649B0	g_world2BossBlockerKinds	the five object kinds IsWorld2BossBlocker tests the query's object against (world2_boss.cpp 217)
+D_002649C4	g_bossNearestHitRange	150: range passed to FindNearestHitObject
 D_002649D8	g_world2BossPhaseStates	the state AdvanceWorld2BossPhase gives ChangeAgentState for each phase index fE28 (368)
 D_002649E8	g_world2BossPhaseValues	the value AdvanceWorld2BossPhase stores in fE3C for the phase index (370)
+D_00264A00	g_bossNearCurve	QuadraticCurve evaluated at dist and limited to 0..1 for the boss's near factor
+D_00264A10	g_bossFarCurve	QuadraticCurve evaluated at dist and limited to 0..1 for the boss's far factor
 D_00264A40	g_memoryCard	the one MemoryCard record that the memory-card functions of memory_card.cpp take as their first parameter
 D_0026998C	g_cardSlotInAction	the card slot UpdatePauseMenu sets when a slot is confirmed on pages 11 and 16 (before page 0x12) and clears when the background job of page 19 finishes
 D_00269990	g_backgroundJob	the one BackgroundJob record: func_0018B5C0 sets it up, func_0018B670 starts a job on it and func_0018B770 asks whether its thread still runs; the memory-card code is its only user
@@ -845,12 +1062,15 @@ D_002699C0	g_movieTitles	16 title strings GetMovieTitle returns by index
 D_00269A00	g_moviePlayer	the movie player state (MoviePlayer): QueueMovieByIndex, QueueMovieWithSuccessor, RunMovieDecodeThread, CreateMovieDecodeThread, InitMoviePlayback and the main loop's on flag all use it
 D_00269B48	g_movieChecksumFailed	set to 1 by AdvanceCodeChecksum, which InitMoviePlayback starts over the code from 0x100010 and StepMovieFrame advances while a movie plays, when it reaches the end with a nonzero CRC-32
 D_00269B4C	g_keyedMovieWatched	set to 1 by PlayMovie once the movie of key D_00248490 has played; from then on PlayMovie lets the pad skip that movie
+D_00269B50	g_pointFadeRamp	RampProfile for ApproachValueWithRamp on the point graph state's fade
+D_00269B60	g_pointGraphLinks	two ObjectLink entries ResolveObjectLinks resolves for the point graph (slots 0x59C, 0x5A0)
+D_00269B78	g_turnAngleSearchOrder	0,.5,-.5,1,-1,... angles tried in order as the turn of the axis-angle matrix around z
 D_00269BA4	g_screenOwner	the activity SetScreenOwner records as drawing to the screen (1 the startup loading screen, 3 a rendered frame, 4 a movie); ClearScreenOwner sets it back to 0
 D_00269BA8	g_targetVectors	the list head RegisterTargetVector and UnregisterTargetVector append to and unlink from for class 0x70 (set up with element size 0x38)
 D_00269BC0	g_followZRamp	RampProfile ApproachValueWithRamp uses to move the output z toward the collider's z (switched_collider.cpp 196)
 D_00269BCC	g_activeSwitchedCollider	the active index into g_switchedColliders (-1 for none): set by ActivateSwitchedColliderIndex, read by GetActiveSwitchedCollider, no other file uses it
 D_00269BD0	g_switchedEffectParams	EffectSpawnParams passed as the tail of SpawnEffectsAt (462-464)
-D_00269C10	g_switchedEffectBlock	the Blk05 passed as the SpawnBlock of SpawnEffectsAt (464)
+D_00269C10	g_switchedEffectBlock	the EffectSpawnData passed as the SpawnBlock of SpawnEffectsAt (464)
 D_00269C90	g_switchedColliderCount	AddToSwitchedColliderList appends at this index (limit 16) and bumps it, RemoveFromSwitchedColliderList lowers it, FindSwitchedColliderIndex loops to it
 D_00269C98	g_switchedColliders	the 16-entry array of SwitchedColliders: AddToSwitchedColliderList appends, RemoveFromSwitchedColliderList shifts, GetActiveSwitchedCollider indexes it, no other file uses it
 D_00269CD8	g_pauseMenuCandidates	the 8 item ids BuildPauseMenuPage walks for page 0 (the pause menu), keeping those whose condition holds in row->items
@@ -891,9 +1111,18 @@ D_0026A700	g_screenAdjustX	the screen position's x being adjusted: set from the 
 D_0026A704	g_screenAdjustY	the screen position's y being adjusted: set from the display register on page 24, moved and clamped to 10..90 by UpdatePauseMenu
 D_0026A708	g_screenAdjustSavedX	the x read from the display register when page 24 opens; CancelPauseMenuPage writes it back
 D_0026A70C	g_screenAdjustSavedY	the y read from the display register when page 24 opens; CancelPauseMenuPage writes it back
+D_0026A710	g_gaugeNoticeTopSpeed	2200: topSpeed while the collider has no floor contact but noticeValue is set
+D_0026A714	g_gaugeNoticePushStrength	4000: pushStrength in the same case
+D_0026A718	g_gaugeGroundTopSpeed	2000: topSpeed set at init and while the collider has floor contact
+D_0026A71C	g_gaugeGroundPushStrength	4000: pushStrength set at init and while the collider has floor contact
 D_0026A720	g_gaugeAgentCountLimit	5: the most UpdateGaugeColliderAgent lets the gauge collider's count at 0x67C reach
 D_0026A728	g_gaugeColliderLoadLinks	the one-entry ObjectLink table LoadGaugeCollider installs
 D_0026A738	g_gaugeColliderStartLinks	the 13-entry ObjectLink table StartGaugeCollider installs
+D_0026A830	g_gaugeNearestRange	250: starting value of the nearest-distance search
+D_0026A834	g_gaugePickDelay	0.25: seconds after pickTime before a held pick is handled
+D_0026A838	g_gaugePlaceCooldown	0.5: added to the time to give nextPlaceTime
+D_0026A83C	g_gaugeBounce	0.2: written to out->bounce
+D_0026A840	g_gaugeFriction	0.1: written to out->friction
 D_0026A890	g_agentGoalMinDistance	UpdateGaugeColliderAgentGoal picks a random graph point only if it is farther than it from the agent (gauge_collider.cpp 1163, 1192)
 D_0026A8E0	g_gaugeCountedObjectLinks	the 3-entry ObjectLink table StartGaugeCountedObject installs
 D_0026A904	g_gaugeCollider	the one class 0x18 gauge collider: InitGaugeCollider stores itself here and EndGaugeColliderTimer reads its walker at 0x6B8 through it
@@ -907,6 +1136,7 @@ D_0026A958	g_numberedItemSpinRange	range (0.8, 1.2) StartNumberedItem draws the 
 D_0026A960	g_numberedItemJitterRange	range (0.9, 1.1) StartNumberedItem draws a factor from it and multiplies f5A8 by it
 D_0026A968	g_numberedItemReachRadius	300.0: UpdateNumberedItem ignores the active collider's target farther than this
 D_0026A970	g_numberedItemEffectParams	effect parameter record CollectNumberedItem gives the effect it creates as params
+D_0026A9E0	g_levelBitTable	table the gatherer searches for the object's levelBit, levelBitIndex indexing it
 D_0026AB90	g_objectGathererLoadLinks	the ObjectLink table LoadObjectGatherer installs
 D_0026ABA0	g_objectGathererStartLinks	the ObjectLink table StartObjectGatherer installs
 D_0026ABB0	g_gathererTurnRamp	ramp profile (12, 0, 0.12, 0) StepObjectGatherer passes to TurnColliderTowardRotation
@@ -974,15 +1204,15 @@ D_0026C3E0	g_elementPlaces	the array of 20-byte placement records (T217D_Place) 
 D_0026C6C8	g_reserveCountCaption	caption AddReserveUnitNow shows after incrementing g_saveData->f19E0 (capped at 99)
 D_0026C948	g_collectedItemCaption	caption shown (vt->m14) by CollectNumberedItem when a numbered item is collected; hidden with the pause menu's other HUD captions
 D_0026D0C8	g_pairControllerCountCaption	caption PairController sets in state 2: target=&self->f3C4, limit=&self->limit3B8, shown by ShowPairControllerElement when the menus are clear
-D_0026D348	g_gaugeAmountCaption	a plain caption (T217D_E30) whose target counter HandleGaugeManagerNotification points at the gauge manager's amount and HandleGaugeColliderNotification at the gauge collider's +0x680
+D_0026D348	g_gaugeAmountCaption	a plain caption (CounterCaption) whose target counter HandleGaugeManagerNotification points at the gauge manager's amount and HandleGaugeColliderNotification at the gauge collider's +0x680
 D_0026D5C8	g_pathFollowerFirstCountCaption	caption HandlePathFollowerActivation points at the follower's 0xB00 count and 0xB04 limit, shown and hidden by world.cpp
 D_0026DAC8	g_pathFollowerSecondCountCaption	caption HandlePathFollowerActivation points at the follower's 0xB08 count and 0xB0C limit
 D_0026DD48	g_hitCountCaptionA	caption StartHitCountCollider points at self+0x690 (hit count) with limit D_00274A40; shown by hit_count_collider.cpp
 D_0026DFC8	g_hitCountCaptionB	caption StartHitCountCollider points at self+0x694 with rate 4.0; shown with g_hitCountCaptionA
-D_0026E248	g_gaugeBarElement	the screen element of t217d.h that is a filled bar following a value and flashing a letter (T217D_2E0), shown and hidden by SetElementStackState
+D_0026E248	g_gaugeBarElement	the screen element of t217d.h that is a filled bar following a value and flashing a letter (GaugeBar), shown and hidden by SetElementStackState
 D_0026E4E0	g_gaugeColliderCaption	caption UpdateGaugeColliderVisibility shows with g_gaugeAmountCaption and g_timerElement while the walker is in state 0x3F3
-D_0026E760	g_timerElement	the on-screen timer object of t217d.h (T217D_510: counts up or down, minutes and seconds); UpdateBestTimeState reads its time
-D_0026E9F8	g_timerCaption	the screen element t217d.h documents as the caption of the timed sprint (T217D_1380)
+D_0026E760	g_timerElement	the on-screen timer object of t217d.h (TimerElement: counts up or down, minutes and seconds); UpdateBestTimeState reads its time
+D_0026E9F8	g_timerCaption	the screen element t217d.h documents as the caption of the timed sprint (SprintCaption)
 D_0026EC68	g_deadlineNotifier	StartDeadlineNotifier stores the class 0x5A object here; func_00149398's file reads it
 D_0026EC70	g_buttonHintElement	the screen element that shows the button prompts: ShowModeLabel sets its hold time and scale and shows the mode label on it (slots 8 and 14), and the save screens of pause_menu.cpp show "&2X&. : Save Game" and the like on it
 D_0026EED0	g_pointerTextCaption	screen element whose table is g_pointerTextCaptionMethods (object_pool.cpp)
@@ -990,19 +1220,28 @@ D_0026F138	g_copiedTextCaption	screen element whose table is g_copiedTextCaption
 D_0026F5A0	g_hintGlyphElement	screen element whose table is g_hintGlyphElementMethods (object_pool.cpp)
 D_0026F800	g_playerStepSequence	the StepSequence the player sets to state 1 on a button press (player.cpp 2633) and when a record flag is set (switched_collider.cpp 404); a pointer defined in assembly data
 D_0026F808	g_mapScreenList	the screen element t217d.h documents as the map screen's list of objects of kind 0x67 by slot; AreMenusAndFadeClear and func_001E9A68 test its open and mode fields
+D_0026FA68	g_currentWarpPage	the warp page on view: group_marker reads it, player reads its +0x2D0 mode (2 or 3); warp_menu sets it
 D_0026FA90	g_selectionCaption	screen element whose table is g_selectionCaptionMethods; the selection menus push it on the element stack and set its text
 D_0026FCF0	g_currentPlacedObject	BecomeCurrentObject (slot 16 of class 0x69) stores itself here (current_placed_object.h calls it the current one)
+D_0026FCF4	g_streamVoiceActive	set from HasStreamVoice() in selection_menus.cpp
 D_0026FD00	g_gridSelector	screen element whose table is g_gridSelectorMethods; the selection menus push it on the element stack
 D_0026FF68	g_pauseMenuElement	the screen element t217d.h documents as the pause menu (three layers ask for a screen); tested by AreMenusAndFadeClear and func_001E9A68 through open, mode and page
 D_002701F8	g_typedTextCaptionBox	the screen element t217d.h documents as the caption box of the dialogue and tutorial screens that types its text out
+D_00270458	g_displayMode	first word of a 0x9C-byte zeroed object; ArcElement SetArcMode/WriteArcOutlineVertices/ApplyArcTarget size the arc 640x360 when it is 4 (160x125.4 otherwise); menus and ColorFade refuse to run for 1, 2 or 4
 D_0027051C	g_activeStepSequence	pointer to the step sequence object that currently owns the sequence text: pooled_object tests it against self and reads it in state 1, object_gatherer reads whether it is zero before moving on, warp_menu pops its element when its +0x2D0 is not 2
 D_00270650	g_spinningSpriteElement	screen element whose table is g_spinningSpriteElementMethods (object_pool.cpp)
+D_002708C0	g_modeWalkerScreenPoint	the screen point the mode walker unprojects to place its look target
+D_002708E0	g_leftArcElement	arc screen element: SetArcTarget/SetArcSpecialObject/SetArcFade set it for caption speaker slot 1 (left arc, stored in p2F0), text_panel and camera controller read its target, blend and fade
+D_00271558	g_rightArcElement	the same for slot 2 (right arc, stored in p2F4)
 D_002721D0	g_letterboxElement	screen element whose table is g_letterboxElementMethods; SetScreenElementHoldTime(0.5 or 2.0) then vt->m16(2) in the warp code
 D_00272430	g_firstTallyCaption	caption whose own count HandlePathFollower resets to 0 and world.cpp compares with D_002751D4 to pick the walker target 0x432
 D_002726B0	g_secondTallyCaption	caption whose own count HandlePathFollower resets to 0 and world.cpp compares with D_002751D4 to pick the walker target 0x431
 D_00272930	g_titleElement	screen element whose table is g_titleElementMethods (object_pool.cpp); the warp menu hides it with vt->m15
+D_00272B6C	g_elementBlendLimit	an element's blend is limited to it (t = limit <? blend) before it is drawn
 D_00272B98	g_promptElement	screen element whose table is g_promptElementMethods; the warp menu hides it with vt->m15
-D_00272E08	g_stackedCaptionGroup	t217d.h: an object holding four sub-elements of one kind stacked and drawn together (T217D_720)
+D_00272E08	g_stackedCaptionGroup	t217d.h: an object holding four sub-elements of one kind stacked and drawn together (StackedCaptionGroup)
+D_002739F0	g_bossBeatGlyphElement	letter-glyph element the world 3 boss message handler switches with m16 on kinds 4 (on, sets fC4C) and 5 (off)
+D_00273C50	g_beatPressGlyphElement	letter-glyph element the world 3 boss message handler switches with m16 on kinds 2 (judging on) and 3 (judging off)
 D_00273EB0	g_cyclingGlyphElement	screen element whose table is g_cyclingGlyphElementMethods; the pause menu shows it with vt->m14
 D_00274118	g_completionPercentCaption	caption whose own count is set to ComputeCompletionPercent(g_saveData) and shown by the pause menu pages 0, 11, 17 (pause_menu.cpp)
 D_002743A0	g_slideEaseOutCoefficients	quadratic (0 + 2p - p*p) UpdateScreenElementSlide evaluates at the slide progress p; an ease-out curve
@@ -1018,10 +1257,14 @@ D_00274430	g_worldTitles	the six world title strings (empty first) SetElementTex
 D_00274448	g_titleFontScaleX	0.9: horizontal scale of the font clone InitTitleElement makes
 D_0027444C	g_titleFontScaleY	0.9: vertical scale of the font clone InitTitleElement makes
 D_00274450	g_titleStyle	TextStyle InitTitleElement stores as its frame; built by ConstructScreenTextStyles
+D_0027446C	g_promptFontScaleX	InitPromptElement clones its font with this x scale (0.7)
+D_00274470	g_promptFontScaleY	InitPromptElement clones its font with [0] (0.6) as the y scale
 D_00274478	g_promptTexts	the three prompt lines ("Press START ... New Game", "... Resume Game", "Press SELECT ... Menu") RebuildPromptText formats two of with "%s\n%s"
 D_00274484	g_noControllerText	the "No Controller" text RebuildPromptText copies when no controller is connected
 D_00274488	g_promptStyle	TextStyle InitPromptElement stores as its frame; built by ConstructScreenTextStyles
+D_002744A4	g_letterPopDuration	the letter glyph's size curve: k = (1 - start)/(it^2), and the pop lasts peak + it seconds
 D_002744A8	g_letterGlyphScale	1.3: the font scale InitLetterGlyphElement and its draw push for the glyph
+D_002744AC	g_cyclingGlyphElementScale	InitCyclingGlyphElement passes it to SetScreenElementScale
 D_002744B0	g_cyclingGlyphSet	GlyphCycleTable whose string ("ab") DrawCyclingGlyphElement takes the length of as the glyph count and cycles through
 D_002744B8	g_timedGroupLinks	the two object-link records (+0xAE4 and +0xAE8 of a class 0x31 object) LoadTimedGroup hands to ResolveObjectLinks
 D_002744D0	g_groupStaggerDirty	set to 1 by func_001AF7A8 and func_001B01B0, tested by the group update and cleared by StaggerGroupOffsets; only timed_object.cpp uses it
@@ -1050,6 +1293,7 @@ D_00274588	g_sjisCharTable	34 SjisCharEntry codes MapCharToCode indexes by the c
 D_00274610	g_sjisCharRanges	four SjisCharEntry (first id and first code) MapCharToCode maps a character in a range with
 D_00274620	g_companionProbePointsA	four points IsCompanionAgentTargetReachable tests for state 2
 D_00274660	g_companionProbePointsB	four points IsCompanionAgentTargetReachable tests for states 0 and 1
+D_002746A0	g_defaultLookPoint	the state walker's look point (1000,0,0) when there is no look target
 D_002746C0	g_colliderPositionGains	per-axis gains (0, 3, 0) ApplyColliderAttachedSetContact scales by contact depth and drag for the two position steers
 D_002746D0	g_colliderRotationGains	per-axis gains (0, 0.75, 0) it scales by depth and drag for the two rotation steers
 D_002746E0	g_anchorPresets	eight AnchorPreset records GetAnchorPreset(index) copies from
@@ -1066,6 +1310,7 @@ D_00274744	g_streamVoiceLocked	the lock StartLockedStreamVoice sets, StopLockedS
 D_00274748	g_soundEmitterUpdateDisabled	word IsSoundEmitterUpdateDisabled returns; InitSoundSystem sets it
 D_0027474C	g_nextSoundRecordId	counter func_001BF920 post-increments to give each sound record a unique id
 D_00274750	g_lastSilentSoundTime	time of the last silent ambient sound UpdateSoundEmitters scheduled; another one waits until it is more than 1 s old
+D_00274754	g_soundLevelStepCountdown	the sound-level update counts it down and steps the level by one each time it goes below 0, adding 3
 D_00274758	g_defaultVolumeChannelFactors	the 0xB0-byte initial values ResetVolumeChannelFactors copies into g_volumeChannelFactors
 D_00274808	g_iopChannel2Values	the six values SetIopChannelValue(2, ...) is given, indexed by an IOP channel-2 setting
 D_00274820	g_defaultSoundRepeat	8 bytes (two floats 4 and 6) AddWorldSoundEntry stores in the new entry's repeat field
@@ -1078,14 +1323,27 @@ D_00274990	g_sprTransferIndex	0 or 1: which g_sprTransfers record is the current
 D_00274998	g_trailEdgeTexCoord	the texture coordinate (0, 1.0) DrawTrailRibbon gives each point's first edge
 D_002749A0	g_trailZeroTexCoord	the zero texture coordinate DrawTrailRibbon gives each point's second edge
 D_002749B0	g_hitCountColliderLinks	the 12 ObjectLink entries StartHitCountCollider passes to ResolveObjectLinks
+D_00274A44	g_hitCountHitRadius	UpdateHitCountColliderRadius blends the radius from baseRadius to it by the hit animation phase; the hit velocity step uses (it - baseRadius)/anim length
 D_00274A60	g_hitCountRotationRamp	RampProfile UpdateHitCountCollider approaches the part's rotation with
+D_00274A90	g_hitCountStickSpeedScale	HitCountCollider stick handler: the [0] value multiplies the stick magnitude into the target velocity (ComputePolarOffset)
+D_00274A98	g_hitCountMinSpeedLimit	the collider's speedLimit is it when not in state 1, else max(it, stick magnitude)
+D_00274A9C	g_hitCountAccelLimit	ClampVectorLength limit for the acceleration, times speedLimit and dt
 D_00274AA8	g_hitCountTurnRamp	RampProfile TurnColliderTowardRotation and ApproachAngleWithRamp use in StepHitCountCollider
+D_00274AB4	g_hitCountPushSpeed	speed of the velocity (unit direction from one collider to the other) given to the pushed object
 D_00274AB8	g_hitCountItemSpeedRange	range (0..300) of the random speed PlaceHitCountColliderItem gives an item
 D_00274AC0	g_hitCountItemSpinRange	range (-1..1) of the random spin PlaceHitCountColliderItem gives an item
 D_00274AD0	g_contactSideSigns	{1.0, -1.0}: the sign applied to a contact's normal by which of the two contact ends (index) is the collider's; read by IsTurningColliderGroundContact, IsPlayerGroundContact, UpdateAgent's floor push and player_state2.cpp (defined in turning_collider.cpp)
 D_00274AD8	g_turningColliderLinks	the six-entry ObjectLink table StartTurningCollider passes to ResolveObjectLinks
+D_00274B20	g_turningColliderPushFactor	InitTurningCollider stores it in pushFactor
+D_00274B30	g_turningColliderHeadingWeightCurve	InitTurningCollider copies it into headingWeightCurve
+D_00274B40	g_turningColliderRestRamp	InitTurningCollider copies the three words into restRamp
+D_00274B50	g_turningColliderSinkRamp	InitTurningCollider copies the three words into sinkRamp
 D_00274B5C	g_previousStickLevel	ReadTurningColliderStickHeading decays it by 0.25 (not below 0), compares it with the pad's stick level f48 to decide camera-relative heading, then stores the level
 D_00274B60	g_phaseSoundMinInterval	PlayPhaseCrossingSound returns without a sound if less than D_00274B60[0] (0.1 s) passed since f6C8 (turning_collider.cpp 226)
+D_00274B64	g_phaseTimeOffset	added (times speed) to the animation phase time before WrapModulo by the player and player_target state animation code
+D_00274B68	g_turningColliderHookRamp	ApproachValueWithRamp profile moving each hooked vertex toward its world position
+D_00274B74	g_turningColliderContactFriction	ComputeTurningColliderContactValue sets friction to it (bounce 0) when slot 0x168 says so
+D_00274B80	g_turningColliderTurnRampDefaults	ScaleTurningColliderRamp resets turnGain and two more values from these three words
 D_00274B90	g_aimStartDelay	0.0667: the delay SetPlayerAimMode adds to the game time for the start time of the aim items (it->time) in aim modes 4 to 7
 D_00274B94	g_aimDurationLong	0.1667: SetPlayerAimMode sets f2424 (the end time of the aim) to the game time plus this in modes 4 and 6
 D_00274B98	g_aimDurationShort	0.1167: SetPlayerAimMode sets f2424 to the game time plus this in modes 5 and 7
@@ -1110,9 +1368,14 @@ D_00274CC0	g_agentPitchHeightCoefficients	quadratic FaceAgentAlongPath evaluates
 D_00274CD0	g_agentPitchHeightLimits	low and high ClampTo bounds for the second pitch factor
 D_00274CD8	g_agentPitchScale	factor (1) the two pitch factors are multiplied by to give the pitch
 D_00274CE0	g_agentTargetRangeCoefficients	quadratic IsAgentTargetInRange evaluates at the distance; times the bearing it is compared with the agent's f74C
+D_00274CF0	g_agentLeadTime	multiplies the agent velocity to project its position ahead before choosing the secondary target
+D_00274CF4	g_agentDisabledContactFriction	ComputeAgentContactValue friction while contacts are disabled
+D_00274CF8	g_agentDisabledContactBounce	ComputeAgentContactValue bounce while contacts are disabled (0)
 D_00274CFC	g_agentHitVelocityBoost	fraction (0.25): DispatchAgentContactHits multiplies the launch velocity by 1 plus it
 D_00274D00	g_agentHitMinUpSpeed	700: the lowest z the launch velocity of an agent contact hit may have (z = 700 >? z)
 D_00274D04	g_agentHitMaxSpeed	1200: the length ClampVectorLength limits the launch velocity to
+D_00274D08	g_agentState6DeadlineRange	random range added to now for each owned agent's state6Deadline
+D_00274D18	g_agentState8DeadlineRange	random range added to now for each owned agent's state8Deadline
 D_00274D20	g_itemKeeperMemberSpacing	700: arc length per member; AssignItemKeeperMemberPlaces takes the ring radius as members * it / 2 pi
 D_00274D28	g_itemKeeperPlaceAngleJitter	range (-0.2, 0.2) of the random fraction of one angular step added to each member's place angle
 D_00274D30	g_itemKeeperPlaceRadiusScale	range (0.8, 1.2) of the random factor applied to each member's place radius
@@ -1141,12 +1404,27 @@ D_00274DD4	g_linkPoseTiltA	3.5: the angle ComputePlayerLinkPose turns the arc ab
 D_00274DD8	g_linkPoseTiltB	-1.7: the angle ComputePlayerLinkPose gives rotB as a rotation about the x axis
 D_00274DE0	g_linkPoseOffsetRamp	ramp profile (3000, 1000, 0.15) UpdatePlayerLinkPose uses to bring the pose offset back to zero
 D_00274DF0	g_linkPoseRotationRamp	ramp profile (30, 10, 0.15) UpdatePlayerLinkPose uses to bring both pose rotations back to the identity
+D_00274E00	g_targetSearchLimit	FindPlayerTarget's initial best distance when no target is forced
 D_00274E04	g_targetPathEdgeInset	the distance kept from both ends of a path shape when clamping and sampling the target position (player_target.cpp 382, 384, 824, 826)
+D_00274E08	g_targetReach	player target scoring: distance less this reach is the miss distance; used as the reach in the leap solver
 D_00274E0C	g_farTargetDistance	a target farther than this (compared as distance and as squared distance) from the player counts as far (player_target.cpp 871, 918)
 D_00274E10	g_targetCostWeight	the weight the target cost functions take as a const reference in the two curve-scoring paths (player_target.cpp 965, 1007)
+D_00274E18	g_specialTargetDistance	FindPlayerTarget accepts the world's f1CE4 object when closer than this
 D_00274E20	g_targetMaxCost	candidates whose cost reaches it are dropped (cost >= it, player_target.cpp 788, 829, 884, 930); also the maxCost of the scoring paths (966, 1008)
+D_00274E24	g_placementTargetBias	AddRepeatTargetPenalty bias for placement targets
+D_00274E28	g_pathTargetBias	AddRepeatTargetPenalty bias for path targets
+D_00274E30	g_nearestPathTargetBias	AddRepeatTargetPenalty bias for targets scored by ScoreTargetPathNearest
+D_00274E34	g_curveTargetBias	AddRepeatTargetPenalty bias for ScoreTargetCurveAt targets
+D_00274E3C	g_repeatTargetPenalty	AddRepeatTargetPenalty adds it when the target is the one the player just used
+D_00274E44	g_curveSearchStep	FindLocalMinimum initial step for ScoreTargetCurveAt
+D_00274E4C	g_driveSpeedThreshold	player target drive length above which the sub state 0x11 is chosen
 D_00274E60	g_onOffObjectDefaults	the 0x90-byte block ResetPlayerOnOffObject copies into the on-off object's +0x2F0: ranges at the float maximum and unit scales
+D_00274F00	g_pathFinishMargin	path clamp: the path position stays this far (35) from the far end of the path in the travel direction (UpdatePlayerPath and the Player path clamp)
+D_00274F04	g_pathStartMargin	path clamp: the margin (100) kept at the end the player starts from; swapped with g_pathFinishMargin when the path is reversed
 D_00274F08	g_steepSlopeThreshold	player_path.cpp and player.cpp compare the absolute z of the path direction with it (3799, 310) to decide the path is steep
+D_00274F0C	g_pathFlipDirectionLimit	a flipped path turns to state 0x1B when the direction z is past +/- this (0.3)
+D_00274F14	g_pathProbeDistance	distance ahead and behind the path position at which the shape is sampled (m2 at pos +/- it)
+D_00274F18	g_pathSpeedEaseRate	times dt gives the blend factor of pathSpeedEased toward the target speed
 D_00274F1C	g_pathTurnThreshold	0.4: ControlPlayerOnPath compares the stick turn f2418 with it (and its negative) before changing direction
 D_00274F20	g_pathPlaceStep	10: distance between the points PlaceOnPathAt samples, multiplied by (i+1) or -i
 D_00274F28	g_pathVelocityRamp	RampProfile ControlPlayerOnPath uses in ApproachPointWithRamp on v2400
@@ -1160,6 +1438,12 @@ D_00274F90	g_countedColliderLinkIds	the zero-ended id list StartCountedCollider 
 D_00274FA0	g_playerBlendDeltaIdsA	id pair given to ComputeWrappedDeltas for the 0x30 field of the six blend items (player_request.cpp 99)
 D_00274FA8	g_playerBlendDeltaIdsB	id pair given to ComputeWrappedDeltas for the 0x40 field of the six blend items (100)
 D_00274FC0	g_playerObjectTable	the seven (id, value, object) entries ResolvePlayerTableObjects copies to the player's +0x26AC and fills with the object of each id
+D_00275020	g_requestSteerProfile	ramp profile passed to SteerColliderTowardPosition in request sub states 0x25 and 0x26
+D_00275030	g_requestTurnAwayRamp	ramp profile with which sub state 0x2B turns the heading away from the velocity
+D_00275040	g_requestDropVelocity	velocity (0,0,-1000) passed to the player's slot-2 method m20 in request state 4
+D_00275050	g_requestLandingVolumeCurve	quadratic of v150.z giving sound 0x49's parameter in the request state-4 update
+D_00275060	g_requestLandingVolumeRange	clamp range (0..0.7) of that quadratic's result
+D_0027506C	g_hullAngleStep	the angle gap in the hull walk is divided by it to count the filler steps
 D_00275070	g_ringSevenPoints	7 unit-circle points (x, y pairs) every DrawAngleSortedRing call with count 7 uses: the player, the world 2 boss and the world 3 boss rings
 D_002750A8	g_ringSeventeenPoints	17 unit-circle points DrawAngleSortedRing takes with count 0x11 (player_request.cpp 1207)
 D_00275140	g_markerRingTintCurve	quadratic curve (1, 0, -0.75) QueuePlayerMarkerRingDraw evaluates at the time fraction t of the player's ring tint, clamped to g_unitRange
@@ -1178,6 +1462,7 @@ D_002751B0	g_standInPositionTurn	vector (0, 7.5, 0, 0) StepStandIn scales by the
 D_002751C0	g_standInAgeCurve	quadratic curve (0, 4, 0) StepStandIn evaluates at the time since f690 and limits to g_unitRange; the result scales the three steering vectors
 D_002751D0	g_pathLookAhead	850.0 added to the follower's progress f83C along its curve when AdvancePathFollowerAlongPath and ComputePathFollowerHeadingTarget sample the curve's position and tangent
 D_002751D8	g_pathFollowerRampTime	1.25 divisor of the time since f854 in StepPathFollower (argument of the lean, grip and acceleration curves) and EmitPathFollowerWheelParticles (argument of its fade curve)
+D_002751DC	g_lapCountCooldown	world.cpp path follower input counts a lap only if more than this long (0.75 s) since lapTime
 D_002751E0	g_leanCurve	quadratic curve (1.35, 0, -0.35) StepPathFollower evaluates at the ramp fraction lap, clamped by g_leanRange, times f85C for the lean
 D_002751F0	g_leanRange	range (1, 1.35) clamp of g_leanCurve in StepPathFollower; its [1] also caps the tilt
 D_00275200	g_gripScaleCurve	quadratic curve (1.5, 0, -0.5) StepPathFollower evaluates at lap, clamped by g_gripScaleRange, to scale the traction limit
@@ -1261,15 +1546,36 @@ D_002756A0	g_coneVolumeMode3Range	record (500, 2500, 0, 0) CreateConeVolumes giv
 D_002756B0	g_clipVolumePlanes	six planes (x, y, z, w) of the cube -1..1 that ClipSegmentToPlanes clips each segment against, one after the other
 D_00275710	g_currentWorld	GetScriptWorld returns it, FindScriptObject and ResolveObjectLinks look objects up on it, and classes read it as their world (C6C*); about 220 uses.
 D_00275714	g_scriptStreamExtras	byte InitWorld (world.cpp) reads first from the level stream: when nonzero, script value nodes (value.cpp) skip four extra 16-bit fields, LoadScriptEntryTable skips three blocks per entry and SkipBufferedBlocks skips blocks
+D_00275718	g_bufferedBlockData	the front-memory block allocated by the buffered block loader (size g_bufferedBlockSize); anim record offsets are added to it
 D_0027571C	g_bufferedBlockLoad	flag ReadBufferedBlockHeader sets when the block's key changed or the caller asked, and ReadBufferedBlockBody tests before it reads the block's bytes
 D_00275720	g_bufferedBlockSize	byte size of the block ReadBufferedBlockHeader read; ReadBufferedBlockBody reads that many bytes
 D_00275724	g_bufferedBlockKey	the second word of the block header; a different value from the last block's makes ReadBufferedBlockHeader set g_bufferedBlockLoad
 D_00275728	g_bufferedBlockStart	the stream position (f14) ReadBufferedBlockBody saved before reading; ReadBufferedBlockHeader steps the stream back by it when the block is reused
+D_00275730	g_redirectObjectDefaultQuad	InitRedirectObject copies it into q320
+D_00275740	g_tintBlendHeadingWeightCurve	InitTintBlendCollider copies it into headingWeightCurve
 D_00275750	g_tintBlendColliderLinks	the ColliderLinkTable (9 links) the start resolves with ResolveObjectLinks(self, 9, ...) (tint_blend_collider.cpp 370)
+D_002757C0	g_tintSpringCurve	quadratic in time since tintStartTime, clamped to the unit range; scales the effect's position and rotation springs
+D_002757D0	g_tintPositionSpringScale	multiplies the spring curve value in SetScaledPositionSpring
+D_002757D4	g_tintRotationSpringScale	multiplies the spring curve value in SetScaledRotationSpring
 D_002757E0	g_reachCurve	Quadratic coefficients evaluated at pad->f48 and clamped by D_002757F0 to give the reach (tint_blend_collider.cpp 573)
 D_002757F0	g_reachRange	the ValueRange (0, 800) that clamps the reach curve's result (573)
 D_00275800	g_tintLeanCurve	Quadratic coefficients of pad->f48 whose limited result is the lean (577, 595)
 D_00275810	g_leanTiltFactor	its first float multiplies the lean to give the angle BuildAxisAngleMatrix tilts by (578)
+D_00275830	g_tintBodyLeanFactor	times the lean gives the angle of the axis-angle matrix that tilts the tint bodies
+D_00275840	g_tintSpeedInfluenceCurve	quadratic of the collider's speed, clamped to the unit range
+D_00275850	g_tintStickInfluenceCurve	quadratic of the stick magnitude, clamped
+D_00275860	g_tintSpeedInfluenceGain	times that curve / speed gives the weight of v150 in the body velocity
+D_00275864	g_tintStickInfluenceGain	times that curve gives the weight of the stick direction in the body velocity
+D_00275870	g_tintBlendTimeCurve	quadratic in time that is the first factor of the tint colour blend
+D_00275880	g_tintBlendPulseCurve	quadratic in the cosine pulse that is the second factor of the tint colour blend
+D_00275890	g_tintEffectImpulseScale	the pending impulse (rotated into the effect's frame) is subtracted from the effect's v150 scaled by it
+D_00275894	g_tintLaunchSpeed	horizontal speed given to the other object along its normalised horizontal velocity
+D_00275898	g_tintLaunchLift	z component of that launch velocity
+D_0027589C	g_tintPushSpeedWithSpare	speed along the heading given to the collider when HasSpareCount is true
+D_002758A0	g_tintPushSpeed	the same speed when HasSpareCount is false
+D_002758A4	g_tintBodyPushSpeed	speed along the heading given to the tint body
+D_002758A8	g_tintBodyPushLift	z of the tint body's pushed velocity (-100)
+D_002758AC	g_tintBodySpinSpeed	speed along the perpendicular given to the body's slot-0x21 (angular) method
 D_002758D0	g_class75List	the list of the objects of class 0x75: InitClass75List sets it up, their slots 6 and 7 add and remove them, and func_0013B828, func_00177990, func_0017E710, func_00181ED0, func_001C6AA8, func_001CDFB8 and func_001CF158 read it
 D_002758E0	g_commentaryFrameStyle	the frame style the file's static initialiser func_001E0848 builds, which InitCommentaryPromptElement installs as its element's frame
 D_00275900	g_bestTimeText	the text buffer SetBestTimeState formats "Best time: ..." into and shows on its element
@@ -1277,12 +1583,18 @@ D_00275940	g_hexDigits	the string "0123456789abcdef": WriteIntegerDigits, GetDec
 D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in word 0 and the id of the thread it creates (entry func_0015EE80, stack D_006056D0) in word 1; InitRenderFrames starts word 1.
 D_00275960	g_backgroundJobThread	word set to -1 when the background job finishes and to the new thread's id in StartBackgroundJob
 D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
+D_00275970	g_onOffCameraMoveCooldown	the re-aim of the on/off camera does nothing while less than this has passed since lastMoveTime
 D_00275974	g_onOffCameraRetryDelay	2.0 s: FindFreeOnOffCameraScreenSpan compares the clock minus the time stored at +0x60 with it
+D_00275980	g_onOffObjectBlockDefaults	InitOnOffObject copies this 0x90-byte table into block2F0; GetOnOffObjectBlock returns it when there is no object
+D_002759C0	g_onOffCameraOrbitLimits	limits table passed to PlaceOnOffCameraOrbit (+/- float max entries)
+D_00275A10	g_onOffObjectQuad450Default	InitOnOffObject copies it into quad450
+D_00275A20	g_onOffObjectPackDefault	InitOnOffObject copies it into pack460
 D_00275A28	g_onOffCameraTurnLimit	2.5: magnitude limit of the turn UpdateOnOffCameraController computes from the offset along the axis
 D_00275A2C	g_onOffCameraAimGain	2.5: the aim's x*|x| is multiplied by it
 D_00275A30	g_onOffCameraStepRate	15: the per-step angle limit is it times the step
 D_00275A40	g_onOffCameraTurnTiltCoefficients	quadratic of y whose clamped value scales the turn
 D_00275A50	g_onOffCameraTurnTiltLimits	ValueRange (1..2) clamp of that factor
+D_00275A58	g_onOffCameraAngleProfileScales	builds the angle ramp: maxSpeed and endSpeed are [0] and [1] times the speed, rampTime is [2]
 D_00275A70	g_onOffCameraTurnBlendCoefficients	quadratic of t, limited to 0..1, that the turn is multiplied by
 D_00275A80	g_onOffCameraFadeRamp	RampProfile view->f44 approaches its target with
 D_00275A90	g_onOffCameraAngleRamp	RampProfile ApproachAngleClampingVelocity uses for the view angle
@@ -1293,23 +1605,46 @@ D_00275B50	g_arcGreyColor	4-byte colour ConstructGreyColor sets to grey (0x80 in
 D_00275B58	g_arcSpriteRange	pair (500, 2500) CreateArcSprite gives the cone volume with SetConeVolumeRange
 D_00275B60	g_world1BossLinks	the 8-entry ObjectLink table StartWorld1Boss passes to ResolveObjectLinks (warp_menu.cpp 675)
 D_00275BC0	g_elementStack	the stack object InitGlobalElementStack, func_0016B580, func_0016BBA8, func_001940E8 and func_001DB838 pass to PushStackElement, PopStackElement, SetElementStackState and ResetElementStack
+D_00275C18	g_worldValueFallRamp	StepWorldValueTowardTarget ramp when the target is below the value
+D_00275C28	g_worldValueRiseRamp	StepWorldValueTowardTarget ramp when the target is above the value
 D_00275C40	g_zeroQuad	a 16-byte zero vector: StepStandIn uses it as a pull and GetAimYawCurve and its sibling use it as the fallback when the object has no f200 block
 D_00275C50	g_unitXQuad	the 16-byte vector (1, 0, 0, 0): effect and pair-controller initialisers copy it into their q40 and q3D0 fields
 D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (pooled_object.cpp) and func_001EB460 clamps its blend factor to.
+D_00275C70	g_beatPressTimingWindowRange	InitWorld3BeatPressCollider blends the timingWindow between [0] and [1]
+D_00275C80	g_beatPressTimingCurve	quadratic of the current entry's dt, clamped to the unit range, that is the blend factor
 D_00275C90	g_world3BeatPressLoadLinks	the 1-entry ObjectLink table LoadWorld3BeatPressCollider resolves (1871)
 D_00275CA0	g_world3BeatPressStartLinks	the 4-entry ObjectLink table StartWorld3BeatPressCollider resolves (1883)
+D_00275CD0	g_beatPressRequestSideSpeed	ContinueWorld3BeatPressColliderRequest velocity: minus it along the collider's x axis
+D_00275CD4	g_beatPressRequestUpSpeed	and it along the collider's z axis
 D_00275CD8	g_world3BeatPressWalkerTargets	four state ids JudgeWorld3BeatPressInput indexes by f678 for SetStateWalkerTarget (1967)
 D_00275CE8	g_world3BeatPressSoundIds	four sound ids JudgeWorld3BeatPressInput indexes by f678 for StartSoundEffect (1968)
 D_00275CF8	g_world3BossClipIds	four ids LoadWorld3Boss resolves with ResolveAgentClip into fC10[i] (2114)
 D_00275D08	g_world3BossStartLinks	the 5-entry ObjectLink table StartWorld3Boss resolves (2122)
 D_00275D48	g_world3BossObjectRefs	the TempoObjectRef array StartWorld3Boss copies to front memory (CopyToFrontMemory(0x6C, ...), 2127)
+D_00275DB8	g_world3BossVoiceState	1 while the boss waits for the cached voice parameter to equal D_00275DBC, 2 once taken (UpdateWorld3Boss)
+D_00275DBC	g_world3BossPendingVoice	the voice number the boss set into cached voice parameter 0
+D_00275DD0	g_unpackBytesPerElement	packet writer returns table[format] * count for a VIF unpack header
 D_00275E10	g_stateResetObjectLinks	the ObjectLink table StartStateResetObject resolves with count 1 (3940); data is an object-link record
 D_00275F80	g_screenFade	the one ScreenFade record: func_001EFFA0 starts a fade on it, func_001EFD10 advances it, func_001EFEE0 draws it
 D_00275F84	g_resumeSoundSetupDone	ResumeAtSavedLevel applies the saved sound flags and the objects' resume only while it is 0 (1482); inferred meaning, read only
+D_00275FC0	g_scaleTargetSmall	the scaleTarget when s3 is 0 (1.0 otherwise)
+D_00275FC8	g_warpSlotKindMasks	per slot mask tested against the kind bits (comment at IsWarpEntryCounted)
 D_00275FE0	g_warpPageLinks	the 52-entry ObjectLink table PostLoadWarpPage resolves (4412)
 D_00276250	g_pendingWarpEntry	SetPendingWarpEntry stores its first argument, AnnouncePendingWarpEntry indexes the page's entries with it and resets it to -1
+D_00276258	g_warpPointRamp	ramp for the smoothPoint approaching targetPoint
+D_00276268	g_warpDimRamp	ramp for each entry's dim toward dimTarget
+D_00276278	g_warpLevelRampKind2	ramp for the available/cursor object levels when openKind is 2; also the scale ramp
+D_00276288	g_warpLevelRamp	the same levels' ramp for other open kinds
+D_00276298	g_warpCursorTable1	slot 1 of g_warpCursorTables
+D_00276348	g_warpCursorTable2	slot 2 of g_warpCursorTables
+D_002763F8	g_warpCursorTable3	slot 3 of g_warpCursorTables
+D_002764A8	g_warpCursorTable4	slot 4 of g_warpCursorTables
+D_00276558	g_warpCursorTable5	slot 5 of g_warpCursorTables
 D_00276608	g_warpCursorTables	six pointers (first zero) to the per-page cursor neighbour tables MoveWarpCursor picks with the page's slot: table[cursor][direction] gives the next entry, -1 for none, and a zero table refuses the move with a sound
 D_00276620	g_warpTextStyle	the WarpTextStyle built by the file's static initialiser and set as the warp menu's frame (4897)
+D_0027663C	g_warpLabelFontScale	times the entry's dim gives the font scale of the warp label
+D_00276648	g_warpCircleScale	multiplies the size for the outer coloured circle of a warp entry
+D_00276650	g_warpInnerCircleScale	0.75 times g_warpCircleScale; multiplies the size of the inner circle
 D_00276654	g_pendingWarpEntryAtEnd	SetPendingWarpEntry's second argument; AnnouncePendingWarpEntry starts the entry's animation at its length when it is 0 (4464)
 D_00276680	g_libraryStateStorage	the C library's state record (error number, three stream pointers, the string "C" and the random seed, then three streams); g_libraryState points to it
 D_0027696C	g_libraryState	the C library's state record: its first word is the error number (GetErrorNumberAddress returns it), +0x58 the random seed SeedRandom and NextRandom use, +0x1D4 the signal table MakeSignalTable allocates
@@ -1340,8 +1675,10 @@ D_00277E40	g_tlbDefaultEntries	the 18 TlbEntry records g_tlbSetup lists second (
 D_00277F60	g_tlbExtendedEntries	the 8 TlbEntry records g_tlbSetup lists third (count 8)
 D_00277FE0	g_tlbSetup	TlbSetup holding the three entry counts and the three tables SetUpTlbEntries walks
 D_00278000	g_frameInfoObject0	first of the six objects g_frameInfoList lists
+D_00278048	g_terminateHandler	exception runtime: SetTerminateHandler stores the new hook, InvokeTerminateHandler calls it
 D_0027804C	g_exceptionContextGetter	the function pointer every exception helper calls for the thread's EhContext; InstallExceptionContextGetter replaces it with GetStaticExceptionContext (throw.c 62, 108-119)
 D_00278050	g_frameInfoObject1	second of the six objects g_frameInfoList lists
+D_00278640	g_unexpectedHandler	exception runtime: SetUnexpectedHandler stores it, the unexpected call invokes it; starts as DefaultUnexpectedHandler
 D_00278644	g_frameInfoObject2	third of the six objects g_frameInfoList lists
 D_002789D8	g_newHandler	the current out-of-memory handler: ReplaceNewHandler stores the new one and returns the previous
 D_002789DC	g_frameInfoObject3	fourth of the six objects g_frameInfoList lists
@@ -1407,6 +1744,7 @@ D_0027AF80	g_defaultIntraQuantiser	64-byte matrix ReadSequenceHeader loads into 
 D_0027AFC0	g_defaultNonIntraQuantiser	64 bytes of 16 that ReadSequenceHeader loads as the IPU's non-intra quantiser matrix (0x58000000) when the stream gives none
 D_0027B000	g_lumaBlockFunctions	8 function pointers (fetch and blend of the luma block, whole, half vertical, half horizontal, half both) the macroblock decoder indexes with the luma selector into each prediction's luma slot
 D_0027B020	g_chromaBlockFunctions	8 function pointers (the chroma block counterparts) the macroblock decoder indexes with the chroma selector into each prediction's chroma slot
+D_0027B040	g_ipuCommandWindowInvalid	SendIpuCommand stores the entry for the command kind (value >> 28) in the decoder's windowInvalid
 D_0027B0B0	g_ipuLibraryVersion	16-byte string "PsIIlibipu  2400" in the IPU library's data; no code reads it, it names the library's version
 D_0027B0C0	g_ipuQuantiserMatrices	five quadwords ResetIpu writes one after another to the IPU's FIFO register 0x10007010: the default intra matrix (four quadwords) and one row of the non-intra matrix sent four times
 D_0027B110	g_ipuColourTable	two quadwords ResetIpu writes to the IPU FIFO register after the matrices: the colour table the reset loads
@@ -1482,6 +1820,7 @@ D_00625B78	g_requestRing	the ring of 0x200 two-byte requests (kind, argument) wi
 D_00625F80	g_outputLine	the 0x80-byte line BufferOutputChar gathers characters in before it hands it to PrintToDebugConsole
 D_00627800	g_remoteCallState	the remote call state: the next packet id, the request pool, the reply ring and the list of services (InitRemoteCalls sets it up)
 D_00627840	g_fileReplyBufferAddress	holds the address of the reply buffer D_00628500, sent to the IOP in the 0xFF bind call (iop_file_client.cpp 268-269)
+D_00627844	g_fileControlOutput	ControlFile stores its out pointer here and writes the reply result (0 or 1) through it
 D_00627880	g_fileRequestBuffer	the 0xC40-byte area the close and read requests are built in (Close_1F84D8 / Read_1F8DB8 casts, 291, 351)
 D_006284C0	g_fileCallResult	the 4-byte area the IOP's answers to the bind and close calls are received into (269, 317)
 D_00628500	g_fileReplyBuffer	the 0x440-byte buffer the reply handler reads the semaphore slot, type, destination and size from (159-199)
@@ -1503,9 +1842,12 @@ D_006293C0	g_commandSystemSlots	32 handler slots (handler, arg) of the channel's
 D_006294C0	g_commandChannelWords	32 words the channel stores values the IOP sends in; GetChannelWord returns one by index
 D_0062A540	g_constructorSavedRegisters	the 0x200-byte area of the constructor-runner's saved registers (global_constructors.cpp comment at lines 6-8: .bss is the saved registers and the flag); inferred from that comment, not from a reader
 D_0062A76C	g_constructorsRun	RunConstructorsOnce sets it before calling func_001FAD68 once (global_constructors.cpp 28)
+D_0062A770	g_invalidOperationNan	soft float: the NaN record returned for infinity minus infinity and infinity times zero
 D_0062A798	g_staticExceptionContext	the single EhContext GetStaticExceptionContext builds on first use (throw.c 129-140)
 D_0062A7A8	g_staticExceptionContextReady	set to 1 once g_staticExceptionContext has been cleared and given its handler chain (135-138)
 D_0062A7B0	g_staticHandlerChain	the handler chain storage g_staticExceptionContext's member b points to (138)
+D_0062A7B8	g_frameTableList	unwind: the head of the list of registered frame description tables, walked by the lookup
+D_0062A7BC	g_frameTableLock	unwind: the lock word passed to LockFrameTables/UnlockFrameTables
 D_0062A7C4	g_discCallback	the user callback RunDiscCallback calls with D_0062A7C8[0]
 D_0062A7C8	g_discCallbackArguments	array whose first word RunDiscCallback passes to the callback
 D_0062A7D0	g_discThreadId	GetCurrentThreadId result saved at the init and given to QueryThreadStatus in the command starts
@@ -1529,7 +1871,7 @@ D_0062C300	g_cardReplyBuffer	the area every memory card call receives its reply 
 D_0062C340	g_blockChainTags	the 0x200-byte area StartBlockChainToScratchpad builds its DMA tags in and hands to channel 9 (1619-1660)
 D_0062C540	g_programFrameTable	the 0x18-byte FrameTable RegisterProgramFrameInfo registers g_frameInfoList in
 D_0062C558	g_vectorAPayloadPool	the pool of 16-byte tag 0x16 blocks (AcquireVectorAPayload)
-D_0062C55C	g_vectorAPayloadBase	the base pointer (+4 of g_vectorAPayloadPool, a Pool6C) that AddRefVectorAPayload subtracts from the payload address, shifted right by 4, for the slot's index in the reference counts
+D_0062C55C	g_vectorAPayloadBase	the base pointer (+4 of g_vectorAPayloadPool, a FreeListPool) that AddRefVectorAPayload subtracts from the payload address, shifted right by 4, for the slot's index in the reference counts
 D_0062C568	g_matrixPayloadPool	the pool of 0x40-byte tag 0x17 blocks (AcquireMatrixPayload)
 D_0062C56C	g_matrixPayloadBase	the base pointer (+4 of g_matrixPayloadPool) that AddRefMatrixPayload subtracts from the payload address, shifted right by 6, for the slot index
 D_0062C578	g_vectorBPayloadPool	the pool of 16-byte tag 0x18 blocks (AcquireVectorBPayload)

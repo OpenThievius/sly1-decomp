@@ -92,7 +92,7 @@ struct Effect {
         f32 m30[3];         // 0x30
     };
     Quad219C q40;           // 0x40
-    Vec02 rotation[3];      // 0x50: the placement (func_0019F858 reads it with the one at +0x80)
+    Vec4 rotation[3];      // 0x50: the placement (func_0019F858 reads it with the one at +0x80)
     Quad219C pos;           // 0x80: the effect's current point
     Quad219C prevPos;       // 0x90: the point it was at last frame
     union {
@@ -106,10 +106,10 @@ struct Effect {
     u8 padB4[0xC0 - 0xB4];  // 0xB4
     union {
         Quad219C qC0;       // 0xC0
-        Vec02 vC0;          // 0xC0: kind 26's direction (func_001924C8 gives it the world's gravity)
+        Vec4 vC0;          // 0xC0: kind 26's direction (func_001924C8 gives it the world's gravity)
     };
     u8 padD0[0x100 - 0xD0]; // 0xD0
-    Vec02 spin;             // 0x100: a spin the effect turns by (func_0019F390)
+    Vec4 spin;             // 0x100: a spin the effect turns by (func_0019F390)
     union {
         s32 i110;           // 0x110
         f32 spinDrag;       // 0x110: its drag, per second (func_0019F390)

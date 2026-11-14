@@ -398,7 +398,7 @@ product renumbered. Four separate causes, found from `-dl -dS -dF -dG` dumps (20
   stores of the row before. find_base_term of `(plus R 16)` gives R's base only when R has
   REGNO_POINTER_FLAG; without it (and with an argument's VOIDmode base) the address has no base
   and base_alias_check lets it conflict with the frame stores. A pointer variable of the
-  function (`Mat02* cur`), a reference variable, a pointer parameter's copy (integrate.c marks
+  function (`Mat3* cur`), a reference variable, a pointer parameter's copy (integrate.c marks
   it) and a pointer an inline returns into a variable are all flagged, and their loads move to
   the top; MulRotationRowsIndexed's own `q = (const u128*)&b` comes out unflagged in the
   caller's RTL (`.lreg`: `user var`, no `pointer`) and its loads wait. But that q is set after
@@ -723,7 +723,7 @@ everything reads vf2. One instruction short.
   self->margin;`), and the splat kept in one `u128` variable reused for the doubled splat after
   the join (the user variable's two lives make one pseudo, and both splats go to VU0, 8
   instructions worse).
-- **The loop is retail's.** `Vec02* pts = r->points[r->bank];` before the loop and `Vec02* p =
+- **The loop is retail's.** `Vec4* pts = r->points[r->bank];` before the loop and `Vec4* p =
   &pts[i];` in its body: loop.c reduces the address to a pointer giv initialised in the
   preheader after the entry test (`addu v1,a0,s1` in the `blez` slot, `move s0,v1`), where a
   pointer stepped by the `for` (`p++`) is the variable itself. With it the loop and the tail
@@ -752,7 +752,7 @@ everything reads vf2. One instruction short.
   gives the asm's output to the VU0 pseudo (`pextlw v0,v0,v0`, `vmove vf3,vf2` in the slot:
   the 563-byte forms). Dead copies between them do not help: delete_trivially_dead_insns
   removes them before cse2, which then swaps. A live insn must sit there. In the matched form
-  it is the load of the record (`u128 margin = Splat(self->margin); Rec50* rec = self->rec;
+  it is the load of the record (`u128 margin = Splat(self->margin); EffectSpawnerRecord* rec = self->rec;
   u128 half = margin; Q(size) = half;`): retail's head has that load between the pextlw and
   the qmtc2. With the store first (`Q(size) = Splat(..); u128 half = Q(size);`) the store is
   that insn but is then made from S (`sq v0,0(sp)`, 527 of 580). Compiled: without
@@ -867,7 +867,7 @@ emulation of pre_lcm over the `-dG` dump (build/swarm/w15-17E088/lcm.py, 2026-11
 
 ### A weight's slot store before a load keeps PRE off that load (func_00187260)
 
-CollectMeshHits loads `rel` (a Vec02 on the frame) for the squared distance and again, after a
+CollectMeshHits loads `rel` (a Vec4 on the frame) for the squared distance and again, after a
 search loop, for the normal `MulX(Vec::Of(rel), Vec::Scalar(1.0f / len))`. PRE deleted the
 second load (`PRE: redundant insn 1977 (expression 122) ... reaching reg is 802`) and kept the
 value in a VU0 register across the loop (a `vmove` in a delay slot); retail loads it again
@@ -903,7 +903,7 @@ reads them again in the draw loop. Retail forms `sp + 14512` once at the entry (
 copy loop) and again in the draw's i-loop preheader (spilled to a slot of its own); ours had one
 pseudo for both (2026-11-10, w15):
 
-- **The expression.** `rows[r].x`, `&rows[r]` and `Vec02* row = rows + r;` all expand the address
+- **The expression.** `rows[r].x`, `&rows[r]` and `Vec4* row = rows + r;` all expand the address
   of the element first, `(plus (plus fp 14512) (ashift r 4))` forced into a register, which
   computes `fp + 14512` as an insn of its own: expression `(plus fp 14512)`, which PRE then finds
   redundant with the copy loop's and replaces by its entry pseudo.

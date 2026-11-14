@@ -5,12 +5,12 @@ s32 RandomIntInRange(s32 lo, s32 hi);
 
 s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
 {
-    Vec02 cur0;
-    Vec02 best0;
-    Vec02 cur1;
-    Vec02 best1;
-    Vec02 from;
-    Vec02 at;
+    Vec4 cur0;
+    Vec4 best0;
+    Vec4 cur1;
+    Vec4 best1;
+    Vec4 from;
+    Vec4 at;
     f32 t;
     f32 cost;
     f32 tPath;
@@ -53,7 +53,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E24);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_placementTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -69,10 +69,10 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestT = t;
     }
     for (TargetCand* path = self->world->paths; path != 0; path = path->next38) {
-        Vec02 at2;
+        Vec4 at2;
         CostContext ctx;
-        Vec02 q;
-        TransformPointBetweenFrames(0, (PlacedObject*)path->frame, (Vec02*)self->f6D4, &at);
+        Vec4 q;
+        TransformPointBetweenFrames(0, (PlacedObject*)path->frame, (Vec4*)self->f6D4, &at);
         if (path->shape->desc->m10) {
             path->shape->desc->m10(path->shape, &at, 0, &at2, 0, &tPath, 0);
         }
@@ -94,7 +94,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, path, cost, D_00274E28);
+            cost = AddRepeatTargetPenalty((Player*)self, path, cost, g_pathTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -139,7 +139,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             }
         }
         PathArgs args;
-        Vec02 p;
+        Vec4 p;
         args.self = self;
         args.frame = o->frame;
         args.c = o->v40;
@@ -167,10 +167,10 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestT = t;
     }
     for (o = (TargetCand*)g_targetVectors.list.head; o != 0; o = o->next38) {
-        Vec02 at2;
+        Vec4 at2;
         NearestContext near;
         PathArgs args;
-        Vec02 p;
+        Vec4 p;
         TransformPointBetweenFrames(0, (PlacedObject*)o->frame, &self->v140, &at);
         if (o->shape->desc->m10) {
             o->shape->desc->m10(o->shape, &at, 0, &at2, 0, 0, &tVector);
@@ -195,7 +195,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             if (cost >= g_targetMaxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E30);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_nearestPathTargetBias);
             if (bestCost <= cost) {
                 continue;
             }
@@ -224,7 +224,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
     }
     for (o = (TargetCand*)g_targetPointList.head; o != 0; o = o->next50) {
         CostContext ctx;
-        Vec02 d;
+        Vec4 d;
         // The point and curve searches weigh their cost and test it against the limit, both
         // named here (bound by reference: their %hi parts are formed at the top of the body).
         const f32& weight = g_targetCostWeight;
@@ -267,11 +267,11 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         bestPointT = tPoint;
     }
     for (o = (TargetCand*)g_targetCurveList.head; o != 0; o = o->next38) {
-        Vec02 at2;
+        Vec4 at2;
         CostContext ctx;
         const f32& weight = g_targetCostWeight;
         const f32& maxCost = g_targetMaxCost;
-        TransformPointBetweenFrames(0, (PlacedObject*)o->frame, (Vec02*)self->f6D4, &at);
+        TransformPointBetweenFrames(0, (PlacedObject*)o->frame, (Vec4*)self->f6D4, &at);
         if (o->shape->desc->m10) {
             o->shape->desc->m10(o->shape, &at, 0, &at2, 0, 0, &tCurve);
         }
@@ -284,14 +284,14 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         ctx.v = self->v150;
         ctx.target = o;
         f32 start = tCurve;
-        FindLocalMinimum((MinimumFn)ScoreTargetCurveAt, c, start, D_00274E44, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
+        FindLocalMinimum((MinimumFn)ScoreTargetCurveAt, c, start, g_curveSearchStep, 30.0f, o->shape->desc->m8(o->shape) - 30.0f,
                          &tCurveBest, &cost);
         cost = cost * weight;
         if (o != keep) {
             if (cost >= maxCost) {
                 continue;
             }
-            cost = AddRepeatTargetPenalty((Player*)self, o, cost, D_00274E34);
+            cost = AddRepeatTargetPenalty((Player*)self, o, cost, g_curveTargetBias);
             if (bestCost <= cost) {
                 continue;
             }

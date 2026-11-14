@@ -35,7 +35,7 @@ struct TargetCurve : PathCurveObject {
     s32 f4C;                // 0x4C: 1 at setup
     s32 f50;                // 0x50: 3 at setup
     u8 pad54[0x58 - 0x54];
-    f32 f58;                // 0x58: the largest float at setup (D_0024A794)
+    f32 maxHeightAbove;     // 0x58: the largest float at setup (D_0024A794)
     s32 f5C;                // 0x5C: nonzero keeps the player's memo of places from recording it (RecordPlayerTargetMemo)
 };
 
@@ -62,7 +62,7 @@ struct TargetVector : PathCurveObject {
 struct C71 : PathCurveObject {
     PathCurveKeptBits keep; // 0x38
     u8 pad40[0x4C - 0x40];
-    f32 f4C;                // 0x4C: D_0024C8C4 at setup
+    f32 maxHeightAbove;     // 0x4C: D_0024C8C4 at setup
     u8 pad50[0x54 - 0x50];
     s32 targetId;           // 0x54: -1 for none
     BaseObject* target;     // 0x58: what func_0015A418 returns for targetId

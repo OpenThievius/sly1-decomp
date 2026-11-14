@@ -32,7 +32,7 @@ struct ObjectGatherer : Collider {
     f32 near5F4;            // 0x5F4: the same in state 2
     void* group;             // 0x5F8: the record func_00159478 sets up (slot 10); its first word is the
                             //        object func_0019BE08 sends a message to
-    void* f5FC;             // 0x5FC
+    void* companionObject;  // 0x5FC: the object turned on and off with the gatherer
     PackedS64 q600;            // 0x600: kept by slot 9 (func_0019B250)
     f32 idleTimeMin;        // 0x608: 0.5 at set-up
     f32 idleTimeMax;        // 0x60C: 1.0 at set-up
@@ -43,12 +43,12 @@ struct ObjectGatherer : Collider {
     f32 upwardPush;         // 0x620: the weight of the upward push
     f32 neighborRadius;     // 0x624: how near another gatherer is sent to state 2
     u8 pad628[0x630 - 0x628];
-    Vec02 v630;             // 0x630: the direction it heads in
-    Vec02 v640;             // 0x640: the point mode 1 picks
-    Vec02 v650;             // 0x650: v140, copied by slot 16
+    Vec4 v630;             // 0x630: the direction it heads in
+    Vec4 v640;             // 0x640: the point mode 1 picks
+    Vec4 v650;             // 0x650: v140, copied by slot 16
     void* candidate;        // 0x660: the candidate object chosen in mode 2
-    s32 f664;               // 0x664: -1 at set-up
-    s32 f668;               // 0x668
+    s32 scatterCount;       // 0x664: -1 at set-up
+    s32 scatterHoldsCounts; // 0x668
     u8 pad66C[0x670 - 0x66C];
 };
 

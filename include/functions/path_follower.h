@@ -16,13 +16,13 @@ struct Player;
 struct RingSource;
 struct StandIn;
 struct ValueRange;
-struct Vec02;
+struct Vec4;
 
 void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b);
 s32 GetPlayerRequestPhase(Player* self);
 void FinishPlayerRequest(Player* self);
 void NotifyPlayerGroundObject(Player* self);
-s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
+s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out);
 void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t);
 void SwapInPlayerStandIn(Player* self);
 s32 TestStandInMayContact(StandIn* self, Collider* value);

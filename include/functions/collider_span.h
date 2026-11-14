@@ -11,19 +11,19 @@ struct ColliderSpan;
 struct SpanEvent;
 struct SpanQuery;
 struct SpanSet;
-struct Vec02;
+struct Vec4;
 
-Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5);
-s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
+s32 CollectColliderSpans(Collider* self, Vec4* a1, Vec4* a2, s32 a3, ColliderSpan* a4);
 s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32 a4, ColliderSpan* a5);
 s32 TestColliderSegmentHit(Collider* self, void* p1, void* p2, f32 x, s32 p3, ColliderSpan* p4);
-s32 FindSegmentSphereSpan(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
-s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
+s32 FindSegmentSphereSpan(Vec4* p, Vec4* a, Vec4* b, f32 radius, s32 count, ColliderSpan* out);
+s32 CollectBoundsSpans(Vec4* p, Vec4* a, Vec4* b, f32 radius, s32 count, ColliderSpan* out);
 s32 TestBoundsSegmentHit(void* p, void* a, void* b, s32 d, ColliderSpan* e, f32 fa, f32 fb);
-s32 IntersectSegmentWithCapsule(Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32 radius, s32 count, ColliderSpan* out);
+s32 IntersectSegmentWithCapsule(Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32 radius, s32 count, ColliderSpan* out);
 s32 CompareSpanEndpoints(SpanEvent* a, SpanEvent* b);
 s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
-s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius);
+s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec4* p, Vec4* q, s32 max, ColliderSpan* out, f32 radius);
 
 #endif

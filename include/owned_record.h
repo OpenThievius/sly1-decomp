@@ -9,7 +9,7 @@
 #include "placed_object.h"
 
 struct OwnedRecord {
-    Vec02 points[2][0x84];  // 0x0000: two banks of points; bank picks the one in use (func_00155868 wraps them)
+    Vec4 points[2][0x84];  // 0x0000: two banks of points; bank picks the one in use (func_00155868 wraps them)
     s32 bank;               // 0x1080
     s32 count;              // 0x1084: the points in use
     void* extraRecord;      // 0x1088: the 0x580-byte record (pool World+0x1B4C), cleared too

@@ -6,33 +6,33 @@
 
 #include "common.h"
 
-struct C80;
+struct BodyContact;
 struct Collider;
-struct Contact03;
 struct MeshEdgePair;
 struct PadRecord;
 struct PlacedObject;
 struct Player;
 struct Quad16;
-struct Vec02;
+struct TargetFindingPoint;
+struct Vec4;
 
 void StepPlayerState2(Player* self);
 void ControlPlayerState2(Player* p, PadRecord* pad);
-s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec02* out);
+s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec4* out);
 s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src);
-s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out);
-Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos);
+s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec4* point, s32 kind, void* arg, Vec4* out);
+BodyContact* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec4* outPos);
 s32 ChoosePlayerNextState(Player* self);
 void CollectPlayerHoldQueries(Player* self);
 s32 ShouldPlayerLaunchAtTarget(Player* self);
 void UpdatePlayerState2(Player* p);
-s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out);
-void ComputePlayerJumpVelocity(Player* self, Vec02* out);
-void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out);
-void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out);
+s32 SolveArrivalTimeAtHeight(Player* self, Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32* out);
+void ComputePlayerJumpVelocity(Player* self, Vec4* out);
+void ComputeUpwardBoostVelocity(PlacedObject* self, Vec4* out);
+void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec4* out);
 void SetPointObjectListLinkOffset(void);
 void ClearPointObjectList(void);
-void RegisterPointObject(C80* self);
-void UnregisterPointObject(C80* self);
+void RegisterPointObject(TargetFindingPoint* self);
+void UnregisterPointObject(TargetFindingPoint* self);
 
 #endif

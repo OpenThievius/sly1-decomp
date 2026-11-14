@@ -23,7 +23,7 @@ void ControlPathFollower(PathFollower* self, PadRecord* pad, f32 dt)
             ClearPadPressedBits(pad, 0x80);
             switch (self->kind) {
             case 0:
-                if (self->lapsLeft > 0 && D_002751DC < g_gameTime - self->lapTime) {
+                if (self->lapsLeft > 0 && g_lapCountCooldown < g_gameTime - self->lapTime) {
                     CountDownPathFollowerLap(self);
                     StartSoundEffect(0x5A, 0, 0, 0, 0.0f, 0.0f, 2.0f, -0.25f, 0.0f, 0, 0);
                 } else {

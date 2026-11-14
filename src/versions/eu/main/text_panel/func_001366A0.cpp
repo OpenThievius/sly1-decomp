@@ -55,7 +55,7 @@ struct Obj_eu_1367B8 {
 };
 
 // PAL's layout, a word longer.
-struct Layout_eu_1367B8 : Layout_137228 {
+struct Layout_eu_1367B8 : TextBoxLayout {
     s32 f1C;
 };
 
@@ -66,9 +66,9 @@ s32 CopyWideString(void* dst, const char* src);
 void SeekTextReader(TextReader* self, s32 n);
 s32 GetTextReaderLength(void* reader);
 void AppendStringToWide(u16* dst, const u8* src);
-void DrawWrappedAlignedText(void* reader, Layout_137228* layout, Layout_137228* frame, PacketWriter* gs);
+void DrawWrappedAlignedText(void* reader, TextBoxLayout* layout, TextBoxLayout* frame, PacketWriter* gs);
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
-void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
+void SetTextLayoutVerticalPlacement(TextBoxLayout* layout, s32 value);
 
 struct PanelLayout_eu_1367B8 {
     static s32* Words(Quad4& q)
@@ -76,7 +76,7 @@ struct PanelLayout_eu_1367B8 {
         return q.w;
     }
 
-    static Layout_137228* Set(Layout_137228* l, f32 x, f32 y, f32 w, f32 h, s32 color, s32 first)
+    static TextBoxLayout* Set(TextBoxLayout* l, f32 x, f32 y, f32 w, f32 h, s32 color, s32 first)
     {
         Quad4 col;
         l->Pos(x, y);
@@ -98,17 +98,17 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     switch (self->state) {
     case 1:
     case 2:
-        DrawTextPanelCenterFrame((T217D_440*)self, &g_gsPacketWriter);
+        DrawTextPanelCenterFrame((CaptionBox*)self, &g_gsPacketWriter);
         AddDmaRefTag(&g_gsPacketWriter, self->bands, self->bandsSize);
-        DrawCompassStrip((T217D_440*)self, &g_gsPacketWriter);
-        DrawTextPanelControlLabels((T217D_440*)self, &g_gsPacketWriter);
-        DrawTextPanelBorders((T217D_440*)self, &g_gsPacketWriter);
-        DrawTextPanelBlocks((T217D_440*)self, &g_gsPacketWriter);
+        DrawCompassStrip((CaptionBox*)self, &g_gsPacketWriter);
+        DrawTextPanelControlLabels((CaptionBox*)self, &g_gsPacketWriter);
+        DrawTextPanelBorders((CaptionBox*)self, &g_gsPacketWriter);
+        DrawTextPanelBlocks((CaptionBox*)self, &g_gsPacketWriter);
         break;
     case 4:
         break;
     case 5:
-        DrawTextPanelCenterFrame((T217D_440*)self, &g_gsPacketWriter);
+        DrawTextPanelCenterFrame((CaptionBox*)self, &g_gsPacketWriter);
         break;
     }
     f32 scale = 1.0f;
@@ -146,11 +146,11 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     Layout_eu_1367B8 box;
     PanelLayout_eu_1367B8::Set(&box, offX + 180.0f, offY + 362.610168f, width, height, grey, 0);
     f32 fade = 1.0f;
-    if (((Sparkle_eu_1367B8*)&D_002708E0)->target != 0) {
-        fade = ((Sparkle_eu_1367B8*)&D_002708E0)->blend <? fade;
+    if (((Sparkle_eu_1367B8*)&g_leftArcElement)->target != 0) {
+        fade = ((Sparkle_eu_1367B8*)&g_leftArcElement)->blend <? fade;
     }
-    if (((Sparkle_eu_1367B8*)&D_00271558)->target != 0) {
-        fade = ((Sparkle_eu_1367B8*)&D_00271558)->blend <? fade;
+    if (((Sparkle_eu_1367B8*)&g_rightArcElement)->target != 0) {
+        fade = ((Sparkle_eu_1367B8*)&g_rightArcElement)->blend <? fade;
     }
     if (fade < 1.0f) {
         u8 a = ByteLerp::Of(0, color.a, fade);

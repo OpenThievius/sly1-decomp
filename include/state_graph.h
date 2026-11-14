@@ -32,7 +32,7 @@ struct StateGraph : BaseObject {
     s32 edgeCount;          // 0x3C
     StateEdge* edges;       // 0x40
     s32 armed;              // 0x44: nonzero once the graph has something to run
-    List01 walkers;         // 0x48: its walkers (StateWalker::next, func_001B6290)
+    ObjectList walkers;         // 0x48: its walkers (StateWalker::next, func_001B6290)
 };
 
 typedef char check_StateGraph[sizeof(StateGraph) == 0x54 ? 1 : -1];

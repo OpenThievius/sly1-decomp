@@ -6,7 +6,7 @@
 // .data provably starts at 0x269BC0: the global before it, g_targetVectors (D_00269BA8), is a
 // list head of 0xC bytes like every other (include/globals.h), so D_00269BC0 (f32[3], aligned to
 // 8) would follow it at 0x269BB8 in one file; retail has 8 more bytes of zeros and puts it on 16,
-// the linker's padding before a new file's .data (aligned to 16 by Blk05's vectors). Its start in
+// the linker's padding before a new file's .data (aligned to 16 by EffectSpawnData's vectors). Its start in
 // the code is a choice: any function start from 0x191FD8 to 0x192380 (point_graph.cpp says why);
 // the cut is at 0x1921A8, the first switched collider function. Its name is ours, after the class.
 #include "common.h"
@@ -43,7 +43,7 @@ struct ColliderPose;
 struct Quad16;
 struct SpawnBlock;
 struct SpawnTail;
-struct Mat02;
+struct Mat3;
 
 s32 FindSwitchedColliderIndex(void* obj);
 s32 FindSwitchedColliderIndex(void* value);
@@ -108,11 +108,11 @@ EffectSpawnParams g_switchedEffectParams = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1
 // brace initialisers): a vector member copied from a global makes an initialiser run at run
 // time, into a temporary that is then copied whole. Both stay where retail has them: the static
 // in .bss, the global with the uninitialised ones at the end of .data.
-static Blk05 g_defaultSwitchedColliderData = {
+static EffectSpawnData g_defaultSwitchedColliderData = {
     { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { { 0, 0, 0, 0 } }, 0.0f, 0.0f, 0.0f, 0,
-    { 0.0f, 0.0f, 0.0f }, *(Quad16*)&D_00248D30, { 0.0f, 0.0f, 0.0f }
+    { 0.0f, 0.0f, 0.0f }, *(Quad16*)&g_zeroVector, { 0.0f, 0.0f, 0.0f }
 };
-Blk05 g_switchedEffectBlock = {
+EffectSpawnData g_switchedEffectBlock = {
     { 1000.0f, 1200.0f, 1.0f }, { 0.0f, 0.0f, -1750.0f }, { -0.5f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, 0.0f, 0.0f, 0.0f, 1,
     { 0.5f, 2.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, -1.0f, 0.0f }
 };
@@ -412,7 +412,7 @@ void GetSwitchedColliderInteractFlags(s32, s32, InteractFlags* out)
 // Stores value in the typed-text caption box and pushes the box on the element stack.
 void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
 {
-    T217D_440* block = &g_typedTextCaptionBox;
+    CaptionBox* block = &g_typedTextCaptionBox;
     ((T217D_Word*)&block->child)->v = value;
     PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
 }
@@ -426,7 +426,7 @@ void HandleStepSequenceSkipButtons(void* self, PadRecord* rec)
         return;
     PadRecord* a1 = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
     StepSequence* ctx = g_activeStepSequence;
-    if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
+    if (ctx != 0 && ctx->state2D4 == 3 && ctx->buttonSkipBlocked == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {
         SkipRemainingSteps(ctx);
     } else if ((rec->flags & 0xC) != 0 && g_playerStepSequence != 0) {
@@ -477,14 +477,14 @@ void FinishSwitchedCollider(SwitchedCollider* self)
 
     PlacedObject* s1 = self->f604;
     if (s1 != 0) {
-        Mat02 tmp;
+        Mat3 tmp;
         s1->desc->m02(s1);
         s1->desc->m15(s1, 0);
         RotateMatrixUpright(&((PlacedObject*)self->f584)->m110, 0, &tmp);
         s1->desc02()->m1D(s1, &((PlacedObject*)self->f584)->v140);
         s1->desc02()->m1E(s1, &tmp);
-        s1->desc02()->m20(s1, (Vec02*)&D_00248D30);
-        s1->desc02()->m21(s1, (Vec02*)&D_00248D30);
+        s1->desc02()->m20(s1, (Vec4*)&g_zeroVector);
+        s1->desc02()->m21(s1, (Vec4*)&g_zeroVector);
         void* r = (void*)FindFirstObjectById(self->world, 1, 0x18C, s1);
         if (r != 0) {
             CreateAnimationPlayerWithoutPresetTargets((Animation*)r, s1, 0, 0, 0.0f, 1.0f);
@@ -504,8 +504,8 @@ struct TrailNode {
     u8 pad00[0x18];
     f32 time;               // 0x18
     u8 pad1C[0x80 - 0x1C];
-    Vec02 v80;              // 0x80
-    Vec02 v90;              // 0x90
+    Vec4 v80;              // 0x80
+    Vec4 v90;              // 0x90
 };
 
 // Sends the sink a message for each point along the segments to the attached node (or along
@@ -515,11 +515,11 @@ struct TrailNode {
 // stays, as retail's (docs/TOOLCHAIN.md, "Loops").
 void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
 {
-    Vec02 from[9];
-    Vec02 to[9];
+    Vec4 from[9];
+    Vec4 to[9];
     SlotMessage msg;
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     BaseObject* sink = self->world->slot1CE8[29];
     s32 count;
     if (sink != 0) {

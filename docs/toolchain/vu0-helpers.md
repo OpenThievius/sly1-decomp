@@ -17,7 +17,7 @@ What retail shows, and what the compiler does:
   float goes in with qmtc2 from a GPR ("r", the compiler adds the mfc1) and
   comes out with qmfc2 to a GPR ("=r", the compiler adds the mtc1).
 - **Stack stores nothing reads are vector locals.** A local of a vector type
-  (Vec02, Mat02) lives on the stack, so a result assigned to it is stored
+  (Vec4, Mat3) lives on the stack, so a result assigned to it is stored
   there even when every use takes the register. Retail stores every float it
   turns into a vector that way: the C put it in a local first. A helper's
   result that is used directly is never stored.
@@ -320,7 +320,7 @@ What retail shows, and what the compiler does:
   object's offset (`fold_rtx`); an address written in the load itself stays as it is
   (`find_best_addr` keeps an equal-cost address), and only the first row, `(mem p)`, takes the
   object's offset. mul_rotation.h's MulRotationRowsIndexed, MulRotationRowsXIndexed and
-  MulRotationIntoRot (the result written through the object, `o->rot = r`, where a `Mat02*` to
+  MulRotationIntoRot (the result written through the object, `o->rot = r`, where a `Mat3*` to
   the matrix stores through a register of its own) matched func_001225D0, func_001EBDD0,
   func_001A11C0, func_00125440 and func_001B8148; seventeen retail functions have the pattern.
   (2) A vector added in place and then scaled (func_001B8148's spin) is read again from memory

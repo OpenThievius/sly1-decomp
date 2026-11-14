@@ -21,10 +21,10 @@ struct WarpEntry {
     f32 availableLevel;     // 0x08
     void* cursorObject;     // 0x0C: another, with weight f10
     f32 cursorLevel;        // 0x10
-    s32 f14;                // 0x14
-    s32 f18;                // 0x18
+    s32 firstAnchor;        // 0x14: the anchor object used when flag is 0
+    s32 secondAnchor;       // 0x18: the anchor object used when flag is nonzero
     s32 reachable;          // 0x1C: IsWarpEntryReachable's answer; MoveWarpCursor skips the entry while it is 0
-    s32 f20;                // 0x20
+    s32 brightColors;       // 0x20
     f32 dim;                // 0x24
     f32 dimTarget;          // 0x28
     f32 phase;              // 0x2C: 0 to 2 pi at random
@@ -49,7 +49,7 @@ struct WarpPage : PlacedObject {
     u8 pad538[0x540 - 0x538];
     Quad16 smoothPoint;     // 0x540: q550 copied whole by SetWarpPageMode
     Quad16 targetPoint;     // 0x550
-    s32 f560;               // 0x560
+    s32 warpChosen;         // 0x560: set once the player has confirmed a warp
     void* sound;            // 0x564: the page's sound (StartSoundEffect, StopSoundRecord)
     u8 pad568[0x570 - 0x568];
 };

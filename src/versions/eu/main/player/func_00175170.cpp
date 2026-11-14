@@ -35,7 +35,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             if (self->aimMode == 0 && state != 7 && state != 3) {
                 SetPlayerAimMode(self, -1);
             }
-            if (self->f2438 == 0) {
+            if (self->containingCollider == 0) {
                 void* m = 0;
                 switch (state) {
                 case 6:
@@ -92,8 +92,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             p->desc02()->m2B(p);
             SetTurningColliderLinkFlag(self, 1);
             if (self->linkSystem != 0) {
-                RemoveColliderAttachment(((Attach03*)self->linkSystem)->target, (Attach03*)self->linkSystem);
-                ReleaseAttachRecords((World*)self->world, (Attach03*)self->linkSystem);
+                RemoveColliderAttachment(((ColliderAttachment*)self->linkSystem)->target, (ColliderAttachment*)self->linkSystem);
+                ReleaseAttachRecords((World*)self->world, (ColliderAttachment*)self->linkSystem);
                 self->linkSystem = 0;
             }
             ResetTrailRing((TrailRing*)self->trail);
@@ -126,10 +126,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 4:
             PS(s32, 0x23DC) = -1;
             if (PS(void*, 0x2490) != 0) {
-                AT(Vec02, PS(void*, 0x2490), 0x300) = D_00248D30;
+                AT(Vec4, PS(void*, 0x2490), 0x300) = g_zeroVector;
             }
             if (PS(void*, 0x2494) != 0) {
-                AT(Vec02, PS(void*, 0x2494), 0x300) = D_00248D30;
+                AT(Vec4, PS(void*, 0x2494), 0x300) = g_zeroVector;
             }
             self->f580 = 1;
             ResetTrailRing((TrailRing*)self->trail);
@@ -193,7 +193,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 SetOnOffObjectForcedState((void*)self->forcedOnOffObject, 0);
                 self->forcedOnOffObject = 0;
             }
-            self->f268C = 0;
+            self->cameraSpringMode = 0;
             if (PS(void*, 0x26A4) != 0) {
                 ReleaseSoundLevel((SoundLevelEntry*)(PS(void*, 0x26A4)));
                 PS(void*, 0x26A4) = 0;
@@ -209,7 +209,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetColliderTreeContactsDropped(self, 0);
             break;
         case 10: {
-            BaseObject* o = (BaseObject*)self->f25D8[2];
+            BaseObject* o = (BaseObject*)self->slotObjects[2];
             self->aimTarget = 0;
             self->boundObject = 0;
             if (o != 0) {
@@ -245,7 +245,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 13:
             self->flags538 &= ~((u64)1 << 40);
-            self->hook = self->f273C;
+            self->hook = self->savedHook;
             if (self->stateNodes[13] != 0) {
                 SetTurningColliderFollowedMesh(self, (Collider*)self->stateNodes[13], 1);
             }
@@ -304,14 +304,14 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             PS(Attachment*, 0x2520)->mode1 = 2;
             p = (PlacedObject*)self->f23D0;
             p->desc02()->m2B(p);
-            Vec02 pos;
-            Mat02 rotA;
-            Mat02 rotB;
+            Vec4 pos;
+            Mat3 rotA;
+            Mat3 rotB;
             f32 heading;
             ComputePlayerLinkPose(self, &pos, &rotA, &rotB);
-            Vu0::Q(PS(Vec02, 0x22F0)) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f61C)->pos), Vu0::Q(pos));
-            MultiplyMatrices3x3(&rotA, &((PlacedObject*)self->f61C)->rot, &PS(Mat02, 0x2300));
-            MultiplyMatrices3x3(&rotB, &((PlacedObject*)self->f23D0)->rot, &PS(Mat02, 0x2330));
+            Vu0::Q(PS(Vec4, 0x22F0)) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f61C)->pos), Vu0::Q(pos));
+            MultiplyMatrices3x3(&rotA, &((PlacedObject*)self->f61C)->rot, &PS(Mat3, 0x2300));
+            MultiplyMatrices3x3(&rotB, &((PlacedObject*)self->f23D0)->rot, &PS(Mat3, 0x2330));
             TriggerScriptEvent((BaseObject*)self->boundObject, 2, 0, 0);
             BaseObject* o = (BaseObject*)self->boundObject;
             o->desc->m17(o, self);
@@ -347,7 +347,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 if (c->desc->flags & 2) {
                     if ((c->mode450 != 3 && c->positionAttachment != 0 && c->positionAttachment->mode0 == 1) ||
                         (c->mode470 != 3 && c->orientationAttachment != 0 && c->orientationAttachment->mode1 == 1)) {
-                        Attach03* a = TakeAttachRecord((World*)self->world);
+                        ColliderAttachment* a = TakeAttachRecord((World*)self->world);
                         a->owner = self;
                         a->target = c;
                         AddColliderAttachment(c, a);
@@ -367,10 +367,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetFlaggedLinkContactMask(self, (BaseObject*)self->aimCurve, 1);
             self->pathStickSide = -1;
             void* track = (void*)self->aimCurve;
-            TrackShape_175170* s = AT(TrackShape_175170*, track, 0x34);
+            PlayerTrackShape* s = AT(PlayerTrackShape*, track, 0x34);
             s32 turn = AT(s32, track, 0x58);
-            Vec02 a;
-            Vec02 b;
+            Vec4 a;
+            Vec4 b;
             switch (turn) {
             case 0:
                 self->pathFlipped = 0;
@@ -380,14 +380,14 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 break;
             default: {
                 if (s->desc->m2 != 0) {
-                    s->desc->m2(s, self->pathPos + D_00274F14, &a, 0);
+                    s->desc->m2(s, self->pathPos + g_pathProbeDistance, &a, 0);
                     if (s->desc->m2 != 0) {
-                        s->desc->m2(s, self->pathPos - D_00274F14, &b, 0);
+                        s->desc->m2(s, self->pathPos - g_pathProbeDistance, &b, 0);
                     }
                 }
                 TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->aimCurve, 0x18)), 0, &a, &a);
                 TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->aimCurve, 0x18)), 0, &b, &b);
-                Vec02 d;
+                Vec4 d;
                 *(u128*)&d = NormalizeOrElse_175170(Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b)), Vu0::Vec::Of(g_unitZVector)).q;
                 self->pathFlipped = d.z < -g_steepSlopeThreshold;
                 break;
@@ -397,16 +397,16 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->pathPos = len;
             if (s->looped == 0) {
                 if (self->pathFlipped != 0) {
-                    self->pathPos = Clamp_175170(len, s->lengths[0] + D_00274F00, s->lengths[s->count - 1] - D_00274F04);
+                    self->pathPos = Clamp_175170(len, s->lengths[0] + g_pathFinishMargin, s->lengths[s->count - 1] - g_pathStartMargin);
                 } else {
-                    self->pathPos = Clamp_175170(len, s->lengths[0] + D_00274F04, s->lengths[s->count - 1] - D_00274F00);
+                    self->pathPos = Clamp_175170(len, s->lengths[0] + g_pathStartMargin, s->lengths[s->count - 1] - g_pathFinishMargin);
                 }
             }
             if (s->desc->m2 != 0) {
                 s->desc->m2(s, self->pathPos, &a, 0);
             }
             TransformPointBetweenFrames((PlacedObject*)(AT(void*, self->aimCurve, 0x18)), 0, &a, &a);
-            TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &b);
+            TransformPointBetweenFrames(self, 0, (Vec4*)&self->f23E0, &b);
             Vu0::Q(self->pathPoseOffset) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
             sound = AT(s32, self->aimCurve, 0x50);
             Vu0::Q(self->poseOffset) = Vu0::Sub(Vu0::Q(self->focusPoint), Vu0::Q(a));
@@ -416,26 +416,26 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             SetPlayerAimMode(self, -1);
             sound = 0x59;
             SetFlaggedLinkContactMask(self, (BaseObject*)self->ledgeCollider, 1);
-            Vec02 pos;
-            Mat02 m;
-            Vec02 k;
-            TransformPointBetweenFrames((PlacedObject*)self->ledgeCollider, 0, (Vec02*)self->ledgeLocalPoint, &pos);
+            Vec4 pos;
+            Mat3 m;
+            Vec4 k;
+            TransformPointBetweenFrames((PlacedObject*)self->ledgeCollider, 0, (Vec4*)self->ledgeLocalPoint, &pos);
             Vu0::Q(k) = Vu0::FromFloat(-1.0f);
             Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->ledgeOffset), Vu0::Q(k));
             BuildPerpendicularPair(&m.r[0], &m.r[1], &g_unitZVector, &g_unitZVector);
             Vu0::Q(pos) = Vu0::Sub(Vu0::Q(pos), Vu0::Rotate(m, Vu0::Q(self->ledgeHandOffset)));
             anim = PS(void*, 0x1038);
             Vu0::Q(self->ledgeSlack) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(pos));
-            self->pathPoseOffset = D_00248D30;
+            self->pathPoseOffset = g_zeroVector;
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             break;
         }
         case 4:
             if (PS(void*, 0x2490) != 0) {
-                AT(Vec02, PS(void*, 0x2490), 0x300) = *(Vec02*)D_00263970;
+                AT(Vec4, PS(void*, 0x2490), 0x300) = *(Vec4*)D_00263970;
             }
             if (PS(void*, 0x2494) != 0) {
-                AT(Vec02, PS(void*, 0x2494), 0x300) = *(Vec02*)D_00263970;
+                AT(Vec4, PS(void*, 0x2494), 0x300) = *(Vec4*)D_00263970;
             }
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             SetPlayerAimMode(self, -1);
@@ -464,9 +464,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 ((BaseObject*)track)->desc->m17((BaseObject*)track, self);
                 SetFlaggedLinkContactMask(self, (BaseObject*)track, 1);
                 self->pathStickSide = -1;
-                Vec02 dir;
-                Vec02 tan;
-                TrackShape_175170* s = AT(TrackShape_175170*, track, 0x34);
+                Vec4 dir;
+                Vec4 tan;
+                PlayerTrackShape* s = AT(PlayerTrackShape*, track, 0x34);
                 if (s->desc->m1 != 0) {
                     s->desc->m1(s, self->trackPos, 0, &tan);
                 }
@@ -481,9 +481,9 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 break;
             }
             case 7:
-                self->desc02()->m20(self, (Vec02*)&D_00248D30);
+                self->desc02()->m20(self, (Vec4*)&g_zeroVector);
                 loud = 1;
-                self->desc02()->m21(self, (Vec02*)&D_00248D30);
+                self->desc02()->m21(self, (Vec4*)&g_zeroVector);
                 Vu0::Q(self->headingVelocity) = Vu0::Zero();
                 ActivateSwitchedCollider(self->targetSwitch);
                 break;
@@ -515,7 +515,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         }
         case 9: {
-            Vec02 d;
+            Vec4 d;
             if (self->walkerHost != 0) {
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->walkerHost)->v140), Vu0::Q(g_player->v140));
             } else {
@@ -543,18 +543,18 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             break;
         case 13:
-            self->f273C = self->hook;
+            self->savedHook = self->hook;
             self->hook = 0;
             self->flags538 |= (u64)1 << 40;
             self->radius3CC = D_00262E30;
             if (self->stateNodes[13] != 0) {
                 SetTurningColliderFollowedMesh(self, 0, 0);
             }
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             SetPlayerAimMode(self, -1);
             break;
         case 16:
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         case 14: {
             BaseObject* o = (BaseObject*)self->contactOwner;
@@ -568,12 +568,12 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             o = (BaseObject*)self->contactOwner;
             o->desc->m03(o);
             anim = PS(void*, 0x274C);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         }
         case 15:
             anim = PS(void*, 0x2754);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         }
         ReleaseFarPlayerLinks(self);
@@ -598,7 +598,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             ((Attachment*)self->selfPoseSource)->mode0 = -1;
             self->desc02()->m2B(self);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         case 9:
             if (self->leapTarget != 0) {
@@ -610,7 +610,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             ((Attachment*)self->selfPoseSource)->mode0 = -1;
             self->desc02()->m2B(self);
-            self->headingVelocity = D_00248D30;
+            self->headingVelocity = g_zeroVector;
             break;
         case 10:
             if (state != 6 || self->targetMode != 5) {
@@ -646,11 +646,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 self->aimTarget = 0;
                 self->boundObject = 0;
             }
-            BaseObject* o = (BaseObject*)self->f25D8[1];
+            BaseObject* o = (BaseObject*)self->slotObjects[1];
             if (o != 0) {
                 o->desc->m03(o);
             }
-            o = (BaseObject*)self->f25D8[3];
+            o = (BaseObject*)self->slotObjects[3];
             if (o != 0) {
                 o->desc->m03(o);
             }
@@ -677,7 +677,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         }
         case 39:
         case 47:
-            AT(Vec02, PS(void*, 0x2490), 0x300) = D_00248D30;
+            AT(Vec4, PS(void*, 0x2490), 0x300) = g_zeroVector;
             break;
         case 28:
             if (self->forcedOnOffObject != 0) {
@@ -686,7 +686,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             break;
         case 55: {
-            BaseObject* o = (BaseObject*)self->f25D8[4];
+            BaseObject* o = (BaseObject*)self->slotObjects[4];
             if (o != 0) {
                 o->desc->m03(o);
             }
@@ -698,7 +698,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case -1:
             break;
         case 0: {
-            Vec02 v;
+            Vec4 v;
             self->steerKeepsDirection = 0;
             self->f2498 = 1;
             self->jumpStickPhase = 0;
@@ -706,7 +706,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->stickReleaseTime = now;
             self->stickFullTime = now;
             self->jumpStartTime = now;
-            self->jumpSpeed = D_00262E14 * Fpu::Sqrt(self->gravityScale);
+            self->jumpSpeed = g_jumpSpeedBase * Fpu::Sqrt(self->gravityScale);
             self->groundContact = 0;
             StartSoundEffect(0x4F, 0, self, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             ComputePlayerJumpVelocity(self, &v);
@@ -715,11 +715,11 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                 anim = PS(void*, 0x1028);
                 break;
             case 4:
-                self->jumpSpeed *= D_00262E1C;
+                self->jumpSpeed *= g_jumpKind4SpeedScale;
                 anim = PS(void*, 0x1028);
                 break;
             case 3:
-                self->jumpSpeed *= D_00262E18;
+                self->jumpSpeed *= g_jumpKind3SpeedScale;
                 anim = PS(void*, 0x1028);
                 break;
             case 0:
@@ -795,7 +795,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         }
         case 10:
         case 11: {
-            Vec02 v;
+            Vec4 v;
             ComputeUpwardBoostVelocity(self, &v);
             self->desc02()->m20(self, &v);
             ((Attachment*)self->selfPoseSource)->mode0 = 4;
@@ -820,7 +820,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             break;
         case 5: {
-            Vec02 v;
+            Vec4 v;
             anim = PS(void*, 0xE2C);
             Vu0::Q(v) = Vu0::Add(Vu0::MulX(Vu0::Q(self->rot.r[2]), Vu0::Scalar(Fpu::Sqrt(self->gravityScale) * 800.0f)), Vu0::Q(self->v150));
             self->desc02()->m20(self, &v);
@@ -831,7 +831,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             self->f2498 = 1;
             self->steerKeepsDirection = 1;
             self->jumpStickPhase = 2;
-            self->jumpSpeed = D_00262E14 * Fpu::Sqrt(self->gravityScale);
+            self->jumpSpeed = g_jumpSpeedBase * Fpu::Sqrt(self->gravityScale);
             self->v2290 = self->v150;
             Vu0::Q(self->headingVelocity) = Vu0::Zero();
             self->groundContact = 0;
@@ -841,7 +841,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 44:
             self->f2498 = 1;
             self->groundContact = 0;
-            if (self->f2730 != 0) {
+            if (self->requestAccepted != 0) {
                 anim = self->subStateAnims[43];
             } else {
                 anim = PS(void*, 0x1020);
@@ -872,7 +872,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             anim = self->markerAnim;
             break;
         case 3: {
-            Vec02 v;
+            Vec4 v;
             self->f2498 = 0;
             anim = PS(void*, 0x1034);
             ComputeUpwardBoostVelocityUnitSlope(self, &v);
@@ -931,7 +931,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                             ResetPlayerOnOffObject(self);
                             OnOffObject* p = (OnOffObject*)self->forcedOnOffObject;
                             p->desc->m15(p, AT(BaseObject*, self->targetCurve, 0x18));
-                            ((OnOffObject*)self->forcedOnOffObject)->obj = AT(Arr63*, self->targetCurve, 0x34);
+                            ((OnOffObject*)self->forcedOnOffObject)->obj = AT(OnOffCurve*, self->targetCurve, 0x34);
                         }
                     } else if (self->targetPoint != 0) {
                         void* o = self->targetPoint;
@@ -944,21 +944,21 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
                             ResetPlayerOnOffObject(self);
                             OnOffObject* p = (OnOffObject*)self->forcedOnOffObject;
                             p->desc->m15(p, AT(BaseObject*, self->targetPoint, 0x18));
-                            ((OnOffObject*)self->forcedOnOffObject)->f38C = 1;
-                            ((OnOffObject*)self->forcedOnOffObject)->v400 = AT(Vec02, self->targetPoint, 0x40);
+                            ((OnOffObject*)self->forcedOnOffObject)->orbitsPoint = 1;
+                            ((OnOffObject*)self->forcedOnOffObject)->v400 = AT(Vec4, self->targetPoint, 0x40);
                             ((OnOffObject*)self->forcedOnOffObject)->orbitRadius = AT(f32, self->targetPoint, 0x5C);
                         }
                     }
                     if ((OnOffObject*)self->forcedOnOffObject == self->ownOnOffObject) {
-                        const Vec02* z = &D_00248D30;
+                        const Vec4* z = &g_zeroVector;
                         OnOffObject* p = (OnOffObject*)self->forcedOnOffObject;
-                        p->desc02()->m1D(p, (Vec02*)z);
+                        p->desc02()->m1D(p, (Vec4*)z);
                         p = (OnOffObject*)self->forcedOnOffObject;
-                        p->desc02()->m1E(p, (Mat02*)&g_identityMatrix);
+                        p->desc02()->m1E(p, (Mat3*)&g_identityMatrix);
                         p = (OnOffObject*)self->forcedOnOffObject;
-                        p->desc02()->m20(p, (Vec02*)z);
+                        p->desc02()->m20(p, (Vec4*)z);
                         p = (OnOffObject*)self->forcedOnOffObject;
-                        p->desc02()->m21(p, (Vec02*)z);
+                        p->desc02()->m21(p, (Vec4*)z);
                     }
                     if (self->forcedOnOffObject != 0) {
                         ((OnOffObject*)self->forcedOnOffObject)->switchedCollider = self;
@@ -1021,10 +1021,10 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             anim = self->f1064;
             break;
         case 25:
-            anim = self->f105C;
+            anim = self->pathBlendItem;
             break;
         case 26:
-            anim = self->f105C;
+            anim = self->pathBlendItem;
             speed = -1.0f;
             break;
         case 27:
@@ -1104,18 +1104,18 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             anim = self->subStateAnims[sub];
             if (sub == 47 || sub == 39) {
                 if (PS(void*, 0x2490) != 0) {
-                    AT(Vec02, PS(void*, 0x2490), 0x300) = *(Vec02*)D_00263980;
+                    AT(Vec4, PS(void*, 0x2490), 0x300) = *(Vec4*)D_00263980;
                 }
             }
             if (sub == 47) {
-                Vec02 d;
+                Vec4 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(self->v140));
                 self->heading = ArctangentOfRatio(d.y, d.x);
             }
             break;
         case 41:
         case 48: {
-            Vec02 d;
+            Vec4 d;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(g_camera->position), Vu0::Q(self->v140));
             self->heading = ArctangentOfRatio(d.y, d.x);
             anim = self->subStateAnims[sub];
@@ -1128,7 +1128,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             break;
         case 40:
         case 49:
-            self->desc02()->m21(self, (Vec02*)&D_00248D30);
+            self->desc02()->m21(self, (Vec4*)&g_zeroVector);
             self->heading = self->stickHeading = ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x);
             anim = self->subStateAnims[sub];
             break;
@@ -1157,7 +1157,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             walkerId = 0x14B;
             break;
         case 55: {
-            Vec02 v;
+            Vec4 v;
             u128 vel = Vu0::Q(self->v150);
             f32 most = D_00262E2C;
             Vu0::Q(v) = vel;
@@ -1172,15 +1172,15 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             }
             self->desc02()->m20(self, &v);
             v.z = 0.0f;
-            Vu0::Vec len = NormalizeInPlace_175170(v, D_00248D30);
+            Vu0::Vec len = NormalizeInPlace_175170(v, g_zeroVector);
             f32 k = Vu0::ToFloatMoved(len) / self->radius3CC;
-            Vec02 spin;
+            Vec4 spin;
             Vu0::Q(spin) = Vu0::FromFloats(-k * v.y, k * v.x, 0.0f);
             self->desc02()->m21(self, &spin);
             anim = PS(void*, 0x25D4);
-            if (self->f25D8[4] != 0) {
+            if (self->slotObjects[4] != 0) {
                 if (MaskWorldBitsBySave() & 0x400) {
-                    BaseObject* o = (BaseObject*)self->f25D8[4];
+                    BaseObject* o = (BaseObject*)self->slotObjects[4];
                     o->desc->m02(o);
                 }
             }
@@ -1215,8 +1215,8 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
     if (!skip) {
         StopPlayerAnimation(self);
         if (anim != 0) {
-            AnimArg_175170 args[2];
-            AnimArg_175170* arg = args;
+            AnimationArgument args[2];
+            AnimationArgument* arg = args;
             if (self->heldObject != 0) {
                 arg->id = 0x61;
                 arg->value = self->heldObject;

@@ -53,7 +53,7 @@ struct Oscillator;
 
 // Types other files define, named by the parameters of their functions declared here.
 struct AnimationPlayer;
-struct T217D_6D0;
+struct PauseMenu;
 
 
 void RegroupQueuedObjects(World* self);
@@ -67,7 +67,7 @@ struct VisitNode { VisitClass* cls; u8 pad0[0x18]; VisitNode* next; u8 pad1[0x14
 
 
 
-void SpliceListToEnd(List01* dst, List01* src);
+void SpliceListToEnd(ObjectList* dst, ObjectList* src);
 
 
 void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other);
@@ -87,10 +87,10 @@ void* MoveMemory(void* dst, void* src, s32 bytes);
 
 void MergeObjectGroupMembers(World* self, FoundList* group);
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 void* AllocateFrontMemory(s32 size);
@@ -98,18 +98,18 @@ void RegisterObjectGroup(World* self, FoundList* group);
 
 
 struct LinkListWalk {
-    List01* list;
+    ObjectList* list;
     u8* link;
     s32 offset;
     LinkListWalk* prev;
 };
 
 
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 void QueueObjectForRegroup(World* owner, PlacedObject* obj);
 
 struct BeginLinkListWalk {
-    static void Of(LinkListWalk* it, List01* list)
+    static void Of(LinkListWalk* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -222,22 +222,22 @@ struct PlaneTreeNode;
 struct PlaneTreeOutput;
 
 extern u8 g_flushBatchProgram[];
-extern u8 D_000018F8[];
+extern u8 g_stripMeshMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
-extern u8 D_00000FA0[];
-extern u8 D_00000FD8[];
+extern u8 g_morphTargetMode0Program[];
+extern u8 g_morphTargetMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
-extern u8 D_00000FA0[];
-extern u8 D_00000FD8[];
+extern u8 g_morphTargetMode0Program[];
+extern u8 g_morphTargetMode1Program[];
 
 void WriteVifMscal(void* obj, void* data);
 
 extern u8 g_flushBatchProgram[];
-extern u8 D_000018F8[];
+extern u8 g_stripMeshMode1Program[];
 
 void WriteVifMscal(void* obj, void* text);
 
@@ -299,12 +299,12 @@ struct ElementStack;
 void SetElementStackState(ElementStack* self, s32 state);
 
 extern u8 g_flushBatchProgram[];
-extern u8 D_000018F8[];
+extern u8 g_stripMeshMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
-extern u8 D_00000FA0[];
-extern u8 D_00000FD8[];
+extern u8 g_morphTargetMode0Program[];
+extern u8 g_morphTargetMode1Program[];
 
 void WriteVifMscal(void* s, s32 n);
 
@@ -318,7 +318,7 @@ extern u8 g_pauseMenuElement[];
 
 struct ScatterController;
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 
@@ -355,9 +355,9 @@ s32 g_previousLevelIndex = -1;
 char g_missingEntryName[8] = "<none>";
 u8 D_002623D8[4] = { 0 };
 s32 g_timerRateExponent = 0;
-extern u8 D_00001298[];
-extern u8 D_00001368[];
-extern u8 D_00000ED8[];
+extern u8 g_morphTargetBlendProgram[];
+extern u8 g_morphTargetTailProgram[];
+extern u8 g_morphTargetEndProgram[];
 
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -492,13 +492,13 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 extern u8 g_unlitBatchFinishProgram[];
 extern u8 g_unlitBatchProgram[];
-extern u8 D_000036D0[];
-extern u8 D_00001A80[];
-extern u8 D_000027C0[];
-extern u8 D_00002008[];
-extern u8 D_000023B8[];
-extern u8 D_00003A80[];
-extern u8 D_00003A90[];
+extern u8 g_unlitKind4BatchFinishProgram[];
+extern u8 g_unlitKind4BatchProgram[];
+extern u8 g_nodeLinkProgram[];
+extern u8 g_skinWeightProgram[];
+extern u8 g_positionDeltaProgram[];
+extern u8 g_extraStreamFirstProgram[];
+extern u8 g_unlitExtraStreamSecondProgram[];
 
 void BeginDmaTag(PacketWriter* pkt);
 void CloseDmaTag(PacketWriter* pkt);
@@ -535,7 +535,7 @@ struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatr
 
 
 extern u8 g_litBatchFinishProgram[];
-extern u8 D_000000F0[];
+extern u8 g_litBatchSecondFinishProgram[];
 
 
 void* InitPacketWriter(PacketWriter* self);
@@ -561,14 +561,14 @@ QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 extern u8 g_litBatchProgram[];
 extern u8 g_litBatchThirdProgram[];
-extern u8 D_00002008[];
-extern u8 D_00002088[];
-extern u8 D_000023B8[];
-extern u8 D_000023D8[];
-extern u8 D_000023F0[];
-extern u8 D_000027C0[];
-extern u8 D_00003A80[];
-extern u8 D_00003AA0[];
+extern u8 g_skinWeightProgram[];
+extern u8 g_litSkinWeightProgram[];
+extern u8 g_positionDeltaProgram[];
+extern u8 g_normalDeltaProgram[];
+extern u8 g_normalDeltaFinishProgram[];
+extern u8 g_nodeLinkProgram[];
+extern u8 g_extraStreamFirstProgram[];
+extern u8 g_litExtraStreamSecondProgram[];
 
 void BeginDmaTag(PacketWriter* self);
 void CloseDmaTag(PacketWriter* self);
@@ -746,12 +746,12 @@ void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other)
     if (self != other) {
         PlacedObject* e = (PlacedObject*)other->list60.head;
         if (e != 0) {
-            e->f54 = self;
+            e->linkListOwner = self;
             for (e = (PlacedObject*)e->link58.next; e != 0; e = (PlacedObject*)e->link58.next) {
-                e->f54 = self;
+                e->linkListOwner = self;
             }
         }
-        SpliceListToEnd((List01*)&self->list60.head, (List01*)&other->list60.head);
+        SpliceListToEnd((ObjectList*)&self->list60.head, (ObjectList*)&other->list60.head);
     }
 }
 
@@ -765,7 +765,7 @@ void DissolveObjectLinkList(World* self, PlacedObject* owner)
     while ((node = NextInLinkList::Of(&it)) != 0) {
         if (node != owner) {
             RemoveFromList(&owner->list60, node);
-            node->f54 = node;
+            node->linkListOwner = node;
             node->list60.tail = node;
             node->list60.head = node;
         }
@@ -788,7 +788,7 @@ void MergeObjectGroupMembers(World* self, FoundList* group)
     s32 first = i;
     for (; i < group->count; i++) {
         if (IsObjectAttached(group->objects[i]) != 0) {
-            MergeObjectLinkLists(self, group->objects[first]->f54, group->objects[i]->f54);
+            MergeObjectLinkLists(self, group->objects[first]->linkListOwner, group->objects[i]->linkListOwner);
         }
     }
 }
@@ -847,8 +847,8 @@ void UnregisterObjectGroup(World* self, FoundList* s)
         }
         for (i = 0; i < s->count; i++) {
             obj = s->objects[i];
-            if (obj->f54 != 0) {
-                DissolveObjectLinkList(self, obj->f54);
+            if (obj->linkListOwner != 0) {
+                DissolveObjectLinkList(self, obj->linkListOwner);
                 break;
             }
         }
@@ -867,7 +867,7 @@ void RegroupQueuedObjects(World* self)
         do {
             PlacedObject* obj = self->regroupObjects[i];
             obj->flags &= mask;
-            if (obj->f54 == obj) {
+            if (obj->linkListOwner == obj) {
                 s32 j = obj->count6C;
                 j--;
                 for (; j >= 0; j--) {
@@ -917,8 +917,8 @@ void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
         if (self->soundRecord != 0) {
             StopSoundRecord((PlayingSound*)self->soundRecord->sound, 0);
         }
-        self->desc02()->m20(self, (Vec02*)D_00248D30);
-        self->desc02()->m21(self, (Vec02*)D_00248D30);
+        self->desc02()->m20(self, (Vec4*)g_zeroVector);
+        self->desc02()->m21(self, (Vec4*)g_zeroVector);
         self->flags |= (u64)1 << 38;
     } else {
         self->flags &= ~((u64)1 << 38);
@@ -953,15 +953,15 @@ void SetColliderFrozen(Collider* self, s32 flag)
 }
 
 extern u8* g_camera;
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
+void AppendToList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 // Marks each group active (bit 37 of its members' flags) when a member's mode bits force it or the
 // camera sees a member within its radius, and moves the members into or out of the world's lists.
 void UpdateGroupsNearCamera(World* self)
 {
     for (PlacedObject* g = (PlacedObject*)self->list54.head; g != 0; g = (PlacedObject*)g->link48.next) {
-        if (g->f54 != g) {
+        if (g->linkListOwner != g) {
             continue;
         }
         PlacedObject* m = (PlacedObject*)g->list60.head;
@@ -977,7 +977,7 @@ void UpdateGroupsNearCamera(World* self)
                 m = 0;
                 goto done;
             }
-            if ((m->visibilityMask & cam->f21C) == cam->f21C) {
+            if ((m->visibilityMask & cam->areaMask) == cam->areaMask) {
                 f32 r = m->fadeDistanceFar + m->boundRadius;
                 u128 diff = Vu0::Sub(Vu0::Q(m->v140), Vu0::Q(cam->position));
                 f32 d = Vu0::ToFloatMoved(Vu0::Dot(diff, diff));
@@ -998,15 +998,15 @@ void UpdateGroupsNearCamera(World* self)
             if (active != ((s32)(m->flags >> 37) & 1)) {
                 if (active != 0) {
                     VisitObjectTree((VisitNode*)m, 0);
-                    AppendToList((List01*)&self->list60, m);
+                    AppendToList((ObjectList*)&self->list60, m);
                     if (m->desc->flags & 2) {
-                        AppendToList((List01*)&self->list6C, m);
+                        AppendToList((ObjectList*)&self->list6C, m);
                     }
                 } else {
                     VisitObjectTree((VisitNode*)m, (void*)1);
-                    RemoveFromList((List01*)&self->list60, m);
+                    RemoveFromList((ObjectList*)&self->list60, m);
                     if (m->desc->flags & 2) {
-                        RemoveFromList((List01*)&self->list6C, m);
+                        RemoveFromList((ObjectList*)&self->list6C, m);
                     }
                 }
                 m->flags = (m->flags & mask) | bit;
@@ -1542,7 +1542,7 @@ void SpendReserveUnit(void)
     } else if (p->reserveCount >= 0) {
         StartScreenFadeFromFlagTable((FlagTable*)g_flagTable);
     } else {
-        SetPauseMenuLayerPage((T217D_6D0*)g_pauseMenuElement, 0, 1);
+        SetPauseMenuLayerPage((PauseMenu*)g_pauseMenuElement, 0, 1);
     }
     RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
 }
@@ -1558,12 +1558,12 @@ void ClearRecordBody(ClearedRecord* self)
     self->f18 = 0;
 }
 
-// A face of a collision mesh (Mesh03::faces, 0x20 bytes): its normal, the plane's offset (as bits)
+// A face of a collision mesh (CollisionMesh::faces, 0x20 bytes): its normal, the plane's offset (as bits)
 // and the index of one of its vertices.
 
 // Copies a mesh (vertices, faces, face points and words) into front memory, sharing its edge list,
 // and when a matrix is given transforms the copied vertices (and the face data) by it.
-void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
+void CopyMeshTransformed(CollisionMesh* src, s32 matrix, CollisionMesh* dst)
 {
     dst->vertCount = src->vertCount;
     dst->verts = CopyToFrontMemory(src->vertCount << 4, src->verts);
@@ -1575,15 +1575,15 @@ void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
     dst->edges = src->edges;
     if (matrix != 0) {
         for (s32 i = 0; i < dst->vertCount; i++) {
-            Vec02* v = &((Vec02*)dst->verts)[i];
+            Vec4* v = &((Vec4*)dst->verts)[i];
             TransformByMatrixWithW((const Quad16*)matrix, v, 1.0f, v);
         }
         for (s32 i = 0; i < dst->faceCount; i++) {
             MeshFace03* face = &((MeshFace03*)dst->faces)[i];
             TransformByMatrixWithW((const Quad16*)matrix, &face->normal, 0.0f, &face->normal);
-            Vec02* vert = (Vec02*)((face->vert << 4) + (uptr)dst->verts);
+            Vec4* vert = (Vec4*)((face->vert << 4) + (uptr)dst->verts);
             face->offset = Vu0::ToBits(Vu0::Dot(Vu0::Q(face->normal), Vu0::Q(*vert)));
-            Vec02* p = &((Vec02*)dst->points)[i];
+            Vec4* p = &((Vec4*)dst->points)[i];
             TransformByMatrixWithW((const Quad16*)matrix, p, 1.0f, p);
         }
     }
@@ -1599,7 +1599,7 @@ s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 ma
     PushBackMemoryMark();
     u8* k = AllocateBackMemory(src->count * 12);
     buf[0] = (sptr)k;
-    if (QueryPlaneTreePoint((PlaneTreeNode*)src->base, (Vec02*)(dst->base + key * 16), 1.0f, (PlaneTreeOutput*)buf) != 2) {
+    if (QueryPlaneTreePoint((PlaneTreeNode*)src->base, (Vec4*)(dst->base + key * 16), 1.0f, (PlaneTreeOutput*)buf) != 2) {
         PopBackMemoryMark();
         return 0;
     }
@@ -1643,7 +1643,7 @@ extern const Fn_Table g_gifPacketMethods[6] = { 0, 0, 0, (Fn_Table)(void (*)(Pac
 PacketWriter* InitGifPacket(PacketWriter* self)
 {
     (void)InitPacketBuffer(self);
-    self->f14 = 1;
+    self->closesThroughTable = 1;
     self->vt = (const PacketWriterVt*)g_gifPacketMethods;
     self->openTag = 0;
     self->registerCount = 0;
@@ -1920,7 +1920,7 @@ void DestroyVertexBatch(VertexBatch* self, s32 flag)
 void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2)
 {
     FlushVertexBatch(batch);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)a1, (const Mat02*)a2, (Mat4A*)batch);
+    BuildMatrixFromRotationAndTranslation((const Vec4*)a1, (const Mat3*)a2, (Mat4A*)batch);
     InvertRigidTransform(a1, a2, (Quad16*)batch->inverse040);
 }
 
@@ -1928,7 +1928,7 @@ void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2)
 // sphere's centre in a1 and its radius in $f12, which this function passes on untouched (the
 // caller, trail_ribbon.cpp's builder, sets both), then a mask, a maximum and the three outputs.
 struct LightObject;
-s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount,
+s32 CollectLightsForSphere(World* world, const Vec4* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount,
                   LightObject** out);
 struct LightedVertexBatch {
     u8 pad0[0x94];
@@ -1952,7 +1952,7 @@ void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius)
         self->f94 = -1;
         self->flaggedLightCount = 0;
     } else {
-        self->strongestLight = CollectLightsForSphere(g_currentWorld, (const Vec02*)center, radius, 1, 0x10, &self->flaggedLightCount,
+        self->strongestLight = CollectLightsForSphere(g_currentWorld, (const Vec4*)center, radius, 1, 0x10, &self->flaggedLightCount,
                                            &self->lightCount, self->lights);
         self->f94 = 4;
     }

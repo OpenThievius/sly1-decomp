@@ -11,10 +11,10 @@ struct Font;
 struct FontGlyph;
 struct FrameGlyph;
 struct FrameRect;
-struct Layout_137228;
+struct LayoutRgba;
 struct PacketWriter;
-struct Rgba_137248;
 struct StringLayout;
+struct TextBoxLayout;
 struct TextReader;
 struct Vec4U;
 
@@ -47,7 +47,7 @@ void UploadFontImages(Font* self, void* arg);
 FontGlyph* FindFontGlyph(Font* self, u8 key);
 TextReader* InitTextReader(TextReader* self, char* text, Font* font);
 void RewindTextReader(TextReader* self);
-void SetTextDefaultColor(TextReader* self, Rgba_137248* color);
+void SetTextDefaultColor(TextReader* self, LayoutRgba* color);
 s32 ReadTextChar(TextReader* self);
 s32 CountTextChars(void* self);
 void SeekTextReader(TextReader* self, s32 n);
@@ -56,7 +56,7 @@ s32 WrapTextLines(TextReader* self, f32 limit);
 f32 MeasureTextHeight(TextReader* self, f32 limit);
 f32 MeasureTextWidth(TextReader* self);
 void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2);
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 void UploadAllFontImages(void);
 
 #endif

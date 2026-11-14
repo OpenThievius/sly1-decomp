@@ -551,7 +551,7 @@ ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, co
             }
             break;
         case 4:
-            *(Mat02*)d = *(Mat02*)q.p;
+            *(Mat3*)d = *(Mat3*)q.p;
             break;
         case 2:
         case 9:

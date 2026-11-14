@@ -29,7 +29,7 @@ typedef struct RemoteCallClient {
     s32 sema;                        // 0x08: the semaphore a waiting request sleeps on, -1 when none
     s32 fC;                          // 0x0C
     s32 f10;                         // 0x10: cleared by BindRemoteService
-    s32 f14;                         // 0x14: a word of the bind's reply
+    s32 callAddr;                    // 0x14: a word of the bind's reply
     s32 f18;                         // 0x18: a word of the bind's reply
     u32 callback;                    // 0x1C: a RemoteCallEndFn as a plain word, run when the reply arrives
     s32 callbackArg;                 // 0x20

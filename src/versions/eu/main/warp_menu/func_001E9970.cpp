@@ -15,9 +15,9 @@ s32 AreMenusAndFadeClear(void)
     if (((Obj_eu_1E9970*)&g_pauseMenuElement)->f56C != 0 && ((Obj_eu_1E9970*)&g_pauseMenuElement)->f570 != 0) goto fail;
     if (((Obj_eu_1E9970*)&g_mapScreenList)->f56C != 0) goto fail;
     if (((Obj_eu_1E9970*)&g_mapScreenList)->f560 != 0) goto fail;
-    if (D_00270458 == 2) goto fail;
-    if (D_00270458 == 1) goto fail;
-    if (D_00270458 != 4) goto ok;
+    if (g_displayMode == 2) goto fail;
+    if (g_displayMode == 1) goto fail;
+    if (g_displayMode != 4) goto ok;
 fail:
     return 0;
 ok:

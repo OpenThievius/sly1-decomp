@@ -8,6 +8,7 @@
 
 struct ClearedRecord;
 struct Collider;
+struct CollisionMesh;
 struct CountedArray;
 struct Counter;
 struct FoundList;
@@ -16,7 +17,6 @@ struct IdLookupObject;
 struct KeyedEdge;
 struct KeyedEntry;
 struct KeyedPointSet;
-struct Mesh03;
 struct PacketWriter;
 struct PlacedObject;
 struct RefCounted;
@@ -79,7 +79,7 @@ void GetCurrentLevelBit(u32* out);
 s32 GetSpareCountLimit(void);
 void SpendReserveUnit(void);
 void ClearRecordBody(ClearedRecord* self);
-void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst);
+void CopyMeshTransformed(CollisionMesh* src, s32 matrix, CollisionMesh* dst);
 s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out);
 PacketWriter* InitGifPacket(PacketWriter* self);
 void EndGifPacket(PacketWriter* self);

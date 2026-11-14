@@ -58,14 +58,14 @@ ObjectLink g_sequencedObjectLinks[2] = {
 
 // The record at PlacedObject::aimAttachment of these objects: its word at 0x44 is cleared at start and
 // set to 4 or 0 as the sequence enters state 0 or 2.
-struct Record200 {
+struct TimedAimRecord {
     u8 pad0[0x44];
     s32 f44;
 };
 
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void SetEffectSpawnerActiveForever(void* p);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
@@ -251,7 +251,7 @@ template <class T> struct NextInList {
 void PostLoadPlacedObject(PlacedObject* self);
 struct ValueListObject;
 struct Bits128;
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
@@ -266,7 +266,7 @@ struct GroupCurveObject {
 void PostLoadTimedGroup(TimedGroup* self)
 {
     ListFrame frame;
-    Vec02 point;
+    Vec4 point;
     PostLoadPlacedObject(self);
     BeginListWalk::Of(&frame, &self->children);
     BaseObject* node;
@@ -281,14 +281,14 @@ void PostLoadTimedGroup(TimedGroup* self)
                     TimedGroupChild* g = (TimedGroupChild*)((u8*)self + n * 0x50 + 0x5E0);
                     g->child = node;
                     g->riseScale = curve->lengths[curve->count - 1];
-                    s32* widest = &self->fAE0;
+                    s32* widest = &self->widestCurveCount;
                     s32 w = *widest;
                     if (!(curve->count < w)) {
                         w = curve->count;
                     }
                     *widest = w;
                     for (s32 i = 0; i < curve->count; i++) {
-                        TransformPointBetweenFrames(self, 0, (Vec02*)((u8*)curve->points + i * 16), &point);
+                        TransformPointBetweenFrames(self, 0, (Vec4*)((u8*)curve->points + i * 16), &point);
                         f32 d = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(point))));
                         if (self->boundRadius < d) {
                             self->boundRadius = d;
@@ -483,13 +483,13 @@ struct DrawPoints {
     u8 pad0[0xC];
     s32 count;
     u8 pad10[0x18 - 0x10];
-    Vec02* points;
+    Vec4* points;
 };
 
-void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec4* p, Vec4* q, f32 sx, f32 sy);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-Vec02* AllocateBackMemory(s32 size);
+Vec4* AllocateBackMemory(s32 size);
 
 // Draws the group's collider and, in states 0 to 7, for each child group a chain of beam segments
 // through its points (in this object's frame), cut off at the length ComputeTimedGroupRamp gives;
@@ -503,19 +503,19 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
     if (st == 8 || st < 0) return;
     void* fp;
     if (st < 4) {
-        fp = self->fAE4;
+        fp = self->firstBeamObject;
     } else if (st < 8) {
-        fp = self->fAE8;
+        fp = self->secondBeamObject;
     } else {
         return;
     }
     if (fp == 0) {
-        fp = (void*)self->world->f1D14;
+        fp = (void*)self->world->defaultBeamObject;
         if (fp == 0) return;
     }
     s32 i = 0;
     PushBackMemoryMark();
-    Vec02* buf = AllocateBackMemory(self->fAE0 << 4);
+    Vec4* buf = AllocateBackMemory(self->widestCurveCount << 4);
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
@@ -523,7 +523,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
         s32 n = src->count;
         f32 total = ComputeTimedGroupRamp(self, g);
         if (g->fC != 0) {
-            s32 lim = g->f20 + 2;
+            s32 lim = g->hitSegment + 2;
             if (lim < n) n = lim;
         }
         s32 next = i + 1;
@@ -532,7 +532,7 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
             TransformPointBetweenFrames(self, 0, &src->points[k], &buf[k]);
         }
         if (g->fC != 0) {
-            buf[g->f20 + 1] = g->f10;
+            buf[g->hitSegment + 1] = g->hitPoint;
         }
         for (k = 0; k < n - 1; k++) {
             u128 d = Vu0::Sub(Vu0::Q(buf[k]), Vu0::Q(buf[k + 1]));
@@ -585,7 +585,7 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 
 }
 
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void SetEffectSpawnerInactive(EffectSpawner* self);
 
@@ -597,16 +597,16 @@ void SetEffectSpawnerInactive(EffectSpawner* self);
 void ChooseTimedGroupState(TimedGroup* self, s32* state)
 {
     ColliderSpan span;
-    Vec02 p0;
-    Vec02 p1;
-    Vec02 mid;
+    Vec4 p0;
+    Vec4 p1;
+    Vec4 mid;
     if (g_gameTime[0] < self->nextStepTime) {
         return;
     }
     s32 i = 0;
     self->nextStepTime = g_gameTime[0] + 0.033333335f;
     PushBackMemoryMark();
-    Vec02* pts = AllocateBackMemory(self->fAE0 << 4);
+    Vec4* pts = AllocateBackMemory(self->widestCurveCount << 4);
     while (i < self->groupCount) {
         TimedGroupChild* g = &self->groups[i];
         f32 acc = 0.0f;
@@ -652,8 +652,8 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             if (hit != 0) {
                 s32 near = acc + Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of(p0), Vu0::Vec::Of(span.q[0])))) < total;
                 if (near) {
-                    Vu0::Q(g->f10) = Vu0::Q(span.q[0]);
-                    g->f20 = k;
+                    Vu0::Q(g->hitPoint) = Vu0::Q(span.q[0]);
+                    g->hitSegment = k;
                     g->hit = hit;
                     if (*state < 8) {
                         active = *state >= 4;
@@ -695,8 +695,8 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
             if (active && (h = g->hit) != 0 && ((h->flags538 & m) != 0 || e->value == 0)) {
                 Quad16* rec = (Quad16*)GetOwnSpawnRecord((EffectSpawner*)e->obj, 1);
                 rec[6] = span.q[2];
-                TransformPointBetweenFrames(0, self, (Vec02*)&span.q[0], &p0);
-                ((void (*)(BaseObject*, Vec02*))((void**)e->obj->desc)[33])(e->obj, &p0);
+                TransformPointBetweenFrames(0, self, (Vec4*)&span.q[0], &p0);
+                ((void (*)(BaseObject*, Vec4*))((void**)e->obj->desc)[33])(e->obj, &p0);
                 SetEffectSpawnerInactive((EffectSpawner*)e->obj);
             } else {
                 SetEffectSpawnerActiveForever((EffectSpawner*)e->obj);
@@ -858,10 +858,10 @@ void SetupSequencedObject(SequencedObject* self)
         self->phaseObject = self;
     }
     if (self->beamObject == 0) {
-        self->beamObject = self->world->f1D14;
+        self->beamObject = self->world->defaultBeamObject;
     }
     if (self->aimAttachment != 0) {
-        ((Record200*)self->aimAttachment)->f44 = 0;
+        ((TimedAimRecord*)self->aimAttachment)->f44 = 0;
     }
     u64 m = 0x8000;
     m <<= 28;
@@ -952,7 +952,7 @@ struct SequencedTransform {
     u8 pad48[8];
 };
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
-void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy);
+void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec4* p, Vec4* q, f32 sx, f32 sy);
 
 static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
 {
@@ -971,7 +971,7 @@ static inline f32 ClampRange(f32 v, f32 lo, f32 hi)
 // draw the object, 4 to 7 its phase object.
 void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
 {
-    Vec02 scale;
+    Vec4 scale;
     SequencedTransform tmp;
     Collider* tgt;
     if (self->state != 8) {
@@ -1034,7 +1034,7 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
                     } else {
                         w = ClampRange((g_gameTime[0] - self->substateStartTime) / self->substate1Duration, 0.0f, 1.0f);
                     }
-                    Vec02 blend;
+                    Vec4 blend;
                     Vu0::Q(blend) = Vu0::MulXSum(Vu0::Q(self->v140), Vu0::Scalar(1.0f - w), Vu0::Q(((Collider*)g_player)->v140), Vu0::Scalar(w));
                     DrawBeamBetweenPoints((PlacedObject*)self->beamObject, (PlacedObject*)a1, &blend, &(g_player)->v140, 10.0f, tmp.outerFade);
                 }
@@ -1081,14 +1081,14 @@ s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-extern const Vec02 g_unitXVector;
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+extern const Vec4 g_unitXVector;
 
 // Slot 72 of class 0x32: picks the state from the player's place (inside the object or not, and
 // which way it faces by the mode), writing 2 or 6 into state when nothing stands between.
 void ChooseSequencedObjectState(TimedObject* self, s32* state)
 {
-    Vec02 delta;
+    Vec4 delta;
     Collider** list;
     s32 count;
     if (g_player == 0) {
@@ -1126,7 +1126,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
         }
     }
     PushBackMemoryMark();
-    Vec02* at = &pl->v140;
+    Vec4* at = &pl->v140;
     GatherCollidersInBox(self->world, 0, at, &self->root->v140, IsSequencedObjectCandidate, self, &count, &list);
     if (FindNearestSpanObject(1, &self->v140, at, count, list, 0) == 0) {
         *state = self->repeating == 0 ? 2 : 6;
@@ -1221,7 +1221,7 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
         break;
     case 0:
         if (self->aimAttachment != 0) {
-            ((Record200*)self->aimAttachment)->f44 = 4;
+            ((TimedAimRecord*)self->aimAttachment)->f44 = 4;
         }
         break;
     case 1:
@@ -1229,7 +1229,7 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
         break;
     case 2:
         if (self->aimAttachment != 0) {
-            ((Record200*)self->aimAttachment)->f44 = 0;
+            ((TimedAimRecord*)self->aimAttachment)->f44 = 0;
         }
         break;
     }
@@ -1257,7 +1257,7 @@ void SetupBlinkObject(BlinkObject* self)
 {
     StartPlacedObject(self);
     for (s32 i = 0; i < self->elemCount; i++) {
-        Elem02* it = self->elems[i];
+        PlacedObjectElement* it = self->elems[i];
         if (it->kind == 1 && it->f14 != 0) {
             self->blinkElem = it;
             break;
@@ -1343,15 +1343,15 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // The 0x40-byte request frame FindNodeForQuery is handed for an object that is not the player:
 // the object, what touched it, where that is and the direction (the unit z).
 struct TouchQuery {
-    void Init(BlinkObject* s, Collider* o, const Vec02* k);
+    void Init(BlinkObject* s, Collider* o, const Vec4* k);
     void* self;
     void* tgt;
     s32 pad8[6];
-    Vec02 q20;
-    Vec02 q30;
+    Vec4 q20;
+    Vec4 q30;
 };
 
-inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec02* k)
+inline void TouchQuery::Init(BlinkObject* s, Collider* o, const Vec4* k)
 {
     FillMemory(this, 0, 0x40);
     tgt = o;
@@ -1374,7 +1374,7 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
     ContactRow03* l = owner->contacts->head;
     if (l != 0) {
         do {
-            Contact03* n = l->head;
+            BodyContact* n = l->head;
             if (n != 0) {
                 do {
                     s32 x = owner != n->end[0].body;
@@ -1566,6 +1566,6 @@ void SetBlinkObjectFrame(BlinkObject* self)
         }
         frame += first;
     }
-    // the cursor at 0x10 of the element overlaps Elem02::f14 (no field of Elem02 covers it)
+    // the cursor at 0x10 of the element overlaps PlacedObjectElement::f14 (no field of PlacedObjectElement covers it)
     SetCursorFrame((AnimCursor*)((u8*)self->blinkElem + 0x10), frame);
 }

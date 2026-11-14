@@ -25,11 +25,11 @@ struct RemoteCallPacket {
     s32 id;
     u32 client;
     u32 cmd;
-    s32 f24;
-    s32 f28;
-    s32 f2C;
-    s32 f30;
-    s32 f34;
+    s32 sendBytes;
+    s32 recvAddr;
+    s32 recvBytes;
+    s32 wantsReply;
+    s32 serverRecord;
     s32 f38;
     s32 f3C;
 };
@@ -58,7 +58,7 @@ struct IopCallPacket {
 struct ServiceRecord {
     u32 key;
     s32 f4;
-    s32 f8;
+    s32 callAddr;
     s32 fC;
     s32 f10;
     s32 f14;
@@ -247,9 +247,9 @@ call_path:
     goto after;
 set_fields:
     s0 = (RemoteCallClient*)reply->client;
-    s0->server = reply->f24;
-    s0->f14 = reply->f28;
-    s0->f18 = reply->f2C;
+    s0->server = reply->sendBytes;
+    s0->callAddr = reply->recvAddr;
+    s0->f18 = reply->recvBytes;
 after:
     s32 sema = s0->sema;
     if (sema >= 0) PostSemaphoreFromInterrupt(sema);
@@ -303,7 +303,7 @@ void AnswerServiceLookup(IopCallPacket* src, RemoteCallState* pools)
         m->f2C = 0;
     } else {
         m->f24 = (s32)n;
-        m->f28 = n->f8;
+        m->f28 = n->callAddr;
         m->f2C = n->f14;
     }
     SendCommandFromInterrupt(0x80000008, m, 0x40, 0, 0, 0);
@@ -357,19 +357,19 @@ extern "C" s32 BindRemoteService(RemoteCallClient* self, u32 cmd, s32 mode)
 // A queued request of the server (func_001F8200): the packet's words, and at 0x40 the list it is
 // queued on (its first and last entries at 0x0C and 0x10, the thread to wake at 0x00).
 struct ServerRequestEntry {
-    s32 f00;
-    s32 f04;
+    s32 threadId;
+    s32 threadBusy;
     s32 f08;
-    s32 f0C;
-    s32 f10;
+    s32 firstQueued;
+    s32 lastQueued;
     s32 f14;
     s32 f18;
     s32 f1C;
     s32 f20;
     s32 f24;
-    s32 f28;
-    s32 f2C;
-    s32 f30;
+    s32 recvAddr;
+    s32 recvBytes;
+    s32 wantsReply;
     s32 f34;
     s32 f38;
     s32 next;
@@ -388,11 +388,11 @@ struct ServerRequestPacket {
     s32 f18;
     s32 f1C;
     s32 f20;
-    s32 f24;
-    s32 f28;
-    s32 f2C;
-    s32 f30;
-    ServerRequestEntry* f34;
+    s32 sendBytes;
+    s32 recvAddr;
+    s32 recvBytes;
+    s32 wantsReply;
+    ServerRequestEntry* serverEntry;
 };
 
 
@@ -401,31 +401,31 @@ struct ServerRequestPacket {
 // with QueueThreadRequest.
 void QueueServerRequest(ServerRequestPacket* self)
 {
-    ServerRequestEntry* n = self->f34;
+    ServerRequestEntry* n = self->serverEntry;
     ServerRequestEntry* list = n->list;
-    if (list->f0C == 0) {
-        list->f0C = (s32)n;
+    if (list->firstQueued == 0) {
+        list->firstQueued = (s32)n;
     } else {
-        ((ServerRequestEntry*)list->f10)->next = (s32)n;
+        ((ServerRequestEntry*)list->lastQueued)->next = (s32)n;
     }
-    list->f10 = (s32)n;
+    list->lastQueued = (s32)n;
     s32 a = self->f14;
     s32 b = self->f1C;
     n->f20 = a;
     n->f1C = b;
     n->f24 = self->f20;
-    n->f0C = self->f24;
-    n->f28 = self->f28;
-    n->f2C = self->f2C;
-    n->f30 = self->f30;
+    n->firstQueued = self->sendBytes;
+    n->recvAddr = self->recvAddr;
+    n->recvBytes = self->recvBytes;
+    n->wantsReply = self->wantsReply;
     n->f34 = self->f10;
-    if (list->f00 < 0) {
+    if (list->threadId < 0) {
         return;
     }
-    if (list->f04 != 0) {
+    if (list->threadBusy != 0) {
         return;
     }
-    QueueThreadRequest(list->f00);
+    QueueThreadRequest(list->threadId);
 }
 
 extern "C" s32 CallRemoteService(RemoteCallClient* self, s32 cmd, s32 mode, void* send, s32 sendSize, void* recv, s32 recvSize,
@@ -444,11 +444,11 @@ extern "C" s32 CallRemoteService(RemoteCallClient* self, s32 cmd, s32 mode, void
     self->callback = (u32)callback;
     self->callbackArg = (s32)callbackArg;
     packet->cmd = cmd;
-    packet->f24 = sendSize;
-    packet->f28 = (s32)recv;
-    packet->f2C = recvSize;
+    packet->sendBytes = sendSize;
+    packet->recvAddr = (s32)recv;
+    packet->recvBytes = recvSize;
     packet->self = packet;
-    packet->f34 = self->server;
+    packet->serverRecord = self->server;
     packet->client = (u32)self;
     if ((mode & 2) == 0) {
         if (send == recv) {
@@ -460,12 +460,12 @@ extern "C" s32 CallRemoteService(RemoteCallClient* self, s32 cmd, s32 mode, void
     }
     if (mode & 1) {
         if (callback == 0) {
-            packet->f30 = 0;
+            packet->wantsReply = 0;
         } else {
-            packet->f30 = 1;
+            packet->wantsReply = 1;
         }
         self->sema = -1;
-        if (SendCommand(0x8000000A, packet, 0x40, send, self->f14, sendSize) != 0) {
+        if (SendCommand(0x8000000A, packet, 0x40, send, self->callAddr, sendSize) != 0) {
             return 0;
         }
         FreeRequestPacket(packet);
@@ -479,8 +479,8 @@ extern "C" s32 CallRemoteService(RemoteCallClient* self, s32 cmd, s32 mode, void
         FreeRequestPacket(packet);
         return -3;
     }
-    packet->f30 = 1;
-    if (SendCommand(0x8000000A, packet, 0x40, send, self->f14, sendSize) == 0) {
+    packet->wantsReply = 1;
+    if (SendCommand(0x8000000A, packet, 0x40, send, self->callAddr, sendSize) == 0) {
         FreeSemaphore(self->sema);
         FreeRequestPacket(packet);
         return -2;

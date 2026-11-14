@@ -39,7 +39,7 @@
 #include "functions/switched_collider.h"
 #include "functions/warp_menu.h"
 #include "functions/zone_collider.h"
-struct Mat02;
+struct Mat3;
 
 
 
@@ -58,7 +58,7 @@ struct OwnerMessage;
 
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin);
+void ApproachRotationWithRamp(f32 limit, Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin);
 
 
 // The file's .data, 0x264230 to 0x264260, in retail's order.
@@ -69,7 +69,7 @@ f32 g_pathSpeedColliderRotationRamp[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 
 // Initialises a path-speed collider: the player-flagged collider's defaults, then its level limit
 // 10, level rate 1 and the fields at 0x6CC-0x6D8 (1000, 0, 0.5, 3000).
-void InitC24Object(C24* self)
+void InitC24Object(PathSpeedCollider* self)
 {
     InitPlayerFlaggedCollider(self);
     self->levelLimit = 10.0f;
@@ -82,12 +82,12 @@ void InitC24Object(C24* self)
 
 // Starts a path-speed collider: starts it as a masked collider, resolves its links, creates its
 // state walker and allocates a 0xC00-byte curve table (an empty weight curve plus its storage).
-void StartC24Object(C24* self)
+void StartC24Object(PathSpeedCollider* self)
 {
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 2, g_pathSpeedColliderLinks);
     self->walker = (StateWalker*)CreateStateWalker((StateGraph*)self->stateGraph, self, 0x36E, 0);
-    Alloc24* n = (Alloc24*)CreateWeightCurve(0);
+    PathSpeedCurveTable* n = (PathSpeedCurveTable*)CreateWeightCurve(0);
     self->curveTable = n;
     n->field8 = 0;
     self->curveTable->field_c = AllocateFrontMemory(0xC00);
@@ -100,7 +100,7 @@ void StartC24Object(C24* self)
 // levelLimit), and when it reaches the limit (or the player is near the end, in state key 0x36F)
 // sends the player a message, notifies its member, calls slot 3 on itself and sends script event
 // 2; near the end it moves its state walker to key 0x36F.
-void UpdateC24Object(C24* self, f32 dt)
+void UpdateC24Object(PathSpeedCollider* self, f32 dt)
 {
     SwitchedCollider* target;
     u8 msg[0x10];
@@ -146,9 +146,9 @@ void UpdateC24Object(C24* self, f32 dt)
 }
 
 typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
-typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec02* pos, Vec02* dir);
+typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec4* pos, Vec4* dir);
 typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
-void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin);
+void ApproachRotationWithRamp(f32 limit, Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 
@@ -156,14 +156,14 @@ void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ra
 // Moves the path-speed object to the point and velocity its curve table gives for the current
 // level, turns it toward the velocity (with the acceleration relative to gravity as its up hint)
 // through a rotation ramp, steps its children, and calls slot 18 unless a1 is set.
-void MoveC24Object(C24* self, s32 a1, f32 dt)
+void MoveC24Object(PathSpeedCollider* self, s32 a1, f32 dt)
 {
     if (self->curveTable != 0) {
-        Vec02 pos;
-        Vec02 dir;
-        Vec02 vel;
-        Vec02 t;
-        Mat02 basis;
+        Vec4 pos;
+        Vec4 dir;
+        Vec4 vel;
+        Vec4 t;
+        Mat3 basis;
         f32 o0, o1;
         ((WeightCurveFn)(*(void***)self->curveTable)[0])(self->curveTable, self, 0, &o0, &o1, self->level, self->levelRate);
         PathCurve* curve = ((PathCurveObject*)self->path)->curve;
@@ -212,7 +212,7 @@ struct CurveEntry {
     f32 d;                  // 0x14
 };
 
-typedef void (*CurveSampleFn)(PathCurve* self, s32 zero, Vec02* out, f32 t);
+typedef void (*CurveSampleFn)(PathCurve* self, s32 zero, Vec4* out, f32 t);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 bytes);
@@ -221,10 +221,10 @@ void* AllocateBackMemory(s32 bytes);
 // is limited by the curve's sharpness (from points half a unit either side) and by a ramp toward
 // the end; the times to each node are accumulated and the table is rescaled so the whole path
 // takes the level range 0 to the given speed (levelLimit). Restarts the level at 0.
-void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
+void BuildPathSpeedProfile(PathSpeedCollider* self, PathCurveObject* path, f32 speed)
 {
-    Vec02 p0;
-    Vec02 p1;
+    Vec4 p0;
+    Vec4 p1;
     f32 out;
     s32 i;
     PushBackMemoryMark();

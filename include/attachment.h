@@ -28,10 +28,10 @@ struct T2195_Vt {
     void (*copy)(Attachment* self, Attachment* src);                              // 0x04: copy src's record, keeping the owner and the link
     void (*release)(Attachment* self, s32 flags);                            // 0x08: out of the owner's list, back to the pool
     void (*update)(Attachment* self, f32 dt);                           // 0x0C: every frame, when set (func_00124FC0)
-    void (*getPos)(Attachment* self, f32 t, Vec02* pos, Vec02* vec);         // 0x10
-    void (*getRot)(Attachment* self, f32 t, Mat02* rot, Vec02* vec);         // 0x14
+    void (*getPos)(Attachment* self, f32 t, Vec4* pos, Vec4* vec);         // 0x10
+    void (*getRot)(Attachment* self, f32 t, Mat3* rot, Vec4* vec);         // 0x14
     void (*getValue)(Attachment* self, f32* value, f32* slope);              // 0x18
-    void (*getMatrix)(Attachment* self, Mat02* out);                         // 0x1C
+    void (*getMatrix)(Attachment* self, Mat3* out);                         // 0x1C
     f32 (*getIndexed)(Attachment* self, s32 index);                          // 0x20
     void* m9;                                                           // 0x24
 };
@@ -41,10 +41,10 @@ typedef void (*AttachInit)(Attachment* self, PlacedObject* owner);
 typedef void (*AttachCopy)(Attachment* self, Attachment* src);
 typedef void (*AttachRelease)(Attachment* self, s32 flags);
 typedef void (*AttachUpdate)(Attachment* self, f32 dt);
-typedef void (*AttachGetPos)(Attachment* self, f32 t, Vec02* pos, Vec02* vec);
-typedef void (*AttachGetRot)(Attachment* self, f32 t, Mat02* rot, Vec02* vec);
+typedef void (*AttachGetPos)(Attachment* self, f32 t, Vec4* pos, Vec4* vec);
+typedef void (*AttachGetRot)(Attachment* self, f32 t, Mat3* rot, Vec4* vec);
 typedef void (*AttachGetValue)(Attachment* self, f32* value, f32* slope);
-typedef void (*AttachGetMatrix)(Attachment* self, Mat02* out);
+typedef void (*AttachGetMatrix)(Attachment* self, Mat3* out);
 typedef f32 (*AttachGetIndexed)(Attachment* self, s32 index);
 
 // The link in the owner's list (an unaligned doubleword, as PlacedObject::link40 and the others).
@@ -70,7 +70,7 @@ struct Attachment {
 struct Rec2195_224 {
     union {
         u8 pad00[0x60];
-        Mat02 m[2];         // 0x00: two matrices (flags 1 and 2), each the identity at first
+        Mat3 m[2];         // 0x00: two matrices (flags 1 and 2), each the identity at first
     };
     union {
         Quad16 q60[4];      // 0x60: flag 0x80, given by func_001261C0
@@ -78,17 +78,17 @@ struct Rec2195_224 {
             BaseObject* p60;    // 0x60: the object followed (flags 4 and 8, 0x10, 0x40)
             BaseObject* p64;    // 0x64: the second one (flag 0x40)
             u8 pad68[0x80 - 0x68]; // 0x68
-            s32 f80;            // 0x80: the parent of p84 (flag 0x20)
+            s32 linkParent;     // 0x80: the parent of p84 (flag 0x20)
             BaseObject* p84;    // 0x84: flag 0x20
             void* p88;          // 0x88: the ancestor the owner shares with f80
-            f32 f8C;            // 0x8C
+            f32 initialAngle;   // 0x8C: the angle the link started at
             f32 angle;          // 0x90: func_00120AA8
             f32 angleSlope;     // 0x94: copied with f90 (func_001276C0)
             s32 linkFlags;      // 0x98: 0 with flag 0x20 (func_00128C10); bit 2 set or cleared by func_001C4578 when fB0 has 0x20
         };
     };
-    s32 fA0;                // 0xA0: set, the owner's transform is unscaled by its parent's (func_00125C90)
-    s32 fA4;                // 0xA4: whether q60 is set (func_001261C0)
+    s32 unscaleByParent;    // 0xA0: set, the owner's transform is unscaled by its parent's (func_00125C90)
+    s32 hasDrawQuads;       // 0xA4: whether q60 is set (func_001261C0)
     u8 padA8[0xB0 - 0xA8];  // 0xA8
     s32 flags;              // 0xB0: the flags; bit 0x20 gives the value at +0x8C
 };
@@ -103,31 +103,31 @@ struct AnimationPlayer {
     const void* vt;         // 0x00: D_002197B8
     u8 pad04[0x08 - 0x04]; // 0x04
     Animation* anim;              // 0x08: its tracks (Animation::tracks at +0x3C) are what the attachment follows
-    void* object;           // 0x0C: an object func_0012F760 tells first (its slot 14, Desc01::m0E)
-    f32 f10;                // 0x10
+    void* object;           // 0x0C: an object func_0012F760 tells first (its slot 14, BaseObjectDescriptor::m0E)
+    f32 delay;              // 0x10: the time left before the player runs
     f32 time;               // 0x14
     f32 speed;              // 0x18
     f32 speedScale;         // 0x1C: a scale of the speed (func_0012F6B0, func_0012F6D0; func_0012C288 sets it)
-    s32 f20;                // 0x20: the next timed entry (func_0012E4E0, func_0012D5D0)
+    s32 nextEventIndex;     // 0x20: the next timed entry (func_0012E4E0, func_0012D5D0)
     s8 state24;             // 0x24: func_0012D448
     u8 pad25[0x28 - 0x25]; // 0x25
     Attachment* driven;          // 0x28
-    void* f2C;              // 0x2C: func_0012D5D0
-    void* f30;              // 0x30: func_0012D5D0
+    void* positionFalloff;  // 0x2C: func_0012D5D0
+    void* rotationFalloff;  // 0x30: func_0012D5D0
     AnimationPlayer* next;  // 0x34: the link in World's list at 0x1B64 or 0x1B70 (offset 0x34, func_001D62E0)
     u8 pad38[0x3C - 0x38]; // 0x38
     AnimationPlayer* animNext; // 0x3C: in its animation's list at Animation::props6C (func_0012C808)
     u8 pad40[0x44 - 0x40]; // 0x40
-    List01 list44;          // 0x44: the attachments that follow it (offset 0x20)
+    ObjectList list44;          // 0x44: the attachments that follow it (offset 0x20)
     union {
-        s32 f50;            // 0x50: its address goes to func_001BF718 (func_0012E760)
+        s32 soundHandle;    // 0x50: its address goes to func_001BF718 (func_0012E760)
         void* p50;          // 0x50: an object func_0012D5D0 calls through
     };
     u8 f54[8];              // 0x54: handed to func_0015F9A0 (func_0012E760)
     s32 rootCount;          // 0x5C: the number of f60 entries (func_0012C288)
     void* roots;            // 0x60: its own +0x64 at set-up (func_0012D3F8)
     u8 pad64[0xE4 - 0x64]; // 0x64
-    QueuedCall* fE4;           // 0xE4: its callbacks, records of World::pool1B14 (func_0012F760 calls each, func_0012E760 gives them back)
+    QueuedCall* callbacks;     // 0xE4: its callbacks, records of World::pool1B14 (func_0012F760 calls each, func_0012E760 gives them back)
     u8 padE8[0xEC - 0xE8]; // 0xE8
 };
 
@@ -137,75 +137,75 @@ struct __attribute__((packed)) Pk8_2195 { u64 v; };
 struct __attribute__((packed)) Pair2195 { s32 lo; s32 hi; };
 
 // D_00219588: a copy of the owner's position, matrix and values, taken when it is set up.
-struct T2195_588 : Attachment {
+struct OwnerSnapshotAttachment : Attachment {
     f32 time18;             // 0x18: the time of the snapshot (the player compares it with the game clock)
     u8 pad1C[0x20 - 0x1C]; // 0x1C
-    Vec02 pos;              // 0x20: PlacedObject::v190
-    Vec02 vec;              // 0x30
-    Mat02 rot;              // 0x40: PlacedObject::m1A0
-    Vec02 v70;              // 0x70
-    f32 f80;                // 0x80: the value at Rec2195_224::f8C, when its flag is set
+    Vec4 pos;              // 0x20: PlacedObject::v190
+    Vec4 vec;              // 0x30
+    Mat3 rot;              // 0x40: PlacedObject::m1A0
+    Vec4 v70;              // 0x70
+    f32 f80;                // 0x80: the value at Rec2195_224::initialAngle, when its flag is set
     f32 f84;                // 0x84
     u8 pad88[0x90 - 0x88]; // 0x88
-    Mat02 m90;              // 0x90: the identity
+    Mat3 m90;              // 0x90: the identity
     s32 countC0;            // 0xC0: PlacedObject::valueCount
     f32* valuesC4;          // 0xC4: the owner's values (+0x274)
 };
 
 // D_002195B0: pointers into the owner's own fields.
-struct T2195_5B0 : Attachment {
+struct OwnerPointerAttachment : Attachment {
     u8 pad18[0x1C - 0x18]; // 0x18
-    Vec02* pos;             // 0x1C: &PlacedObject::v190
-    Vec02* vec;             // 0x20: D_00248D30
-    Mat02* rot;             // 0x24: &PlacedObject::m1A0
-    Vec02* vec2;            // 0x28: D_00248D30
-    f32* p2C;               // 0x2C: &Rec2195_224::f8C, when its flag is set
+    Vec4* pos;             // 0x1C: &PlacedObject::v190
+    Vec4* vec;             // 0x20: D_00248D30
+    Mat3* rot;             // 0x24: &PlacedObject::m1A0
+    Vec4* vec2;            // 0x28: D_00248D30
+    f32* p2C;               // 0x2C: &Rec2195_224::initialAngle, when its flag is set
     f32* p30;               // 0x30: D_00248D30
-    Mat02* ident;           // 0x34: D_002483D0
+    Mat3* ident;           // 0x34: D_002483D0
     s32* count;             // 0x38: &PlacedObject::valueCount
     f32* values;            // 0x3C: the owner's values (+0x274)
 };
 
 // D_002195D8: two matrices of its own.
-struct T2195_5D8 : Attachment {
+struct IdentityMatrixAttachment : Attachment {
     u8 pad18[0x40 - 0x18]; // 0x18
-    Mat02 m40;              // 0x40: the identity
+    Mat3 m40;              // 0x40: the identity
     u8 pad70[0x90 - 0x70]; // 0x70
-    Mat02 m90;              // 0x90: the identity
+    Mat3 m90;              // 0x90: the identity
 };
 
 // D_00219600: a value of its own.
-struct T2195_600 : Attachment {
+struct TiltValueAttachment : Attachment {
     u8 pad18[0x1C - 0x18]; // 0x18
-    f32 f1C;                // 0x1C: 1.0
-    f32 f20;                // 0x20: 0.25
+    f32 tiltScale;          // 0x1C: 1.0
+    f32 sampleTime;         // 0x20: 0.25
 };
 
 // D_002197C0: follows a track of an animation: the animation's player drives it (slots 4 to 8
 // ask the track's curves).
-struct T2195_7C0 : Attachment {
-    f32 f18;                // 0x18
+struct TrackFollowAttachment : Attachment {
+    f32 endTime;            // 0x18
     AnimationPlayer* player;     // 0x1C
     Pair2195 w20;           // 0x20: kept by slot 1
     s32 index;              // 0x28: the track
 };
 
 // D_0021A790: an aim at a target.
-struct T2195_790 : Attachment {
+struct AimAttachment : Attachment {
     u8 pad18[0x1C - 0x18]; // 0x18
     s32 hasTarget;          // 0x1C
-    s32 f20;                // 0x20: -1
+    s32 targetId;           // 0x20: -1
     void* target;           // 0x24
     u8 pad28[0x30 - 0x28]; // 0x28
-    Vec02 point;            // 0x30
+    Vec4 point;            // 0x30
     f32 aimRange;           // 0x40: 800.0; the aim range, the distance that picks f44 or f48 (func_00185498)
     s32 nearKey;            // 0x44: 1; the key taken when the target is within f40
     s32 farKey;             // 0x48: -1; the key taken when the target is beyond f40
     s32 hold;               // 0x4C: while set, func_00185538 hands back the owner's own matrix
-    Vec02 v50;              // 0x50: the quadratic (a, b, c) applied to the yaw toward the target
+    Vec4 v50;              // 0x50: the quadratic (a, b, c) applied to the yaw toward the target
     Pk8_2195 p60;           // 0x60: the low and high the yaw is clamped to
     u8 pad68[0x70 - 0x68]; // 0x68
-    Vec02 v70;              // 0x70: the same for the pitch
+    Vec4 v70;              // 0x70: the same for the pitch
     union {
         Pk8_2195 p80;       // 0x80: the low and high the pitch is clamped to
         struct {

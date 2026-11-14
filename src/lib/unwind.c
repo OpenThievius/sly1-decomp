@@ -91,11 +91,11 @@ typedef struct KeyedArray {
 } KeyedArray;
 
 /* The head of the blocks of frame descriptions. */
-static FrameTable* D_0062A7B8;
+static FrameTable* g_frameTableList;
 /* The lock of the list, in a runtime built for one thread: its functions do nothing. It sits in the
  * word after the list (nothing reads it), and its inline functions keep func_001FF658's check of
  * the walk's result where retail has it. */
-static s32 D_0062A7BC;
+static s32 g_frameTableLock;
 
 static inline s32 LockFrameTables(s32* lock) { return 0; }
 static inline s32 UnlockFrameTables(s32* lock) { return 0; }
@@ -345,14 +345,14 @@ FrameDesc* FindFrameDescription(void* pc)
     u32 lo, hi, mid;
     FrameDesc* f;
 
-    LockFrameTables(&D_0062A7BC);
-    for (t = D_0062A7B8; t != 0; t = t->next) {
+    LockFrameTables(&g_frameTableLock);
+    for (t = g_frameTableList; t != 0; t = t->next) {
         if (t->start == 0)
             BuildFrameTableIndex(t);
         if ((u32)pc >= t->start && (u32)pc < t->end)
             break;
     }
-    UnlockFrameTables(&D_0062A7BC);
+    UnlockFrameTables(&g_frameTableLock);
     if (t == 0)
         return 0;
 
@@ -515,8 +515,8 @@ void RegisterFrameInfo(void* begin, FrameTable* ob)
     ob->records = begin;
     ob->start = ob->end = 0;
     ob->count = 0;
-    ob->next = D_0062A7B8;
-    D_0062A7B8 = ob;
+    ob->next = g_frameTableList;
+    g_frameTableList = ob;
     ob->sorted = (FrameDesc**)begin;
 }
 
@@ -525,10 +525,10 @@ void RegisterFrameInfo(void* begin, FrameTable* ob)
  * table, and aborts when it is not there (ReleaseProgramFrameInfo calls it at exit). */
 FrameTable* DeregisterFrameInfo(void* value)
 {
-    FrameTable** slot = &D_0062A7B8;
+    FrameTable** slot = &g_frameTableList;
     FrameTable* t;
 
-    if (D_0062A7B8 != 0) {
+    if (g_frameTableList != 0) {
         do {
             t = *slot;
             if (t->records == value) {

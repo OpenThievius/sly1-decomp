@@ -35,7 +35,7 @@ struct HitTarget : Collider {
             f32 spawnerIntervalMin; // 0x57C: the two floats slot 16 copies from scaledObject's 0x2DC
             f32 spawnerIntervalMax; // 0x580
         };
-        Range50 spawnerInterval;  // 0x57C
+        ParticleRange spawnerInterval;  // 0x57C
     };
     u8 pad584[0x590 - 0x584];
     TimePolynomial scalePoly;  // 0x590: 1, 0, 0 at set-up

@@ -65,7 +65,7 @@ lever; the record (here the graph's triangle) is plausibly the original's own ty
 An element of a global array (`D[0]`) is MEM_IN_STRUCT_P like a structure's member, so
 fixed_scalar_and_varying_struct_p does not separate its load from a store through a pointer.
 ComputePlayerLinkPose's `BuildAxisAngleMatrix(&g_unitXVector, D_00274DD8[0], rotB)` had its lwc1
-of the angle after the three `*rotA = r` stores (through a Mat02 parameter), five insns later than
+of the angle after the three `*rotA = r` stores (through a Mat3 parameter), five insns later than
 retail; read as `float D_00274DD8` the load moved above the stores and the function matched. The
 label's second word is 0, the padding before the array D_00274DE0 that the MIPS DATA_ALIGNMENT
 puts on an 8-byte boundary, so the scalar gives the same .data. A two-word label whose second
@@ -84,7 +84,7 @@ same word and matches either way, so the unit declares it once, as the array.
 
 - ApplyColliderPendingMove multiplies its rotation into its own matrix with
   MulRotationRowsIndexed (b's rows read by index after each row's stores). Written
-  `Mat02* frame = &self->rot; MulRotationRowsIndexed(&m, rot, *frame); *frame = m;`, the three
+  `Mat3* frame = &self->rot; MulRotationRowsIndexed(&m, rot, *frame); *frame = m;`, the three
   rows of b were loaded before any product row was stored; written `MulRotationRowsIndexed(&m,
   rot, self->rot); self->rot = m;` the second and third rows wait for the stores of the row
   before, as retail's do: EXACT. Not traced in the dumps; it fits the rule above that a base
@@ -113,7 +113,7 @@ priority (2026-11-08, read from alias.c and expr.c, -dS dumps):
   $f0. Retail loads both bounds first and stores in the branch's delay slot. Writing the store as
   a member (`self->g08 = ...`, a float in CameraController's union) and reading the upper bound
   as a scalar (`D_00261C00` an `f32` of its own, its 16-byte label padded by the 16-aligned
-  `Vec02` offsets after it) gives retail's registers; either change alone does not.
+  `Vec4` offsets after it) gives retail's registers; either change alone does not.
 - **Insn order instead of flags: case 2's Scalar slot.** Vu0::Scalar's slot store (neither
   flag) and Rotate's row loads through a u128 pointer (neither) may alias. Rotate loads the rows
   in its body, after its argument (MulX of a Scalar) has stored the slot, so the loads depend on
@@ -227,7 +227,7 @@ DrawStreakedEffect (normalise the velocity, `tail = place + dir * 100`, draw wit
 template slot 11) matched on 2026-11-09 from 68.3%, with two changes read from the `.sched`
 dump:
 
-- **The weight as `Vu0::Scalar(100.0f)`** instead of the near miss's own `Vec02 k` slot: the
+- **The weight as `Vu0::Scalar(100.0f)`** instead of the near miss's own `Vec4 k` slot: the
   cast's MEM_SCALAR_P temporary is stored last, in the call's delay slot, as retail's
   `sqc2 $vf4, 32(sp)` is (the Scalar-slot lever).
 - **The template read first, `BaseObject* tmpl = g_currentWorld->slot1CE8[11];`, before the
@@ -270,7 +270,7 @@ pos += vel * dt` with vel.y zeroed for the position) went from 81.1% to 86.1% on
   priority 3 beats the dt copy's 2, the only other ALU insn) and the 20.0 at clock 5 (three
   dependents, the two stores and the jump, beat 125's and -25's two). None of the 280 orders
   of the seven a/b/t statements, the clamp as an inline, if/else, ?:, a reference output or
-  named bounds, `g_gameClock[1]`, or `Vec02 a = {125, -25}` initialisers changes either; the
+  named bounds, `g_gameClock[1]`, or `Vec4 a = {125, -25}` initialisers changes either; the
   difference lies in the RTL's shape, not in the order.
 
 ### A weight listed before its vector (func_001DDE90)
@@ -326,7 +326,7 @@ ApplyPoseSourcePosition matched from 35 differing lines with three changes (2026
   is then `sq` from the GPR. A matched NormalizeOr caller without a switch (func_0013BBA0) has no
   jump pass after cse2, which is why the helper keeps its branch there.
 - **An out float allocated last.** ApproachValueWithRamp's last parameter is an `f32*` (camera.cpp
-  declares it so): with a Vec02 record for the rate the record took 96 and the weights' Scalar
+  declares it so): with a Vec4 record for the rate the record took 96 and the weights' Scalar
   slot 112, retail's the other way round. An `f32 speed;` whose address is passed is put in the
   frame by purge_addressof after the other locals and temporaries, at 112. The profile is a
   RampProfile local (`prof.maxSpeed = ...`).
@@ -525,7 +525,7 @@ reference.
   Vu0::RotateMembers, whose row loads are Vec members, MEM_IN_STRUCT_P, so rows 1 and 2 pass the
   weight's store but still wait for v's), func_0017ABE8 (FromFloats' slot against the method
   table's load), func_00184B58, func_001C57C8 and func_001A00A0 (whose caller-side
-  `Q(k) = FromFloat(-m)` into a Vec02 local was the weight of `Scalar(-m)` passed straight to the
+  `Q(k) = FromFloat(-m)` into a Vec4 local was the weight of `Scalar(-m)` passed straight to the
   MulAddX: its slot follows pos as an expand-time temporary). Retail's sources most plausibly had the same:
   Sony's headers have both 128-bit types (signed and unsigned), and a helper taking one by
   reference called with the other cast to it binds such a copy.
@@ -538,7 +538,7 @@ reference.
 - **The axis is not the weight (func_00181078, matched 2026-11-10).** func_00181078's axis
   shares the weight's slot (0x50) because it is declared after the weight's statement: the
   weight is `Vu0::ScalarAt(D)` passed straight to MulX (the cast's expand-time temporary, freed
-  at the statement's end by free_temp_slots), and `Mat02 m2; Vec02 k;` declared just after it
+  at the statement's end by free_temp_slots), and `Mat3 m2; Vec4 k;` declared just after it
   are given slots by expand_decl's assign_temp there, the 16-byte axis taking the freed one
   (between d and m2) and the 48-byte matrix a new one. Earlier attempts made one local the
   weight and the axis (`Set(k, w)`, or `const s128& k = (s128)w;`), which no plain form orders as
@@ -546,7 +546,7 @@ reference.
   later passed by address as an out-parameter is two objects, the second declared after the
   first's statement. func_0014F168 is now retail's size with only the call's `addiu a1, sp, 16`
   early.
-- **A receiver loaded early (func_0015BC78).** Its `Q(k) = FromFloat(-1.0f)` into a Vec02 local
+- **A receiver loaded early (func_0015BC78).** Its `Q(k) = FromFloat(-1.0f)` into a Vec4 local
   held the virtual call's receiver load (`self->receiver678`, a member through a pointer) behind
   the weight's and the message's stores, so local-alloc tied it to a0. With `Scalar(-1.0f)`
   passed to MulX the load rises above the vmulx into a2 and the call's delay slot takes
@@ -559,7 +559,7 @@ RecomputeModeWalker rotates a basis's three rows by a product matrix, and retail
 result three times: to the basis (0x50), to a matrix local (0x80) and to three more 16-byte
 slots at the frame's end (0xB0, 0xC0, 0xD0). The last store of the third group fills the first
 virtual call's delay slot and the group interleaves with the call's loads (`self->fC08`, its
-method table, the method), where every attempt with plain locals (Mat02 or Vec02 copies, the
+method table, the method), where every attempt with plain locals (Mat3 or Vec4 copies, the
 mul_rotation.h forms) scheduled all nine stores before `lw a0, 0xC08(s2)` and left a nop: 296
 bytes against 292.
 
@@ -571,7 +571,7 @@ bytes against 292.
   argument's conversion is a copy g++ makes into a temporary of the scalar type (the cast's copy
   of "The weight slot is a cast's copy"), and the three of one call get three slots, allocated
   after the block's locals. The helper writes the matrix local, which is then assigned to the
-  basis: `Mat02 rot; SetMatrixRows(rot, x, y, z); m2 = rot;`. Three `const s128& a = (s128)x;`
+  basis: `Mat3 rot; SetMatrixRows(rot, x, y, z); m2 = rot;`. Three `const s128& a = (s128)x;`
   statements share one slot (each statement frees its temporaries), and the rotations written
   as the call's arguments change the order.
 - **Spot it:** a group of dead 16-byte stores at the frame's end that sched2 lets pass loads
@@ -582,7 +582,7 @@ bytes against 292.
 LaunchContactListObjectWithoutGravity stores `MulX(NormalizeOrMoved(v150, unit x), speed)`.
 Retail loads the speed (`lw v0, 0x6F0(s0)`) right after the velocity's lqc2, moves it into
 vf4 after the dot's vmaddz and stores the weight's slot (`sqc2 vf4, 0(sp)`) in the branch's
-delay slot. The near miss's own `Vec02 k; Q(k) = FromFloatAt(speed)` (an aggregate written
+delay slot. The near miss's own `Vec4 k; Q(k) = FromFloatAt(speed)` (an aggregate written
 through Q: no alias flag) left the load after the square root and the store folded into the
 result's address; `Vu0::ScalarAt(self->speed6F0)` written inside the MulX call is expanded after
 the NormalizeOrMoved (the inline call's nested arguments, right to left), so its lw comes after
@@ -624,7 +624,7 @@ ContinueWorld3BeatPressColliderRequest (a MulXSum of two rows of the object's ma
   `((PlayerSlotFn*)self->desc)[0x90 / 4]`: an array element through a cast pointer, a MEM with
   no flag, which fixed_scalar_and_varying_struct_p cannot separate from a MEM_SCALAR_P frame
   store (it needs the varying side MEM_IN_STRUCT_P).
-- **The fix.** `self->desc02()->m20(self, &dir)`, the descriptor's member (Desc02, as the rest of
+- **The fix.** `self->desc02()->m20(self, &dir)`, the descriptor's member (PlacedObjectDescriptor, as the rest of
   the project calls slot 0x90), is a `mem/s` load; it passes the second weight's store, so
   sched1 issues the table load first, the method load before that store, and reorg puts the store
   in the jalr's delay slot, as retail does. The method load still follows the sum's own store
@@ -762,7 +762,7 @@ and 2), 0x80 (r's row 2), 0x00 (out's row 0) and 0xb0 (z) last; ours stores z be
   product takes the same helper (98 lines to 5); func_00149760's do not (frame grows).
 - **func_00172078's second product** (near miss on another branch) takes the same one-call form
   with the matrix local passed in and its rows read as Vec members (`SetRows(*out, x = Q(a.r[0])
-  = RotateRows(.., q[0].q), ..)` after `Mat02 a;` in the caller): three slots at 0xa0 to 0xc0,
+  = RotateRows(.., q[0].q), ..)` after `Mat3 a;` in the caller): three slots at 0xa0 to 0xc0,
   5 lines to 2. It and func_001721B0 keep one tie: retail stores z's slot before r's row 2 at the
   block's end, ours after, whichever way each argument's chain is written.
 - **Closed (2026-11-10, w11-1721B0).** The slot is copied first and r's row stored from it,
@@ -787,13 +787,13 @@ dumps, alias.c and function.c of 2.95.3). It has a rotation product, `*rot = sel
   struct loads, so the spin is Vu0::RotateMembers. With Vu0::Rotate's u128 reads (no flag) the
   late stores stay ahead (37 lines). The three slots are distinct and sit above the matrix
   local, so all three are alive at once.
-- **The form.** mul_rotation.h's `SetRows(Mat02& m, const s128& x, const s128& y, const s128& z)`,
+- **The form.** mul_rotation.h's `SetRows(Mat3& m, const s128& x, const s128& y, const s128& z)`,
   called once with the three product rows as u128 variables. Each argument is converted from
   u128 to s128, so g++ binds a temporary of the parameter's scalar type to each reference. That
   gives three assign_temp slots (MEM_SCALAR_P), all alive for the one call statement. Then
   `*out = r`. Each of these alone gives 32 lines and one shared slot or none: `const u128&`
   parameters (the variables bound directly, purged back into registers), the products passed
-  as rvalues (with either type), a u128 row read as `(Vec02&)x`, and a cast copy per statement.
+  as rvalues (with either type), a u128 row read as `(Vec4&)x`, and a cast copy per statement.
   This is the construct func_0014A8F8's notes above ask for, and there the stores of those
   slots must come last too ("Three casts in one statement ... are stored last"). It may close
   that near miss and explain mul_rotation.h's other forms. There the rows must be computed in
@@ -890,12 +890,12 @@ argument register no call seems to read is an argument the declaration is missin
   camera's matrix as `(mz my) mx`. Both products take the rows computed first and set through
   three cast copies (MulRotationThenCopy): with both, local-alloc's VU registers of the first
   product are retail's (31 differing lines to 6; MulRotationRowsInto stored each row to a
-  Vec02 local and the matrix instead). The second product leaves one tie:
+  Vec4 local and the matrix instead). The second product leaves one tie:
   retail stores the matrix local's row 0 between the first and second slots. Its rows 1 and 2
   have the struct copy's loads as dependents and go early; row 0's store ties with the slots
   on LUID, so it was expanded right after the first slot: the slot copy stored to the local's
   row in SetRowsFrom's own argument, and the camera's matrix set from the local's rows
-  (mul_rotation.h's MulRotationThenCopyVia, `(Mat02*)cam->f80` and the caller's `rot`). The
+  (mul_rotation.h's MulRotationThenCopyVia, `(Mat3*)cam->f80` and the caller's `rot`). The
   forms with the products computed in the arguments (MulRotationCopied, CopiedVia) or b's rows
   as Vec members or by index differ by 70 to 146 lines.
 
@@ -921,7 +921,7 @@ argument register no call seems to read is an argument the declaration is missin
   flag is set only when the argument already is a register, at expand_inline_function's
   mark_reg_pointer). A member function's `this` is read-only, so for `args[1].Method()` the
   argument `args + 8` is such a copy; for `args[0].Method()` it is `args` itself, flagged.
-- **The form.** An inline accessor on ScriptValue, `Vec02* Vector() const { return (Vec02*)v; }`
+- **The form.** An inline accessor on ScriptValue, `Vec4* Vector() const { return (Vec4*)v; }`
   (include/script_value.h), called as `*args[0].Vector()` and `*args[1].Vector()` in both
   statements. The first argument's pointer is loaded once (known base), the second's twice,
   through one `this` register: retail's code, the prologue's order included. The original's
@@ -955,14 +955,14 @@ MoveTumblingEffect matched on 2026-11-10 from 32.7%. Three mechanisms, each read
   operands and keeps a base only if it is a symbol or a Pmode ADDRESS (the stack). An argument's
   base is a VOIDmode ADDRESS, so `(plus P 16)` with P an unflagged copy of `self + 0x50` has no
   base, base_alias_check answers "may alias", and the load depends on every earlier frame store
-  through a `u128` cast. A declared pointer local (`Vec02* b = self->rot50;`) is flagged
+  through a `u128` cast. A declared pointer local (`Vec4* b = self->rot50;`) is flagged
   (expand_decl), so its loads never wait for the frame; an inline function's pointer or
   reference parameter is a pseudo of the inline's own without the flag. Retail's rows 1 and 2 of
   the placement, loaded at `0x10(s0)` and `0x20(s0)` each after the stores of the row before, with
   s0 set before the call that builds the turn, are a reference parameter of an inline that makes
-  that call (`TurnEffectAboutRow(self, *(Mat02*)self->rot50, &turn, angle)`); row 0's load,
+  that call (`TurnEffectAboutRow(self, *(Mat3*)self->rot50, &turn, angle)`); row 0's load,
   `(mem P)`, is folded by CSE to `0x50(s1)` (self, flagged) and so issues early. The rows are
-  stored through the effect (`*(Mat02*)o->rot50 = r`), so the stores use s1 and the turn's rows,
+  stored through the effect (`*(Mat3*)o->rot50 = r`), so the stores use s1 and the turn's rows,
   loaded once, are not reloaded. Spot it: loads through a register that crosses a call and is
   never folded into the object's offset, each after the frame stores before it.
 - **An in-place normalisation as an inline over a pointer**, `*v = fallback` in one arm and
@@ -1483,7 +1483,7 @@ maintainer's decision.
   to an insn ready from the start. Ruled out by probes (each the same six differences): the
   count, the index, the owner or the slot's address named (before or after the Dot; the count
   named before the Dot lets cse_around_loop reuse the loop test's load instead), the Dot
-  operands named or as `Vec02` entries, `u128` for the product, a `const s32&` index,
+  operands named or as `Vec4` entries, `u128` for the product, a `const s32&` index,
   `&items[i]`, the row read at each use, a named axes pointer, ToBits named before the store.
   What retail's block had that changes the graph (an insn sched1 sees and reload deletes, or a
   dependence of the index load) is open.
@@ -1872,7 +1872,7 @@ TurnColliderTowardRotation (2026-11-09):
 ### A constant set in an earlier block and used once (func_001549C8, matched 2026-11-12)
 
 **Matched (w37-f3, 2026-11-12).** The two records are function-local statics with brace
-initialisers (`static Blk05 block = { { 750.0f, 750.0f, 1.0f }, ..., 200, ..., { 1.0f, 0.0f,
+initialisers (`static EffectSpawnData block = { { 750.0f, 750.0f, 1.0f }, ..., 200, ..., { 1.0f, 0.0f,
 -1.0f } };`), each built in a temporary and copied because a vector member is copied from a
 global. What made f70 and f78 wait is the CLOBBER of the union member at 0x70 (the block's last
 vector is a Quadratic16, include/shapes.h): docs/toolchain/large-functions.md, "A brace
@@ -2068,7 +2068,7 @@ variable set before the guards is needed. The notes below are kept as they were 
 
 - Retail's four walks of the contact rows (a count, the Gram matrix, the right-hand sides,
   the weighted sum) keep the row in a2 and the contact in a0 in every one, with the
-  count loop's `move a2,v0` from row->next: one `ContactRow03* row; Contact03* c;` declared at
+  count loop's `move a2,v0` from row->next: one `ContactRow03* row; BodyContact* c;` declared at
   the top and reused by each loop (one pseudo each, which global-alloc places once over all
   the loops), as camera.cpp's sibling func_00145B68 reuses `i` and `j`. A variable per loop
   gave other caller-saved registers in each (t0, a1, v1). The Gram loop's inner pair (the
@@ -2111,7 +2111,7 @@ variable set before the guards is needed. The notes below are kept as they were 
     argument base, which never conflicts with a frame address.
   - Probes: acc as a plain u128 (ToFloatZ for the test) leaves the sum in vf3 for the loop,
     with a caller save around PopBackMemoryMark (58 lines); with `((f32*)&acc)[2]` the frame
-    is 160 and s5 is used (200 lines); down as a Vec02 in memory (`acc = down`) moves the
+    is 160 and s5 is used (200 lines); down as a Vec4 in memory (`acc = down`) moves the
     count loop's registers and the slots (128 lines).
 
 - Probes of 2026-11-10 (after func_0017ECE8's variable set twice): taking the qmfc2's result
@@ -2220,7 +2220,7 @@ variable set before the guards is needed. The notes below are kept as they were 
   dot: both were ready the cycle after the vmove, at equal priority (9, both through the vsqrt,
   the store by its anti-dependence on vf1), in class 3 (a link out of an asm costs 1), and the
   store won on dependents (the branch, the vsqrt and the fallback's `lq`, which may alias
-  the store; 3 to 2). Read in the arm instead (a `const Vec02&` fallback) the `lq` dependence
+  the store; 3 to 2). Read in the arm instead (a `const Vec4&` fallback) the `lq` dependence
   goes and the order is retail's, but the load is then an `lqc2` into the result; read through a
   fixed `u128` it is independent and issues too early for reorg to put it in the delay slot.
 - **What retail had: the compiler's vmove.** As Vu0::Vec values (`Vec dir = Sub(...);
@@ -2443,7 +2443,7 @@ match retail except the spill slot of its count pointer (retail 0x24, ours 0x20)
   code. Its limit: it is declared only where a retail frame shows an unread slot of 1 to 4 bytes
   of this kind after the aggregate locals, and it is the only such type, never a padding array,
   a byte array or an invented type of one function. GatherCollidersInSphere declares it with
-  the loop body's vector (`Vec02 d; ScopeMarker scope;`), GatherCollidersInBox with its two
+  the loop body's vector (`Vec4 d; ScopeMarker scope;`), GatherCollidersInBox with its two
   bound vectors, in the same form as the sphere query (the walk as a class with a constructor
   and destructor, the filter's outcomes as `continue`, `lo` before `hi`); both match.
 
@@ -2532,7 +2532,7 @@ caller can (2026-11-08, read from calls.c and haifa-sched.c with `-dS -fsched-ve
   Its definition (warp_menu) and its other callers (func_0017FAC0, func_001BC260,
   func_001EA4B8) match with either order; func_00156718 (effect_spawner) already declared the roots
   last, so every declaration now agrees.
-- **BuildYawPitchMatrix is `(f32 yaw, f32 pitch, Mat02* out)` (func_00185538).** GetAimRotation's
+- **BuildYawPitchMatrix is `(f32 yaw, f32 pitch, Mat3* out)` (func_00185538).** GetAimRotation's
   last call loads `$f12` from the yaw's slot, then the pitch's `mov.s $f13` and `move a0` tie in
   sched1 and sched2 (priority 3, both alu); retail issues `$f13` first, which needs the out
   pointer after the floats. Its definition (matrix.cpp) and every other caller (camera,
@@ -2591,7 +2591,7 @@ the 1.0 copy in $f27; ours swapped each pair). Read from the `-dt -dL -dS -dl -d
 - **Stack slots of vectors in a branch.** In the same function the else branch's and the
   final mix's Scalar temporaries took 64(sp) in retail, the slot of the loop's direction
   vector, and 112(sp) (the loop's own temporary) in ours: declared at the top of the
-  `if` block (`Vec02 dir, cand, mixed;`), the three slots are freed at its end, and
+  `if` block (`Vec4 dir, cand, mixed;`), the three slots are freed at its end, and
   assign_stack_temp_for_type takes the first exact fit of the free list.
 
 ### A named operand of `>?` (expand_expr's target, func_0012C9E8)
@@ -2642,7 +2642,7 @@ emitted in parameter order, $f12's first; in sched1 they all have priority 2 and
 to INSN_LUID, so `t`'s copy took the cycle's second slot and the shape's load issued before
 self's copy out of a0. The shape was then born while a0 was live, a conflict, and global-alloc
 gave it v1 (`lw v1,52(s3)` and a `move a0,v1` before the call: four bytes). Its two matched
-callers already declared it `(Chooser*, TargetCand*, Vec02*, Vec02*, f32 t)`, and one sets $f12
+callers already declared it `(Chooser*, TargetCand*, Vec4*, Vec4*, f32 t)`, and one sets $f12
 before the integer arguments, as calls.c's reversed evaluation does for a last parameter. With
 `t` last, self's copy comes first and the shape takes a0. ApproachValueWithRamp likewise takes
 its three floats first (`(f32, f32, f32, RampProfile*, f32*)`, as the file's other callers
@@ -2707,7 +2707,7 @@ one register each (95.5%).
   the address, which a following call takes as an ordinary argument. That pseudo is in gcse's
   table, PRE hoists it, and global-alloc leaves it in a spill slot: retail's `lw a1, 0x2B4(sp)`.
 - **The form.** The six setter calls in an inline helper taking the layout and the colour
-  (`Reset(Layout_137228* l, s32 color)`), the colour written into the helper's own Quad4 and
+  (`Reset(TextBoxLayout* l, s32 color)`), the colour written into the helper's own Quad4 and
   passed as `l->Color(Words(col))`, `Words` an inline returning `q.w`: EXACT. The helper's
   frame (the Quad4 at 0x260) is the block temporary the later SpanHead reuses, as retail's.
   `l->Color(col.w)` in the helper gives `addiu a1, sp, 0x260`; the buffer as the caller's local
@@ -2722,7 +2722,7 @@ one register each (95.5%).
   spill slot, the two words cleared) and is likely the same helper.
 
 - **Confirmed in US func_00134B48** (2026-11-09, near miss, 99.1%). The same five setters in
-  an inline helper (`ScreenLayout::Reset(Layout_137228* l)`, the colour a constant in the helper:
+  an inline helper (`ScreenLayout::Reset(TextBoxLayout* l)`, the colour a constant in the helper:
   as a parameter, loop.c hoisted it into s4) give retail's `addiu a0, sp, 0x1B0` at each call and
   the buffer from a spill slot. The rule finds a second inline in the same function: retail
   forms `&layout` again for the font's `drawBox` call but passes `&style` from a spill slot, so
@@ -2794,7 +2794,7 @@ near miss's notes had stopped.
   agent.cpp's `StoreScaledQuadword(dst, k, p)` is that inline; with it the size was retail's.
   Then: the clamp is ValueRange::Limit (its own result variable: `mov.s $f20` in each arm), the
   two weights are `Vu0::ScalarAt(D_x)` (retail's `lw` into a GPR for the qmtc2), the steer calls
-  take `&q60` directly (one pseudo, set into a4 and copied to s3 as retail does; a `Vec02* c`
+  take `&q60` directly (one pseudo, set into a4 and copied to s3 as retail does; a `Vec4* c`
   variable set s3 first), and StepCollider takes the step `t` it reads in $f12.
 - **func_001D9AC8 (ProcessPathFollowerContacts): `Vu0::ScalarAtCall` in a loop.** The two
   weights were `Slot k; Q(k) = FromFloat(D_x)` (lwc1 and mfc1, 12 bytes longer). ScalarAt's
@@ -2847,7 +2847,7 @@ fall-through, and keeps both `%hi`'s (and g_camera's, s5) from the prologue on.
   across Pos and Size; with the helper's own Quad4 the buffer's address is the inline frame's
   pseudo, hoisted into a saved register, and with `&color` the store moves before Pos); `char
   buf[16]` declared before the layout (sp+16, layout sp+32, buffer sp+64); the first two
-  words stored through `Layout_137228* lay = &L;` (PRE copies lay into the pseudo the draw
+  words stored through `TextBoxLayout* lay = &L;` (PRE copies lay into the pseudo the draw
   calls use, retail's `addiu v1, sp, 32; move s6, v1`), the later stores as `L.`, and the
   move colour stored before PushFontScale.
 - **Still open.** 55 and 372.8 stay in the loop only as a variable assigned twice (as literals
@@ -3391,7 +3391,7 @@ FindClosestPointsOnSegments went from 49 differing lines to 2 (2026-11-10, w12, 
   what looked like a clamp written differently from the first.
 - **A pointer local set before a test keeps its address in the test's block.** Retail's
   `lui/addiu v0` of the fallback vector come before the branch and its `lq` in the arm:
-  `const Vec02* fallback = &g_unitXVector;` before the test (a TImode load cannot take a
+  `const Vec4* fallback = &g_unitXVector;` before the test (a TImode load cannot take a
   `%lo` address, so CSE leaves the pseudo). Haifa schedules one block per region here (no
   loops: find_rgns makes single-block regions), so no interblock motion does it.
 - **An asm's sw has no function unit.** The epilogue's restores after `sw v0,0(s6)` are
@@ -3505,9 +3505,9 @@ From the `-dS -fsched-verbose-6` dumps of ControlTintBlendCollider (2026-11-10):
 ### A global record copied as u128 waits for a frame store; a struct copy does not (func_0019ED58)
 
 HandleEffectContact starts its nearest-vertex search from `D_00248D30` right after storing the
-rotated normal to a Vec02 local (`Vu0::Q(v) = RotateTransposed(..)`). Written `Vec02 best =
+rotated normal to a Vec4 local (`Vu0::Q(v) = RotateTransposed(..)`). Written `Vec4 best =
 D_00248D30;`, the copy is a structure move whose load carries MEM_IN_STRUCT_P and a symbol base,
-so sched2 lifts its `lq` above the frame store, first in the block. Written `Vec02 best;
+so sched2 lifts its `lq` above the frame store, first in the block. Written `Vec4 best;
 Vu0::Q(best) = Vu0::Q(D_00248D30);`, the load has no alias class and its address is a register,
 so it waits for the `sqc2` to 0(sp): retail's `lq` comes after the argument addresses
 (`addiu s3..s5`), and the FLT_MAX load before it falls into place. In the same function's other

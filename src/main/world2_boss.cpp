@@ -140,13 +140,13 @@ void DrawWorld2BossMarkerRing(DeferredRequest* request)
 // The static's guard (D_002649A8) is written out with the function above, so the data below
 // follows it.
 s32 g_world2BossBlockerKinds[5] = { 4, 5, 60, 41, 76 };
-f32 D_002649C4 = 1.5e+02f;
+f32 g_bossNearestHitRange = 1.5e+02f;
 f32 D_002649C8 = 0.25f;
 f32 D_002649D0[2] = { 0.0f, 0.25f };
 s32 g_world2BossPhaseStates[4] = { 16, 16, 11, 0 };
 s32 g_world2BossPhaseValues[6] = { 1083, 1085, 1087, 0, 0, 0 };
-f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
-f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
+f32 g_bossNearCurve[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
+f32 g_bossFarCurve[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
 f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A34 = 20.0f;
 f32 D_00264A38 = 20.0f;
@@ -154,9 +154,9 @@ f32 D_00264A38 = 20.0f;
 // The record an agent's draw method is given: the point and the weights it measures against.
 struct AgentDrawArgs {
     u8 pad00[0x40];
-    Vec02 point;            // 0x40
+    Vec4 point;            // 0x40
     u8 pad50[0x80 - 0x50];
-    Vec02 weights;          // 0x80
+    Vec4 weights;          // 0x80
 };
 
 void DrawAgent(Agent* self, void* unused1, void* unused2);
@@ -259,8 +259,8 @@ s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
     s32 x;
     s32 y;
     PushBackMemoryMark();
-    GatherCollidersInBox(self->world, 0, (Vec02*)a1, (Vec02*)a2, (s32 (*)(void*, Collider*))IsWorld2BossBlocker, self, &x, (Collider***)&y);
-    s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, D_002649C4);
+    GatherCollidersInBox(self->world, 0, (Vec4*)a1, (Vec4*)a2, (s32 (*)(void*, Collider*))IsWorld2BossBlocker, self, &x, (Collider***)&y);
+    s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, g_bossNearestHitRange);
     PopBackMemoryMark();
     return r != 0;
 }
@@ -314,7 +314,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
 one:
     return 1;
 second:
-    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec02*)loc.buf, 0, 0, 0, D_002649C8);
+    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec4*)loc.buf, 0, 0, 0, D_002649C8);
     if (IsWorld2BossLineBlocked(self, &self->v140, loc.buf) == 0) {
         goto one;
     }
@@ -330,7 +330,7 @@ s32 IsWorld2BossFree(World2Boss* self)
 {
     s32 out;
     if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
-    if (self->fC10 != 0) goto zero;
+    if (self->busy != 0) goto zero;
     if (self->state == 0x10) goto zero;
     if (self->state == 0xB) goto zero;
     if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
@@ -385,7 +385,7 @@ s32 ChooseWorld2BossState(World2Boss* self)
 // 16), and the phase counter incremented.
 void AdvanceWorld2BossPhase(World2Boss* self)
 {
-    DecrementGaugeCount((T217D_2E0*)&g_gaugeBarElement);
+    DecrementGaugeCount((GaugeBar*)&g_gaugeBarElement);
     s32 idx = self->phase;
     ChangeAgentState(self, g_world2BossPhaseStates[idx], (void*)self->phaseClips[idx]);
     s32 n = self->phase;
@@ -420,7 +420,7 @@ void ShowWorld2BossBar(World2Boss* self)
         g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void SetAgentGoalPoint(Agent* self, Vec02* p);
+void SetAgentGoalPoint(Agent* self, Vec4* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
 
 // Sets the boss's goal point each update. In state 4 it chases the object it holds (fE14) when it
@@ -430,9 +430,9 @@ void UpdateWorld2BossGoal(World2Boss* self, s32 flag)
 {
     switch (self->state) {
     case 4:
-        if (self->fE14 != 0) {
-            Vec02 pos;
-            GetObjectWorldPosition((BaseObject*)self->fE14, &pos);
+        if (self->heldObject != 0) {
+            Vec4 pos;
+            GetObjectWorldPosition((BaseObject*)self->heldObject, &pos);
             SetAgentGoalPoint(self, &pos);
         } else {
             s32 key;
@@ -462,7 +462,7 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 struct TurnBlendRecords;
 struct BlendTimeScale;
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 s32 IsAgentFacingBlocked(Agent* self);
 void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
@@ -489,8 +489,8 @@ void UpdateWorld2BossState(World2Boss* self)
         if (tgt != 0) {
             f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vec::Of(self->v140), Vec::Of(tgt->v140)).q,
                                                         Vu0::Sub(Vec::Of(self->v140), Vec::Of(tgt->v140)).q)));
-            f32 near = g_unitRange.Limit(((QuadraticCurve*)D_00264A00)->Eval(dist));
-            f32 far = g_unitRange.Limit(((QuadraticCurve*)D_00264A10)->Eval(dist));
+            f32 near = g_unitRange.Limit(((QuadraticCurve*)g_bossNearCurve)->Eval(dist));
+            f32 far = g_unitRange.Limit(((QuadraticCurve*)g_bossFarCurve)->Eval(dist));
             f32 level;
             GetWorld2BossLevelFactor(self, &level);
             weight = level * far + (1.0f - level) * near;
@@ -505,12 +505,12 @@ void UpdateWorld2BossState(World2Boss* self)
         // global-alloc, which gives retail's v0 and a0 (docs/TOOLCHAIN.md, local-alloc).
         PoseSource* m;
         CyclicRanges* a;
-        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f610))->mover;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->linkPartA))->mover;
         a = m->ranges;
-        s32 offFirst = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
-        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->f614))->mover;
+        s32 offFirst = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->blendedDuration, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        m = ((BlendSourceEntry*)FindEntryByObjectId(self->blendView, (BaseObject*)self->linkPartB))->mover;
         a = m->ranges;
-        s32 offSecond = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->f34, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
+        s32 offSecond = FindCyclicRangeIndex(self->statePlayer->time, self->blendView->blendedDuration, a->count, (BlendTimeScale*)a->pairs, 0) == 0;
         if (offFirst && self->firstInRange == 0) {
             RecordCameraTimestamp(g_camera);
             StartSoundEffect(0x1CC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -527,8 +527,8 @@ void UpdateWorld2BossState(World2Boss* self)
         if (IsAgentFacingBlocked(self)) {
             return;
         }
-        Vec02 to;
-        Vec02 curve = { 0.0f, 0.00016666666f, 0.0f, 0.0f };
+        Vec4 to;
+        Vec4 curve = { 0.0f, 0.00016666666f, 0.0f, 0.0f };
         f32 level;
         GetWorld2BossLevelFactor(self, &level);
         f32 rest = 1.0f - level;

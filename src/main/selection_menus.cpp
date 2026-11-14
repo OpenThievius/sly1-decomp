@@ -71,7 +71,7 @@ extern ChoiceSound g_choiceSounds[6];
 extern ChoiceSound g_defaultChoiceSound;
 extern f32 g_gameClock[];
 extern f32 g_choiceSoundGap;
-extern s32 D_0026FCF4;
+extern s32 g_streamVoiceActive;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 struct BoxStyle {
@@ -110,11 +110,11 @@ struct CaptionLayout {
             s32 vAlign;
         };
     };
-    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
-    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
-    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
-    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+    void Pos(f32 x, f32 y) { ((TextBoxLayout*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((TextBoxLayout*)this)->Size(x, y); }
+    void Color(s32* c) { ((TextBoxLayout*)this)->Color(c); }
+    void FlagA(s32 f) { ((TextBoxLayout*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
 };
 struct CaptionDrawer {
     static void Draw(Font** h, CaptionLayout* out, void* tbl)
@@ -411,7 +411,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
         }
         if (slot) {
             OpenKeyRecord((KeyRecord*)slot);
-            D_0026FCF4 = HasStreamVoice();
+            g_streamVoiceActive = HasStreamVoice();
         }
     }
     void* h = self->walkers[0].walker;
@@ -435,7 +435,7 @@ s32 IsFontLoaded(s32 index);
 Font* GetFontById(s32 index);
 // Sets up the screen element text with font 2 if loaded, no hold time, no node, a fixed colour and
 // the last sound time set back by the choice sound gap.
-void InitSelectionCaption(T217D_12E0* self)
+void InitSelectionCaption(ObjectScreenCaption* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
@@ -450,7 +450,7 @@ void InitSelectionCaption(T217D_12E0* self)
 }
 
 // If the caption is open, finds the object with id 0x4FD and pushes its camera controller.
-void RestoreSelectionCaptionCamera(T217D_12E0* self)
+void RestoreSelectionCaptionCamera(ObjectScreenCaption* self)
 {
     if (self->open != 0) {
         void* p = FindFirstObjectByIdMode4(g_currentWorld, 0x4FD, 0);
@@ -460,21 +460,21 @@ void RestoreSelectionCaptionCamera(T217D_12E0* self)
     }
 }
 
-void UpdateSelectionCaption(T217D_12E0* self)
+void UpdateSelectionCaption(ObjectScreenCaption* self)
 {
     UpdateScreenElementSlide(self);
 }
 
 // The object the element shows (a view of it: its mode at +0x2D0, its animation clock at +0x2D8).
 void ShowCurrentObjectCaptions(CurrentPlacedObject* o);
-void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
+void SetPauseMenuLayerPage(PauseMenu* a, s32 b, s32 c);
 void ConfirmCurrentObjectChoice(CurrentPlacedObject* o);
 void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1);
 // Input of the selection caption: (with no step sequence running) starts a pending sequence (saving
 // the memory card for the first) and refreshes captions. With key index 1 and the walker arrived
 // (or 0.3 s) it pushes the grid selector or the map screen list. Once arrived, 0x800 (or no pad for
 // 5 s) opens pause page 0x17, 0x140 confirms, else it moves the choice.
-void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
+void HandleSelectionCaptionInput(ObjectScreenCaption* self, PadRecord* arg)
 {
     if (self->node == 0) {
         return;
@@ -541,7 +541,7 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
 // Opens or closes the selection caption (no-op if already so). Opening selects the node's current
 // choice and sets the pad select flags; closing stops the voice stream, clears the flags and closes
 // the caption and the copied text caption.
-void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
+void SetSelectionCaptionOpen(ObjectScreenCaption* self, s32 v)
 {
     s32 flag = (v != 0);
     if (flag != (self->open == 0)) {
@@ -567,14 +567,14 @@ extern "C" f32 Sine(f32 x);
 void PushFontScale(Font* font, f32 a, f32 b);
 struct TextReader;
 void* InitTextReader(TextReader* self, char* text, Font* font);
-struct Layout_137228;
-struct Layout_137228;
+struct TextBoxLayout;
+struct TextBoxLayout;
 struct TextReader;
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(Font* font);
 // Draws the selection caption when it has a node and text: its frame with alpha applied, and the
 // text, scaled by a pulse (between 0.9 and 1) driven by the elapsed time.
-void DrawSelectionCaption(T217D_12E0* self)
+void DrawSelectionCaption(ObjectScreenCaption* self)
 {
     T217D_Word tmp;
     CaptionLayout out;
@@ -607,7 +607,7 @@ void DrawSelectionCaption(T217D_12E0* self)
         f32 v = self->scale * k;
         PushFontScale(self->font, v, v);
         InitTextReader((TextReader*)loc, &self->text[0], self->font);
-        DrawAlignedText((TextReader*)loc, (Layout_137228*)&out, 0, &g_gsPacketWriter);
+        DrawAlignedText((TextReader*)loc, (TextBoxLayout*)&out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -618,7 +618,7 @@ void PopFontScale(Font* font);
 // Sets the grid selector up: text element, the frame from font 2 (if loaded), a clone of its font,
 // its colour (0xDF7F7F7F) and its size, computed from the font heights and four cells of font 4 at
 // scale 1.3, plus margins (60 high, 90 wide).
-void InitGridSelector(T217D_1330* self)
+void InitGridSelector(ChoiceGridCaption* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
@@ -659,13 +659,13 @@ u32 TestGridEntryBit(u32 bit)
 
 void QueueMovieByIndex(s32 index);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 // Input of the grid selector: the buttons 0x9B0 (or no pad for 5 s) pop it; button 0x40 queues the
 // movie of the cursor's entry if its bit is set, else plays sound 0x7B; the d-pad or stick steps
 // move the cursor around the 4x4 grid with wrap-around (a horizontal step off an edge also moves a
 // row), playing sound 0x79.
-void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
+void HandleGridSelectorInput(ChoiceGridCaption* ctx, PadRecord* o)
 {
     s32 s1;
     s32 r2;
@@ -712,7 +712,7 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
 // Opens or closes the grid selector (no-op if already so). Opening sets the pad select flags, calls
 // slot 20 and puts the cursor on the highest entry the save has unlocked; closing clears the flags
 // and calls slot 21.
-void SetGridSelectorOpen(T217D_1330* self, s32 flag)
+void SetGridSelectorOpen(ChoiceGridCaption* self, s32 flag)
 {
     if ((flag != 0) != (self->open == 0)) {
         return;
@@ -752,7 +752,7 @@ const char* GetMovieTitle(s32 index);
 // title of the cursor's entry ("???" until that entry's bit is set), sixteen cells of letters
 // 'a'..'p' (an underscore where the bit is not set) with the cursor's cell pulsing in size, and a
 // line under the title.
-void DrawGridSelector(T217D_1330* self)
+void DrawGridSelector(ChoiceGridCaption* self)
 {
     T217D_Word tmp;
     CaptionLayout out;

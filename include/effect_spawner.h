@@ -16,7 +16,7 @@
 struct BufferedStream;
 
 // Two floats a random value is taken between (func_001EAAE0), copied as one unaligned doubleword.
-struct Range50 {
+struct ParticleRange {
     f32 lo;
     f32 hi;
 };
@@ -25,7 +25,7 @@ struct RecordMember;   // transform_object.h
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
 // own before a change, func_001550E8 fills it from the ids).
-struct __attribute__((aligned(16))) Rec50 {
+struct __attribute__((aligned(16))) EffectSpawnerRecord {
     s32 uses;               // 0x00: objects sharing it
     u8 pad04[0x10 - 0x04];
     s32 kind;               // 0x10: 3, 4 seen
@@ -36,25 +36,25 @@ struct __attribute__((aligned(16))) Rec50 {
                 PathCurve* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
                 s32 value20;        // 0x20: a value taken from another object (func_001550E8)
             };
-            void* f24;              // 0x24
+            void* links;            // 0x24: the kind 3 link records
             u8 pad28[0x40 - 0x28];
         };
-        Vec02 point20;      // 0x20: a point (PlaceEffectAtSource)
+        Vec4 point20;      // 0x20: a point (PlaceEffectAtSource)
         f32 box20[8];       // 0x20: kind 1's box: two corners (WrapSpawnerParticlesIntoBox)
     };
     u8 pad40[0x78 - 0x40];
     void* frame;            // 0x78: a frame the record's points are placed in (GenerateSpawnSetupPair)
     void* target;           // 0x7C
-    s32 f80;                // 0x80: how the second end of a setup pair takes its velocity (1, 2 or 3)
+    s32 secondVelocityMode; // 0x80: how the second end of a setup pair takes its velocity (1, 2 or 3)
     u8 pad84[0x110 - 0x84];
     Quad16 q110;            // 0x110: copied to the start of each effect it makes (SpawnRecordEffects)
-    s32 f120;               // 0x120
+    s32 effectMode;         // 0x120: 1 when the record spawns individual effects
     u8 pad124[0x130 - 0x124];
     union {
         struct {
             s32 f130;               // 0x130
             u8 pad134[0x178 - 0x134];
-            s32 f178;               // 0x178: set, each particle gets a random second frame
+            s32 randomSecondFrame;  // 0x178: set, each particle gets a random second frame
             u8 pad17C[0x188 - 0x17C];
             s32 f188;               // 0x188
         };
@@ -62,17 +62,17 @@ struct __attribute__((aligned(16))) Rec50 {
     };
     RecordMember* member;   // 0x18C: the member object the record belongs to (its rec at 0x90 is this record)
     u8 pad190[0x198 - 0x190];
-    s32 f198;               // 0x198: clear, a particle's second frame turns toward the camera (EmitParticleChunk)
-    Range50 range19C;       // 0x19C: the range of a particle's second frame
-    s32 f1A4;               // 0x1A4: set, each particle gets a random turn
+    s32 skipCameraFacing;   // 0x198: clear, a particle's second frame turns toward the camera (EmitParticleChunk)
+    ParticleRange range19C;       // 0x19C: the range of a particle's second frame
+    s32 randomTurn;         // 0x1A4: set, each particle gets a random turn
     u8 pad1A8[0x1B0 - 0x1A8];
-    s32 f1B0;               // 0x1B0: -1 or a value; set, starting the spawner sets f120 (func_00155270)
+    s32 effectKind;         // 0x1B0: -1 or a value; set, starting the spawner sets f120 (func_00155270)
     u8 pad1B4[0x1C0 - 0x1B4];
     f32 poly1C0[3];         // 0x1C0: a quadratic (AimEffectAtNearestObject)
     u8 pad1CC[0x1D8 - 0x1CC];
     void* found[3];         // 0x1D8: objects named by the ids
     u8 pad1E4[0x1E8 - 0x1E4];
-    f32 f1E8;               // 0x1E8
+    f32 boundsMargin;       // 0x1E8
     u8 pad1EC[0x1F0 - 0x1EC];
     union {
         f32 f1F0f;          // 0x1F0: kind 24's first parameter
@@ -86,10 +86,10 @@ struct __attribute__((aligned(16))) Rec50 {
     u8 pad1FC[0x200 - 0x1FC];
 };
 
-typedef char check_Rec50[sizeof(Rec50) == 0x200 ? 1 : -1];
+typedef char check_Rec50[sizeof(EffectSpawnerRecord) == 0x200 ? 1 : -1];
 
 struct EffectSpawner : PlacedObject {
-    Rec50* rec;             // 0x2D0
+    EffectSpawnerRecord* rec;             // 0x2D0
     s32 mode;               // 0x2D4: -1 at setup; the mode, 0 to 3, chosen when it starts (func_00155270)
     s32 remaining;          // 0x2D8: -1 at setup
     union {
@@ -97,11 +97,11 @@ struct EffectSpawner : PlacedObject {
             f32 delayMin;   // 0x2DC: 10.0 at setup
             f32 delayMax;   // 0x2E0: 10.0 at setup
         };
-        Range50 delay;      // 0x2DC: where the first delay is taken from
+        ParticleRange delay;      // 0x2DC: where the first delay is taken from
     };
     s32 scaleByVolume;      // 0x2E4: set, the volume of the record's box scales the rate
     f32 chance;             // 0x2E8: the chance it starts active
-    Range50 active;         // 0x2EC: how long it then stays active
+    ParticleRange active;         // 0x2EC: how long it then stays active
     f32 targetCount;        // 0x2F4
     union {
         s64 key2F8;         // 0x2F8: the two ids, tested together against -1

@@ -18,7 +18,7 @@ s32 ReadCardDirectory(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, void* a5
     CardNameRequest* rec = &g_cardPathRequestBuffer;
     rec->port = a0;
     rec->slot = a1;
-    rec->f08 = a3;
+    rec->openFlags = a3;
     rec->entryCount = a4;
     rec->entries = (s32)a5;
     CopyStringBounded(rec->name, name, 0x3FF);

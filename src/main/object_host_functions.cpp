@@ -842,7 +842,7 @@ ScriptValue* TestScriptPointInsideCollider(ScriptValue* ret, Collider* obj, s32 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    s32 r = IsPointInsideCollider(obj, (Vec02*)&vec);
+    s32 r = IsPointInsideCollider(obj, (Vec4*)&vec);
     SetScriptValueBool(&q, r);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2178,7 +2178,7 @@ ScriptValue* TestScriptSphereInCameraView(ScriptValue* ret, Camera* obj, s32 unu
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &vec, &fx, &fy);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, IsSphereInCameraView(obj, (Vec02*)&vec, fx, fy));
+    SetScriptValueBool(&q, IsSphereInCameraView(obj, (Vec4*)&vec, fx, fy));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3253,7 +3253,7 @@ ScriptValue* AdvanceScriptWorld2BossPhase(ScriptValue* ret, World2Boss* obj, s32
 
 // Script function: adds a key to record number index (of 0x2C bytes) of the object, which holds
 // up to four per record.
-ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args)
+ScriptValue* AddScriptEntryRecordKey(ScriptValue* ret, ProgressCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -3390,7 +3390,7 @@ ScriptValue* AddScriptSeekingAgentObject(ScriptValue* ret, SeekingAgent* obj, s3
 
 // Script function: builds the speed table of a path curve for the given time
 // (BuildPathSpeedProfile).
-ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args)
+ScriptValue* StartScriptC24ObjectPath(ScriptValue* ret, PathSpeedCollider* obj, s32 unused, ScriptValue* args)
 {
     ScriptValue q;
     Kinds2 kinds;
@@ -4144,7 +4144,7 @@ AnimationStart* EnsureTimerRecord(PlacedObject* self);
 void GetRotationDegrees(PlacedObject* self, f32* out);
 void SetRotationDegrees(PlacedObject* self, f32* src);
 void GetPlacedObjectLocalVelocity();
-void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec02* local);
+void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec4* local);
 void GetPlacedObjectScaleXY(PlacedObject* self, f32* out);
 void SetPlacedObjectScaleXY(PlacedObject* self, f32 x);
 void GetPlacedObjectScaleZ(PlacedObject* self, f32* out);
@@ -4163,7 +4163,7 @@ void GetRangeRecordOuter(PlacedObject* self, f32* out);
 void SetRangeRecordOuter(PlacedObject* self, f32 x);
 void GetRangeRecordAngle(void* self, f32* out);
 void SetRangeRecordInnerAndOuter(PlacedObject* self, f32 x);
-void GetRangeRecordVector(void* self, Vec02* out);
+void GetRangeRecordVector(void* self, Vec4* out);
 void SetRangeRecordVector(void* self, void* src);
 void SetRangeRecordCode(void* self, s32 value);
 void SetGroupActivityModeEnabled(void* self, s32 a1);
@@ -4194,11 +4194,11 @@ void SetAimOrientationMode(PlacedObject* self, s32 value);
 void GetAimRange(PlacedObject* self, f32* out);
 void SetAimRange(PlacedObject* self, f32 f);
 void GetAimYawCurve(PlacedObject* self, Quad16* out);
-void SetAimYawCurve(PlacedObject* self, Vec02* src);
+void SetAimYawCurve(PlacedObject* self, Vec4* src);
 void GetAimYawLimits(PlacedObject* self, U64P* out);
 void SetAimYawLimits(PlacedObject* self, Pk8_2195* src);
 void GetAimPitchCurve(PlacedObject* self, Quad16* out);
-void SetAimPitchCurve(PlacedObject* self, Vec02* src);
+void SetAimPitchCurve(PlacedObject* self, Vec4* src);
 void GetAimPitchLimits(PlacedObject* self, U64P* out);
 void SetAimPitchLimits(PlacedObject* self, Pk8_2195* src);
 void GetAimNearKey(PlacedObject* self, s32* out);

@@ -10,8 +10,8 @@
 struct BaseObject;
 struct LookSource;
 struct OwnedRecord;
-struct Src_13AD08;
-struct Vec02;
+struct ScaledBlockSource;
+struct Vec4;
 struct World;
 struct WorldListedObject;
 
@@ -28,10 +28,10 @@ void RebuildAnimRecordEntries(WorldListedObject* self);
 void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src);
 void UpdateWorldListedObject(WorldListedObject* self, f32 dt);
 void CopyWorldListedObject(WorldListedObject* self, BaseObject* src);
-s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec02* pos, Vec02* extra, Vec02* items, s32 count, s32 mode, void* boundA, void* boundB);
+s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec4* pos, Vec4* extra, Vec4* items, s32 count, s32 mode, void* boundA, void* boundB);
 void StepListedObjectParticles(WorldListedObject* self, f32 dt);
 void MoveWorldListedObject(WorldListedObject* self, f32 dt);
-void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src);
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, ScaledBlockSource* src);
 void WriteListedObjectParticlePacket(void* self);
 void UpdateMatchingListedObjects(s32 mask);
 

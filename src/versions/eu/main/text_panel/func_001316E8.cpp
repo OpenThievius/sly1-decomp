@@ -13,8 +13,8 @@ struct TextReader_eu_1316E8 { u8 bytes[0xC0]; };
 
 void InitTextReaderFromTextTable(TextReader_eu_1316E8* out, s32 id, Font* font, s32 zero);
 f32 SumTextWidth(TextReader_eu_1316E8* reader);
-void DrawWrappedAlignedText(TextReader_eu_1316E8* reader, Layout_137228* layout, s32 zero, PacketWriter* gs);
-void SetTextLayoutVerticalPlacement(Layout_137228* layout, s32 value);
+void DrawWrappedAlignedText(TextReader_eu_1316E8* reader, TextBoxLayout* layout, s32 zero, PacketWriter* gs);
+void SetTextLayoutVerticalPlacement(TextBoxLayout* layout, s32 value);
 
 struct Gfx_eu_1316E8 {
     static s32 ScreenX(f32 x)
@@ -40,7 +40,7 @@ struct ScreenLayout_eu_1316E8 {
         return q.w;
     }
 
-    static void Reset(Layout_137228* l, s32 color)
+    static void Reset(TextBoxLayout* l, s32 color)
     {
         Quad4 col;
         l->Pos(0.0f, 0.0f);
@@ -58,7 +58,7 @@ void DrawCompassStrip(Obj_eu_1316E8* self, PacketWriter* gs)
     TextReader_eu_1316E8 sCur;
     TextReader_eu_1316E8 sPrev;
     TextReader_eu_1316E8 sNext;
-    Layout_137228 L;
+    TextBoxLayout L;
     s32 i;
     f32 left = 273.0f;
     f32 bottom = 42.181820f;

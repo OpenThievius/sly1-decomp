@@ -109,13 +109,13 @@ struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 diffe
 void* FindLevelEntry(s32 k);
 s32 IsFontLoaded(s32 k);
 Font* GetFontById(s32 k);
-void SetBestTimeState(T217D_1380* self, s32 n);
+void SetBestTimeState(SprintCaption* self, s32 n);
 
 // Sets up the commentary prompt element: its text, the level entry's timer length, commentary
 // record and credits (where the world has none), the frame font and the scale 0.6; it starts in
 // state 1 when the entry's requirement is met, else 0, and when the entry has its bit set and the
 // commentary differs, it shows the prompt text and notes that a press is awaited.
-void InitCommentaryPromptElement(T217D_1380* self)
+void InitCommentaryPromptElement(SprintCaption* self)
 {
     const LevelEntry* e;
 
@@ -159,7 +159,7 @@ void InitCommentaryPromptElement(T217D_1380* self)
     self->f270 = 0;
 }
 
-void SetBestTimeState(T217D_1380* self, s32 n);
+void SetBestTimeState(SprintCaption* self, s32 n);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
@@ -168,14 +168,14 @@ extern s32 D_002701C4;
 extern s32 g_timerRateExponent;
 
 struct KeyRecord;
-void SetBestTimeState(T217D_1380* self, s32 n);
+void SetBestTimeState(SprintCaption* self, s32 n);
 extern "C" f32 Power(f32 x, f32 y);
 
 // The per-frame update of the caption element: slides it, and in states 0 and 1 handles a pending
 // prompt (a press of the pad bit 4 starts the commentary's locked stream voice and shows the
 // credits text, or after five seconds the prompt is hidden); in state 2 follows the timer, moving
 // to state 3 when it stops and showing the best-time caption when the menus and fade are clear.
-void UpdateBestTimeState(T217D_1380* self)
+void UpdateBestTimeState(SprintCaption* self)
 {
     UpdateScreenElementSlide(self);
     switch (self->state) {
@@ -202,7 +202,7 @@ void UpdateBestTimeState(T217D_1380* self)
     }
     case 2:
     {
-        T217D_510* o = &g_timerElement;
+        TimerElement* o = &g_timerElement;
         s32 r;
         if (o->state == 0) {
             SetBestTimeState(self, 3);
@@ -224,16 +224,16 @@ void UpdateBestTimeState(T217D_1380* self)
 extern s32 g_timerRateExponent;
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern "C" f32 Power(f32 x, f32 y);
-void SetPauseMenuLayerPage(T217D_6D0* y, s32 a, s32 b);
+void SetPauseMenuLayerPage(PauseMenu* y, s32 a, s32 b);
 
 // Changes the state of the timer's caption element (0 off, 1 prompt, 2 timer running, 3 finished).
 // Entering 2 plays a sound and starts the timer counting down from the level's time, with the best
 // time as the caption (or a start message if none); entering 3 compares the time left with the
 // best, records a new best (starting a save) and sets the pause menu page for the outcome.
-void SetBestTimeState(T217D_1380* self, s32 n)
+void SetBestTimeState(SprintCaption* self, s32 n)
 {
     if (self->state == n) {
         return;
@@ -283,7 +283,7 @@ void SetBestTimeState(T217D_1380* self, s32 n)
         break;
     }
     case 3: {
-        T217D_510* o = &g_timerElement;
+        TimerElement* o = &g_timerElement;
         s32 id;
         f32 t = o->time;
         if (0.0f < t) {
@@ -327,11 +327,11 @@ void SetBestTimeState(T217D_1380* self, s32 n)
 struct TextLayout;
 struct TextLayout {
     u8 b[32];
-    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
-    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
-    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
-    void FlagA(s32 f) { ((Layout_137228*)this)->SetF14(f); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+    void Pos(f32 x, f32 y) { ((TextBoxLayout*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((TextBoxLayout*)this)->Size(x, y); }
+    void Color(s32* c) { ((TextBoxLayout*)this)->Color(c); }
+    void FlagA(s32 f) { ((TextBoxLayout*)this)->SetF14(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
 };
 struct FrameFont {
     static void Draw(Font** h, TextLayout* out, void* tbl)
@@ -348,19 +348,19 @@ struct Font;
 extern f32 D_0027240C;
 void PushFontScale(Font* font, f32 a, f32 b);
 struct TextReader;
-struct Layout_137228;
+struct TextBoxLayout;
 void* InitTextReader(TextReader* self, char* text, Font* font);
-struct Layout_137228;
+struct TextBoxLayout;
 struct PacketWriter;
 struct TextReader;
 struct Vec4U;
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 void PopFontScale(Font* font);
 
 // Draws the element's text in its frame: with a text set, scales the font, fades the colour and the
 // frame's by blend, draws the frame font box at the shown position (the vertical offset applied)
 // and the text aligned in it.
-void DrawFramedText(T217D_1380* self)
+void DrawFramedText(SprintCaption* self)
 {
     T217D_Word tmp;
     TextLayout out;
@@ -389,7 +389,7 @@ void DrawFramedText(T217D_1380* self)
             *(T217D_Word*)&((BestTimeTextStyle*)self->frame)->color = slot;
         }
         InitTextReader((TextReader*)loc, &self->text[0], self->font);
-        DrawAlignedText((TextReader*)loc, (Layout_137228*)&out, 0, &g_gsPacketWriter);
+        DrawAlignedText((TextReader*)loc, (TextBoxLayout*)&out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
@@ -399,7 +399,7 @@ LINKER_REMNANT(func_001E0820);
 // Sets the best time display to state 3.
 void FinishBestTimeRun(void* self)
 {
-    SetBestTimeState((T217D_1380*)self, 3);
+    SetBestTimeState((SprintCaption*)self, 3);
 }
 
 // The style above is built by the static initialiser GCC writes here (func_001E0848), and its

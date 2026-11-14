@@ -58,7 +58,7 @@ void InitTargetFollower(TargetFollower* self)
     self->f5C4 = 3000.0f;
     self->f5C8 = 1000.0f;
     SetListLinkOffset(&self->list55C, 0x7B0);
-    Tune47* q = &self->tune5B0;
+    FollowerTuning* q = &self->tune5B0;
     q->a = 25.0f;
     q->c = 0.25f;
     q->b = 0;
@@ -80,7 +80,7 @@ void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
             return;
         }
         // address arithmetic over a variable index
-        Entry47* e = (Entry47*)((u8*)self->list550->items + off);
+        FollowerStateEdge* e = (FollowerStateEdge*)((u8*)self->list550->items + off);
         if (GetStateEntryKey((StateGraph*)self->list550, e->a) == k1 && GetStateEntryKey((StateGraph*)self->list550, e->b) == k2) {
             break;
         }
@@ -89,8 +89,8 @@ void LoadTargetFollowerRecords(TargetFollower* self, BufferedStream* stream)
     }
     if (i < self->list550->count) {
         // address arithmetic over a variable index
-        Entry47* p = (Entry47*)((u8*)(i * 0x14) + (s32)self->list550->items);
-        self->leadTime = p->ref->f34;
+        FollowerStateEdge* p = (FollowerStateEdge*)((u8*)(i * 0x14) + (s32)self->list550->items);
+        self->leadTime = p->ref->leadTime;
     }
 }
 
@@ -107,8 +107,8 @@ void ResolveTargetFollowerLinks(TargetFollower* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 2, (ObjectLink*)g_targetFollowerResolveLinks);
     self->stateWalker = CreateStateWalker((StateGraph*)self->list550, self, -1, 1);
-    self->launchPool = (Sub47*)FindFirstObjectByIdGathered(self->world, 1, 0x8C, self);
-    ConvertPositionToWorld((BaseObject*)self->f568, (Vec02*)scratch);
+    self->launchPool = (FollowerStepRecord*)FindFirstObjectByIdGathered(self->world, 1, 0x8C, self);
+    ConvertPositionToWorld((BaseObject*)self->heightObject, (Vec4*)scratch);
     self->heightOffset = self->v140.z - scratch[2];
     if (self->followedObjectId != -1)
     {
@@ -155,8 +155,8 @@ void StepTargetFollower(TargetFollower* self, f32 t)
     if (self->stepHalted != 0) {
         return;
     }
-    BuildAxisAngleMatrix(&g_unitZVector, (Mat02*)&buf, self->heading);
-    TurnColliderTowardRotation((Collider*)self, t, (Mat02*)&buf, (f32*)self->sub5B0);
+    BuildAxisAngleMatrix(&g_unitZVector, (Mat3*)&buf, self->heading);
+    TurnColliderTowardRotation((Collider*)self, t, (Mat3*)&buf, (f32*)self->sub5B0);
 }
 
 void PlayPendingFollowerSound(TargetFollower* self);
@@ -190,7 +190,7 @@ void UpdateTargetFollower(TargetFollower* self, f32 dt)
         if (other == 0) {
             return;
         }
-        Vec02 d;
+        Vec4 d;
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(other->v140), Vu0::Q(self->v140));
         self->heading = ArctangentOfRatio(d.y, d.x);
         break;
@@ -222,8 +222,8 @@ s32 ChooseTargetFollowerMode(TargetFollower* self)
                     mode = 2;
                 }
             } else {
-                Vec02 v;
-                ConvertPositionToWorld((BaseObject*)next->anchor, (Vec02*)&v);
+                Vec4 v;
+                ConvertPositionToWorld((BaseObject*)next->anchor, (Vec4*)&v);
                 u128 d = Vu0::Sub(Vu0::Q(v), Vu0::Q(self->v140));
                 f32 len = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
                 if (len < 5.0f) {
@@ -292,7 +292,7 @@ extern s32 g_padSelectFlags;
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-struct Item_16D3F0 { u8 pad0[0x318]; s32 f318; };
+struct FollowerTuneObject { u8 pad0[0x318]; s32 f318; };
 
 
 // Makes x the followed object (nothing if it is already); when its tune object differs it records
@@ -312,7 +312,7 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x)
     }
     self->followedObject = x;
     if (v != 0) {
-        self->launchPool->f44 = ((Item_16D3F0*)x->tuneObject)->f318;
+        self->launchPool->f44 = ((FollowerTuneObject*)x->tuneObject)->f318;
         ChooseObjectPoolItem((ObjectPool*)self->launchPool);
         if (self->soundLevel != 0) {
             return;
@@ -327,11 +327,11 @@ void SetFollowedObject(TargetFollower* self, FollowableObject* x)
 }
 
 extern f32 g_gameTime;
-extern const Vec02 g_unitZVector;
+extern const Vec4 g_unitZVector;
 
 struct FollowPoseA {
     u8 pad00[0x50];
-    Vec02 v50;              // 0x50
+    Vec4 v50;              // 0x50
     u8 pad60[0x78 - 0x60];
     f32 life;               // 0x78: how long the launched item lives
     u8 pad7C[0x80 - 0x7C];
@@ -339,14 +339,14 @@ struct FollowPoseA {
 
 struct FollowPoseB {
     u8 pad00[0x10];
-    Vec02 v10;              // 0x10
+    Vec4 v10;              // 0x10
 };
 
 struct ChaseObject;
 
 struct FollowObject {
     u8 pad00[0x48];
-    ChaseObject* f48;       // 0x48
+    ChaseObject* chaseTarget; // 0x48: the object the pooled item is chasing/launched as
     u8 pad4C[0x60 - 0x4C];
     FollowPoseA poseA;      // 0x60: the record the placement is read from; its v50 is the velocity at 0xB0
     FollowPoseB poseB;      // 0xE0
@@ -354,22 +354,22 @@ struct FollowObject {
 
 struct ChaseObject {
     u8 pad00[0x350];
-    Vec02 gravity;          // 0x350
+    Vec4 gravity;          // 0x350
     u8 pad360[0x690 - 0x360];
-    f32 f690;               // 0x690
+    f32 initialSpeed;       // 0x690: the speed the launch starts at
     u8 pad694[0x6F0 - 0x694];
     f32 f6F0;               // 0x6F0
-    f32 f6F4;               // 0x6F4
+    f32 speedChangeRate;    // 0x6F4: how fast the speed changes during the flight
     u8 pad6F8[0x700 - 0x6F8];
-    Vec02 v700;             // 0x700
+    Vec4 v700;             // 0x700
 };
 
 struct FollowTune {
     u8 pad00[0x31C];
     f32 launchInterval;     // 0x31C: the delay before the next launch
     f32 flightTime;         // 0x320: how long a launched item takes to reach the target
-    f32 f324;               // 0x324
-    f32 f328;               // 0x328
+    f32 speedChangeFraction; // 0x324: the fraction of the flight over which the speed changes
+    f32 endSpeedRatio;      // 0x328: end speed over initial speed
     f32 launchAngle;        // 0x32C: the angle of a ballistic launch
     f32 launchSpeed;        // 0x330: the speed along Z given to the launched object
     f32 f334;               // 0x334
@@ -382,12 +382,12 @@ struct PlacementRecord;
 // velocity from the follower's tuning toward the look target's position and gives it to the item.
 void LaunchPoolItemAtTarget(TargetFollower* self)
 {
-    Vec02 a;
-    Vec02 b;
-    Mat02 c;
+    Vec4 a;
+    Vec4 b;
+    Mat3 c;
     GetObjectWorldPosition((BaseObject*)self->lookTarget, &a);
     FollowObject* obj = (FollowObject*)self->launchPool;
-    ChaseObject* t = obj->f48;
+    ChaseObject* t = obj->chaseTarget;
     FollowPoseA* sa = &obj->poseA;
     FollowPoseB* sb = &obj->poseB;
     if (t == 0) {
@@ -396,8 +396,8 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
     GetPlacementRecordTransform((PlacementRecord*)sa, &b, c.r, 0);
     FollowTune* tune = (FollowTune*)self->followedObject->tuneObject;
     if (IsObjectOfKind((BaseObject*)t, 0x3D) != 0) {
-        Vec02 dir;
-        const Vec02* fb = &g_unitXVector;
+        Vec4 dir;
+        const Vec4* fb = &g_unitXVector;
         Vu0::Q(dir) = Vu0::Sub(Vu0::Q(a), Vu0::Q(b));
         u128 len = Vu0::Length(Vu0::Q(dir));
         if (Vu0::ToFloat(len) < 0.0001f) {
@@ -405,27 +405,27 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
         } else {
             Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), len);
         }
-        f32 e = tune->f328;
+        f32 e = tune->endSpeedRatio;
         f32 l = Vu0::ToFloat(len);
-        f32 f5 = tune->f324;
+        f32 f5 = tune->speedChangeFraction;
         if (e == 1.0f) {
             f32 q = l / tune->flightTime;
-            t->f6F4 = 0.0f;
+            t->speedChangeRate = 0.0f;
             t->f6F0 = q;
-            t->f690 = q;
+            t->initialSpeed = q;
         } else {
             f32 q = (l + l) / ((f5 - e * f5 + (e + e)) * tune->flightTime);
-            t->f690 = q;
+            t->initialSpeed = q;
             t->f6F0 = q * e;
-            t->f6F4 = (t->f6F0 - q) / (f5 * tune->flightTime);
+            t->speedChangeRate = (t->f6F0 - q) / (f5 * tune->flightTime);
         }
-        Vu0::Q(sa->v50) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(t->f690));
+        Vu0::Q(sa->v50) = Vu0::MulX(Vu0::Q(dir), Vu0::ScalarAt(t->initialSpeed));
     } else if (IsObjectOfKind((BaseObject*)t, 0x3E) != 0) {
         Vu0::Q(obj->poseA.v50) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::ScalarAt(tune->launchSpeed));
         Vu0::Q(t->v700) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Scalar(-tune->f334));
         t->f6F0 = tune->flightTime;
     } else {
-        Vec02 dir;
+        Vec4 dir;
         if (ComputeBallisticLaunchVelocity(&b, &a, &dir, 0, tune->launchAngle) == 0) {
             return;
         }
@@ -451,9 +451,9 @@ typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     Vec3 v;
     SetColliderAnchors(self, 3, 0, 3, 0);
-    ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
-    ((VFn_16D788*)self->desc)[37](self, &D_00248D30);
-    ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec02*)&v);
+    ((VFn_16D788*)self->desc)[36](self, &g_zeroVector);
+    ((VFn_16D788*)self->desc)[37](self, &g_zeroVector);
+    ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec4*)&v);
     v.z = v.z + self->heightOffset;
     ((VFn_16D788*)self->desc)[33](self, &v);
 }
@@ -465,10 +465,10 @@ extern f32 g_gameTime;
 // (now plus distance / speed) and the end of the first phase (arrival minus leadTime) are stored.
 void LaunchTargetFollowerAtFollowed(TargetFollower* self)
 {
-    Vec02 target;
-    Vec02 vel;
-    Vec02 d;
-    ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec02*)&target);
+    Vec4 target;
+    Vec4 vel;
+    Vec4 d;
+    ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec4*)&target);
     target.z = target.z + self->heightOffset;
     ComputeBallisticLaunchVelocity(&self->v140, &target, &vel, (u8*)self, 0.5f);
     SetColliderAnchors(self, 0, 0, 3, 0);
@@ -528,7 +528,7 @@ void SetTargetFollowerMode(void* self, s32 mode);
 // On notification 0x13 reacts to the message code: 0x2FD launches a pool item at the target,
 // 0x2FE and 0x2FF are the cases handled by the calls at the end of the function (0x2FF sets mode
 // 2), 0x300 launches the follower at the followed object.
-void HandleTargetFollowerNotification(TargetFollower* self, s32 type, Packet47* packet)
+void HandleTargetFollowerNotification(TargetFollower* self, s32 type, FollowerNotification* packet)
 {
     HandlePlacedObjectNotification(self, type, packet);
     if (type != 0x13) {
@@ -565,11 +565,11 @@ void PlaceTargetFollowerOnFollowed(TargetFollower* self);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 Collider* GetActiveSwitchedCollider(void);
 
-extern const Mat02 g_identityMatrix;
+extern const Mat3 g_identityMatrix;
 void* ChooseEntryTableObject(EntryTableObject* self);
 extern GameClock g_gameClock;
 
-struct FollowerTrail { u8 pad00[0x40]; Vec02 v40; Vec02 v50; Vec02 v60; Vec02 v70; };
+struct FollowerTrail { u8 pad00[0x40]; Vec4 v40; Vec4 v50; Vec4 v60; Vec4 v70; };
 
 // Changes the follower's mode (0 to 4): leaving mode 1 puts it on the followed object, then it
 // records the time, sets up what the new mode needs (the next launch time one second on for mode 1,
@@ -588,10 +588,10 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode)
     self->modeStartTime = g_gameClock.time;
     switch (mode) {
     case 0: {
-        Vec02 pos;
-        Vec02 d;
+        Vec4 pos;
+        Vec4 d;
         key = 0x2EF;
-        ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec02*)&pos);
+        ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec4*)&pos);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
         self->heading = ArctangentOfRatio(d.y, d.x);
         f32 big = 3.4028234663852886e+38f;
@@ -600,8 +600,8 @@ void SetTargetFollowerMode(TargetFollower* self, s32 mode)
         break;
     }
     case 3: {
-        Vec02 pos;
-        Vec02 d;
+        Vec4 pos;
+        Vec4 d;
         GetActiveSwitchedCollider();
         EntryTableObject* table = (EntryTableObject*)self->followedObject->tuneObject;
         if (self->trailCountdown <= 0) {
@@ -732,7 +732,7 @@ void* ChooseEntryTableObject(EntryTableObject* self)
         Collider* player = GetActiveSwitchedCollider();
         for (s32 i = 0; i < self->entryCount; i++) {
             void* obj = ((void**)self->entries)[i];
-            Vec02 pos;
+            Vec4 pos;
             GetObjectWorldPosition((BaseObject*)obj, &pos);
             u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(player->v140));
             f32 dist = Vu0::ToFloat(Vu0::Dot(d, d));

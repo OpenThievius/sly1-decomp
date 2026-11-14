@@ -24,7 +24,7 @@ struct ItemGroup {
 
 struct ItemKeeper : BaseObject {
     u8 pad34[0x40 - 0x34];
-    Vec02 targetPos;        // 0x40: the target's position (func_001CBCB8)
+    Vec4 targetPos;        // 0x40: the target's position (func_001CBCB8)
     s32 state;              // 0x50: func_001CBB88 picks the next, 3 stops the updates
     f32 stateSince;         // 0x54: the game time it was set (func_001CBEE8)
     ItemGroup owned;          // 0x58: the ones that become its own (their owner is set to it)

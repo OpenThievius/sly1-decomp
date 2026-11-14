@@ -60,7 +60,7 @@ struct SortKeyedObject : PlacedObject {
     s32 mode;               // 0x2D4: a light's mode, of which CollectLightsForSphere returns the highest
     u8 pad2D8[0x304 - 0x2D8];
     s32 dynamic;            // 0x304
-    s32 f308;               // 0x308
+    s32 sortKey;            // 0x308: the second sort key
 };
 
 
@@ -132,9 +132,9 @@ struct Blob_1F9868;
 s32 LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data);
 
 s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b);
-void InitAim(T2195_790* self, PlacedObject* owner);
-void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
-void* ResolveAimTarget(T2195_790* a0);
+void InitAim(AimAttachment* self, PlacedObject* owner);
+void AssignAimTarget(AimAttachment* self, void* obj, Vec4* src);
+void* ResolveAimTarget(AimAttachment* a0);
 void RunMainLoop(s32 a, s32 b);
 void LoadIopModules();
 void SendVif0StartupPacket(void);
@@ -153,9 +153,9 @@ s32 g_lightCount = 0;
 void* g_sortedLights[256] = {0};
 s32 g_lightGroupCount = 0;
 LightGroup g_lightGroups[16] = {};
-Vec02 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
-Vec02 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
-Vec02 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec4 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec4 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
+Vec4 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
 ValueRange D_002647A0 = { -1.0f, 1.0f };
 const char* g_iopModuleNames[6] = {
     "sio2man.irx", "padman.irx", "mcman.irx",
@@ -176,7 +176,7 @@ s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b)
     if (d != 0) {
         return d;
     }
-    d = x->f308 - y->f308;
+    d = x->sortKey - y->sortKey;
     if (d != 0) {
         return d;
     }
@@ -238,7 +238,7 @@ void UploadLightVolumes(World* world)
         if (l->dynamic == 0) {
             flags |= 1;
         }
-        if (l->f308 != 0) {
+        if (l->sortKey != 0) {
             flags |= 2;
         }
         if ((l->flags & (1ULL << 38)) != 0) {
@@ -303,7 +303,7 @@ void UploadLightVolumes(World* world)
 // skipMask is left out, and the mask of a group is read when the next one is set up, or
 // after the last. Writes up to maxLights lights, their number, and how many have the flag
 // bit 0; returns the highest mode among them (at least 1 when the world's +0x1D6C is set).
-s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount,
+s32 CollectLightsForSphere(World* world, const Vec4* centre, f32 radius, u32 skipMask, s32 maxLights, s32* flagged, s32* outCount,
                   LightObject** out)
 {
     u32 keepOut = ~skipMask;
@@ -311,8 +311,8 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
     s32 flaggedCount = 0;
     LightGroup* prev = 0;
     u32 mask;
-    s32 strongest = world->f1D6C != 0.0f;
-    Vec02 sphere = *centre;
+    s32 strongest = world->lightingParamA != 0.0f;
+    Vec4 sphere = *centre;
     sphere.w = radius;
     Vu0::LoadVf<31>(&sphere);
     for (s32 i = 0; i < g_lightGroupCount + 1; i++) {
@@ -362,14 +362,14 @@ s32 CollectLightsForSphere(World* world, const Vec02* centre, f32 radius, u32 sk
 
 // Initialises the pose source with an aim range of 800, four constant vectors and the near and far
 // keys at 1 and -1.
-void InitAim(T2195_790* self, PlacedObject* owner)
+void InitAim(AimAttachment* self, PlacedObject* owner)
 {
     InitPoseSource(self, owner);
-    self->f20 = -1;
+    self->targetId = -1;
     self->aimRange = 800.0f;
-    self->v50 = *(Vec02*)&D_00264770;
+    self->v50 = *(Vec4*)&D_00264770;
     self->p60 = *(Pk8_2195*)&D_00264780;
-    self->v70 = *(Vec02*)&D_00264790;
+    self->v70 = *(Vec4*)&D_00264790;
     self->p80 = *(Pk8_2195*)&D_002647A0;
     self->nearKey = 1;
     self->farKey = -1;
@@ -377,12 +377,12 @@ void InitAim(T2195_790* self, PlacedObject* owner)
 
 // Sets the aim target and the point on it; no object, or the active switched collider itself, means
 // no target and the zero point.
-void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
+void AssignAimTarget(AimAttachment* self, void* obj, Vec4* src)
 {
     if (obj == 0 || obj == (void*)GetActiveSwitchedCollider()) {
         self->hasTarget = 0;
         self->target = 0;
-        self->point = D_00248D30;
+        self->point = g_zeroVector;
     } else {
         self->target = obj;
         self->hasTarget = 1;
@@ -391,7 +391,7 @@ void AssignAimTarget(T2195_790* self, void* obj, Vec02* src)
 }
 
 // Gives the aim target, or the active switched collider when none was assigned.
-void* ResolveAimTarget(T2195_790* a0) {
+void* ResolveAimTarget(AimAttachment* a0) {
     if (a0->hasTarget == 0) {
         return GetActiveSwitchedCollider();
     }
@@ -402,7 +402,7 @@ void* ResolveAimTarget(T2195_790* a0) {
 // The aim attachment's key from the owner's distance to the target: the far key beyond the
 // range at +0x40, else the near key, after clearing the root's tries. The owner is resorted in
 // its list when the key changes.
-void SwitchAimByTargetDistance(T2195_790* self)
+void SwitchAimByTargetDistance(AimAttachment* self)
 {
     PlacedObject* owner = self->owner;
     PlacedObject* target = (PlacedObject*)ResolveAimTarget(self);
@@ -422,7 +422,7 @@ void SwitchAimByTargetDistance(T2195_790* self)
     }
 }
 
-// One axis of an aim (T2195_790 has the yaw's at +0x50 and the pitch's at +0x70): a quadratic
+// One axis of an aim (AimAttachment has the yaw's at +0x50 and the pitch's at +0x70): a quadratic
 // (a, b, c) applied to the angle toward the target and the range the result is clamped to.
 // GetAimRotation gives both axes the same code, one inline per axis.
 struct AimAxis {
@@ -445,14 +445,14 @@ void GetVectorAngles(Vec3* v, f32* a1, f32* a2);
 // quadratic and clamp (AimAxis). d's stores are written to its address (`*(u128*)&d`): through
 // Q(d) the inline's address of d stays in a pseudo the later &d reuses (a0 set before the range
 // test instead of in the branch's delay slot).
-void GetAimRotation(T2195_790* self, f32 dt, Mat02* rot, Vec02* vec)
+void GetAimRotation(AimAttachment* self, f32 dt, Mat3* rot, Vec4* vec)
 {
-    Vec02 pos;
-    Vec02 d;
-    Mat02 m;
+    Vec4 pos;
+    Vec4 d;
+    Mat3 m;
     f32 angles[2];
     PlacedObject* owner = self->owner;
-    *vec = D_00248D30;
+    *vec = g_zeroVector;
     if (self->hold != 0) {
         *rot = owner->rot;
         return;

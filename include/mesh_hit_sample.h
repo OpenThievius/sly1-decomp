@@ -9,7 +9,7 @@
 
 struct MeshHitSample {
     u8 pad00[0x10];
-    Vec02 normal;           // 0x10
+    Vec4 normal;           // 0x10
     u8 pad20[0x10];
 };
 

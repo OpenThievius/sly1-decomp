@@ -3,9 +3,9 @@
 
 void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
 {
-    Mat02 mats[2];
+    Mat3 mats[2];
     s32 i;
-    Mat02 aim;
+    Mat3 aim;
     s32 key;
     f32 hiX;
     f32 loX;
@@ -21,7 +21,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
                 ClearPadPressedBits(pad, 0x40);
                 self->buttonPressTime = g_gameTime;
             }
-            if (self->f6E0 != 0 && g_gameTime - self->buttonPressTime < g_world5ButtonWindow[0]) {
+            if (self->pressArmed != 0 && g_gameTime - self->buttonPressTime < g_world5ButtonWindow[0]) {
                 self->desc05()->m50(self);
             }
         }
@@ -41,9 +41,9 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     case 2:
     case 3:
     case 4: {
-        Vec02 at;
-        Vec02 pos;
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &self->f664->v140, &at);
+        Vec4 at;
+        Vec4 pos;
+        TransformPointBetweenFrames(0, (PlacedObject*)self->aimFrame, &self->aimTargetObject->v140, &at);
         f32 u = (at.y - g_world5AimMapY[0]) / g_world5AimMapY[1];
         f32 v = (at.z - g_world5AimMapZ[0]) / g_world5AimMapZ[1];
         ApproachValueWithRamp(self->aimX, u + g_world5AimMargin[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiX);
@@ -71,14 +71,14 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         f32 h = self->aimX;
         Vu0::Q(pos) = Vu0::FromFloats(at.x, g_world5AimMapY[0] + h * (g_world5AimMapY[1] + h * g_world5AimMapY[2]),
                                       g_world5AimMapZ[0] + w * (g_world5AimMapZ[1] + w * g_world5AimMapZ[2]));
-        TransformPointBetweenFrames((PlacedObject*)self->f660, 0, &pos, &pos);
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f660, &pos, (Vec02*)((u8*)self->f650 + 0xF0));
+        TransformPointBetweenFrames((PlacedObject*)self->aimFrame, 0, &pos, &pos);
+        TransformPointBetweenFrames(0, (PlacedObject*)self->aimFrame, &pos, (Vec4*)((u8*)self->f650 + 0xF0));
         ProjectPointToCamera(g_camera, &pos, (f32*)((u8*)&g_spinningSpriteElement + 0x580));
         for (i = 0; i < 2; i++) {
-            Vec02 dir;
-            *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f674[i]->v140));
+            Vec4 dir;
+            *(Vu0::Vec*)&dir = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->turnedParts[i]->v140));
             BuildBasisFromXAndZHint(&dir, &g_unitZVector, &mats[i]);
-            TransformRotationBetweenFrames(0, (PlacedObject*)self->f674[i]->parent, &mats[i], &mats[i]);
+            TransformRotationBetweenFrames(0, (PlacedObject*)self->turnedParts[i]->parent, &mats[i], &mats[i]);
         }
         ApproachValueWithRamp(self->poseX, g_world5SteerLimits[1], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &hiX);
         ApproachValueWithRamp(self->poseX, g_world5SteerLimits[0], 0.0f, (RampProfile*)g_world5AimBoundsRamp, &loX);
@@ -102,14 +102,14 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         self->poseX = ClampBetween(self->poseX + dt * self->poseRateX, g_world5SteerLimits[0], g_world5SteerLimits[1]);
         self->poseY = ClampBetween(self->poseY + dt * self->poseRateY, g_world5SteerLimits[0], g_world5SteerLimits[1]);
 
-        Mat02 pitch;
-        Mat02 yaw;
-        Mat02 face;
-        Vec02 to;
-        Vec02 rel;
-        Mat02 tilt;
-        Vec02 axis;
-        TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->f660)->v140, &rel);
+        Mat3 pitch;
+        Mat3 yaw;
+        Mat3 face;
+        Vec4 to;
+        Vec4 rel;
+        Mat3 tilt;
+        Vec4 axis;
+        TransformPointBetweenFrames(0, (PlacedObject*)self->f668, &((PlacedObject*)self->aimFrame)->v140, &rel);
         f32 sx = pad->stickX;
         if (rel.x < 0.0f) {
             sx = -sx;
@@ -117,7 +117,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         BuildAxisAngleMatrix(&g_unitXVector, &pitch, g_world5PitchCoefficients[0] + sx * (g_world5PitchCoefficients[1] + sx * g_world5PitchCoefficients[2]));
         f32 sy = pad->stickY;
         BuildAxisAngleMatrix(&g_unitYVector, &yaw, g_world5YawCoefficients[0] + sy * (g_world5YawCoefficients[1] + sy * g_world5YawCoefficients[2]));
-        *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->f660)->v140), Vu0::Vec::Of(self->v140));
+        *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->aimFrame)->v140), Vu0::Vec::Of(self->v140));
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &face);
         f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
         f32 angle = ClampBetween(g_world5TiltCoefficients[0] + speed * (g_world5TiltCoefficients[1] + speed * g_world5TiltCoefficients[2]), g_world5TiltLimits[0], g_world5TiltLimits[1]);
@@ -126,35 +126,35 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         *(Vu0::Vec*)&axis = n;
         *(Vu0::Vec*)&axis = Vu0::NormalizeOr(Vu0::Vec::Of(axis), Vu0::Vec::Of(g_unitXVector));
         BuildAxisAngleMatrix(&axis, &tilt, angle);
-        Mat02 m3;
-        Mat02 m2;
-        Mat02 m1;
+        Mat3 m3;
+        Mat3 m2;
+        Mat3 m1;
         RotationProductInto(&m1, tilt, face);
         RotationProductInto(&m2, m1, yaw);
         RotationProductInto(&m3, m2, pitch);
         self->m620 = m3;
-        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->f67C->v140)).q;
+        Vu0::Q(to) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(self->thirdTurnedPart->v140)).q;
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &aim);
-        TransformRotationBetweenFrames(0, (PlacedObject*)self->f67C->linkRecord->p60, &aim, &aim);
+        TransformRotationBetweenFrames(0, (PlacedObject*)self->thirdTurnedPart->linkRecord->p60, &aim, &aim);
         break;
     }
     default:
         BuildAxisAngleMatrix(&g_unitZVector, &self->m620, self->heading);
         for (i = 0; i < 2; i++) {
-            mats[i] = self->f674[i]->m1A0;
+            mats[i] = self->turnedParts[i]->m1A0;
         }
         aim = g_identityMatrix;
         break;
     }
-    Mat02 rot;
+    Mat3 rot;
     for (i = 0; i < 2; i++) {
-        ApproachRotationWithRamp(&self->f674[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
-        self->f674[i]->desc02()->m1E(self->f674[i], &rot);
+        ApproachRotationWithRamp(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
+        self->turnedParts[i]->desc02()->m1E(self->turnedParts[i], &rot);
     }
-    if (self->f67C->orientationAttachment == 0) {
-        MulRotationRowsIndexed(&aim, aim, self->f67C->m1A0);
-        ApproachRotationWithRamp(&self->f67C->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
-        self->f67C->desc02()->m1E(self->f67C, &rot);
+    if (self->thirdTurnedPart->orientationAttachment == 0) {
+        MulRotationRowsIndexed(&aim, aim, self->thirdTurnedPart->m1A0);
+        ApproachRotationWithRamp(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
+        self->thirdTurnedPart->desc02()->m1E(self->thirdTurnedPart, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);
     ClearRootTries(self);

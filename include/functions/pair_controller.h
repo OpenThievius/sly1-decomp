@@ -6,9 +6,9 @@
 
 #include "common.h"
 
+struct BodyContact;
 struct BufferedStream;
 struct Collider;
-struct Contact03;
 union Contact_001A4538;
 struct GameProgress;
 struct HitTarget;
@@ -21,7 +21,7 @@ struct PadRecord;
 struct PairController;
 struct PairedObject;
 struct SoundStateObject;
-struct Vec02;
+struct Vec4;
 struct WalkerCollider;
 struct Walker_001A4538;
 
@@ -38,7 +38,7 @@ void SetWalkerColliderSubState(WalkerCollider* self, s32 state);
 void HandleWalkerColliderNotification(WalkerCollider* self, s32 code, MessageBody* rec);
 void StepWalkerCollider(WalkerCollider* self, f32 dt);
 void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s32 i);
-void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj);
+void ComputeWalkerColliderContactValue(WalkerCollider* ctx, BodyContact* obj);
 void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 s32 IsWalkerColliderCameraFree(void);
 void InitPairController(PairController* self);
@@ -75,7 +75,7 @@ void LoadPairedObject(PairedObject* self, BufferedStream* stream);
 void CopyPairedObject(PairedObject* self, PairedObject* src);
 void StartPairedObject(PairedObject* self);
 void UpdatePairedObject(PairedObject* self, f32 dt);
-void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards);
+void SteerPairedObjectWithinArea(PairedObject* self, Vec4* goal, s32 backwards);
 s32 ChoosePairedObjectState(PairedObject* self);
 void SetPairedState(PairedObject* self, s32 mode);
 s32 HandlePairedHit(PairedObject* o, ObjectEvent* ev);
@@ -86,7 +86,7 @@ void CopyHitTarget(HitTarget* self, HitTarget* src);
 void StartHitTarget(HitTarget* self);
 void UpdateHitTarget(HitTarget* self, f32 dt);
 void StepHitTarget(HitTarget* self, f32 dt);
-void ComputeHitTargetContactValue(HitTarget* self, Contact03* obj);
+void ComputeHitTargetContactValue(HitTarget* self, BodyContact* obj);
 s32 ApplyHitTargetHit(HitTarget* self, ObjectEvent* ev);
 s32 ChooseHitTargetState(HitTarget* self);
 void SetHitTargetState(HitTarget* self, s32 value);

@@ -20,7 +20,7 @@ struct ObjectMessage {
     s32 key;                // 0x08: func_00198EF8
 };
 
-// A message an object receives through its slot 27 (Desc01::m1B), built in a 0x50-byte local:
+// A message an object receives through its slot 27 (BaseObjectDescriptor::m1B), built in a 0x50-byte local:
 // its kind, and the sender (kind 1) or quadwords (kinds 4 and 6; object_gatherer.cpp, effect.cpp,
 // pair_controller.cpp).
 struct SlotMessage {
@@ -32,11 +32,11 @@ struct SlotMessage {
     u8 pad08[0x10 - 0x08];
     union {
         Quad16 qa;          // 0x10
-        Vec02 va;           // 0x10: as floats (kind 6: func_001A6DE0, func_001A72B0)
+        Vec4 va;           // 0x10: as floats (kind 6: func_001A6DE0, func_001A72B0)
     };
     union {
         Quad16 qb;          // 0x20
-        Vec02 vb;           // 0x20
+        Vec4 vb;           // 0x20
     };
     f32 f30;                // 0x30: func_0012D5D0 (event 48, with flags 0x18); a zone's f620 (kind 9, func_0013D278)
     f32 radius;             // 0x34: the zone's radius (kind 9, func_0013D278)

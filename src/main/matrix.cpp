@@ -9,8 +9,8 @@
 #include "functions/matrix.h"
 #include "functions/warp_menu.h"
 struct HomogeneousMatrix;
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Matrices and vectors: identity and transposition, rotations from angles and an axis, the
@@ -97,7 +97,7 @@ Mat4A MultiplyMatrices(Quad16* m, Quad16* in) return out
 LINKER_REMNANT(func_001886F8);
 
 // The point v through m, with w as its fourth coordinate.
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out)
+void TransformByMatrixWithW(const Quad16* m, const Vec4* v, f32 w, Vec4* out)
 {
     Vu0::Q(*out) = Vu0::Transform(*m, Vu0::Q(*v), w);
 }
@@ -134,7 +134,7 @@ LINKER_REMNANT(func_00188848);
 
 // Builds the rotation matrix about the unit axis v by angle radians (Rodrigues' formula) into the
 // 3x3 part of out.
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle)
+void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle)
 {
     const f32* axis = &v->x;
     f32 (*m)[4] = (f32 (*)[4])out;
@@ -171,13 +171,13 @@ extern Matrix3x4 g_identityMatrix;
 
 // Rotation about the vector's direction by its length in radians, or the identity when the vector
 // is shorter than 0.0001.
-void BuildRotationFromVector(Vec02* v, Mat02* mat)
+void BuildRotationFromVector(Vec4* v, Mat3* mat)
 {
     u128 q = Vu0::Q(*v);
     f32 len = Vu0::ToFloat(Vu0::Length(q));
     if (0.0001f < len) {
-        Vec02 axis;
-        Vec02 k;
+        Vec4 axis;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(1.0f / len);
         Vu0::Q(axis) = Vu0::MulX(q, Vu0::Q(k));
         BuildAxisAngleMatrix(&axis, mat, len);
@@ -210,7 +210,7 @@ void BuildEulerRotationMatrix(f32* in, f32* out)
 }
 
 // Builds a 4x4 transform from a rotation (rows with w 0) and a position (fourth row, w 1).
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out)
+void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out)
 {
     const Quad16* a = (const Quad16*)pos;
     const Quad16* b = (const Quad16*)rot;
@@ -271,7 +271,7 @@ extern "C" f32 Arccosine(f32 x);
 // from the trace, the axis components from the diagonal, signed by the off-diagonal differences.
 // The identity gives angle 0 about x, and a half turn (angle pi) takes its signs from the largest
 // component.
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis)
+void MatrixToAxisAngle(Mat3* m, f32* angle, Vec4* axis)
 {
     f32 (*e)[4] = (f32 (*)[4])m;
     f32* v = &axis->x;
@@ -347,9 +347,9 @@ void MatrixToEulerAngles(Mat4* self, Vec3* out)
 ASM_FUNC(func_001890A0);
 
 // out = a's transpose times b, for 3x3 matrices.
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out)
+void MultiplyMatrices3x3(Mat3* a, Mat3* b, Mat3* out)
 {
-    Mat02 t;
+    Mat3 t;
     Vu0::MulTransposed(t, *a, *b);
     *out = t;
 }
@@ -375,12 +375,12 @@ void VectorToAngles(Vec3* v, f32* a1, f32* a2)
 extern u8 g_unitYVector[];
 
 // The product a b of two rotations into out: b's rows each rotated by a.
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotation(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
@@ -391,31 +391,31 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 }
 
 // Rotation matrix for a yaw about z followed by a pitch about y (negated).
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out)
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat3* out)
 {
-    Mat02 a;
-    Mat02 b;
-    BuildAxisAngleMatrix((const Vec02*)g_unitZVector, &a, yaw);
-    BuildAxisAngleMatrix((const Vec02*)g_unitYVector, &b, -pitch);
+    Mat3 a;
+    Mat3 b;
+    BuildAxisAngleMatrix((const Vec4*)g_unitZVector, &a, yaw);
+    BuildAxisAngleMatrix((const Vec4*)g_unitYVector, &b, -pitch);
     MulRotation(out, a, b);
 }
 
 // Builds a rotation basis whose x axis is x, taking up (z) as the hint for the other axes.
-void BuildBasisFromX(Vec02* x, Mat02* out)
+void BuildBasisFromX(Vec4* x, Mat3* out)
 {
-    BuildBasisFromXAndZHint(x, (const Vec02*)g_unitZVector, out);
+    BuildBasisFromXAndZHint(x, (const Vec4*)g_unitZVector, out);
 }
 
 
 // Builds the rotation that turns the matrix's third row onto the up (z) axis, into scratch when
 // given, and writes the matrix rotated by it to out when given.
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out)
+void RotateMatrixUpright(Mat3* self, Mat3* scratch, Mat3* out)
 {
-    Mat02 local;
-    Mat02 m;
-    Mat02 t;
-    Mat02* z = scratch ? scratch : &local;
-    BuildShortestArcRotation(&self->r[2], (const Vec02*)g_unitZVector, z);
+    Mat3 local;
+    Mat3 m;
+    Mat3 t;
+    Mat3* z = scratch ? scratch : &local;
+    BuildShortestArcRotation(&self->r[2], (const Vec4*)g_unitZVector, z);
     if (out) {
         u128 x0 = Vu0::RotateUntied(*z, Vu0::Q(self->r[0]));
         u128 x1 = Vu0::RotateUntied(*z, Vu0::Q(self->r[1]));
@@ -569,14 +569,14 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 	return InvertSquareMatrix(4, (f32*)a0, (f32*)a1);
 }
 
-extern const Vec02 g_unitXVector;
+extern const Vec4 g_unitXVector;
 
 // Builds a rotation basis whose x row is the direction x (normalised) and whose z row is
 // perpendicular to both it and the hint, so that the y row lies as near the hint as the x row
 // allows. When the hint is parallel to x, an arbitrary perpendicular is used.
-void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
+void BuildBasisFromXAndYHint(Vec4* x, Vec4* hint, Mat3* out)
 {
-    Vec02 c;
+    Vec4 c;
     out->r[0] = *x;
     Vu0::Q(out->r[0]) = Vu0::NormalizeOr(Vu0::Q(out->r[0]), Vu0::Q(g_unitXVector));
     u128 cr = Vu0::Cross(Vu0::Q(out->r[0]), Vu0::Q(*hint));
@@ -593,9 +593,9 @@ void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
 // Builds a rotation basis whose x row is the direction x (normalised) and whose y row is
 // perpendicular to both it and the hint, so that the z row lies as near the hint (the up direction)
 // as the x row allows. When the hint is parallel to x, an arbitrary perpendicular is used.
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out)
+void BuildBasisFromXAndZHint(const Vec4* x, const Vec4* hint, Mat3* out)
 {
-    Vec02 c;
+    Vec4 c;
     out->r[0] = *x;
     Vu0::Q(out->r[0]) = Vu0::NormalizeOrMoved(Vu0::Q(out->r[0]), Vu0::Q(g_unitXVector));
     u128 cr = Vu0::Cross(Vu0::Q(*hint), Vu0::Q(out->r[0]));
@@ -615,13 +615,13 @@ void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out)
 // (*(u128*)&axis): through Vu0::Q or Set its address would stay in a saved register for the last
 // call, where retail forms it again. Its length is a float the compiler keeps in the GPR of its
 // qmfc2, which the divide's Scalar moves back with qmtc2.
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out)
+void BuildShortestArcRotation(const Vec4* from, const Vec4* to, Mat3* out)
 {
-    Vec02 a = *from;
-    Vec02 b = *to;
-    Vec02 axis;
-    Vu0::Q(a) = Vu0::NormalizeOr(Vu0::Q(a), Vu0::Q(*(Vec02*)g_unitZVector));
-    u128 bn = Vu0::NormalizeOr(Vu0::Q(b), Vu0::Q(*(Vec02*)g_unitZVector));
+    Vec4 a = *from;
+    Vec4 b = *to;
+    Vec4 axis;
+    Vu0::Q(a) = Vu0::NormalizeOr(Vu0::Q(a), Vu0::Q(*(Vec4*)g_unitZVector));
+    u128 bn = Vu0::NormalizeOr(Vu0::Q(b), Vu0::Q(*(Vec4*)g_unitZVector));
     Vu0::Set(b, bn);
     *(u128*)&axis = Vu0::Cross(Vu0::Q(a), bn);
     f32 len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
@@ -629,7 +629,7 @@ void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out)
         *(u128*)&axis = Vu0::Cross(Vu0::Q(g_unitXVector), Vu0::Q(a));
         len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
         if (len < 0.0001f) {
-            *(u128*)&axis = Vu0::Cross(Vu0::Q(*(Vec02*)g_unitYVector), Vu0::Q(a));
+            *(u128*)&axis = Vu0::Cross(Vu0::Q(*(Vec4*)g_unitYVector), Vu0::Q(a));
             len = Vu0::ToFloat(Vu0::Length(*(u128*)&axis));
         }
     }
@@ -660,10 +660,10 @@ void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
 {
     Quad16 scale;
     Vu0::Q(scale) = Vu0::Splat(s);
-    BuildScaleAboutFrame((Vec02*)point, 0, (f32*)&scale, (Mat4A*)out);
+    BuildScaleAboutFrame((Vec4*)point, 0, (f32*)&scale, (Mat4A*)out);
 }
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 // A matrix of zeros.
 static inline void ClearMatrix(Mat4A* m)
@@ -673,7 +673,7 @@ static inline void ClearMatrix(Mat4A* m)
 
 // The transform that scales by scale along the axes of the frame of rotation rot at pos (the
 // origin and identity when they are null): back into the frame, scaled, out again.
-void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out)
+void BuildScaleAboutFrame(Vec4* pos, Mat3* rot, f32* scale, Mat4A* out)
 {
     Mat4A frame;
     Mat4A inverse;
@@ -681,9 +681,9 @@ void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out)
     Mat4A step;
 
     if (pos == 0)
-        pos = (Vec02*)D_00248D30;
+        pos = (Vec4*)g_zeroVector;
     if (rot == 0)
-        rot = (Mat02*)&g_identityMatrix;
+        rot = (Mat3*)&g_identityMatrix;
     BuildMatrixFromRotationAndTranslation(pos, rot, &frame);
     InvertRigidTransform(pos, rot, (Quad16*)&inverse);
     ClearMatrix(&scaling);
@@ -701,9 +701,9 @@ void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out)
 // cross product's length is read twice: for the test by ToFloat (an asm qmfc2) and for the sine
 // by ToFloatMoved, whose qmfc2 is the compiler's own copy, a VU0-unit insn sched2 issues after
 // the two lqc2 of the dot, where retail has the loop counter's move.
-void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m)
+void BuildRotationBetweenVectors(Vec4* a, Vec4* b, f32* m)
 {
-    Vec02 axis;
+    Vec4 axis;
     f32 la = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*a)));
     f32 lb = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(*b)));
     if (la < 0.0001f || lb < 0.0001f) {
@@ -712,7 +712,7 @@ void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m)
     }
     u128 c = Vu0::Cross(Vu0::Q(*a), Vu0::Q(*b));
     u128 lc = Vu0::Length(c);
-    const Vec02* fallback = &g_unitXVector;
+    const Vec4* fallback = &g_unitXVector;
     Vu0::Q(axis) = c;
     if (Vu0::ToFloat(lc) < 0.0001f) {
         axis = *fallback;

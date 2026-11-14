@@ -15,9 +15,9 @@
 // One step of the chain func_001DDD18 builds: the object's position, the point below it, its
 // length and the object.
 struct RedirectStep {
-    Vec02 pos;              // 0x00: the object's v140
-    Vec02 vel;              // 0x10: its velocity (func_001278A8; func_001DDE90 integrates it)
-    Vec02 below;            // 0x20
+    Vec4 pos;              // 0x00: the object's v140
+    Vec4 vel;              // 0x10: its velocity (func_001278A8; func_001DDE90 integrates it)
+    Vec4 below;            // 0x20
     f32 length;             // 0x30
     PlacedObject* node;     // 0x34
     u8 pad38[8];
@@ -34,7 +34,7 @@ struct RedirectObject : PlacedObject {
     f32 maxBend;            // 0x2EC: the angle a step may bend from the one before
     s32 iterations;         // 0x2F0: the substeps func_001DDE90 divides the frame into
     u8 pad2F4[0x300 - 0x2F4];
-    Vec02 gravity;          // 0x300: added to every free step's velocity each frame
+    Vec4 gravity;          // 0x300: added to every free step's velocity each frame
     s32 f310;               // 0x310
     u8 pad314[0x320 - 0x314];
     Quad16 q320;            // 0x320: set from D_00275730 by func_001DDCE0

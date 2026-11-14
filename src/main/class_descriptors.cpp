@@ -92,18 +92,18 @@ struct AgentRequest;
 struct AgentValueNotice;
 struct AimBlendGrid;
 struct ArmedStateNotifier;
-struct Attach03;
+struct ColliderAttachment;
 struct AttachedSet;
 struct BlinkObject;
 struct ContactlessCollider;
 struct BufferedStream;
-struct C17;
-struct C24;
+struct ProgressCollider;
+struct PathSpeedCollider;
 struct C35;
-struct C37;
+struct OverlapTracker;
 struct C52;
 struct C71;
-struct C80;
+struct TargetFindingPoint;
 struct Camera;
 struct CameraController;
 struct CameraPlacement;
@@ -118,7 +118,7 @@ struct ColoredTriangleSet;
 struct CompanionAgent;
 struct ConeAgent;
 struct ConeVolume;
-struct Contact03;
+struct BodyContact;
 struct ContactAgent;
 struct ContactEnd03;
 struct ContactEvent;
@@ -143,7 +143,7 @@ struct EffectOwner;
 struct EffectSpawner;
 struct EntryQueue;
 struct EntryTableObject;
-struct Ev07;
+struct PlayerMessageRecord;
 struct FaceRef;
 struct FlaggedObject;
 struct FlaggedObjectSet;
@@ -192,7 +192,7 @@ struct OnOffCameraController;
 struct OnOffObject;
 struct Oscillator;
 struct OwnerMessage;
-struct Packet47;
+struct FollowerNotification;
 struct PadStick;
 struct PairController;
 struct PairedObject;
@@ -209,7 +209,7 @@ struct PointObject;
 struct PooledContact;
 struct PooledHolder;
 struct PooledObject;
-struct Rec50;
+struct EffectSpawnerRecord;
 struct RecordMember;
 struct RedirectObject;
 struct SaveNotifier;
@@ -221,7 +221,7 @@ struct SequencedObject;
 struct SoundNotifier;
 struct SoundStateObject;
 struct SourceNotice;
-struct Src_13AD08;
+struct ScaledBlockSource;
 struct StandIn;
 struct StateGraph;
 struct StateNotifier;
@@ -295,22 +295,22 @@ typedef void (*PathM10)(PathCurve* self, void* a1, void* a2, void* a3, void* a4,
 typedef void (*PathM11)(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
 
 void SetSwitchedColliderMode();
-void InitPauseMenu(T217D_6D0* self);
-void SetPauseMenuOpen(T217D_6D0* self, s32 mode);
-void UpdatePauseMenu(T217D_6D0* self);
-void SetPauseMenuMode(T217D_6D0* self, s32 v);
-void ShowPauseMenu(T217D_6D0* self);
-void HidePauseMenu(T217D_6D0* self);
-void DrawPauseMenu(T217D_6D0* self);
+void InitPauseMenu(PauseMenu* self);
+void SetPauseMenuOpen(PauseMenu* self, s32 mode);
+void UpdatePauseMenu(PauseMenu* self);
+void SetPauseMenuMode(PauseMenu* self, s32 v);
+void ShowPauseMenu(PauseMenu* self);
+void HidePauseMenu(PauseMenu* self);
+void DrawPauseMenu(PauseMenu* self);
 void ComputeObjectGathererContactValues();
 void ResolveObjectGathererContact();
 void InitEffect(Effect* self, void* pos, f32 scale, s32 flags);
 void UpdateColliderBounds(Collider* self);
 void ComputePathFollowerContactValue();
-void InitWarpMenu(T217D_0F0* self);
-void HandleWarpMenuInput(T217D_0F0* self, PadRecord* t);
-void SetWarpMenuOpen(T217D_0F0* self, s32 a1);
-void DrawWarpMenu(T217D_0F0* self);
+void InitWarpMenu(WarpPageList* self);
+void HandleWarpMenuInput(WarpPageList* self, PadRecord* t);
+void SetWarpMenuOpen(WarpPageList* self, s32 a1);
+void DrawWarpMenu(WarpPageList* self);
 
 
 extern const ClassDescriptor<2> D_00217380 = { 0x0, 0x0, 0x0, 0x0, {
@@ -492,23 +492,23 @@ extern const ClassDescriptor<124> g_switchedColliderClass = { &g_colliderClass, 
     (Fn_Table)GetCaptionHoldTime, (Fn_Table)GetScreenElementSlideOutTime, (Fn_Table)ShowScreenElement, (Fn_Table)HideScreenElement,
     (Fn_Table)SetScreenElementMode, (Fn_Table)SetScreenElementClock, (Fn_Table)AreScreenElementsTogether, 0,
 } };
-extern const T217D_Vt D_00217E30 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00217E80 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_reserveCountCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_collectedItemCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
 extern const T217D_Vt D_00217ED0 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
 extern const T217D_Vt D_00217F20 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00217F70 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetPairCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_pairControllerCountCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetPairCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
 extern const T217D_Vt g_gaugeAmountCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetGaugeAmountCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
 extern const T217D_Vt D_00218010 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00218060 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_002180B0 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00218100 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00218150 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_002181A0 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetGaugeColliderCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_002181F0 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00218240 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00218290 = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_pathFollowerSecondCountCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_pathFollowerFirstCountCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_hitCountCaptionAMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_hitCountCaptionBMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_gaugeColliderCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetGaugeColliderCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_completionPercentCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_firstTallyCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
+extern const T217D_Vt g_secondTallyCaptionMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitCounterCaption, (ElementFn)UpdateCounterCaption, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawCounterCaption, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetCaptionHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
 extern const T217D_Vt g_gaugeBarElementMethods = { (ElementIntFn)InitScreenElement, (ElementFn)InitGauge, (ElementFn)UpdateScreenElementSlide, 0, 0, (ElementFn)ResetScreenElement, 0, 0, (ElementTextFn)SetScreenElementText, (ElementFn)DrawGauge, 0, (ElementTimeFn)GetScreenElementSlideInTime, (ElementTimeFn)GetScreenElementHoldTime, (ElementTimeFn)GetScreenElementSlideOutTime, (ElementFn)ShowScreenElement, (ElementFn)HideScreenElement, (ElementIntFn)SetScreenElementMode, (ElementClockFn)SetScreenElementClock, (ElementPairFn)AreScreenElementsTogether, 0 };
-extern const T217D_Vt D_00218330 = {
+extern const T217D_Vt g_buttonHintElementMethods = {
     (ElementIntFn)InitScreenElement, (ElementFn)InitFramedElement, (ElementFn)UpdateScreenElementSlide, 0,
     0, (ElementFn)ResetScreenElement, 0, 0,
     (ElementTextFn)SetCaptionTextAndSize, (ElementFn)DrawElementWithFadedFrame, 0, (ElementTimeFn)GetScreenElementSlideInTime,

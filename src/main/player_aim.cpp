@@ -31,7 +31,7 @@ struct BaseObject;
 
 extern f32 g_gameTime[];
 extern u8 g_class75List[];
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, f32 t, Vec02* vel, Vec02* spin);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, f32 t, Vec4* vel, Vec4* spin);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern const T2195_Vt g_ownerPoseSourceMethods;
 
@@ -42,13 +42,13 @@ struct ChildPoseSource : Attachment {
     s32 count;              // 0x1C
 };
 
-struct Rec_274BA0 { s32 a[12]; f32 b; };
+struct AimModeTable { s32 a[12]; f32 b; };
 
 // The file's .data, in retail's order.
 f32 g_aimStartDelay = 0.06666667f;
 f32 g_aimDurationLong = 0.16666667f;
 f32 g_aimDurationShort = 0.116666675f;
-Rec_274BA0 g_aimModeChain = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
+AimModeTable g_aimModeChain = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
 float g_aimHitDistanceBias = -250.0f;
 f32 g_aimBlendOverride = -1.0f;
 f32 g_aimBlendSearchOffset[4] = { 175.0f, 0.0f, 0.0f, 0.0f };
@@ -60,15 +60,15 @@ s32 D_00274C14 = 0;
 // Gives the owner's position (v190) plus the offsets of the pose sources attached to it (each
 // source's position minus the owner's) in *pos, and the sum of their second vectors in *vec, at
 // time t.
-void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
+void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec4* pos, Vec4* vec)
 {
     ListFrame frame;
-    Vec02 a;
-    Vec02 b;
-    Vec02 d;
+    Vec4 a;
+    Vec4 b;
+    Vec4 d;
     PlacedObject* owner = self->owner;
     *pos = owner->v190;
-    *vec = D_00248D30;
+    *vec = g_zeroVector;
     Attachment* c = self;
     s32 n = ((ChildPoseSource*)c)->count;
     if (n > 0) {
@@ -93,9 +93,9 @@ void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
 
 // The rows of m, each turned by r, returned by value (g++'s named return value): r's rows are
 // read once, and each row goes to the result as soon as it is made.
-static inline Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out
+static inline Mat3 RotateRowsBy(const Mat3& r, const Mat3& m) return out
 {
-    Mat02 t;
+    Mat3 t;
     Vu0::Vec r0 = Vu0::Vec::Of(r.r[0]);
     Vu0::Vec r1 = Vu0::Vec::Of(r.r[1]);
     Vu0::Vec r2 = Vu0::Vec::Of(r.r[2]);
@@ -110,16 +110,16 @@ static inline Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out
 // Gives the owner's rotation combined with the rotations of the pose sources attached to it (each
 // applied in turn, relative to the owner's own) in *outRot, and the matching vector in *outVec,
 // at time t.
-void CombineChildPoseRotations(ChildPoseSource* self, Mat02* outRot, Vec02* outVec, f32 t)
+void CombineChildPoseRotations(ChildPoseSource* self, Mat3* outRot, Vec4* outVec, f32 t)
 {
     ListFrame frame;
-    Mat02 saved;
-    Mat02 tmpRot;
-    Mat02 m;
-    Vec02 tmpVec;
+    Mat3 saved;
+    Mat3 tmpRot;
+    Mat3 m;
+    Vec4 tmpVec;
     PlacedObject* owner = self->owner;
     *outRot = owner->m1A0;
-    *outVec = D_00248D30;
+    *outVec = g_zeroVector;
     owner->desc02()->m29(owner, outRot, 0);
     saved = *outRot;
     Attachment* c = self;
@@ -177,7 +177,7 @@ struct AimSoundPoint { u8 pad0[0x54]; s32 f54; };
 struct AimTarget { u8 pad0[0x3E4]; BlendAnimationView* f3E4; };
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 struct StateGraph;
 struct TwoBlendWeights;
@@ -201,7 +201,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     if (state != -1 && old != -1) {
         chained = state == g_aimModeChain.a[old];
     }
-    AimSlotObject* hold = (AimSlotObject*)self->f25D8[0];
+    AimSlotObject* hold = (AimSlotObject*)self->slotObjects[0];
     if (hold != 0 && chained == 0) {
         hold->vt[7](hold);
     }
@@ -216,7 +216,7 @@ void SetPlayerAimMode(Player* self, s32 state)
     play:
         StartSoundEffect(id, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     case 0:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         break;
     case 6:
     case 7:
@@ -241,17 +241,17 @@ void SetPlayerAimMode(Player* self, s32 state)
         self->aimCurve = 0;
         break;
     case 1:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         break;
     case 2:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         break;
     case 10:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         anim = self->aimAnim10;
         break;
     case 11:
-        self->f4B8 = 0;
+        self->stateBits = 0;
         anim = self->aimAnim11;
         break;
     case 0: {
@@ -260,16 +260,16 @@ void SetPlayerAimMode(Player* self, s32 state)
         sound = 13;
         speed = 0.0f;
         start = g->pC0->p8->f8;
-        self->f4B8 = 0;
+        self->stateBits = 0;
         self->previousBoundObject = 0;
         self->previousAimCurve = 0;
         self->aimEndTime = g_gameClock.time + 0.1f;
         break;
     }
     case 3: {
-        Vec02 v;
+        Vec4 v;
         self->foundNodeCount = 0;
-        self->f21C8 = -1.0f;
+        self->aimHeldTime = -1.0f;
         TransformPointBetweenFrames(0, self, &((PlacedObject*)self->f23D4)->v140, &v);
         Vu0::Vec h = Vu0::Vec::Scalar(0.5f);
         Vu0::Q(v) = Vu0::MulXSum(Vu0::Vec::Of(v), h, Vu0::Vec::Of(((PlacedObject*)self->f61C)->pos), h).q;
@@ -360,7 +360,7 @@ void SetPlayerAimMode(Player* self, s32 state)
         if (s == 0.0f) {
             if (start == 0.0f) {
                 speed = -1.0f;
-            } else if (start == ((AimPlayer*)self->aimAnimPlayer)->anim->f34) {
+            } else if (start == ((AimPlayer*)self->aimAnimPlayer)->anim->blendedDuration) {
                 speed = 1.0f;
             }
         } else {
@@ -489,18 +489,18 @@ void HandlePlayerAimButton(Player* self, PadRecord* other)
         break;
     }
     if (held != 0)
-        self->f21C8 = g_gameTime[0];
+        self->aimHeldTime = g_gameTime[0];
 tail:
     s32 st = self->aimMode;
     if (st == -1) {
         if (flag != 0) {
-            if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
+            if (g_gameTime[0] - self->aimHeldTime < 0.35f) st = 3;
         }
     } else if (st >= -1) {
         if (st < 8) {
             if (st >= 4) {
                 if (flag != 0 && self->f2248 != 0) {
-                    if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
+                    if (g_gameTime[0] - self->aimHeldTime < 0.35f) st = 3;
                 }
             }
         }
@@ -515,30 +515,30 @@ tail:
 void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b)
 {
     ListFrame frame;
-    Mat02 rot;
-    Vec02 eye;
-    Vec02 here;
-    Vec02 world;
-    Vec02 local;
-    Mat02 objRot;
-    Vec02 objOrigin;
-    Vec02 delta;
-    Vec02 hitPoint;
-    Vec02 bestPoint;
+    Mat3 rot;
+    Vec4 eye;
+    Vec4 here;
+    Vec4 world;
+    Vec4 local;
+    Mat3 objRot;
+    Vec4 objOrigin;
+    Vec4 delta;
+    Vec4 hitPoint;
+    Vec4 bestPoint;
     u8* list = g_class75List;
     f32 bestDist = 300.0f;
     Class75Object* best = 0;
     BuildAxisAngleMatrix(&g_unitZVector, &rot, self->heading);
     {
-        Vec02 k;
+        Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(a);
         Vu0::Q(eye) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Q(k));
     }
-    TransformPointBetweenFrames(self, 0, (Vec02*)tbl, &here);
-    Vu0::Q(world) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*(Vec02*)tbl)), Vu0::Q(eye));
+    TransformPointBetweenFrames(self, 0, (Vec4*)tbl, &here);
+    Vu0::Q(world) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*(Vec4*)tbl)), Vu0::Q(eye));
     Vu0::Q(local) = Vu0::Sub(Vu0::Q(world), Vu0::Q(here));
     for (Class75Object* n = *(Class75Object**)list; n != 0; n = *(Class75Object**)&n->link) {
-        Vec02 bestDir;
+        Vec4 bestDir;
         f32 hit[2];
         if ((n->count & mode) == 0) {
             continue;
@@ -546,7 +546,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         ComputeObjectFrameAtTime((PlacedObject*)n->parent, 0, &objOrigin, &objRot, a, 0, 0);
         GetObjectWorldPosition(n, &delta);
         Vu0::Q(delta) = Vu0::Add(Vu0::Q(delta), Vu0::Q(local));
-        Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec02*)&n->pos)), Vu0::Q(objOrigin));
+        Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec4*)&n->pos)), Vu0::Q(objOrigin));
         MeasurePointToSegment(&world, &delta, &hitPoint, &hit[0], &hit[1]);
         if (n->parent != 0) {
             if (((PlacedObject*)n->parent)->root->desc->flags & 8) {
@@ -566,7 +566,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         }
     }
     *found = best;
-    Vu0::Q(*(Vec02*)dir) = Vu0::Q(bestPoint);
+    Vu0::Q(*(Vec4*)dir) = Vu0::Q(bestPoint);
 }
 
 // What FindNearestClass75Ahead finds: the direction to the nearest class 0x75 object ahead

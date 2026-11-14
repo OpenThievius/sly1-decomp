@@ -53,7 +53,7 @@ extern u8 g_objectPropertyDescriptors[];
 
 s32 ReadBufferedS16(BufferedStream* self);
 
-// The owner's slot 44 (Desc02::m28) is told what was asked.
+// The owner's slot 44 (PlacedObjectDescriptor::m28) is told what was asked.
 typedef void (*VectorCurveToldFn)(PlacedObject* self, f32* a, f32* b);
 
 
@@ -80,7 +80,7 @@ struct CurveSegment { f32 diff; f32 delta; u8* ptr; };
 
 
 
-// The owner's slot 45 (Desc02::m29) is told what was asked.
+// The owner's slot 45 (PlacedObjectDescriptor::m29) is told what was asked.
 typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
 
 // The angles and their rates EvaluateAxisCurves gives an axis rotation curve (func_0011FF08).
@@ -182,15 +182,15 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 // Gives the owner the position and the orientation this attachment gives (slots 29, 30, 32, 33).
 struct PoseLocals {
-    Vec02 pos;
-    Vec02 vec;
-    Mat02 rot;
+    Vec4 pos;
+    Vec4 vec;
+    Mat3 rot;
 };
 
-// The owner's slot 44 (Desc02::m28) and 45 (m29) are told what was asked.
-typedef void (*PositionToldFn)(PlacedObject* self, Vec02* a, Vec02* b);
+// The owner's slot 44 (PlacedObjectDescriptor::m28) and 45 (m29) are told what was asked.
+typedef void (*PositionToldFn)(PlacedObject* self, Vec4* a, Vec4* b);
 
-typedef void (*OrientationToldFn)(PlacedObject* self, Mat02* b, Vec02* q);
+typedef void (*OrientationToldFn)(PlacedObject* self, Mat3* b, Vec4* q);
 
 typedef void (*OwnerToldFn)(PlacedObject* self);
 
@@ -220,7 +220,7 @@ extern const PositionCurveVt g_positionCurveKind0Methods;
 extern const PositionCurveVt g_positionCurveKind1Methods;
 extern const PositionCurveVt g_positionCurveKind2Methods;
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 extern u8 g_identityMatrix[];
 
@@ -235,7 +235,7 @@ void* AllocateZeroedFrontMemory(s32 n);
 
 extern u8 g_ownerPoseSourceMethods[];
 
-typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
+typedef void (*PositionOutToldFn)(PlacedObject* self, Vec4* out);
 
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
@@ -247,7 +247,7 @@ extern const WeightCurveVt g_weightCurveKind3Methods;
 extern const WeightCurveVt g_weightCurveKind4Methods;
 void* AllocateZeroedFrontMemory(s32 n);
 
-typedef void (*FrameOutToldFn)(PlacedObject* self, Mat02* out1, Vec02* out2);
+typedef void (*FrameOutToldFn)(PlacedObject* self, Mat3* out1, Vec4* out2);
 
 // Fills the object property table with the built-in entries.
 void InitObjectBuiltinTable(void)
@@ -263,7 +263,7 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a
 {
     s32 off = index << 2;
     // address arithmetic over a variable index
-    Desc01* owner = *(Desc01**)((u8*)g_classDescriptorTable + off);
+    BaseObjectDescriptor* owner = *(BaseObjectDescriptor**)((u8*)g_classDescriptorTable + off);
     BaseObject* r = (BaseObject*)AllocateZeroedFrontMemory(owner->size);
     r->desc = owner;
     r->id = a3;
@@ -274,9 +274,9 @@ BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a
     r->parent = a2;
     r->world = (World*)a1;
     r->scriptScope = GetScriptEntryScope(a4, (World*)a1);
-    AppendToList((List01*)(GetHashedSlot((u8*)r->world, r->id)), r);
+    AppendToList((ObjectList*)(GetHashedSlot((u8*)r->world, r->id)), r);
     // address arithmetic over a variable index
-    u8* base = (u8*)r->world->f1884;
+    u8* base = (u8*)r->world->objectsById;
     void** slot = (void**)(base + off);
     r->nextById = (BaseObject*)*slot;
     *slot = r;
@@ -414,7 +414,7 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
             t[0] = ReadBufferedFloat(r);
             t[1] = ReadBufferedFloat(r);
             t[2] = ReadBufferedFloat(r);
-            BuildRotationFromVector((Vec02*)t, (Mat02*)dst);
+            BuildRotationFromVector((Vec4*)t, (Mat3*)dst);
             break;
         }
         case 6:
@@ -494,7 +494,7 @@ void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r)
             t[1] = ReadBufferedFloat(r);
             t[2] = ReadBufferedFloat(r);
             o = sc.f + 4;
-            BuildRotationFromVector((Vec02*)t, (Mat02*)o);
+            BuildRotationFromVector((Vec4*)t, (Mat3*)o);
             ((void (*)(void*, f32*))fn)(tgt, o);
             break;
         }
@@ -862,12 +862,12 @@ void GetLinearWeightCurveTimes(LinearWeightCurve* self, s32* count, f32** out)
 
 // Evaluates the three axis curves at key: the values start from base (and the slopes from 0), and
 // each axis that has a curve overwrites its own component; outputs may be null.
-void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
+void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec4* base, f32* outValues, f32* outSlopes, f32 key, f32 scale)
 {
     if (outValues)
-        *(Vec02*)outValues = *base;
+        *(Vec4*)outValues = *base;
     if (outSlopes)
-        Vu0::Q(*(Vec02*)outSlopes) = Vu0::Zero();
+        Vu0::Q(*(Vec4*)outSlopes) = Vu0::Zero();
     for (s32 i = 0; i < 3; i++) {
         WeightCurve* curve = axis[i];
         if (curve)
@@ -877,7 +877,7 @@ void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec0
 
 // Reads a vector and a 3-bit mask, then for each set bit one weight curve (kind byte, then the
 // curve's own read) into out[0..2], one per axis.
-void ReadAxisCurves(WeightCurve** out, Vec02* dst, Stream83* src)
+void ReadAxisCurves(WeightCurve** out, Vec4* dst, Stream83* src)
 {
     s32 mask = ReadBufferedU8((BufferedStream*)src);
     WeightCurve** slot = out;
@@ -945,7 +945,7 @@ void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, 
     CurveSegment s;
     FindCurveSegment(key, flags, 0x40, count, (u8*)keys, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
-    EvaluateHermiteVectorSegment(s.delta, (const Vec02*)(p + 0x10), (const Vec02*)(p + 0x30), (const Vec02*)(p + 0x50), (const Vec02*)(p + 0x60), s.diff, scale, (Vec02*)values, (Vec02*)slopes, 0);
+    EvaluateHermiteVectorSegment(s.delta, (const Vec4*)(p + 0x10), (const Vec4*)(p + 0x30), (const Vec4*)(p + 0x50), (const Vec4*)(p + 0x60), s.diff, scale, (Vec4*)values, (Vec4*)slopes, 0);
 }
 
 // Reads a list of vector keys from the stream: a count, then per key the time (in 1/60 s, stored in
@@ -1008,7 +1008,7 @@ void EvaluateAxisPositionCurve(AxisPositionCurve* self, PlacedObject* other, s32
 // apart (or it has no keys).
 void ReadAxisPositionCurve(AxisPositionCurve* self, Stream83* arg)
 {
-    Vec02 v[2];
+    Vec4 v[2];
     s32 count;
     f32* values;
     s32 result;
@@ -1095,8 +1095,8 @@ void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg)
     if (loc.count > 0) {
         self->vt->eval(self, 0, 0, loc.a, 0, loc.values[0], 1.0f);
         self->vt->eval(self, 0, 0, loc.b, 0, loc.values[loc.count - 1], 1.0f);
-        MultiplyMatrices3x3((Mat02*)loc.a, (Mat02*)loc.b, (Mat02*)loc.c);
-        MatrixToAxisAngle((Mat02*)loc.c, &loc.first, (Vec02*)loc.d);
+        MultiplyMatrices3x3((Mat3*)loc.a, (Mat3*)loc.b, (Mat3*)loc.c);
+        MatrixToAxisAngle((Mat3*)loc.c, &loc.first, (Vec4*)loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     } else {
         result = 1;
@@ -1150,8 +1150,8 @@ void ReadKeyedRotationCurve(KeyedRotationCurve* self, Stream83* arg)
     } else {
         BuildEulerRotationMatrix((f32*)&self->keys[0].v0, (f32*)loc.a);
         BuildEulerRotationMatrix((f32*)&self->keys[self->count - 1].v0, (f32*)loc.b);
-        MultiplyMatrices3x3((Mat02*)loc.a, (Mat02*)loc.b, (Mat02*)loc.c);
-        MatrixToAxisAngle((Mat02*)loc.c, &loc.first, (Vec02*)loc.d);
+        MultiplyMatrices3x3((Mat3*)loc.a, (Mat3*)loc.b, (Mat3*)loc.c);
+        MatrixToAxisAngle((Mat3*)loc.c, &loc.first, (Vec4*)loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     }
     self->closed = result;
@@ -1221,13 +1221,13 @@ void GetKeyedScaleCurveKeyTimes(KeyedScaleCurve* self, s32* outCount, f32** outT
 // sequence if it has one): out0 gets the weighted sum of the positions and out1 of the velocities
 // (a missing target counts as the object's own value), either may be null; then the owner's method
 // 0x28 sees them.
-void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec02* out0, Vec02* out1, f32 dt, f32 scale)
+void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 c, Vec4* out0, Vec4* out1, f32 dt, f32 scale)
 {
-    Vec02 x0;
-    Vec02 x1;
-    Vec02 k;
+    Vec4 x0;
+    Vec4 x1;
+    Vec4 k;
     f32 x2;
-    Vec02* p1;
+    Vec4* p1;
     if (out0)
         Vu0::Q(*out0) = Vu0::Zero();
     if (out1)
@@ -1244,7 +1244,7 @@ void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 
     }
     for (s32 i = 0; i < cfg->count; i++) {
         BlendEntry* e = (BlendEntry*)(cfg->base + i * cfg->stride);
-        Vec02* p0 = out0 ? &x0 : 0;
+        Vec4* p0 = out0 ? &x0 : 0;
         f32 wt = e->weight;
         if (wt == 0.0f)
             continue;
@@ -1254,7 +1254,7 @@ void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 
                 u128 w = Vu0::FromFloat(wt);
                 u128 acc = Vu0::Q(*out0);
                 Vu0::Q(k) = w;
-                Vu0::Q(*out0) = Vu0::MulAddX(acc, Vu0::Q(cam ? cam->v190 : *(Vec02*)D_00248D30), w);
+                Vu0::Q(*out0) = Vu0::MulAddX(acc, Vu0::Q(cam ? cam->v190 : *(Vec4*)g_zeroVector), w);
             }
         } else {
             f32 a, b;
@@ -1290,12 +1290,12 @@ void EvaluateBlendedPositionCurve(PositionCurveKind2* o, PlacedObject* cam, s32 
 
 // The product a b of two rotations into out: b's rows each rotated by a, the rows of both read
 // once (mul_rotation.h has the forms that read b's rows one by one).
-static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotationRowsOnce(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     const u128* p = (const u128*)&a;
     const u128* q = (const u128*)&b;
     u128 a0 = p[0], a1 = p[1], a2 = p[2];
@@ -1314,12 +1314,12 @@ static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& 
 // any): a rotation matrix to out0 and an angular velocity to out1 (either may be null). Targets of
 // weight 0 are skipped, a missing target uses the object's own value; rotations are averaged as
 // angles or, with multiplyRotations, composed by weighted axis-angle.
-void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
+void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat3* out0, Vec4* out1, f32 dt, f32 scale)
 {
-    Vec02 x0;
-    Vec02 acc0;
-    Vec02 x1;
-    Vec02 acc1;
+    Vec4 x0;
+    Vec4 acc0;
+    Vec4 x1;
+    Vec4 acc1;
     f32 x2;
     if (out0)
         Vu0::Q(acc0) = Vu0::Zero();
@@ -1344,7 +1344,7 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
         if (!tg) {
             if (!out0)
                 continue;
-            Vu0::Set(x0, Vu0::Q(cam ? cam->v1D0 : *(Vec02*)D_00248D30));
+            Vu0::Set(x0, Vu0::Q(cam ? cam->v1D0 : *(Vec4*)g_zeroVector));
         } else {
             f32 a, b;
             if (!seq) {
@@ -1370,9 +1370,9 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
             if (w == 0.0f) {
                 BuildEulerRotationMatrix((f32*)&x0, (f32*)out0);
             } else {
-                Vec02 axis;
-                Mat02 rotA;
-                Mat02 prod;
+                Vec4 axis;
+                Mat3 rotA;
+                Mat3 prod;
                 f32 angle;
                 BuildEulerRotationMatrix((f32*)&x0, (f32*)&rotA);
                 MultiplyMatrices3x3(&rotA, out0, &prod);
@@ -1513,7 +1513,7 @@ void EvaluateValueBlendCurve(ValueBlendWeightCurve* o, PlacedObject* cam, s32 c,
         WeightCurve* tg = o->targets[i];
         if (!tg) {
             if (cam)
-                sum0 += e->weight * cam->f274[o->index];
+                sum0 += e->weight * cam->defaultValues[o->index];
         } else {
             f32 a, b;
             if (!seq) {
@@ -1704,17 +1704,17 @@ void ReleasePoseSource(Attachment* self, s32 flags)
     if (self == a && m->positionAttachment == 0 && (flags & 1) != 0) {
         if ((m->desc->flags & 2) != 0) {
             ConstrainColliderVector(m, (u8*)&((Collider*)m)->v440, (u8*)&m->v150, local, 0);
-            m->desc02()->m20(m, (Vec02*)local);
+            m->desc02()->m20(m, (Vec4*)local);
         } else {
-            SetPlacedObjectVelocity(m, (Vec02*)D_00248D30);
+            SetPlacedObjectVelocity(m, (Vec4*)g_zeroVector);
         }
     }
     if (self == b && m->orientationAttachment == 0 && (flags & 2) != 0) {
         if ((m->desc->flags & 2) != 0) {
             ConstrainColliderVector(m, (u8*)&((Collider*)m)->v460, (u8*)&m->v160, local, 0);
-            m->desc02()->m21(m, (Vec02*)local);
+            m->desc02()->m21(m, (Vec4*)local);
         } else {
-            SetPlacedObjectSpin(m, (Vec02*)D_00248D30);
+            SetPlacedObjectSpin(m, (Vec4*)g_zeroVector);
         }
     }
     PushFreeSlot(&m->world->pool1B20, self);
@@ -1722,20 +1722,20 @@ void ReleasePoseSource(Attachment* self, s32 flags)
 
 // Gives the owner's position and a zero vector, then tells the owner through its slot-28 method if
 // it has one.
-void GetOwnerPosition(Attachment* self, Vec02* out1, Vec02* out2)
+void GetOwnerPosition(Attachment* self, Vec4* out1, Vec4* out2)
 {
     *out1 = self->owner->v190;
-    *out2 = *(Vec02*)D_00248D30;
+    *out2 = *(Vec4*)g_zeroVector;
     if (self->owner->desc02()->m28 != 0) {
         ((PositionOutToldFn)self->owner->desc02()->m28)(self->owner, out1);
     }
 }
 
 // Gives the owner's orientation and a zero vector, then tells the owner through its slot-29 method.
-void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
+void GetOwnerRotation(Attachment* self, Mat3* out1, Vec4* out2)
 {
     *out1 = self->owner->m1A0;
-    *out2 = *(Vec02*)D_00248D30;
+    *out2 = *(Vec4*)g_zeroVector;
     ((FrameOutToldFn)self->owner->desc02()->m29)(self->owner, out1, out2);
 }
 
@@ -1743,14 +1743,14 @@ void GetOwnerRotation(Attachment* self, Mat02* out1, Vec02* out2)
 void GetOwnerValue(Attachment* self, f32* value, f32* slope)
 {
 	Rec2195_224* rec = (Rec2195_224*)self->owner->linkRecord;
-	*value = rec->f8C;
+	*value = rec->initialAngle;
 	*slope = 0.0f;
 }
 
 // Copies the 3-row identity matrix into out.
-void GetIdentityMatrix(Attachment* unused, Mat02* out)
+void GetIdentityMatrix(Attachment* unused, Mat3* out)
 {
-    Mat02* src = (Mat02*)g_identityMatrix;
+    Mat3* src = (Mat3*)g_identityMatrix;
     out->r[0] = src->r[0];
     out->r[1] = src->r[1];
     out->r[2] = src->r[2];
@@ -1759,7 +1759,7 @@ void GetIdentityMatrix(Attachment* unused, Mat02* out)
 // Gives entry index of the owner's animation value array.
 f32 GetOwnerIndexedValue(Attachment* self, s32 index)
 {
-	return self->owner->f274[index];
+	return self->owner->defaultValues[index];
 }
 
 // Picks the source's two modes from the owner: its own 0x2C9 and 0x2CA bytes unless they are -1,
@@ -1819,10 +1819,10 @@ void ApplyPoseSource(Attachment* self, s32 flag)
 // its velocity toward b: a spring term along the offset (quadratic coefficients from p20C, as
 // k2*len + k1 + k0/len) and a damping term on the velocity difference (coefficients of p210,
 // limited by 1 over the frame time).
-void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec02* b, Vec02* out)
+void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec4* a, Vec4* b, Vec4* out)
 {
-    Vec02 force = *(Vec02*)D_00248D30;
-    Vec02 d;
+    Vec4 force = *(Vec4*)g_zeroVector;
+    Vec4 d;
     f32* k = (f32*)self->p20C;
     f32* k2;
     if (k != 0) {
@@ -1849,25 +1849,25 @@ void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec
     *out = force;
 }
 
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
+f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 // The ramp with its floats first (the value, the target, the step), as retail sets $f12 to
 // $f14 before the profile and the rate's address.
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 extern f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-extern const Vec02 g_unitXVector;
+extern const Vec4 g_unitXVector;
 
 // Moves the owner's position toward what the pose source gives (position A and velocity B), once
 // per frame, by mode: 2 and 7 copy it; 1 integrates a spring acceleration; 3, 6 and 9 move toward
 // it with a speed limited by a ramp (6 must also arrive by an end time) and drop to mode 7 once
 // there; 4 follows a Hermite segment that ends exactly at the end time.
-void ApplyPoseSourcePosition(T2195_7C0* self)
+void ApplyPoseSourcePosition(TrackFollowAttachment* self)
 {
     PlacedObject* owner = self->owner;
     f32 dt;
     f32 now;
-    Vec02 A;
-    Vec02 B;
+    Vec4 A;
+    Vec4 B;
     if (owner->frameStepClock != 0) {
         dt = g_gameClock.step;
     } else {
@@ -1886,7 +1886,7 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
         owner->v150 = B;
         break;
     case 1: {
-        Vec02 C;
+        Vec4 C;
         ComputePositionSpringAcceleration(owner, dt, &A, &B, &C);
         Vu0::Q(C) = Vu0::Add(Vu0::Q(C), Vu0::Q(owner->v170));
         Vu0::Q(owner->pos) = Vu0::MulAddX2WeightFirst(Vu0::Vec::Of(owner->pos), Vu0::Vec::Scalar(dt), Vu0::Vec::Of(owner->v150), Vu0::Vec::Scalar(dt * (dt * 0.5f)), Vu0::Vec::Of(C)).q;
@@ -1896,9 +1896,9 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
     case 3:
     case 6:
     case 9: {
-        Vec02 d;
-        Vec02 dir;
-        Vec02 rest;
+        Vec4 d;
+        Vec4 dir;
+        Vec4 rest;
         RampProfile prof;
         f32 speed;
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(A), Vu0::Q(owner->pos));
@@ -1919,7 +1919,7 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
         prof.rampTime = ((RampProfile*)owner->p21C)->rampTime;
         f32 reach = ApproachValueWithRamp(0.0f, dist, dt, &prof, &speed);
         if (self->mode0 == 6) {
-            f32 end = self->f18;
+            f32 end = self->endTime;
             f32 lim;
             if (now < end) {
                 lim = dist * dt / (end - now + dt);
@@ -1944,16 +1944,16 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
         break;
     }
     case 4: {
-        f32 end = self->f18;
+        f32 end = self->endTime;
         f32 left = end - now;
         if (left < dt) {
-            Vec02 k;
+            Vec4 k;
             Vu0::Q(k) = Vu0::FromFloat(now + dt - end);
             Vu0::Q(owner->pos) = Vu0::MulAddX(Vu0::Q(A), Vu0::Q(B), Vu0::Q(k));
             owner->v150 = B;
         } else {
-            Vec02 p;
-            Vec02 v;
+            Vec4 p;
+            Vec4 v;
             EvaluateHermiteVectorSegment(left, &owner->pos, &owner->v150, &A, &B, dt, 1.0f, &p, &v, 0);
             owner->pos = p;
             owner->v150 = v;
@@ -1967,12 +1967,12 @@ void ApplyPoseSourcePosition(T2195_7C0* self)
 // rotation and spin: a spring term along the axis of the remaining rotation (a quadratic in the
 // angle with the coefficients of p214) and a damping term toward the target's spin (coefficients of
 // p218, limited by 1 over the frame time).
-void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, Vec02* spin, Vec02* out)
+void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat3* rot, Vec4* spin, Vec4* out)
 {
-    Vec02 force = *(Vec02*)D_00248D30;
+    Vec4 force = *(Vec4*)g_zeroVector;
     if (self->p214 != 0) {
-        Mat02 m;
-        Vec02 axis;
+        Mat3 m;
+        Vec4 axis;
         f32 angle;
         MultiplyMatrices3x3(&self->rot, rot, &m);
         MatrixToAxisAngle(&m, &angle, &axis);
@@ -1983,7 +1983,7 @@ void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, V
         }
     }
     if (self->p218 != 0) {
-        Vec02 d;
+        Vec4 d;
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(*spin), Vu0::Q(self->v160));
         f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
         if (1e-4f < len) {
@@ -1999,8 +1999,8 @@ void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, V
     *out = force;
 }
 
-void OrthonormalizeMatrix(Mat02* m);
-void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat02* a, const Vec02* wa, Mat02* b, const Vec02* wb, Mat02* out, Vec02* outW,
+void OrthonormalizeMatrix(Mat3* m);
+void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat3* a, const Vec4* wa, Mat3* b, const Vec4* wb, Mat3* out, Vec4* outW,
                             s32 unused6);
 
 // Moves the owner's rotation toward the pose source's orientation A and spin B (and a link angle
@@ -2012,8 +2012,8 @@ void ApplyPoseSourceRotation(Attachment* self)
     PlacedObject* owner = self->owner;
     f32 dt;
     f32 now;
-    Mat02 A;
-    Vec02 B;
+    Mat3 A;
+    Vec4 B;
     f32 value;
     f32 slope;
     s32 hasValue;
@@ -2045,15 +2045,15 @@ void ApplyPoseSourceRotation(Attachment* self)
         }
         break;
     case 1: {
-        Vec02 C;
-        Vec02 w;
-        Mat02 m;
+        Vec4 C;
+        Vec4 w;
+        Mat3 m;
         ComputeRotationSpringAcceleration(owner, dt, &A, &B, &C);
         Vu0::Q(C) = Vu0::Add(Vu0::Q(C), Vu0::Q(owner->v180));
         Vu0::Vec s;
         s.q = Vu0::ScalarInGpr(dt);
         Vu0::Q(w) = Vu0::MulXSum(Vu0::Vec::Of(owner->v160), s, Vu0::Vec::Of(C), Vu0::Vec::Scalar(dt * (dt * 0.5f))).q;
-        BuildRotationFromVector((Vec02*)&w, (Mat02*)&m);
+        BuildRotationFromVector((Vec4*)&w, (Mat3*)&m);
         MulRotationIntoRotX(owner, m, owner->rot);
         OrthonormalizeMatrix(&owner->rot);
         Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Vec::Of(owner->v160), Vu0::Vec::Of(C), Vu0::Vec::ScalarInGpr(dt)).q;
@@ -2065,10 +2065,10 @@ void ApplyPoseSourceRotation(Attachment* self)
     case 3:
     case 6:
     case 9: {
-        Mat02 m;
-        Vec02 axis;
-        Vec02 rest;
-        Vec02 prof;
+        Mat3 m;
+        Vec4 axis;
+        Vec4 rest;
+        Vec4 prof;
         f32 angle;
         f32 rate;
         s32 settle = 0;
@@ -2080,7 +2080,7 @@ void ApplyPoseSourceRotation(Attachment* self)
         prof.z = ((f32*)owner->p220)[2];
         f32 reach = ApproachValueWithRamp(0.0f, angle, dt, (RampProfile*)&prof, &rate);
         if (self->mode1 == 6) {
-            f32 end = ((T2195_7C0*)self)->f18;
+            f32 end = ((TrackFollowAttachment*)self)->endTime;
             f32 lim;
             if (now < end) {
                 lim = angle * dt / (end - now + dt);
@@ -2114,7 +2114,7 @@ void ApplyPoseSourceRotation(Attachment* self)
         break;
     }
     case 4: {
-        f32 left = ((T2195_7C0*)self)->f18 - now;
+        f32 left = ((TrackFollowAttachment*)self)->endTime - now;
         if (left <= dt) {
             s32 still = 0;
             if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(B))) < 0.0001f
@@ -2124,12 +2124,12 @@ void ApplyPoseSourceRotation(Attachment* self)
             }
             if (still) {
                 owner->rot = A;
-                owner->v160 = *(Vec02*)D_00248D30;
+                owner->v160 = *(Vec4*)g_zeroVector;
             } else {
-                Vec02 w;
-                Mat02 m;
-                Vu0::Q(w) = Vu0::MulX(Vu0::Q(B), Vu0::Scalar(now + dt - ((T2195_7C0*)self)->f18));
-                BuildRotationFromVector((Vec02*)&w, (Mat02*)&m);
+                Vec4 w;
+                Mat3 m;
+                Vu0::Q(w) = Vu0::MulX(Vu0::Q(B), Vu0::Scalar(now + dt - ((TrackFollowAttachment*)self)->endTime));
+                BuildRotationFromVector((Vec4*)&w, (Mat3*)&m);
                 MulRotationIntoRotMatFirst(owner, m, A);
                 owner->v160 = B;
             }
@@ -2138,8 +2138,8 @@ void ApplyPoseSourceRotation(Attachment* self)
                 owner->linkRecord->angleSlope = 0.0f;
             }
         } else {
-            Mat02 m;
-            Vec02 s;
+            Mat3 m;
+            Vec4 s;
             BlendRotationsWithSpin(left, dt, 1.0f, &owner->rot, &owner->v160, &A, &B, &m, &s, 0);
             owner->rot = m;
             owner->v160 = s;
@@ -2159,12 +2159,12 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
     f32 ret = self->vt->getIndexed(self, val);
     switch (self->mode3) {
     case 2:
-        self->owner->f270[val] = ret;
+        self->owner->currentValues[val] = ret;
         break;
     case 3: {
-        f32 cur = self->owner->f270[val];
+        f32 cur = self->owner->currentValues[val];
         f32 limit = self->owner->frameStepClock ? g_frameStep : g_frameDt;
-        self->owner->f270[val] = ApproachValueWithRamp((RampProfile*)g_valueRampProfile, 0, cur, ret, limit);
+        self->owner->currentValues[val] = ApproachValueWithRamp((RampProfile*)g_valueRampProfile, 0, cur, ret, limit);
         break;
     }
     }
@@ -2172,9 +2172,9 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
 
 // Gives the object's position and velocity t seconds ahead: its own if t is 0, the position
 // attachment's if it has one, else the plain linear extrapolation pos + velocity * t.
-void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec)
+void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec4* pos, Vec4* vec)
 {
-    Vec02 k;
+    Vec4 k;
     Attachment* source = self->positionAttachment;
     if (t == 0.0f) {
         *pos = self->pos;
@@ -2192,11 +2192,11 @@ void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec
 // Gives the placed object's rotation and spin at t seconds from now: now if t is zero, from its
 // orientation attachment if it has one, otherwise by turning the current rotation by its spin times
 // t.
-void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec)
+void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat3* rot, Vec4* vec)
 {
-    Vec02 d;
-    Mat02 m;
-    Vec02 k;
+    Vec4 d;
+    Mat3 m;
+    Vec4 k;
     Attachment* source = self->orientationAttachment;
     if (t == 0.0f) {
         *rot = self->rot;
@@ -2208,7 +2208,7 @@ void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec
         Vu0::Q(k) = Vu0::FromFloat(t);
         Vu0::Q(*vec) = w;
         Vu0::Q(d) = Vu0::MulX(w, Vu0::Q(k));
-        BuildRotationFromVector((Vec02*)&d, (Mat02*)&m);
+        BuildRotationFromVector((Vec4*)&d, (Mat3*)&m);
         MulRotationRowsIndexed(rot, m, self->rot);
     }
 }
@@ -2226,7 +2226,7 @@ void SettlePoseSourceModes(Attachment* self)
 
 // Sets the pose source up as a copy of the owner's current position, orientation and animation
 // values, with an identity matrix beside it.
-void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
+void InitSnapshotPoseSource(OwnerSnapshotAttachment* self, PlacedObject* src)
 {
     InitPoseSource(self, src);
     self->pos = src->v190;
@@ -2236,19 +2236,19 @@ void InitSnapshotPoseSource(T2195_588* self, PlacedObject* src)
     Rec2195_224* p = (Rec2195_224*)src->linkRecord;
     if (p != 0) {
         if (p->flags & 0x20) {
-            self->f80 = p->f8C;
+            self->f80 = p->initialAngle;
         }
     }
-    Vec02* table = (Vec02*)g_identityMatrix;
+    Vec4* table = (Vec4*)g_identityMatrix;
     self->m90.r[0] = table[0];
     self->m90.r[1] = table[1];
     self->m90.r[2] = table[2];
     self->countC0 = src->valueCount;
-    self->valuesC4 = src->f274;
+    self->valuesC4 = src->defaultValues;
 }
 
 // Gives the snapshot position and vector, then tells the owner through its slot-28 method if set.
-void GetSnapshotPosition(T2195_588* src, Vec02* d0, Vec02* d1)
+void GetSnapshotPosition(OwnerSnapshotAttachment* src, Vec4* d0, Vec4* d1)
 {
     *d0 = src->pos;
     *d1 = src->vec;
@@ -2260,7 +2260,7 @@ void GetSnapshotPosition(T2195_588* src, Vec02* d0, Vec02* d1)
 }
 
 // Gives the snapshot orientation and vector, then tells the owner through its slot-29 method.
-void GetSnapshotRotation(T2195_588* src, Mat02* d0, Vec02* d1)
+void GetSnapshotRotation(OwnerSnapshotAttachment* src, Mat3* d0, Vec4* d1)
 {
     d0->r[0] = src->rot.r[0];
     d0->r[1] = src->rot.r[1];
@@ -2272,14 +2272,14 @@ void GetSnapshotRotation(T2195_588* src, Mat02* d0, Vec02* d1)
 }
 
 // Gives the two values saved in the snapshot.
-void GetSnapshotValue(T2195_588* self, f32* first, f32* second)
+void GetSnapshotValue(OwnerSnapshotAttachment* self, f32* first, f32* second)
 {
 	*first = self->f80;
 	*second = self->f84;
 }
 
 // Copies the snapshot's second matrix (the identity set at init) into output.
-void GetSnapshotMatrix(T2195_588* self, Mat02* output)
+void GetSnapshotMatrix(OwnerSnapshotAttachment* self, Mat3* output)
 {
 	output->r[0] = self->m90.r[0];
 	output->r[1] = self->m90.r[1];
@@ -2287,34 +2287,34 @@ void GetSnapshotMatrix(T2195_588* self, Mat02* output)
 }
 
 // Gives entry i of the snapshot's value array.
-f32 GetSnapshotIndexedValue(T2195_588* self, s32 i)
+f32 GetSnapshotIndexedValue(OwnerSnapshotAttachment* self, s32 i)
 {
     return self->valuesC4[i];
 }
 
 // Sets the pose source up to point at the owner's own position, orientation and animation values
 // (and its link record's value when flagged 0x20) instead of copying them.
-void InitLinkedPoseSource(T2195_5B0* self, PlacedObject* src)
+void InitLinkedPoseSource(OwnerPointerAttachment* self, PlacedObject* src)
 {
     InitPoseSource(self, src);
     self->pos = &src->v190;
     self->rot = &src->m1A0;
     self->count = &src->valueCount;
-    self->vec = (Vec02*)D_00248D30;
-    self->vec2 = (Vec02*)D_00248D30;
-    self->values = src->f274;
+    self->vec = (Vec4*)g_zeroVector;
+    self->vec2 = (Vec4*)g_zeroVector;
+    self->values = src->defaultValues;
     Rec2195_224* o = (Rec2195_224*)src->linkRecord;
     if (o != 0) {
         if (o->flags & 0x20) {
-            self->p30 = (f32*)D_00248D30;
-            self->p2C = &o->f8C;
+            self->p30 = (f32*)g_zeroVector;
+            self->p2C = &o->initialAngle;
         }
     }
-    self->ident = (Mat02*)g_identityMatrix;
+    self->ident = (Mat3*)g_identityMatrix;
 }
 
 // Gives the linked position and vector, then calls the owner's slot-28 method if it has one.
-void GetLinkedPosition(T2195_5B0* self, Vec02* first, Vec02* second)
+void GetLinkedPosition(OwnerPointerAttachment* self, Vec4* first, Vec4* second)
 {
 	*first = *self->pos;
 	*second = *self->vec;
@@ -2324,9 +2324,9 @@ void GetLinkedPosition(T2195_5B0* self, Vec02* first, Vec02* second)
 }
 
 // Gives the linked orientation and vector, then tells the owner through its slot-29 method.
-void GetLinkedRotation(T2195_5B0* self, Mat02* d1, Vec02* d2)
+void GetLinkedRotation(OwnerPointerAttachment* self, Mat3* d1, Vec4* d2)
 {
-    Mat02* s = self->rot;
+    Mat3* s = self->rot;
     d1->r[0] = s->r[0];
     d1->r[1] = s->r[1];
     d1->r[2] = s->r[2];
@@ -2336,34 +2336,34 @@ void GetLinkedRotation(T2195_5B0* self, Mat02* d1, Vec02* d2)
 }
 
 // Gives the two linked values, read through the pointers at 0x2C and 0x30.
-void GetLinkedValue(T2195_5B0* self, f32* a, f32* b)
+void GetLinkedValue(OwnerPointerAttachment* self, f32* a, f32* b)
 {
     *a = *self->p2C;
     *b = *self->p30;
 }
 
 // Copies the linked identity matrix into dst.
-void GetLinkedMatrix(T2195_5B0* self, Mat02* dst)
+void GetLinkedMatrix(OwnerPointerAttachment* self, Mat3* dst)
 {
-    Mat02* s = self->ident;
+    Mat3* s = self->ident;
     dst->r[0] = s->r[0];
     dst->r[1] = s->r[1];
     dst->r[2] = s->r[2];
 }
 
 // Gives entry i of the linked value array.
-f32 GetLinkedIndexedValue(T2195_5B0* self, s32 i)
+f32 GetLinkedIndexedValue(OwnerPointerAttachment* self, s32 i)
 {
     return self->values[i];
 }
 
 // Sets the pose source up with two identity matrices.
-void InitIdentityPoseSource(T2195_5D8* self, PlacedObject* owner)
+void InitIdentityPoseSource(IdentityMatrixAttachment* self, PlacedObject* owner)
 {
     InitPoseSource(self, owner);
-    Vec02* src = (Vec02*)g_identityMatrix;
-    Vec02* d1 = self->m40.r;
-    Vec02* d2 = self->m90.r;
+    Vec4* src = (Vec4*)g_identityMatrix;
+    Vec4* d1 = self->m40.r;
+    Vec4* d2 = self->m90.r;
     self->m40.r[0] = src[0];
     d1[1] = src[1];
     d1[2] = src[2];
@@ -2374,7 +2374,7 @@ void InitIdentityPoseSource(T2195_5D8* self, PlacedObject* owner)
 
 // Gives the position at time t from the next pose source in the chain whose mode0 is not 0 or -1
 // (the owner's position if there is none), then adds this source's own offset vectors.
-void GetIdentityPosePosition(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
+void GetIdentityPosePosition(OwnerSnapshotAttachment* self, f32 t, Vec4* pos, Vec4* vec)
 {
     Attachment* p = self;
     while ((p = p->link.next) != 0) {
@@ -2394,7 +2394,7 @@ void GetIdentityPosePosition(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
 // Gives the rotation and spin of a pose source that stands on another one: the next attachment of
 // the chain with a defined orientation (or the owner's own) is asked, the rotation is composed with
 // this source's rotation, and the spin is rotated by it and offset by v70.
-void GetIdentityPoseRotation(T2195_588* self, f32 t, Mat02* rot, Vec02* vec)
+void GetIdentityPoseRotation(OwnerSnapshotAttachment* self, f32 t, Mat3* rot, Vec4* vec)
 {
     Attachment* p = self;
     while ((p = p->link.next) != 0) {
@@ -2431,9 +2431,9 @@ void GetNextPoseSourceValue(Attachment* self, f32* a1, f32* a2)
 // Gives the matrix of a pose source that stands on another one: the next attachment of the chain
 // with a defined matrix (or the identity) is asked and the result is composed with this source's
 // own matrix.
-void GetIdentityPoseMatrix(T2195_588* self, Mat02* out)
+void GetIdentityPoseMatrix(OwnerSnapshotAttachment* self, Mat3* out)
 {
-    Mat02 m;
+    Mat3 m;
     Attachment* p = self;
     while ((p = p->link.next) != 0) {
         s8 f = p->mode2;
@@ -2455,22 +2455,22 @@ f32 GetIdentityPoseIndexedValue(void)
 }
 
 // Initialises the pose source with two constants, 1.0 and 0.25, in its aim fields.
-void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
+void InitAimPoseSource(TiltValueAttachment* self, PlacedObject* a1)
 {
     InitPoseSource(self, a1);
-    self->f1C = 1.0f;
-    self->f20 = 0.25f;
+    self->tiltScale = 1.0f;
+    self->sampleTime = 0.25f;
 }
 
 
 // Gives a rotation that points the owner along its velocity with up taken against gravity (the
 // collider's or the world's), tilted toward the change in velocity of the position source over f20
 // seconds, scaled by f1C; the angular velocity is zero.
-void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
+void GetAimPoseRotation(TiltValueAttachment* self, Mat3* out, Vec4* vec)
 {
-    Vec02 dir;
-    Vec02 vel;
-    Vec02* pd = &dir;
+    Vec4 dir;
+    Vec4 vel;
+    Vec4* pd = &dir;
     PlacedObject* owner = self->owner;
     Attachment* source = owner->positionAttachment;
     Vu0::Vec g;
@@ -2480,18 +2480,18 @@ void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
         g = Vu0::MulX(Vu0::Vec::Of(owner->world->gravity), Vu0::Vec::Scalar(-1.0f));
     }
     Vu0::Q(*pd) = g.q;
-    if (source != 0 && self->f20 != 0.0f && self->f1C != 0.0f) {
-        source->vt->getPos(source, self->f20, 0, &vel);
-        u128 w1 = Vu0::ScalarAt(self->f1C);
-        Vu0::Q(dir) = Vu0::MulAddX(Vu0::Q(dir), Vu0::DivX(Vu0::Sub(Vu0::Q(vel), Vu0::Q(owner->v150)), Vu0::ScalarAt(self->f20)), w1);
+    if (source != 0 && self->sampleTime != 0.0f && self->tiltScale != 0.0f) {
+        source->vt->getPos(source, self->sampleTime, 0, &vel);
+        u128 w1 = Vu0::ScalarAt(self->tiltScale);
+        Vu0::Q(dir) = Vu0::MulAddX(Vu0::Q(dir), Vu0::DivX(Vu0::Sub(Vu0::Q(vel), Vu0::Q(owner->v150)), Vu0::ScalarAt(self->sampleTime)), w1);
     }
     BuildBasisFromXAndZHint(&owner->v150, &dir, out);
-    *vec = *(Vec02*)D_00248D30;
+    *vec = *(Vec4*)g_zeroVector;
 }
 
 // Removes the track's pose source from its player's list, clears the player's driven pointer if it
 // was this one, and releases it.
-void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
+void ReleaseTrackPoseSource(TrackFollowAttachment* self, s32 a1)
 {
     AnimationPlayer* o = self->player;
     RemoveFromList(&o->list44, self);
@@ -2502,7 +2502,7 @@ void ReleaseTrackPoseSource(T2195_7C0* self, s32 a1)
 }
 
 // Copies a pose source over this track source, keeping its player and its pair at 0x20.
-void CopyTrackPoseSource(T2195_7C0* self, Attachment* a1)
+void CopyTrackPoseSource(TrackFollowAttachment* self, Attachment* a1)
 {
     AnimationPlayer* saved = self->player;
     Pair2195 tmp = self->w20;
@@ -2514,10 +2514,10 @@ void CopyTrackPoseSource(T2195_7C0* self, Attachment* a1)
 // Gives the position and velocity of the pose source's animation track at the player's time (moved
 // ahead by f seconds, with the loop mode applied, and further ahead while in mode 4 until its end
 // time); if the track has no position curve it gives the owner's own.
-void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
+void GetTrackPosition(TrackFollowAttachment* self, Vec4* a1, Vec4* a2, f32 f)
 {
     AnimationPlayer* track = self->player;
-    Track83* e = &track->anim->tracks[self->index];
+    AnimationTrack* e = &track->anim->tracks[self->index];
     if (e->pos != 0) {
         f32 tmp[2];
         if (f != 0.0f) {
@@ -2530,7 +2530,7 @@ void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
             tmp[0] = track->time;
         }
         if (self->mode0 == 4) {
-            f32 d = self->f18 - g_gameTime[0] - track->f10;
+            f32 d = self->endTime - g_gameTime[0] - track->delay;
             if (0.0f < d) {
                 tmp[0] = tmp[0] + d * track->speed;
             }
@@ -2544,11 +2544,11 @@ void GetTrackPosition(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
 // Gives the rotation and angular velocity of the pose source's animation track at the player's time
 // (moved ahead by f seconds, with the loop mode applied, and further ahead while in mode 4 until
 // its end time); if the track has no rotation curve it gives the owner's own.
-void GetTrackRotation(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
+void GetTrackRotation(TrackFollowAttachment* self, Mat3* a1, Vec4* a2, f32 f)
 {
     PlacedObject* p4 = self->owner;
     AnimationPlayer* track = self->player;
-    Track83* e = &track->anim->tracks[self->index];
+    AnimationTrack* e = &track->anim->tracks[self->index];
     if (e->rot != 0) {
         f32 tmp[2];
         if (f != 0.0f) {
@@ -2561,7 +2561,7 @@ void GetTrackRotation(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
             tmp[0] = track->time;
         }
         if (self->mode1 == 4) {
-            f32 d = self->f18 - g_gameTime[0] - track->f10;
+            f32 d = self->endTime - g_gameTime[0] - track->delay;
             if (0.0f < d) {
                 tmp[0] = tmp[0] + d * track->speed;
             }
@@ -2574,12 +2574,12 @@ void GetTrackRotation(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
 
 // Gives the value of the animation track's weight curve at the player's time, or the owner's own
 // value when the track has no weight curve.
-void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
+void GetTrackValue(TrackFollowAttachment* self, f32* a1, f32* a2)
 {
     f32* saved = a1;
     PlacedObject* f4 = self->owner;
     AnimationPlayer* player = self->player;
-    Track83* e = &player->anim->tracks[self->index];
+    AnimationTrack* e = &player->anim->tracks[self->index];
     WeightCurve* target = e->weight;
     if (target) {
         target->vt->eval(target, f4, player->time, player->speed, 0, saved, a2);
@@ -2590,12 +2590,12 @@ void GetTrackValue(T2195_7C0* self, f32* a1, f32* a2)
 
 // Gives the scale matrix of the animation track's scale curve at the player's time, or the identity
 // when the track has none.
-void GetTrackScaleMatrix(T2195_7C0* self, Mat02* a1)
+void GetTrackScaleMatrix(TrackFollowAttachment* self, Mat3* a1)
 {
-    Mat02* saved = a1;
+    Mat3* saved = a1;
     PlacedObject* f4 = self->owner;
     AnimationPlayer* player = self->player;
-    Track83* e = &player->anim->tracks[self->index];
+    AnimationTrack* e = &player->anim->tracks[self->index];
     ScaleCurve* target = e->scale;
     if (target) {
         target->vt->eval(target, f4, 0, saved, player->time);
@@ -2605,10 +2605,10 @@ void GetTrackScaleMatrix(T2195_7C0* self, Mat02* a1)
 }
 
 // Gives the track's indexed curve at index, evaluated at the player's time.
-f32 GetTrackIndexedValue(T2195_7C0* self, s32 index)
+f32 GetTrackIndexedValue(TrackFollowAttachment* self, s32 index)
 {
     AnimationPlayer* track = self->player;
-    Track83* row = &track->anim->tracks[self->index];
+    AnimationTrack* row = &track->anim->tracks[self->index];
     WeightCurve** values = row->morph;
     WeightCurve* object = values[index];
     f32 result;

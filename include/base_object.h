@@ -16,7 +16,7 @@ struct World;     // the world, class 0x6C (include/c6c.h): the level every obje
 // A list (func_00152438 sets the offset, func_00152470 appends, func_00152600 removes): the
 // first and the last element, and the offset inside an element of its link, the element's
 // next and previous ones.
-struct List01 {
+struct ObjectList {
     void* head;     // 0x00
     void* tail;     // 0x04
     s32 offset;     // 0x08
@@ -24,15 +24,15 @@ struct List01 {
 
 // An entry of an object's callback list (+0x28): slot 23 (func_001832F0) adds one that calls
 // the listener's slot 13 with the listener as context; slot 14 (func_00183350) calls each.
-struct Callback01 {
+struct ObjectCallback {
     void (*fn)(void* ctx, s32 kind, void* arg);    // 0x00
     void* ctx;                                      // 0x04
     u8 pad08[0x10 - 0x08];
-    Callback01* next;                               // 0x10
+    ObjectCallback* next;                               // 0x10
 };
 
 // The record at +0x30: another id the object answers to (func_001833F0, func_00183458).
-struct Alias01 {
+struct ObjectAlias {
     u8 pad00[4];
     s32 id;         // 0x04
 };
@@ -41,7 +41,7 @@ struct Alias01 {
 // Slot n is at 0x10 + 4n; the members are named by slot number until step 6 names them. The
 // types are those of class 0x01's own methods (and 0x02's where 0x01 has none); a slot no
 // matched method fixes stays `void*`.
-struct Desc01 {
+struct BaseObjectDescriptor {
     const void* parent;                     // 0x00: the parent class's descriptor
     s32 id;                                 // 0x04
     u32 flags;                              // 0x08: 0x100 a group of objects (class 0x53)
@@ -85,7 +85,7 @@ struct ClassHead {
 };
 
 struct BaseObject {
-    const Desc01* desc;     // 0x00
+    const BaseObjectDescriptor* desc;     // 0x00
     void* keyedList;        // 0x04: a 4-byte block func_0011BF30 makes (func_00130110); copied through func_0011BEE0 by slot 9
     s32 id;                 // 0x08: the object's id (func_001833F0)
     u32 f0C;                // 0x0C: class 0x02's slot 45 tests it of the other object (func_0012B2E8)
@@ -94,13 +94,13 @@ struct BaseObject {
     BaseObject* parent;            // 0x18
     BaseObject* next;              // 0x1C: the link in the parent's list of children (PlacedObject::children)
     BaseObject* prev;              // 0x20
-    BaseObject* nextById;          // 0x24: the next in its bucket of World::f1884 (func_0015A4F0 walks them)
-    Callback01* callbacks;  // 0x28: slot 14 calls each
+    BaseObject* nextById;          // 0x24: the next in its bucket of World::objectsById (func_0015A4F0 walks them)
+    ObjectCallback* callbacks;  // 0x28: slot 14 calls each
     void* scriptScope;      // 0x2C: looked up by func_001837E0, copied through func_0011A5B0
-    Alias01* alias;         // 0x30
+    ObjectAlias* alias;         // 0x30
 };
 
 typedef char check_BaseObject[sizeof(BaseObject) == 0x34 ? 1 : -1];
-typedef char check_Desc01[sizeof(Desc01) == 0x80 ? 1 : -1];
+typedef char check_Desc01[sizeof(BaseObjectDescriptor) == 0x80 ? 1 : -1];
 
 #endif

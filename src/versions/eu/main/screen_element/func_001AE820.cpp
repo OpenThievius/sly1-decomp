@@ -64,12 +64,12 @@ void DrawCyclingGlyphElement(Obj_1AE820_eu* self)
     held = self->f208;
     px = self->f234;
     py = self->f238;
-    ((Layout_137228*)out)->Pos(self->f21c, self->f220 + adj);
-    ((Layout_137228*)out)->Size(px, py);
+    ((TextBoxLayout*)out)->Pos(self->f21c, self->f220 + adj);
+    ((TextBoxLayout*)out)->Size(px, py);
     tmp[0] = held;
-    ((Layout_137228*)out)->Color(tmp);
-    ((Layout_137228*)out)->SetF14(0);
-    ((Layout_137228*)out)->SetF18(0);
+    ((TextBoxLayout*)out)->Color(tmp);
+    ((TextBoxLayout*)out)->SetF14(0);
+    ((TextBoxLayout*)out)->SetF18(0);
     SetTextLayoutVerticalPlacement(out, 0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;

@@ -9,7 +9,7 @@
 #include "collider.h"
 
 // The object at +0x560: a part of another class whose +0x694 func_0013DD08 tests.
-struct Child27 {
+struct TimedStateFilterObject {
     u8 pad0[0x694];
     s32 f694;
 };
@@ -19,7 +19,7 @@ struct TimedStateObject : Collider {
     f32 stamp;              // 0x554: the clock when the state changed (D_0026185C)
     f32 limit;              // 0x558: how long state 1 lasts
     f32 param;              // 0x55C: handed to func_00126D60 when the state becomes 2
-    Child27* child;             // 0x560
+    TimedStateFilterObject* child;             // 0x560
     s32 acceptAll;              // 0x564
     u8 pad568[0x570 - 0x568];
 };

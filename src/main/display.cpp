@@ -91,14 +91,14 @@ s32 g_displayFieldCountdown = 0;
 u8 g_displayRegisters[0x50] __attribute__((aligned(16))) = { 0 };
 u8 g_drawEnvPacket0[16] = { 0 };
 u8 g_fieldOffsetPacket0[16] = { 0 };
-u8 D_00262500[208] = { 0 };
+u8 g_drawEnvBlockEven[208] = { 0 };
 u8 g_drawEnvPacket1[16] = { 0 };
 u8 g_fieldOffsetPacket1[16] = { 0 };
-u8 D_002625F0[208] = { 0 };
+u8 g_drawEnvBlockOdd[208] = { 0 };
 s32 g_displayFrameCounter = 0;
 s32 g_drawFieldParity = 0;
 s32 g_displayFieldParity = 0;
-s32 D_002626CC = 0;
+s32 g_fieldOffsetMode = 0;
 
 static s32 g_vblankSemaphore;
 static s32 g_gsFinishSemaphore;
@@ -172,7 +172,7 @@ s32 HandleVblankStart(s32 cause)
         g_vblankWaiting = 0;
         PostSemaphoreFromInterrupt(g_vblankSemaphore);
     }
-    switch (D_002626CC) {
+    switch (g_fieldOffsetMode) {
     case 1:
         if (g_displayFlipBusy == 0) {
             g_displayFieldCountdown = g_displayFieldReload;
@@ -233,7 +233,7 @@ void FlipDisplayFrame(void)
     SyncDataCache(0);
     g_displayFrameCounter = g_displayFrameCounter + 1;
     SwapDoubleBuffer(g_displayRegisters, g_displayFrameCounter);
-    if ((u32)(D_002626CC - 1) < 2) {
+    if ((u32)(g_fieldOffsetMode - 1) < 2) {
         ApplyFieldDisplayOffset();
     }
     WaitGsPaths(0, 0);
@@ -244,8 +244,8 @@ void FlipDisplayFrame(void)
 // draw-environment packet of the current frame buffer. Also moves display state 3 to 2.
 void ApplyPendingDisplayFlip(void)
 {
-    if (D_002626CC == 3) {
-        D_002626CC = 2;
+    if (g_fieldOffsetMode == 3) {
+        g_fieldOffsetMode = 2;
     }
     if (g_displayFlipPending != 0) {
         u32 flag = (*(u32*)0x12001000 >> 13) & 1;
@@ -283,7 +283,7 @@ void ResetDisplayBuffers(void)
     ResetGs(0, 1, 2, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
     s32 cnt = g_displayFrameCounter;
-    D_002626CC = 0;
+    g_fieldOffsetMode = 0;
     g_displayFieldCountdown = 0;
     g_displayFieldParity = flag;
     g_drawFieldParity = (flag == 0);
@@ -436,7 +436,7 @@ void FadeScreenToBlack(f32 t)
     InitGifPacket(&f);
     n = (s32)(t * 59.999996f);
     SignalDisplaySync();
-    D_002626CC = 0;
+    g_fieldOffsetMode = 0;
     if (n > 0) {
         do {
             f32 x = ((f32)i + 1.0f) / (f32)n;

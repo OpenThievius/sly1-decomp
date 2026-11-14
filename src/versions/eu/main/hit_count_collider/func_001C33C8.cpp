@@ -9,7 +9,7 @@ void StartHitCountCollider(HitCountCollider* self)
     self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = (PlacedObject*)self->aimObject;
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
-    *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
+    *(UnalignedFloatPair*)&self->drivenBaseX = *(UnalignedFloatPair*)((u8*)self->drivenObject + 0x2DC);
     u8* g1 = (u8*)&g_hitCountCaptionA;
     ((UnalignedPointer*)(g1 + 0x574))->p = (u8*)self + 0x690;
     u8* g2 = (u8*)&g_hitCountCaptionB;

@@ -58,12 +58,12 @@ void DrawCounterCaption(Obj_1AB198_eu* self)
     held = packed.v;
     px = self->f544;
     py = self->f548;
-    ((Layout_137228*)out)->Pos(self->f52c, self->f530);
-    ((Layout_137228*)out)->Size(px, py);
+    ((TextBoxLayout*)out)->Pos(self->f52c, self->f530);
+    ((TextBoxLayout*)out)->Size(px, py);
     tmp[0] = held;
-    ((Layout_137228*)out)->Color(&tmp[0]);
+    ((TextBoxLayout*)out)->Color(&tmp[0]);
     SetTextLayoutHorizontalAlign(out, q);
-    ((Layout_137228*)out)->SetF18(0);
+    ((TextBoxLayout*)out)->SetF18(0);
     SetTextLayoutVerticalPlacement(out, 0);
     PushFontScale(self->f4, self->f51c, self->f51c);
     InitWideTextReader(buf, &self->f8, self->f4, 0);

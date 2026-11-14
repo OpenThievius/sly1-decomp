@@ -31,7 +31,7 @@
 #include "point_object.h"
 #include "value_range.h"
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
 struct BaseObject;
 
@@ -54,7 +54,7 @@ struct CurveSpan {
     f32 q;
 };
 
-void SetTextPanelSubject(T217D_440* self, BaseObject* arg);
+void SetTextPanelSubject(CaptionBox* self, BaseObject* arg);
 
 struct PanelColor
 {
@@ -102,18 +102,18 @@ struct BorderColorMix
 
 struct CameraHeading {
     u8 pad0[0x40];
-    s32 f40[4];             // 0x40: the eye
+    s32 position[4];        // 0x40: the eye
     f32 planes[3][4];       // 0x50: the view planes' normals, as columns (camera.h)
     u8 pad80[0x1C4 - 0x80];
-    f32 f1C4;               // 0x1C4
+    f32 zoom;               // 0x1C4: the camera's current zoom
     u8 pad1C8[0x1E0 - 0x1C8];
-    f32 f1E0;               // 0x1E0
+    f32 aspectScale;        // 0x1E0: scales the yaw offset with zoom
     u8 pad1E4[0x468 - 0x1E4];
     f32 heading;            // 0x468
     u8 pad46C[0x470 - 0x46C];
     f32 pitch;              // 0x470
     u8 pad474[0x478 - 0x474];
-    f32 f478;
+    f32 zoomFraction;
 };
 
 extern s32 g_padRouting;
@@ -127,7 +127,7 @@ void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 f32 WrapAngle(f32 a);
 extern "C" f32 Cosine(f32 x);
-void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
+void GetTextPanelCenter(CaptionBox* self, f32* x, f32* y);
 
 struct CenterFrameMath {
     static s32 LerpU8(s32 a, s32 b, f32 t)
@@ -168,7 +168,7 @@ struct CenterFrameMath {
 };
 
 
-void SetTextPanelState(T217D_440* self, s32 mode);
+void SetTextPanelState(CaptionBox* self, s32 mode);
 
 struct SortEntry {
     void* obj;
@@ -187,7 +187,7 @@ struct BufferedStream;
 extern void FreeObjectMemory(void*);
 
 struct PercentClampStore {
-    static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
+    static void Set(CaptionBox* self, f32 x, f32 lo, f32 hi) {
         if (x < lo) x = lo;
         else if (hi < x) x = hi;
         self->value = x;
@@ -214,13 +214,13 @@ void PopFontScale(Font* font);
 void RewindTextReader(TextReader* self);
 s32 ReadTextChar(TextReader* self);
 
-struct __attribute__((packed)) Tail_1356C0 { u8 pad0[0x464]; s32 v; };
+struct __attribute__((packed)) CaptionAnnounceTail { u8 pad0[0x464]; s32 v; };
 extern f32 g_gameTime;
 
-void ClearTextPanel(T217D_440* self);
+void ClearTextPanel(CaptionBox* self);
 struct PlayingSound;
 struct BaseObject;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern World* g_currentWorld;
@@ -233,19 +233,19 @@ extern u8 func_00135E40[];
 struct LevelBit { s32 v; };
 void GetCurrentLevelBit(u32* out);
 s32 MaskWorldBitsBySave(void);
-void CollectPanelEntriesOfClass(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, BaseObject* a5, f32 f);
+void CollectPanelEntriesOfClass(CaptionBox* self, s32 a1, void* a2, void* a3, s32 a4, BaseObject* a5, f32 f);
 
 struct StickLimits { u64 a __attribute__((packed)); u32 b; };
 typedef u64 Quad_136040 __attribute__((mode(TI)));
-struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
+struct __attribute__((aligned(16))) StickVec4 { f32 x, y, z, w; };
 
-extern const StickLimits D_00249D00;
-extern const StickLimits D_00249D10;
+extern const StickLimits g_panelStickActiveRamp;
+extern const StickLimits g_panelStickIdleRamp;
 
 struct RampProfile;
-Quad_136040 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
+Quad_136040 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec4* vel);
 f32 WrapModulo(f32 x, f32 y);
-void RefreshPanelEntries(T217D_440* self, PadRecord* p);
+void RefreshPanelEntries(CaptionBox* self, PadRecord* p);
 
 struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
 struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
@@ -253,7 +253,7 @@ struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
 s32 ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
 
-struct PlayerListHolder { u8 pad0[0x6C]; List01 list; };
+struct PlayerListHolder { u8 pad0[0x6C]; ObjectList list; };
 
 struct ListWalkNextPlayer {
     static AnimationPlayer* Of(ListFrame* it)
@@ -271,12 +271,12 @@ extern World* g_currentWorld;
 
 void GetCurrentLevelBit(u32* out);
 s32 MaskWorldBitsBySave(void);
-void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
+void ReleasePanelEntries(CaptionBox* self, s32 state, s32 flag);
 
 struct ClampBelow { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 void GetCurrentLevelBit(u32* out);
-void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q);
+void DrawTextPanelMarkers(CaptionBox* self, PacketWriter* q);
 extern "C" f32 Cosine(f32 x);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
@@ -339,7 +339,7 @@ PanelStyle g_panelFrameStyle(2.0f);
 PanelStyle g_objectLabelStyle(32, 16);
 f32 g_nearestLabelScale = 1.0f;
 f32 g_otherLabelScale = 0.5f;
-f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 g_panelFocusPoint[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
 f32 g_labelAlphaCoefficients[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
 f32 g_labelAlphaRamp[3] = { 5.0f, 0.0f, 0.100000001f };
 f32 g_otherLabelAlphaFactor = 0.5f;
@@ -363,7 +363,7 @@ f32 g_panelBlockCornersY[4][4] = {
 };
 f32 g_panelBlockPulseRate[2] = { 8.0f, 0.0f };
 f32 g_panelBlockFadeRamp[3] = { 8.0f, 0.0f, 0.150000006f };
-f32 D_00261274 = 0.25f;
+f32 g_panelStartCooldown = 0.25f;
 CurveSpan g_panelEdgeCurveA;
 CurveSpan g_panelEdgeCurveB;
 CurveSpan g_panelEdgeCurveC;
@@ -371,31 +371,31 @@ f32 g_compassLabelWidth;
 
 void InitCurveSpan(CurveSpan* d, const SpanHead* src, f32 x, f32 y, s32 n);
 f32 EvalCurveSpan(const CurveSpan* s, s32 x);
-void InitTextPanel(T217D_440* self, s32 a1);
-void ClearTextPanel(T217D_440* self);
-void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs);
-void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs);
-void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q);
-void SetTextPanelMode(T217D_440* self, s32 value);
-void SetTextPanelState(T217D_440* self, s32 mode);
+void InitTextPanel(CaptionBox* self, s32 a1);
+void ClearTextPanel(CaptionBox* self);
+void DrawTextPanelCenterFrame(CaptionBox* self, PacketWriter* gs);
+void DrawTextPanelBorders(CaptionBox* self, PacketWriter* gs);
+void DrawTextPanelBlocks(CaptionBox* self, PacketWriter* q);
+void SetTextPanelMode(CaptionBox* self, s32 value);
+void SetTextPanelState(CaptionBox* self, s32 mode);
 s32 CompareEntriesByAttachedKey(SortEntry* a, SortEntry* b);
 s32 CompareEntriesFlaggedLast(SortEntry* a, SortEntry* b);
 void ReadPanelEntryPosition(PanelEntrySource* self, PanelEntryPosition* out, s32* flag);
 void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out);
-void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag);
-void RefreshPanelEntries(T217D_440* self, PadRecord* pad);
-void UpdatePanelStick(T217D_440* self, PadRecord* p);
-void SetTextPanelOpen(T217D_440* self, s32 on);
-void ResetTextPanel(T217D_440* self);
-void SetTextPanelText(T217D_440* self, const char* name);
-s32 IsTextPanelTextTyped(T217D_440* self);
-void SetTextPanelSubject(T217D_440* self, BaseObject* value);
-void SetTextPanelValuePercent(T217D_440* self, f32 value);
-f32 GetTextPanelSlideInTime(T217D_440* self);
-f32 GetTextPanelSlideOutTime(T217D_440* s);
-void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
-void ChooseTextPanelState(T217D_440* self);
-void EndTextPanelState(T217D_440* self);
+void ReleasePanelEntries(CaptionBox* self, s32 state, s32 flag);
+void RefreshPanelEntries(CaptionBox* self, PadRecord* pad);
+void UpdatePanelStick(CaptionBox* self, PadRecord* p);
+void SetTextPanelOpen(CaptionBox* self, s32 on);
+void ResetTextPanel(CaptionBox* self);
+void SetTextPanelText(CaptionBox* self, const char* name);
+s32 IsTextPanelTextTyped(CaptionBox* self);
+void SetTextPanelSubject(CaptionBox* self, BaseObject* value);
+void SetTextPanelValuePercent(CaptionBox* self, f32 value);
+f32 GetTextPanelSlideInTime(CaptionBox* self);
+f32 GetTextPanelSlideOutTime(CaptionBox* s);
+void GetTextPanelCenter(CaptionBox* self, f32* x, f32* y);
+void ChooseTextPanelState(CaptionBox* self);
+void EndTextPanelState(CaptionBox* self);
 
 // Sets up a span of n steps over a quadratic: copies its three coefficients, stores the length and
 // middle, a window around the middle of half width x * n / 2, and the curve's values at the
@@ -447,7 +447,7 @@ f32 EvalCurveSpan(const CurveSpan* s, s32 x)
 
 // Slot 0 of the text panel: full-screen size (640 by 492.8), typing speed 15 characters a second
 // and highlight colour 0x80FFFFFF, then the screen element init.
-void InitTextPanel(T217D_440* self, s32 a1)
+void InitTextPanel(CaptionBox* self, s32 a1)
 {
     self->w = 640.0f;
     self->h = 492.800018f;
@@ -458,7 +458,7 @@ void InitTextPanel(T217D_440* self, s32 a1)
 
 // Empties the panel: clears its text (slot 8), subject, value and stick offsets and sets the tick
 // scroll to 0.4.
-void ClearTextPanel(T217D_440* self)
+void ClearTextPanel(CaptionBox* self)
 {
     self->vt->m08(self, 0);
     SetTextPanelSubject(self, 0);
@@ -479,7 +479,7 @@ f32 MeasureFontString(Font* font, const char* text);
 
 // Sets a text panel up: its two fonts, the widest compass point, and the GS packet of the two
 // curved bands drawn behind it.
-void SetupTextPanel(T217D_440* self)
+void SetupTextPanel(CaptionBox* self)
 {
     SetupScreenElementText(self);
     ClearTextPanel(self);
@@ -550,7 +550,7 @@ void SetupTextPanel(T217D_440* self)
 
 
 struct PanelFont {
-    static Font* Of(T217D_440* self) { return self->smallFont; }
+    static Font* Of(CaptionBox* self) { return self->smallFont; }
 };
 
 f32 MeasureFontString(Font* font, const char* text);
@@ -560,9 +560,9 @@ void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip,
 // marks (shifted by tickScroll), and the names of the three compass directions nearest the camera's
 // heading (eight directions, 45 degrees apart) side by side, the middle one coloured by how well
 // centred it is.
-void DrawCompassStrip(T217D_440* self, PacketWriter* gs)
+void DrawCompassStrip(CaptionBox* self, PacketWriter* gs)
 {
-    Layout_137228 L;
+    TextBoxLayout L;
     s32 i;
     f32 left = 273.0f;
     f32 bottom = 42.181820f;
@@ -662,7 +662,7 @@ extern const char g_moveLabel[8] = "Move";
 extern const char g_zoomLabel[8] = "Zoom";
 
 struct ScreenLayout {
-    static void Reset(Layout_137228* l, s32 color)
+    static void Reset(TextBoxLayout* l, s32 color)
     {
         l->Pos(0.0f, 0.0f);
         l->Size(640.0f, 492.800018f);
@@ -678,7 +678,7 @@ struct ScreenLayout {
     }
 
     // The same in grey, the colour in a 16-byte local (DrawTextPanelMarkers).
-    static void Reset(Layout_137228* l)
+    static void Reset(TextBoxLayout* l)
     {
         Quad4 col;
         l->Pos(0.0f, 0.0f);
@@ -696,14 +696,14 @@ struct ScreenLayout {
 // life, so loop.c moves its constant out with the literals', and with every saved float register
 // taken by the literals used more often, reload forms the three again in the loop
 // (docs/toolchain/loops.md, "Named constants that lose their registers").
-void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
+void DrawTextPanelControlLabels(CaptionBox* self, PacketWriter* gs)
 {
     BeginGifTag(gs, 0, 1, 0xE);
     AddGifRegisterWrite(gs, 0x47, 0x31001);
     AddGifRegisterWrite(gs, 0x42, 0x44);
     BeginGifTag(gs, 0x84, 5, 0x44441);
     for (s32 i = 0; i < 8; i++) {
-        f32 zoom = g_camera->f478;
+        f32 zoom = g_camera->zoomFraction;
         const PanelColor* const lit = &g_arcTickColorFrom;
         const PanelColor* const dim = &g_arcTickColorTo;
         f32 step = 1.0f / 15.0f;
@@ -729,14 +729,14 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
         return;
     }
     char buf[16];
-    Layout_137228 L;
+    TextBoxLayout L;
     f32 row = 390.800018f;
     ScreenLayout::Reset(&L, 0xFF808080);
     PadRecord* pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     Font* glyphs = GetFontById(1);
     Font* text = GetFontById(0);
     FormatToString(buf, g_characterFormat, 0x28);
-    Layout_137228* lay = &L;
+    TextBoxLayout* lay = &L;
     lay->f14 = 1;
     lay->f18 = 1;
     L.w = 0.0f;
@@ -762,7 +762,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
     PopFontScale(glyphs);
     *(PanelColor*)&L.color = PanelColor(0x32, 0x84, 0xB0, 0x80);
     PushFontScale(text, 0.6f, 0.6f);
-    Layout_137228& move = L;
+    TextBoxLayout& move = L;
     move.f14 = 2;
     L.x = (f32)(320 - g_hintLabelOffset[0]);
     L.y = row;
@@ -778,7 +778,7 @@ void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs)
 // colours blended along a travelling wave between the palette's two colours (palette 0 differs in
 // state 5) and, in states other than 5, rows of small tick strokes at the sides. It also advances
 // the spin angle, by 3 or by 6 when the second stick is moved.
-void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
+void DrawTextPanelCenterFrame(CaptionBox* self, PacketWriter* gs)
 {
     PanelColor c0;
     PanelColor c1;
@@ -805,7 +805,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
     }
     self->spin = WrapAngle(self->spin + g_frameDt * k);
 
-    alpha = (s32)(g_camera->f478 * 24.999f) + 0x30;
+    alpha = (s32)(g_camera->zoomFraction * 24.999f) + 0x30;
     switch (self->palette) {
     case 0:
         if (self->state == 5) {
@@ -845,7 +845,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
     }
 
     GetTextPanelCenter(self, &posX, &posY);
-    scale = g_camera->f478 + 1.0f;
+    scale = g_camera->zoomFraction + 1.0f;
 
     {
         f32 step = 1.0f / 24.0f;
@@ -956,7 +956,7 @@ void DrawTextPanelCenterFrame(T217D_440* self, PacketWriter* gs)
 // fixed screen positions: each strip is a quad strip of 24 steps whose edge height comes from the
 // curves g_panelEdgeCurveA and B, in colours that pulse between the two arc tick colours with the
 // spin angle.
-void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
+void DrawTextPanelBorders(CaptionBox* self, PacketWriter* gs)
 {
     PanelColor c0;
     PanelColor c1;
@@ -1069,11 +1069,11 @@ void DrawTextPanelBorders(T217D_440* self, PacketWriter* gs)
 // than the second's, else -1, so the farthest sorts first.
 s32 CompareEntriesFarthestFirst(void** a, void** b)
 {
-    Vec02 pa;
-    Vec02 pb;
+    Vec4 pa;
+    Vec4 pb;
     ConvertPositionToWorld((BaseObject*)*a, &pa);
     ConvertPositionToWorld((BaseObject*)*b, &pb);
-    u128 cam = Vu0::Q(g_camera->f40);
+    u128 cam = Vu0::Q(g_camera->position);
     u128 da = Vu0::Sub(cam, Vu0::Q(pa));
     u128 db = Vu0::Sub(cam, Vu0::Q(pb));
     s32 c = Vu0::ToFloat(Vu0::Dot(da, da)) < Vu0::ToFloat(Vu0::Dot(db, db));
@@ -1081,7 +1081,7 @@ s32 CompareEntriesFarthestFirst(void** a, void** b)
 }
 
 struct StyleDrawer {
-    static void Draw(Font** h, Layout_137228* out, void* tbl)
+    static void Draw(Font** h, TextBoxLayout* out, void* tbl)
     {
         if (*h != 0) {
             const FontVt* vt = (*h)->vt;
@@ -1100,11 +1100,11 @@ f32 MeasureFontStringHeight(Font* self, u8* s, f32 width);
 // its life then spans the call, so loop.c moves its address in its first pass, ahead of the
 // screen constants, and the second loop's preheader keeps retail's order
 // (docs/toolchain/sched1.md, "Spill stores between float constants").
-void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
+void DrawTextPanelMarkers(CaptionBox* self, PacketWriter* q)
 {
     TextPointObject* objs[32];
-    Vec02 pos;
-    Vec02 screen;
+    Vec4 pos;
+    Vec4 screen;
     s32 i;
     s32 shown = 0;
     TextPointObject* nearest = 0;
@@ -1126,7 +1126,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         } else {
             objs[shown++] = obj;
             ProjectPointToCamera((Camera*)g_camera, &pos, (f32*)&screen);
-            Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(D_00261190));
+            Vu0::Vec e = Vu0::Sub(Vu0::Vec::Of(screen), Vu0::Vec::Of(g_panelFocusPoint));
             f32 c = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(e, e)));
             if (c < best) {
                 nearest = obj;
@@ -1138,7 +1138,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
         TextPointObject* obj = objs[i];
         ConvertPositionToWorld(obj, &pos);
         char buf[0x100];
-        Layout_137228 layout;
+        TextBoxLayout layout;
         const char* s = (const char*)obj->text;
         char* t = buf;
         for (; *s != 0; s++) {
@@ -1197,7 +1197,7 @@ void DrawTextPanelMarkers(T217D_440* self, PacketWriter* q)
 // world mask (and the markers first when bit 0x800 is): each block's strength is ramped toward 1
 // when something wanted is off screen on that side (set by CollectPanelEntriesOfClass), and its
 // colour pulses between three greys.
-void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
+void DrawTextPanelBlocks(CaptionBox* self, PacketWriter* q)
 {
     if (self->state == 1)
     {
@@ -1241,7 +1241,7 @@ void DrawTextPanelBlocks(T217D_440* self, PacketWriter* q)
 
 // Changes the panel's screen-element mode. Leaving mode 0 stops every animation player of the
 // object 0x495's list (speed 0) and entering mode 0 sets them all running again (speed 1).
-void SetTextPanelMode(T217D_440* self, s32 value)
+void SetTextPanelMode(CaptionBox* self, s32 value)
 {
     if (value == self->mode) {
         return;
@@ -1275,7 +1275,7 @@ void SetTextPanelMode(T217D_440* self, s32 value)
 
 // Changes the panel's state and stamps the time. Leaving state 0 clears the text, leaving state 1
 // plays sound 0x8F, entering state 1 plays 0x8E and entering state 4 resets the copied caption.
-void SetTextPanelState(T217D_440* self, s32 mode)
+void SetTextPanelState(CaptionBox* self, s32 mode)
 {
     if (mode != self->state) {
         if (self->state != 1) {
@@ -1293,7 +1293,7 @@ void SetTextPanelState(T217D_440* self, s32 mode)
             self->state = mode;
             break;
         case 4:
-            ((Tail_1356C0*)&g_copiedTextCaption)->v = 0;
+            ((CaptionAnnounceTail*)&g_copiedTextCaption)->v = 0;
             g_copiedTextCaption.vt->m15(&g_copiedTextCaption);
             self->state = mode;
             break;
@@ -1358,11 +1358,11 @@ Effect* CreateEffect(s32 kind, EffectOwner* sys);
 // distance from the camera and, for each wanted one (state 1, among the nearest limit and in range,
 // for class 0x2E with its flag clear), sets the edge block of the side it is off screen on, or
 // starts a marker effect (kind 0x12) if visible. Markers of objects no longer wanted end.
-void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s32 limit, BaseObject* a5, f32 range)
+void CollectPanelEntriesOfClass(CaptionBox* self, s32 kind, void* a2, void* a3, s32 limit, BaseObject* a5, f32 range)
 {
     PanelEntry entries[0x80];
     void* objs[0x80];
-    Vec02 d;
+    Vec4 d;
     s32 want;
     s32 i = 0;
     s32 n = GatherObjectsById(g_currentWorld, 0x105, kind, 0, 0x80, objs);
@@ -1371,12 +1371,12 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
         e = &entries[i];
         e->obj = objs[i];
         ((void (*)(void*, PanelEntryPosition*, f32*))a2)(e->obj, &e->v, &e->radius);
-        e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->f40) - e->radius;
+        e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->position) - e->radius;
     }
     HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
     s32 mayStart = 1;
     FillMemory(self->blockA, 0, 0x10);
-    if (!(D_00261274 < g_gameClock[1] - *(f32*)&self->countA)) {
+    if (!(g_panelStartCooldown < g_gameClock[1] - *(f32*)&self->countA)) {
         mayStart = 0;
     }
     for (i = 0; i < n;) {
@@ -1389,7 +1389,7 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
         }
         CameraHeading* cam = g_camera;
         u128 ones = Vu0::Ones();
-        Vu0::Q(d) = Vu0::Sub(Vu0::Q(e->v), Vu0::Q(cam->f40));
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(e->v), Vu0::Q(cam->position));
         u32 signs = Vu0::PlaneSigns(Vu0::Q(cam->planes[0]), Vu0::Q(cam->planes[1]), Vu0::Q(cam->planes[2]), Vu0::Q(d), ones, Vu0::ScalarAt(e->radius)) ^ 0xF0;
         s32 visible = signs == 0;
         if (want && !visible) {
@@ -1398,13 +1398,13 @@ void CollectPanelEntriesOfClass(T217D_440* self, s32 kind, void* a2, void* a3, s
             f32 rise = ArctangentOfRatio(d.z, Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(v, v))));
             yaw = WrapAngle(yaw - g_camera->heading);
             f32 pitch = WrapAngle(rise - g_camera->pitch);
-            if (g_camera->f1C4 * (g_camera->f1E0 * 0.45f) < yaw) {
+            if (g_camera->zoom * (g_camera->aspectScale * 0.45f) < yaw) {
                 self->blockA[0] = 1;
-            } else if (yaw < g_camera->f1C4 * (g_camera->f1E0 * -0.45f)) {
+            } else if (yaw < g_camera->zoom * (g_camera->aspectScale * -0.45f)) {
                 self->blockA[1] = 1;
-            } else if (g_camera->f1C4 * 0.45f < pitch) {
+            } else if (g_camera->zoom * 0.45f < pitch) {
                 self->blockA[2] = 1;
-            } else if (pitch < g_camera->f1C4 * -0.45f) {
+            } else if (pitch < g_camera->zoom * -0.45f) {
                 self->blockA[3] = 1;
             }
         }
@@ -1466,7 +1466,7 @@ LINKER_REMNANT(func_00135E70);
 // When the state changes, releases every effect the panel holds (removing it and clearing the
 // second block, or ending it with phase 2), clears the counts and the first block and stores the
 // new state.
-void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
+void ReleasePanelEntries(CaptionBox* self, s32 state, s32 flag)
 {
     if (state == self->bankState) return;
     s32 i = 0;
@@ -1493,7 +1493,7 @@ void ReleasePanelEntries(T217D_440* self, s32 state, s32 flag)
 // Refreshes the panel's marker entries: releases them all when the level's bit is not set in the
 // saved world mask, and otherwise, with bankState 1, collects the markers of the object classes
 // 0x2E and 0x21 (up to five of each).
-void RefreshPanelEntries(T217D_440* self, PadRecord* pad)
+void RefreshPanelEntries(CaptionBox* self, PadRecord* pad)
 {
     LevelBit flag;
     GetCurrentLevelBit((u32*)&flag);
@@ -1514,18 +1514,18 @@ void RefreshPanelEntries(T217D_440* self, PadRecord* pad)
 // each way) toward the pads' stick (the sum of the two sticks' x, y flipped by the save option bit
 // 0x200) and scrolls the compass ticks by x; in state 5 it holds y at 50. Then it refreshes the
 // panel's entries.
-void UpdatePanelStick(T217D_440* self, PadRecord* p)
+void UpdatePanelStick(CaptionBox* self, PadRecord* p)
 {
     switch (self->state) {
     case 1: {
-        Vec_136040 va;
-        Vec_136040 vb;
-        Vec_136040 r;
+        StickVec4 va;
+        StickVec4 vb;
+        StickVec4 r;
         f32 lo = -1.0f;
         f32 hi = 1.0f;
         f32 sum = p->stickX + p->secondStickX;
-        StickLimits t0 = D_00249D00;
-        StickLimits t1 = D_00249D10;
+        StickLimits t0 = g_panelStickActiveRamp;
+        StickLimits t1 = g_panelStickIdleRamp;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
         f32 v = p->stickY;
         f32 lo2 = -1.0f;
@@ -1556,14 +1556,14 @@ void UpdatePanelStick(T217D_440* self, PadRecord* p)
     }
     RefreshPanelEntries(self, p);
 }
-extern const StickLimits D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
-extern const StickLimits D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
+extern const StickLimits g_panelStickActiveRamp = { 0x4248000042A00000ULL, 0x3F000000 };
+extern const StickLimits g_panelStickIdleRamp = { 0x43480000437A0000ULL, 0x3DCCCCCD };
 
 // Opens or closes the text panel (nothing when it is already so): pauses or resumes the stream
 // voice of its child sequence, sets the palette to 0 and, on opening, runs method 0x16 with 2,
 // releases the saved bank's entries when the level's bit is set and resets the text points; on
 // closing it runs method 0x16 with 0, saves the bank state and releases the entries.
-void SetTextPanelOpen(T217D_440* self, s32 on)
+void SetTextPanelOpen(CaptionBox* self, s32 on)
 {
     LevelBit in;
     void* arr[0x100];
@@ -1598,7 +1598,7 @@ void SetTextPanelOpen(T217D_440* self, s32 on)
 }
 
 // Slot 5 of the text panel: resets the screen element and puts its child into state 2.
-void ResetTextPanel(T217D_440* self)
+void ResetTextPanel(CaptionBox* self)
 {
     ResetScreenElement(self);
     if (self->child != 0) {
@@ -1609,7 +1609,7 @@ void ResetTextPanel(T217D_440* self)
 // Sets the panel's text from a string (empty when null or empty): copies it, wraps it in lines at
 // 280 units wide (380 and a 0.8 font scale in state 4), records the index of each line break in
 // lineBreaks and stamps the time the text was set.
-void SetTextPanelText(T217D_440* self, const char* name)
+void SetTextPanelText(CaptionBox* self, const char* name)
 {
     TextScratch buf;
     s32 s1;
@@ -1652,7 +1652,7 @@ tail:
 
 // True when the text is empty or the typing effect (elapsed time times characters per second) has
 // revealed all its characters.
-s32 IsTextPanelTextTyped(T217D_440* self)
+s32 IsTextPanelTextTyped(CaptionBox* self)
 {
     u8 buf[0xB0];
 
@@ -1666,16 +1666,16 @@ s32 IsTextPanelTextTyped(T217D_440* self)
 }
 
 // Sets the object the panel is about.
-void SetTextPanelSubject(T217D_440* self, BaseObject* value) { self->subject = value; }
+void SetTextPanelSubject(CaptionBox* self, BaseObject* value) { self->subject = value; }
 
 // Sets the panel's value from a percentage (divided by 100 and limited to 0..1).
-void SetTextPanelValuePercent(T217D_440* self, f32 value)
+void SetTextPanelValuePercent(CaptionBox* self, f32 value)
 {
     PercentClampStore::Set(self, value * 0.01f, 0.0f, 1.0f);
 }
 
 // Slot 11 of the text panel: 0 in states 1, 2 and 5, otherwise the element's usual slide-in time.
-f32 GetTextPanelSlideInTime(T217D_440* self)
+f32 GetTextPanelSlideInTime(CaptionBox* self)
 {
     switch (self->state) {
     case 1:
@@ -1691,7 +1691,7 @@ f32 GetTextPanelSlideInTime(T217D_440* self)
 
 // The slide-out twin of GetTextPanelSlideInTime: 0 in states 1, 2 and 5, otherwise the element's
 // usual slide-out time.
-f32 GetTextPanelSlideOutTime(T217D_440* s) {
+f32 GetTextPanelSlideOutTime(CaptionBox* s) {
     switch (s->state) {
     case 1:
     case 2:
@@ -1706,11 +1706,11 @@ f32 GetTextPanelSlideOutTime(T217D_440* s) {
 
 extern PacketWriter g_gsPacketWriter;
 s32 AreMenusClosed(void);
-void DrawCompassStrip(T217D_440* self, PacketWriter* gs);
-void DrawTextPanelControlLabels(T217D_440* self, PacketWriter* gs);
+void DrawCompassStrip(CaptionBox* self, PacketWriter* gs);
+void DrawTextPanelControlLabels(CaptionBox* self, PacketWriter* gs);
 void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
 void SeekTextReader(TextReader* self, s32 n);
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 
 // A byte from a toward b by t, as the panel fades its alpha (the difference taken as an integer).
 struct ByteLerp {
@@ -1733,7 +1733,7 @@ struct PanelLayout {
         return q.w;
     }
 
-    static Layout_137228* Set(Layout_137228* l, f32 x, f32 y, f32 w, f32 h, s32 color)
+    static TextBoxLayout* Set(TextBoxLayout* l, f32 x, f32 y, f32 w, f32 h, s32 color)
     {
         Quad4 col;
         l->Pos(x, y);
@@ -1748,7 +1748,7 @@ struct PanelLayout {
 
 // Draws the panel: its frames by state, then its box, the text typed so far (a cursor blinking
 // at its end) scrolled to the line being typed, and the pulsing button glyph.
-void DrawTextPanel(T217D_440* self)
+void DrawTextPanel(CaptionBox* self)
 {
     if (AreMenusClosed() == 0) {
         return;
@@ -1801,14 +1801,14 @@ void DrawTextPanel(T217D_440* self)
         break;
     }
     s32 grey = 0xFF808080;
-    Layout_137228 box;
+    TextBoxLayout box;
     PanelLayout::Set(&box, offX + 180.0f, offY + 386.800018f, width, height, grey);
     f32 fade = 1.0f;
-    if (D_002708E0.target != 0) {
-        fade = D_002708E0.blend <? fade;
+    if (g_leftArcElement.target != 0) {
+        fade = g_leftArcElement.blend <? fade;
     }
-    if (D_00271558.target != 0) {
-        fade = D_00271558.blend <? fade;
+    if (g_rightArcElement.target != 0) {
+        fade = g_rightArcElement.blend <? fade;
     }
     if (fade < 1.0f) {
         u8 a = ByteLerp::Of(0, color.a, fade);
@@ -1865,7 +1865,7 @@ void DrawTextPanel(T217D_440* self)
             AppendString(text, "&.~ffffff|");
         }
         f32 y = ((f32)row + scroll) * ((f32)self->font->height * self->font->sy);
-        Layout_137228 lines;
+        TextBoxLayout lines;
         f32 noScroll = 0.0f;
         PanelLayout::Set(&lines, offX + 180.0f, (offY + 386.800018f) - (noScroll >? (y - height)), width, y,
                          *(s32*)&color);
@@ -1888,8 +1888,8 @@ void DrawTextPanel(T217D_440* self)
         }
         PushFontScale(font, size, size);
         s32 glyphColor = 0xFF808080;
-        Layout_137228 at;
-        Layout_137228* l = PanelLayout::Set(&at, x, y, 0.0f, 0.0f, glyphColor);
+        TextBoxLayout at;
+        TextBoxLayout* l = PanelLayout::Set(&at, x, y, 0.0f, 0.0f, glyphColor);
         l->f14 = 1;
         l->f18 = 1;
         DrawFontString(font, glyph, (StringLayout*)l, 0, &g_gsPacketWriter);
@@ -1898,7 +1898,7 @@ void DrawTextPanel(T217D_440* self)
 }
 
 // The panel's centre on screen: its stick offset plus (320, 180.4).
-void GetTextPanelCenter(T217D_440* self, f32* x, f32* y)
+void GetTextPanelCenter(CaptionBox* self, f32* x, f32* y)
 {
     *x = self->stickX + 320.0f;
     *y = self->stickY + 180.4000091552734375f;
@@ -1906,7 +1906,7 @@ void GetTextPanelCenter(T217D_440* self, f32* x, f32* y)
 
 // Slot 6 of the text panel: with a child, takes state 2, 3 or 4 by the child's mode and sets the
 // child to state 3; without one takes state 1.
-void ChooseTextPanelState(T217D_440* self)
+void ChooseTextPanelState(CaptionBox* self)
 {
     if (self->child != 0) {
         switch (((StepSequence*)self->child)->mode2D0) {
@@ -1928,7 +1928,7 @@ void ChooseTextPanelState(T217D_440* self)
 
 // Slot 7 of the text panel, after ChooseTextPanelState: puts the child into state 4, or returns the
 // panel to state 0 when it has none.
-void EndTextPanelState(T217D_440* self)
+void EndTextPanelState(CaptionBox* self)
 {
     if (self->child != 0) {
         SetStepSequenceState((StepSequence*)self->child, 4);
@@ -1939,26 +1939,26 @@ void EndTextPanelState(T217D_440* self)
 
 // The text layout's setters (layout_137228.h): defined after their callers, which call them,
 // and written out here at the end of the file, after the static initialiser.
-inline void Layout_137228::Pos(f32 x_, f32 y_)
+inline void TextBoxLayout::Pos(f32 x_, f32 y_)
 {
     x = x_;
     y = y_;
 }
 
-inline void Layout_137228::Size(f32 w_, f32 h_)
+inline void TextBoxLayout::Size(f32 w_, f32 h_)
 {
     w = w_;
     h = h_;
 }
 
-inline void Layout_137228::Color(s32* value)
+inline void TextBoxLayout::Color(s32* value)
 {
-    color = *(Rgba_137248*)value;
+    color = *(LayoutRgba*)value;
 }
 
-inline void Layout_137228::SetF14(s32 value) { f14 = value; }
+inline void TextBoxLayout::SetF14(s32 value) { f14 = value; }
 
-inline void Layout_137228::SetF18(s32 value)
+inline void TextBoxLayout::SetF18(s32 value)
 {
     f18 = value;
 }

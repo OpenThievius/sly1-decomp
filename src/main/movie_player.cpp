@@ -42,8 +42,8 @@ struct MpegHandle;
 struct Outer_20AE40;
 struct S_20B0C0;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -117,11 +117,11 @@ void EndGifPacket(PacketWriter* self);
 void AddGifImageTag(PacketWriter* self, s32 count);
 
 struct AttachedTransformFrame {
-    Vec02 q00;
-    Vec02 q10;
-    Vec02 q20;
-    Mat02 tbl30;
-    Vec02 q60;
+    Vec4 q00;
+    Vec4 q10;
+    Vec4 q20;
+    Mat3 tbl30;
+    Vec4 q60;
     u8 pad70[0xA0 - 0x70];
     Mat4A blkA0;
     u8 padE0[0xF0 - 0xE0];
@@ -140,7 +140,7 @@ extern "C" s32 AwaitSemaphore(s32 a);
 
 extern u8 g_movieCrcTable[];
 
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 void ResetMpegDecoder(S_20B0C0* d);
 
@@ -184,7 +184,7 @@ struct GameClock;
 struct ScreenFade;
 s32 GetMpegDecoderStatus(Device_20B0B0* device);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern u8 g_movieDecodeThreadStack[];
@@ -213,7 +213,7 @@ extern u8 g_moviePictureBuffer[];
 extern u8 g_movieVideoRingBuffer[];
 extern u8 g_movieUploadPacket[];
 extern u8 g_movieDrawPacket[];
-extern u8 D_00148D68[];
+extern u8 g_moviePlayerChecksumEnd[];
 
 s32 CreateMpegDecoder(void* self, void* a, s32 b);
 Handler_20A220 SetStreamCallback(Ctx_20A220* self, s32 idx, s32 key, Handler_20A220 handler, void* arg);
@@ -302,7 +302,7 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
 
 // Attaches the object to an anchor object at an offset, starts its animation player if it has an
 // animation, and, when it is ready and moving, turns it to face its velocity.
-void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
+void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec4* v)
 {
     self->anchorObject = a;
     self->anchorOffset = *v;
@@ -317,7 +317,7 @@ void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec02* v)
             still = 1;
         }
         if (!still) {
-            Mat02 m;
+            Mat3 m;
             BuildBasisFromX(&self->v150, &m);
             self->desc02()->m1E(self, &m);
         }
@@ -338,7 +338,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
             if (self->positionAttachment != 0) {
                 self->positionAttachment->vt->getPos(self->positionAttachment, 0.0f, &f.q00, &f.q10);
             } else {
-                f.q00 = D_00248D30;
+                f.q00 = g_zeroVector;
             }
             if (self->orientationAttachment != 0) {
                 self->orientationAttachment->vt->getRot(self->orientationAttachment, 0.0f, &f.tbl30, &f.q20);
@@ -347,7 +347,7 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
                 f.tbl30 = g_identityMatrix;
             }
             BuildPlacedObjectTransform(self, (Quad16*)in2, (ScaledTransform*)&f.blkA0);
-            BuildMatrixFromRotationAndTranslation((const Vec02*)&f, &f.tbl30, (Mat4A*)&f.q60);
+            BuildMatrixFromRotationAndTranslation((const Vec4*)&f, &f.tbl30, (Mat4A*)&f.q60);
             MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
             ApplyPlacedObjectTransform(self, (Camera*)in1, (ScaledTransform*)&f.blkA0);
@@ -401,12 +401,12 @@ void AddColliderForce(void* a, void* b);
 void InitContactListObjectWithoutGravity(ContactListObject* self)
 {
     InitContactListObject(self);
-    self->gravity = D_00248D30;
+    self->gravity = g_zeroVector;
 }
 
 // Launches the object as the base does, then sets its target velocity to the unit X direction
 // of its velocity scaled by its speed.
-void LaunchContactListObjectWithoutGravity(ContactListGlider* self, PlacedObject* target, Vec02* offset)
+void LaunchContactListObjectWithoutGravity(ContactListGlider* self, PlacedObject* target, Vec4* offset)
 {
     LaunchContactListObject(self, target, offset);
     u128 speed = Vu0::ScalarAt(self->speed6F0);
@@ -417,8 +417,8 @@ void LaunchContactListObjectWithoutGravity(ContactListGlider* self, PlacedObject
 // within one step, its length clamped to the object's rate limit.
 void StepContactListObjectWithoutGravity(ContactListGlider* self, f32 dt)
 {
-    Vec02 accel;
-    Vec02 t;
+    Vec4 accel;
+    Vec4 t;
     StepCollider(self, dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Sub(Vu0::Q(self->v700), Vu0::Q(self->v150)), Vu0::Q(t));
@@ -432,12 +432,12 @@ extern f32 g_gameTime;
 // Launches the object like LaunchContactListObject and sets the time at which it should reach the
 // anchor: speed6F0 seconds from now when that is positive, otherwise computed from the distance to
 // where the anchor will be and rate6F4 (at most four seconds).
-void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target, Vec02* offset)
+void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target, Vec4* offset)
 {
-    Mat02 rot;
-    Vec02 d;
-    Vec02 e;
-    Vec02 pos;
+    Mat3 rot;
+    Vec4 d;
+    Vec4 e;
+    Vec4 pos;
     ColliderSpan hit;
     LaunchContactListObject(self, target, offset);
     f32 speed = self->speed6F0;
@@ -449,7 +449,7 @@ void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target,
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
         Vu0::Q(e) = Vu0::MulAddX(Vu0::Q(d), Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.5f));
-        FindSegmentSphereSpan((Vec02*)&D_00248D30, &d, &e, self->rate6F4, 1, &hit);
+        FindSegmentSphereSpan((Vec4*)&g_zeroVector, &d, &e, self->rate6F4, 1, &hit);
         f32 x = hit.time[1];
         f32 m = 0.25f;
         m = m >? x;
@@ -462,7 +462,7 @@ struct GliderListFrame {
     void* cur;
     s32 off;
     GliderListFrame* prev;
-    GliderListFrame(List01* l)
+    GliderListFrame(ObjectList* l)
     {
         cur = l;
         base = l;
@@ -474,10 +474,10 @@ struct GliderListFrame {
     ~GliderListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
+f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 
 // Moves the glider-like contact list object one step of dt: until its end time it follows a Hermite
 // curve to the anchor object's position a short time ahead, afterwards it coasts. Once ready it
@@ -485,12 +485,12 @@ f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
 // unless hold is set.
 void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
 {
-    Vec02 accel;
+    Vec4 accel;
     f32 now = *(f32*)(g_gameClock + 4);
     if (now < self->time6FC) {
-        Vec02 pos;
-        Vec02 vel;
-        Mat02 rot;
+        Vec4 pos;
+        Vec4 vel;
+        Mat3 rot;
         f32 remain = self->time6FC - now + dt;
         ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, g_movieFrameLookahead <? remain);
         Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
@@ -505,13 +505,13 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         } else {
             vel = self->v700;
         }
-        Vec02 outPos;
-        Vec02 outVel;
+        Vec4 outPos;
+        Vec4 outVel;
         EvaluateHermiteVectorSegment(remain, dt, 1.0f, &self->pos, &self->v150, &pos, &vel, &outPos, &outVel, &accel);
         self->pos = outPos;
         self->v150 = outVel;
     } else {
-        accel = D_00248D30;
+        accel = g_zeroVector;
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(dt));
     }
     if (self->ready != 0) {
@@ -522,8 +522,8 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
             still = 1;
         }
         if (!still) {
-            Vec02 dir;
-            Vec02 rest;
+            Vec4 dir;
+            Vec4 rest;
             Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(self->v150), Vu0::Q(g_unitXVector)));
             SplitVectorAlongAxis(&accel, &self->rot.r[0], 0, &rest);
             u128 s = Vu0::Scalar(-1.0f);
@@ -1064,9 +1064,9 @@ void InitMoviePlayback(MoviePlayer* self, void* v)
     }
     self->uploadPacket = g_movieUploadPacket;
     self->drawPacket = g_movieDrawPacket;
-    D_002626CC = 0;
+    g_fieldOffsetMode = 0;
     g_moviePlayer.cur = (u8*)0x100010;
-    g_moviePlayer.remain = (s32)D_00148D68;
+    g_moviePlayer.remain = (s32)g_moviePlayerChecksumEnd;
     g_moviePlayer.crc = 0xFFFFFFFF;
     u8* tb = g_movieCrcTable;
     i = 0;
@@ -1128,7 +1128,7 @@ void StepMovieFrame(MoviePlayer* self)
     if (DecodeMpegPicture((MpegHandle*)&self->decoder, self->picture, 0x4B0) < 0) {
         return;
     }
-    if (self->decoder.f08 == 0) {
+    if (self->decoder.skipPicture == 0) {
         UploadMovieFrame(self->uploadPacket, (s32)self->picture, self->decoder.width, self->decoder.height);
         DrawMovieFrame(self->drawPacket, self->decoder.width, self->decoder.height);
         SyncDataCache(0);
@@ -1160,7 +1160,7 @@ void FinishMovie(MoviePlayer* self)
         do {
         } while (self->threadStep != 0);
     }
-    D_002626CC = 3;
+    g_fieldOffsetMode = 3;
     SendResidentImages();
     if (self->movieIndex >= 16) {
         mask = 0;

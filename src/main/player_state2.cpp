@@ -64,15 +64,15 @@ f32 D_00263E70 = 0.0700000003f;
 f32 D_00263E74 = 0.300000012f;
 f32 D_00263E78 = -750.0f;
 f32 D_00263E7C = 5.0f;
-f32 D_00263E80 = 700.0f;
-f32 D_00263E84 = 245.0f;
-f32 D_00263E88 = 900.0f;
-f32 D_00263E8C = 800.0f;
+f32 g_jumpKind1SpeedBase = 700.0f;
+f32 g_jumpApexHeight = 245.0f;
+f32 g_jumpKind3SpeedBase = 900.0f;
+f32 g_jumpKind4SpeedBase = 800.0f;
 f32 D_00263E90[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
 f32 D_00263EA0[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
 f32 D_00263EB0[4] = { 0.400000006f, 0.0f, 0.0f, 0.0f };
 // The 22 segment ends func_0017DE88 transforms; func_00188700 loads each whole (lqc2).
-Vec02 g_probeSegmentEndpoints[22] = {
+Vec4 g_probeSegmentEndpoints[22] = {
     { 50.0f, 0.0f, 75.0f, 0.0f },
     { 50.0f, 0.0f, -150.0f, 0.0f },
     { 50.0f, 0.0f, 75.0f, 0.0f },
@@ -111,10 +111,10 @@ f32 D_00264060[4] = { -3.40282347e+38f, 682.0f, 0.0f, 0.0f };
 f32 D_00264070[4] = { 682.0f, 1.0f, 0.0f, 0.0f };
 f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 // size: list head of three words, link offset at +8 (0x50)
-List01 g_pointObjects = {0};
+ObjectList g_pointObjects = {0};
 
 extern f32 g_gameClock[];
-void AddColliderForce(void* target, Vec02* force);
+void AddColliderForce(void* target, Vec4* force);
 
 // The step of state 2: turns toward the heading matrix, then by sub-state: 6 steers toward the
 // stick's target position, 8 holds the player up against gravity until a marker of its animation
@@ -122,8 +122,8 @@ void AddColliderForce(void* target, Vec02* force);
 // wanted ground velocity with a lift when falling too slowly.
 void StepPlayerState2(Player* self)
 {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
     TurnColliderTowardRotation(self, g_gameClock[2], &self->headingMatrix, &self->turnGain);
     switch (self->subState) {
     case 6:
@@ -142,7 +142,7 @@ void StepPlayerState2(Player* self)
             AddColliderForce(self, &a);
         }
         if (((AnimationPlayer*)self->stateAnimPlayer)->time < t0) {
-            b = D_00248D30;
+            b = g_zeroVector;
         } else {
             Vu0::Q(b) = Vu0::FromFloats(0.0f, 0.0f, self->v150.z);
         }
@@ -162,9 +162,9 @@ void StepPlayerState2(Player* self)
         if (self->entryQueue != 0) {
             break;
         }
-        Vec02 c;
-        Mat02 m;
-        Vec02 r;
+        Vec4 c;
+        Mat3 m;
+        Vec4 r;
         a = self->v150;
         a.z = 0.0f;
         const u128& fb = Vu0::Q(g_unitXVector);
@@ -214,41 +214,41 @@ void StepPlayerState2(Player* self)
     }
 }
 
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
+f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 extern f32 g_gameTime;
 
-struct LeapPart_17D5D8 {
+struct LeapCandidatePart {
     u8 pad000[0x100];
-    Vec02 pos;                      // 0x100
+    Vec4 pos;                      // 0x100
     u8 pad110[0x140 - 0x110];
-    Vec02 v140;                     // 0x140
-    Vec02 v150;                     // 0x150
+    Vec4 v140;                     // 0x140
+    Vec4 v150;                     // 0x150
     u8 pad160[0x558 - 0x160];
-    LeapPart_17D5D8* next;          // 0x558
+    LeapCandidatePart* next;          // 0x558
     u8 pad55C[0x568 - 0x55C];
     f32 height;                     // 0x568
 };
-struct LeapPoint_17D5D8 {
+struct LeapCandidatePoint {
     u8 pad00[0x18];
     void* parent;                   // 0x18
     u8 pad1C[0x50 - 0x1C];
-    LeapPoint_17D5D8* next;         // 0x50
+    LeapCandidatePoint* next;         // 0x50
     u8 pad54[0x58 - 0x54];
     f32 radius;                     // 0x58
 };
-struct LeapRecord_17D5D8 { u8 pad00[0x18]; f32 time; u8 pad1C[0x20 - 0x1C]; Vec02 aim; Vec02 land; };
+struct LeapPoseRecord { u8 pad00[0x18]; f32 time; u8 pad1C[0x20 - 0x1C]; Vec4 aim; Vec4 land; };
 
-static inline void StartPlayerLeap(Player* p, f32 t, const Vec02& aim, const Vec02& land)
+static inline void StartPlayerLeap(Player* p, f32 t, const Vec4& aim, const Vec4& land)
 {
-    ((LeapRecord_17D5D8*)p->selfPoseSource)->time = g_gameTime + t;
-    ((LeapRecord_17D5D8*)p->selfPoseSource)->aim = aim;
-    ((LeapRecord_17D5D8*)p->selfPoseSource)->aim.z += 75.0f;
-    ((LeapRecord_17D5D8*)p->selfPoseSource)->land = land;
-    ((LeapRecord_17D5D8*)p->selfPoseSource)->land.z = p->v150.z + t * p->gravity.z;
+    ((LeapPoseRecord*)p->selfPoseSource)->time = g_gameTime + t;
+    ((LeapPoseRecord*)p->selfPoseSource)->aim = aim;
+    ((LeapPoseRecord*)p->selfPoseSource)->aim.z += 75.0f;
+    ((LeapPoseRecord*)p->selfPoseSource)->land = land;
+    ((LeapPoseRecord*)p->selfPoseSource)->land.z = p->v150.z + t * p->gravity.z;
 }
 
 // v made a unit vector, or the fallback when shorter than 1e-4; its length.
-static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
+static inline u128 NormalizeVectorOr(Vec4& v, const Vec4& fallback)
 {
     u128 len = Vu0::Length(Vu0::Q(v));
     if (Vu0::ToFloat(len) < 0.0001f) {
@@ -260,7 +260,7 @@ static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
 }
 
 // The square of the distance from a to b on the ground plane.
-static inline f32 GroundDistanceSquared(const Vec02& a, const Vec02& b)
+static inline f32 GroundDistanceSquared(const Vec4& a, const Vec4& b)
 {
     Vu0::Vec d = Vu0::Sub(Vu0::Vec::Of(a), Vu0::Vec::Of(b));
     return Vu0::ToFloat(Vu0::DotXY(d.q, d.q));
@@ -274,7 +274,7 @@ static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 // parts and point objects within 600 units and leaps at it (sub-state 4 for a part, 9 for a point).
 void ControlPlayerState2(Player* p, PadRecord* pad)
 {
-    Vec02 aim;
+    Vec4 aim;
     switch (p->subState) {
     case 4:
     case 6:
@@ -290,8 +290,8 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
         ComputePolarOffset((Vec3*)&aim, p->stickHeading, p->stickLevel * p->jumpSpeed, 0.0f);
         Vu0::Q(p->headingVelocity) = Vu0::MulX(Vu0::RotateTransposed(p->headingMatrix, Vu0::Q(aim)), Vu0::Scalar(-1.0f));
         if ((p->subState != 0 || p->jumpStickPhase == 3) && p->steerKeepsDirection == 0) {
-            Vec02 dir;
-            Vec02 side;
+            Vec4 dir;
+            Vec4 side;
             dir = p->v150;
             dir.z = 0.0f;
             f32 speed = Vu0::ToFloat(NormalizeVectorOr(dir, g_unitXVector));
@@ -312,17 +312,17 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
     case 2:
     case 5:
     default: {
-        Vec02 bestAim;
-        Vec02 land;
-        Vec02 bestLand;
+        Vec4 bestAim;
+        Vec4 land;
+        Vec4 bestLand;
         ListFrame frame;                // the list walks' frame: retail leaves its 16 bytes at 0x50 untouched
-        LeapPart_17D5D8* best = 0;
-        LeapPoint_17D5D8* bestPoint = 0;
+        LeapCandidatePart* best = 0;
+        LeapCandidatePoint* bestPoint = 0;
         f32 bestCost = 1500.0f;
         f32 bestT;
         f32 t;
         f32 cost;
-        for (LeapPart_17D5D8* q = (LeapPart_17D5D8*)g_partList.head; q != 0; q = q->next) {
+        for (LeapCandidatePart* q = (LeapCandidatePart*)g_partList.head; q != 0; q = q->next) {
             if (360000.0f < GroundDistanceSquared(q->v140, p->v140)) {
                 continue;
             }
@@ -333,16 +333,16 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             if (bestCost < cost) {
                 continue;
             }
-            Vec02 rel;
-            Vec02 dv;
-            Vec02 end;
+            Vec4 rel;
+            Vec4 dv;
+            Vec4 end;
             f32 a;
             f32 b;
             Vu0::Q(rel) = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(q->pos));
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(q->v150));
             Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
             rel.z = end.z = 0.0f;
-            MeasurePointToSegment((Vec02*)&D_00248D30, &rel, &end, &a, &b);
+            MeasurePointToSegment((Vec4*)&g_zeroVector, &rel, &end, &a, &b);
             if ((100.0f < b || a == 0.0f) && (25.0f < b || 0.0f < p->v150.z)) {
                 continue;
             }
@@ -353,20 +353,20 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             bestT = t;
             bestCost = cost;
         }
-        for (LeapPoint_17D5D8* q = (LeapPoint_17D5D8*)g_pointObjects.head; q != 0; q = q->next) {
-            Vec02 pos;
-            Vec02 vel;
-            Vec02 rel;
-            Vec02 dv;
-            Vec02 dir;                      // a local the original declared and never used: retail leaves its 16-byte slot at 0xA0 untouched
-            Vec02 end;
+        for (LeapCandidatePoint* q = (LeapCandidatePoint*)g_pointObjects.head; q != 0; q = q->next) {
+            Vec4 pos;
+            Vec4 vel;
+            Vec4 rel;
+            Vec4 dv;
+            Vec4 dir;                      // a local the original declared and never used: retail leaves its 16-byte slot at 0xA0 untouched
+            Vec4 end;
             f32 a;
             f32 b;
             ConvertPositionToWorld((BaseObject*)q, &pos);
             if (360000.0f < GroundDistanceSquared(pos, p->v140)) {
                 continue;
             }
-            ScorePlayerTargetPlacement(p, (Vec02*)&p->v150, (BaseObject*)q->parent, &pos, 0, &t, &cost, &aim, &land);
+            ScorePlayerTargetPlacement(p, (Vec4*)&p->v150, (BaseObject*)q->parent, &pos, 0, &t, &cost, &aim, &land);
             if (bestCost < cost) {
                 continue;
             }
@@ -375,7 +375,7 @@ void ControlPlayerState2(Player* p, PadRecord* pad)
             Vu0::Q(dv) = Vu0::Sub(Vu0::Q(p->v150), Vu0::Q(vel));
             Vu0::Q(end) = Vu0::MulAddX(Vu0::Q(rel), Vu0::Q(dv), Vu0::Scalar(MinF(0.25f, t)));
             rel.z = end.z = 0.0f;
-            MeasurePointToSegment((Vec02*)&D_00248D30, &rel, &end, &a, &b);
+            MeasurePointToSegment((Vec4*)&g_zeroVector, &rel, &end, &a, &b);
             if ((b > q->radius || a == 0.0f) && (q->radius * 0.25f < b || 0.0f < p->v150.z)) {
                 continue;
             }
@@ -438,9 +438,9 @@ struct MeshEdgePair {
 // For a mesh edge between a floor face (normal z over 0.7) and a wall face (under 0.55), gives in
 // *out the horizontal unit normal of the edge on the side of the floor, and 1; any other edge gives
 // 0.
-s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec02* out)
+s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec4* out)
 {
-    Mesh03* mesh = &c->meshCopy;
+    CollisionMesh* mesh = &c->meshCopy;
     MeshFace* faces = (MeshFace*)mesh->faces;
     MeshFace* fa = &faces[e->faceA];
     MeshFace* fb = &faces[e->faceB];
@@ -452,9 +452,9 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec02* ou
     } else {
         return 0;
     }
-    Vec02* verts = (Vec02*)mesh->verts;
-    Vec02 d;
-    Vec02 n;
+    Vec4* verts = (Vec4*)mesh->verts;
+    Vec4 d;
+    Vec4 n;
     u128 vb = Vu0::Q(verts[e->vertB]);
     u128 va = Vu0::Q(verts[e->vertA]);
     Vu0::Q(d) = Vu0::Sub(vb, va);
@@ -470,7 +470,7 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec02* ou
 }
 
 
-void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
+void BuildPerpendicularPair(Quad16* q, void* out, const Vec4* a, const Vec4* b);
 
 // Probes the surroundings of a ledge point: builds a frame at ctx from the direction in src and
 // tests eleven fixed segments of it (g_probeSegmentEndpoints) against the contacted objects' parts.
@@ -484,10 +484,10 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     s32 hits = 0;
     // stack scratch: a frame and the segment spans, not an object
     BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
-    BuildMatrixFromRotationAndTranslation((const Vec02*)ctx, (const Mat02*)&q, (Mat4A*)(buf + 0x30));
+    BuildMatrixFromRotationAndTranslation((const Vec4*)ctx, (const Mat3*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i], 1.0f, (Vec02*)(buf + 0x70));
-        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i + 1], 1.0f, (Vec02*)(buf + 0x80));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i], 1.0f, (Vec4*)(buf + 0x70));
+        TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i + 1], 1.0f, (Vec4*)(buf + 0x80));
         ContactRow03* n = self->contacts->head;
         while (n) {
             Collider* a = n->other;
@@ -496,7 +496,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
                 while (c) {
                     if (!(c->flags538 & 0x80000000000ULL)) {
                         // stack scratch: the span buffer, not an object
-                        if (CollectColliderSpans(c, (Vec02*)(buf + 0x70), (Vec02*)(buf + 0x80), 1, (ColliderSpan*)(buf + 0x90)) > 0) {
+                        if (CollectColliderSpans(c, (Vec4*)(buf + 0x70), (Vec4*)(buf + 0x80), 1, (ColliderSpan*)(buf + 0x90)) > 0) {
                             if (i < 4) return 0;
                             if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
                             if (0.7f < *(f32*)(buf + 0xB8)) hits++;
@@ -528,16 +528,16 @@ struct KeyedEdge;
 // contact's kind: 1 (a vertex) sums the ledge edges on that vertex, 3 (an edge) takes that edge's,
 // 2 (a face group) sums its edges the tree reaches. Then it tests the probe segments at the point
 // (TestProbeSegmentsAgainstColliders) and gives 1 when the ledge is usable.
-s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out)
+s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec4* point, s32 kind, void* arg, Vec4* out)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
-    Vec02 gap;
+    Vec4 gap;
     switch (kind) {
     case 1: {
-        Mesh03* mesh = &part->meshCopy;
-        u128 acc = Vu0::Q(D_00248D30);
+        CollisionMesh* mesh = &part->meshCopy;
+        u128 acc = Vu0::Q(g_zeroVector);
         s32 found = 0;
-        s32 n = CollectEntriesForKey((KeyedPointSet*)mesh, (KeyedPointSet*)&part->tree, (Vec02*)arg - (Vec02*)mesh->verts, 0x40, (KeyedEdge**)buf);
+        s32 n = CollectEntriesForKey((KeyedPointSet*)mesh, (KeyedPointSet*)&part->tree, (Vec4*)arg - (Vec4*)mesh->verts, 0x40, (KeyedEdge**)buf);
         for (s32 i = 0; i < n; i++) {
             if (ComputeLedgeEdgeOffset(self, part, ((MeshEdgePair**)buf)[i], &gap) != 0) {
                 found = 1;
@@ -560,26 +560,26 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
         if (g->f8 < 0.7f) {
             return 0;
         }
-        u128 sum = Vu0::Q(D_00248D30);
+        u128 sum = Vu0::Q(g_zeroVector);
         s32 found = 0;
-        Vec02* verts;
+        Vec4* verts;
         for (EdgeNode* e = g->list14; e != 0; e = e->next8) {
-            if (ComputeLedgeEdgeOffset(self, part, e, (Vec02*)buf) != 0) {
-                verts = (Vec02*)part->meshCopy.verts;
+            if (ComputeLedgeEdgeOffset(self, part, e, (Vec4*)buf) != 0) {
+                verts = (Vec4*)part->meshCopy.verts;
                 // stack scratch: the span buffer, not an object
                 if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
                     found = 1;
-                    sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
+                    sum = Vu0::Add(sum, Vu0::Q(*(Vec4*)buf));
                 }
             }
         }
         for (EdgeNode* e = g->list18; e != 0; e = e->nextC) {
-            if (ComputeLedgeEdgeOffset(self, part, e, (Vec02*)buf) != 0) {
-                verts = (Vec02*)part->meshCopy.verts;
+            if (ComputeLedgeEdgeOffset(self, part, e, (Vec4*)buf) != 0) {
+                verts = (Vec4*)part->meshCopy.verts;
                 // stack scratch: the span buffer, not an object
                 if (CollectTreeNodeSpans(self->tree.nodes, verts + e->vertA, verts + e->vertB, 0, 2, (ColliderSpan*)(buf + 0x10)) > 0) {
                     found = 1;
-                    sum = Vu0::Add(sum, Vu0::Q(*(Vec02*)buf));
+                    sum = Vu0::Add(sum, Vu0::Q(*(Vec4*)buf));
                 }
             }
         }
@@ -597,20 +597,20 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
 
 extern f32 g_gameTime;
 extern f32 g_contactSideSigns[];
-s32 FindPlaneTreeNodeForPoint(Vec02* p, void* tree);
+s32 FindPlaneTreeNodeForPoint(Vec4* p, void* tree);
 // Looks for a contact the player could grab as a ledge (not in the first 0.15 s of the state): of
 // its vertex, edge and face contacts it keeps the highest one with a usable ledge
 // (ComputeLedgeOffsetForContact) that the player is not moving away from and whose point is not
 // just inside the other tree. Gives it with the side in *outEnd and the offset in *outPos, or null.
-Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
+BodyContact* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec4* outPos)
 {
-    Vec02 tmp;
-    Vec02 p;
-    Contact03* c;
+    Vec4 tmp;
+    Vec4 p;
+    BodyContact* c;
     if (g_gameTime - self->stateStartTime < 0.15f) {
         return 0;
     }
-    Contact03* best = 0;
+    BodyContact* best = 0;
     for (ContactRow03* row = self->contacts->head; row != 0; row = row->next) {
         for (c = row->head; c != 0; c = c->next) {
             s32 side = (Collider*)self != c->end[0].body;
@@ -649,7 +649,7 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
             if (ComputeLedgeOffsetForContact(self, other, &c->end[1 - side].point, c->kind, (void*)extra, &tmp) == 0) {
                 continue;
             }
-            if ((self->f4B8 & 2) == 0 || (c->end[1 - side].body->f4B8 & 2) == 0) {
+            if ((self->stateBits & 2) == 0 || (c->end[1 - side].body->stateBits & 2) == 0) {
                 NotifyContactEnds(self->world, 1, &c);
             }
             if (0.0f < g_contactSideSigns[side] * c->relativeVelocity.z) {
@@ -689,22 +689,22 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 // A hit CollectMeshHits gives (0x30 bytes): its point first.
 struct MeshPointHit {
-    Vec02 point;
+    Vec4 point;
     u8 pad10[0x30 - 0x10];
 };
 struct FaceRef;
 struct MeshHitEntry;
 struct ValueRange;
-extern List01 g_class75List;
+extern ObjectList g_class75List;
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
 // (list_iter.h) and each step reads the next item through the link (as effect_spawner.cpp's).
 struct BeginListWalkFromFrame {
-    static void Of(ListFrame* it, List01* list)
+    static void Of(ListFrame* it, ObjectList* list)
     {
         it->list = list;
         it->link = (u8*)list;
-        it->offset = ((List01*)it->list)->offset;
+        it->offset = ((ObjectList*)it->list)->offset;
         it->prev = g_activeListFrames;
         g_activeListFrames = it;
     }
@@ -747,7 +747,7 @@ void CollectPlayerHoldQueries(Player* self)
     Class75Object* n;
     s32 i;
 
-    if (!IsObjectAttached((BaseObject*)self->f25D8[3])) {
+    if (!IsObjectAttached((BaseObject*)self->slotObjects[3])) {
         return;
     }
     RecordCameraTimestamp(g_camera);
@@ -762,7 +762,7 @@ void CollectPlayerHoldQueries(Player* self)
     n = NextInList<Class75Object>::Of(&fr);
     while (n != 0) {
         NodeQuery q;
-        Vec02 pos;
+        Vec4 pos;
         f32 range = D_00264028;
         PlacedObject* p;
         s32 far;
@@ -826,7 +826,7 @@ void CollectPlayerHoldQueries(Player* self)
         q.p00 = self;
         q.hold = o;
         if (o->meshCopy.vertCount > 0) {
-            q.pos = ((Vec02*)o->meshCopy.verts)[RandomIntInRange(0, o->meshCopy.vertCount - 1)];
+            q.pos = ((Vec4*)o->meshCopy.verts)[RandomIntInRange(0, o->meshCopy.vertCount - 1)];
         } else {
             q.pos = o->v140;
         }
@@ -856,9 +856,9 @@ void* AllocateBackMemory(s32 size);
 // "A reload where ours had a pseudo").
 s32 ShouldPlayerLaunchAtTarget(Player* self)
 {
-    Vec02 acc;
+    Vec4 acc;
     ContactRow03* row;
-    Contact03* c;
+    BodyContact* c;
     s32 n = 0;
     f32 now = g_gameTime;
     if (now - self->subStateStartTime < 1.0f) {
@@ -871,7 +871,7 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     if (self->groundContact != 0) {
         return 0;
     }
-    Contacts03* ct = self->contacts;
+    BodyContactTable* ct = self->contacts;
     if (ct != 0) {
         for (row = ct->head; row != 0; row = row->next) {
             for (c = row->head; c != 0; c = c->next) {
@@ -895,7 +895,7 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
                 na = Vu0::MulX(na, Vu0::Vec::Scalar(-1.0f));
             }
             for (ContactRow03* rb = self->contacts->head; rb != 0; rb = rb->next) {
-                for (Contact03* b = rb->head; b != 0; b = b->next) {
+                for (BodyContact* b = rb->head; b != 0; b = b->next) {
                     Vu0::Vec nb = Vu0::Vec::Of(b->normal);
                     if (b->end[0].body != (Collider*)self) {
                         nb = Vu0::MulX(nb, Vu0::Vec::Scalar(-1.0f));
@@ -940,28 +940,28 @@ extern f32 D_00263E74;
 extern f32 D_00264040;
 extern f32 D_00264044;
 extern f32 D_00264048[2];
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime;
 extern f32 g_gameClock[];
 extern u16 D_00262D18;
 
-struct Leap_17F018 { u8 pad00[0x18]; f32 time; u8 pad1C[0x20 - 0x1C]; Vec02 aim; Vec02 land; };
-struct Track_17F018;
-struct TrackDesc_17F018 { void* m0; void (*m1)(Track_17F018* self, f32 t, Vec02* out, s32 a); };
-struct Track_17F018 { TrackDesc_17F018* desc; };
-struct TrackOwner_17F018 { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; Track_17F018* track; };
-struct LeapTarget_17F018 { u8 pad00[0x18]; void* frame; u8 pad1C[0x40 - 0x1C]; union { Vec02 pos; s32 curveAttachKind; }; u8 pad50[0x58 - 0x50]; s32 pointAttachKind; };
-struct Anim_17F018 { u8 pad00[0x14]; f32 f14; f32 f18; };
+struct LeapPoseSource { u8 pad00[0x18]; f32 time; u8 pad1C[0x20 - 0x1C]; Vec4 aim; Vec4 land; };
+struct LeapTrack;
+struct LeapTrackClass { void* m0; void (*m1)(LeapTrack* self, f32 t, Vec4* out, s32 a); };
+struct LeapTrack { LeapTrackClass* desc; };
+struct LeapTrackOwner { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; LeapTrack* track; };
+struct LeapTargetObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x40 - 0x1C]; union { Vec4 pos; s32 curveAttachKind; }; u8 pad50[0x58 - 0x50]; s32 pointAttachKind; };
+struct AnimationPlayerClock { u8 pad00[0x14]; f32 f14; f32 f18; };
 
 // The airborne player's step. Each leap state reads the game clock through a pointer of its own,
 // formed before the leap record is loaded, as retail's order shows; state 6's test is written with
 // named values so that cross-jumping merges it into state 7's compare.
 void UpdatePlayerState2(Player* p)
 {
-    Vec02 at;
-    Vec02 b;
-    Vec02 c;
+    Vec4 at;
+    Vec4 b;
+    Vec4 c;
     s32 end;
     if (p->aimMode == -1) {
         switch (p->subState) {
@@ -1010,12 +1010,12 @@ void UpdatePlayerState2(Player* p)
         }
         break;
     }
-    Contact03* hit = FindPlayerLedgeContact(p, &end, &at);
+    BodyContact* hit = FindPlayerLedgeContact(p, &end, &at);
     if (hit != 0) {
         ContactEnd03* e = &hit->end[1 - end];
         void* part = e->part;
         p->ledgeCollider = part;
-        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->point, (Vec02*)p->ledgeLocalPoint);
+        TransformPointBetweenFrames(0, (PlacedObject*)part, &e->point, (Vec4*)p->ledgeLocalPoint);
         p->ledgeKind = hit->kind;
         s32 key;
         if (end == 0) {
@@ -1067,17 +1067,17 @@ void UpdatePlayerState2(Player* p)
         break;
     case 4: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < clock[1]) {
             p->targetMode = 2;
             SetPlayerState(p, 6, 0x10);
             break;
         }
         ComputeObjectFrameAtTime((PlacedObject*)p->heldObject, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
-        ((Leap_17F018*)p->selfPoseSource)->aim = b;
-        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
-        ((Leap_17F018*)p->selfPoseSource)->land = c;
-        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
+        ((LeapPoseSource*)p->selfPoseSource)->aim = b;
+        ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
+        ((LeapPoseSource*)p->selfPoseSource)->land = c;
+        ((LeapPoseSource*)p->selfPoseSource)->land.z = p->v150.z + (((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 7:
@@ -1088,109 +1088,109 @@ void UpdatePlayerState2(Player* p)
     case 8:
         if (p->groundContact != 0 && D_00264044 < g_gameTime - p->subStateStartTime) {
             f32 t = GetAnimationMarkerTime((Animation*)p->markerAnim, 0x1BB);
-            if (((Anim_17F018*)p->stateAnimPlayer)->f14 < t) {
+            if (((AnimationPlayerClock*)p->stateAnimPlayer)->f14 < t) {
                 CollectPlayerHoldQueries(p);
-                SeekAnimationPlayer((AnimationPlayer*)p->stateAnimPlayer, 0, t, ((Anim_17F018*)p->stateAnimPlayer)->f18);
+                SeekAnimationPlayer((AnimationPlayer*)p->stateAnimPlayer, 0, t, ((AnimationPlayerClock*)p->stateAnimPlayer)->f18);
             }
         }
         break;
     case 9: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < clock[1]) {
             SetPlayerState(p, 2, 2);
             break;
         }
-        b = ((LeapTarget_17F018*)p->leapTarget)->pos;
-        c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->leapTarget)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
-        ((Leap_17F018*)p->selfPoseSource)->aim = b;
-        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
-        ((Leap_17F018*)p->selfPoseSource)->land = c;
-        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
+        b = ((LeapTargetObject*)p->leapTarget)->pos;
+        c = g_zeroVector;
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->leapTarget)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        ((LeapPoseSource*)p->selfPoseSource)->aim = b;
+        ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
+        ((LeapPoseSource*)p->selfPoseSource)->land = c;
+        ((LeapPoseSource*)p->selfPoseSource)->land.z = p->v150.z + (((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 10: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < clock[1]) {
             p->targetMode = 5;
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        b = ((LeapTarget_17F018*)p->targetNode)->pos;
-        c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetNode)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
-        ((Leap_17F018*)p->selfPoseSource)->aim = b;
-        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
-        ((Leap_17F018*)p->selfPoseSource)->land = c;
-        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
+        b = ((LeapTargetObject*)p->targetNode)->pos;
+        c = g_zeroVector;
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetNode)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        ((LeapPoseSource*)p->selfPoseSource)->aim = b;
+        ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
+        ((LeapPoseSource*)p->selfPoseSource)->land = c;
+        ((LeapPoseSource*)p->selfPoseSource)->land.z = p->v150.z + (((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 11: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < clock[1]) {
             p->targetMode = 4;
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        Track_17F018* t = ((TrackOwner_17F018*)p->targetTrack)->track;
+        LeapTrack* t = ((LeapTrackOwner*)p->targetTrack)->track;
         if (t->desc->m1 != 0) {
             t->desc->m1(t, p->trackPos, &b, 0);
         }
-        TransformPointAtTime((PlacedObject*)(((TrackOwner_17F018*)p->targetTrack)->frame), 0, &b, 0, 0, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
-        ((Leap_17F018*)p->selfPoseSource)->aim = b;
-        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
+        TransformPointAtTime((PlacedObject*)(((LeapTrackOwner*)p->targetTrack)->frame), 0, &b, 0, 0, 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]);
+        ((LeapPoseSource*)p->selfPoseSource)->aim = b;
+        ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         break;
     }
     case 13: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->targetMode = ((LeapTarget_17F018*)p->targetPoint)->pointAttachKind;
+            p->targetMode = ((LeapTargetObject*)p->targetPoint)->pointAttachKind;
             SetPlayerState(p, 6, 0x10);
             break;
         }
         PlaceOnTargetPoint((TargetPoint*)p->targetPoint, &b, 0, p->targetPointPlace);
-        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->targetPoint)->frame), &b, &b);
-        c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetPoint)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
-        ((Leap_17F018*)p->selfPoseSource)->aim = b;
-        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
-        ((Leap_17F018*)p->selfPoseSource)->land = c;
-        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
+        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTargetObject*)p->targetPoint)->frame), &b, &b);
+        c = g_zeroVector;
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetPoint)->frame), 0, &b, 0, &c, 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]);
+        ((LeapPoseSource*)p->selfPoseSource)->aim = b;
+        ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
+        ((LeapPoseSource*)p->selfPoseSource)->land = c;
+        ((LeapPoseSource*)p->selfPoseSource)->land.z = p->v150.z + (((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 12: {
         const f32* clock = g_gameClock;
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < clock[1]) {
-            p->targetMode = ((LeapTarget_17F018*)p->targetCurve)->curveAttachKind;
+            p->targetMode = ((LeapTargetObject*)p->targetCurve)->curveAttachKind;
             SetPlayerState(p, 6, 0x10);
             break;
         }
         PlaceOnTargetCurve((TargetCurve*)p->targetCurve, &b, 0, p->targetCurvePos);
-        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTarget_17F018*)p->targetCurve)->frame), &b, &b);
-        c = D_00248D30;
-        TransformPointAtTime((PlacedObject*)(((LeapTarget_17F018*)p->targetCurve)->frame), 0, &b, 0, &c, 0, ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]);
-        ((Leap_17F018*)p->selfPoseSource)->aim = b;
-        ((Leap_17F018*)p->selfPoseSource)->aim.z += 75.0f;
-        ((Leap_17F018*)p->selfPoseSource)->land = c;
-        ((Leap_17F018*)p->selfPoseSource)->land.z = p->v150.z + (((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
+        TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTargetObject*)p->targetCurve)->frame), &b, &b);
+        c = g_zeroVector;
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetCurve)->frame), 0, &b, 0, &c, 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]);
+        ((LeapPoseSource*)p->selfPoseSource)->aim = b;
+        ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
+        ((LeapPoseSource*)p->selfPoseSource)->land = c;
+        ((LeapPoseSource*)p->selfPoseSource)->land.z = p->v150.z + (((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]) * p->gravity.z;
         break;
     }
     case 14: {
-        Leap_17F018* rec = (Leap_17F018*)p->selfPoseSource;
+        LeapPoseSource* rec = (LeapPoseSource*)p->selfPoseSource;
         if (rec->time < g_gameTime) {
             SetPlayerState(p, 3, 0x33);
         } else {
-            ScorePlayerLeapToPoint(p, (BaseObject*)(((TrackOwner_17F018*)p->boundObject)->frame), &((LeapTarget_17F018*)p->boundObject)->pos, 0, &rec->aim, &rec->land, rec->time - g_gameTime);
+            ScorePlayerLeapToPoint(p, (BaseObject*)(((LeapTrackOwner*)p->boundObject)->frame), &((LeapTargetObject*)p->boundObject)->pos, 0, &rec->aim, &rec->land, rec->time - g_gameTime);
         }
         break;
     }
     case 15:
-        if (((Leap_17F018*)p->selfPoseSource)->time < g_gameTime) {
+        if (((LeapPoseSource*)p->selfPoseSource)->time < g_gameTime) {
             SetPlayerState(p, 7, 0x17);
         }
         break;
@@ -1202,9 +1202,9 @@ void UpdatePlayerState2(Player* p)
     }
     if (p->subState < 16) {
         if (p->subState >= 9) {
-            f32 t = ((Leap_17F018*)p->selfPoseSource)->time - g_gameClock[1] + g_gameClock[2];
-            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((Leap_17F018*)p->selfPoseSource)->aim, &((Leap_17F018*)p->selfPoseSource)->land, 0, 0, &b);
-            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((Leap_17F018*)p->selfPoseSource)->aim, &((Leap_17F018*)p->selfPoseSource)->land, 0, 0, &c);
+            f32 t = ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1] + g_gameClock[2];
+            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
+            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
             if (D_00264048[0] < (Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(b))) + Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(c)))) * (t * 0.5f)) {
                 SetPlayerState(p, 2, 2);
             }
@@ -1215,7 +1215,7 @@ void UpdatePlayerState2(Player* p)
 
 // Solves for the time at which a ballistic path (start a with velocity b, the player's gravity)
 // reaches the height of c. Gives 1 and the larger root when it is positive, else 0.
-s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out)
+s32 SolveArrivalTimeAtHeight(Player* self, Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32* out)
 {
     f32 roots[2];
     s32 count = SolveQuadratic(self->gravity.z * 0.5f, b->z - d->z, a->z - c->z, roots);
@@ -1240,22 +1240,22 @@ static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
 // The state test with two equal arms is retail's: its dead `li v1,3` and `lw v0,0x2220` are
 // what reorg leaves of a compare with 3 once the arms' repeated stores are deleted, and its
 // join is why out->z is read again from memory for the max (docs/TOOLCHAIN.md, CSE).
-void ComputePlayerJumpVelocity(Player* self, Vec02* out)
+void ComputePlayerJumpVelocity(Player* self, Vec4* out)
 {
     f32 z;
     switch (self->jumpKind) {
     case 1:
-        z = D_00263E80 * Fpu::Sqrt(self->gravityScale);
+        z = g_jumpKind1SpeedBase * Fpu::Sqrt(self->gravityScale);
         break;
     case 4:
-        z = D_00263E8C * Fpu::Sqrt(self->gravityScale);
+        z = g_jumpKind4SpeedBase * Fpu::Sqrt(self->gravityScale);
         break;
     case 3:
-        z = D_00263E88 * Fpu::Sqrt(self->gravityScale);
+        z = g_jumpKind3SpeedBase * Fpu::Sqrt(self->gravityScale);
         break;
     case 0:
     case 2:
-        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (self->groundContactPoint.z + D_00263E84)) + (self->v140.z - (self->groundContactPoint.z + D_00263E84))) * self->gravity.z));
+        z = Fpu::Sqrt(MaxF(0.0f, ((self->v140.z - (self->groundContactPoint.z + g_jumpApexHeight)) + (self->v140.z - (self->groundContactPoint.z + g_jumpApexHeight))) * self->gravity.z));
         break;
     }
     *out = self->v150;
@@ -1283,7 +1283,7 @@ static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
 
 // Gives the object's velocity with its z replaced by a clamped quadratic of it, but never below the
 // original z.
-void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out)
+void ComputeUpwardBoostVelocity(PlacedObject* self, Vec4* out)
 {
     *out = self->v150;
     f32 z = EvalClampedQuadratic(D_00264050, D_00264060, out->z);
@@ -1291,7 +1291,7 @@ void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out)
     out->z = (z >? self->v150.z);
 }
 // The same with a second pair of constants.
-void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out)
+void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec4* out)
 {
     *out = self->v150;
     f32 z = EvalClampedQuadratic(D_00264070, D_00264080, out->z);
@@ -1315,7 +1315,7 @@ void ClearPointObjectList(void)
 
 
 // Registers the object and adds it to the global list of point objects.
-void RegisterPointObject(C80* self)
+void RegisterPointObject(TargetFindingPoint* self)
 {
     RegisterObject(self);
     AppendToList(&g_pointObjects, self);
@@ -1323,7 +1323,7 @@ void RegisterPointObject(C80* self)
 
 
 // Unregisters the object and removes it from the global list of point objects.
-void UnregisterPointObject(C80* self)
+void UnregisterPointObject(TargetFindingPoint* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_pointObjects, self);

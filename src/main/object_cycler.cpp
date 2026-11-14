@@ -49,10 +49,10 @@
 #include "functions/switched_collider.h"
 #include "functions/warp_menu.h"
 #include "functions/world.h"
-struct Vec02;
+struct Vec4;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -108,10 +108,10 @@ struct CyclerEventMessage {
     Quad16 target;
 };
 struct __attribute__((aligned(16))) GroupForwardMessage {
-    s32 f0;
+    s32 kind;
     u8 pad0[0x10 - 0x4];
-    Quad16 f10;
-    Quad16 f20;
+    Quad16 target;
+    Quad16 origin;
     u8 pad1[0x50 - 0x30];
 };
 
@@ -120,13 +120,13 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
 
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern f32 g_gameTime;
 
@@ -135,7 +135,7 @@ typedef int Quadword128 __attribute__((mode(TI)));
 extern f32 g_gameClock[];
 
 s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern f32 g_gameClock[];
@@ -150,7 +150,7 @@ extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
 
 struct GroundProbe {
-    Vec02 q;
+    Vec4 q;
     s32 a;
     Collider** b;
 };
@@ -161,14 +161,14 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 
 struct GroundCandidate;
 struct GroundFilterContext;
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
 typedef unsigned long u64;
-extern const Vec02 D_00248D30;
+extern const Vec4 g_zeroVector;
 
 
 // Initialises the collider part, sets the state to -1, points the cycler's random ranges (target
@@ -190,7 +190,7 @@ void InitObjectCycler(ObjectCycler* self)
     self->p660.pk = g_cyclerWrapDelayRange;
     self->p670.pk = g_cyclerMessageIntervalRange;
     self->indexStep = 1;
-    self->f690 = -1;
+    self->scatterCount = -1;
     AppendToList(&self->world->list1C48, self);
 }
 
@@ -284,10 +284,10 @@ extern f32 g_cyclerFallPositionSteer[4];
 extern f32 g_cyclerFallRotationSteer[4];
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
-void AddColliderForce(Collider* self, Vec02* force);
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
+void AddColliderForce(Collider* self, Vec4* force);
 struct RampProfile;
-struct Mat02;
+struct Mat3;
 
 // k, the ramp's output, is read and written at its own address (*(u128*)&k): through Vu0::Q
 // its address stays in a saved register, where retail forms it again for each call.
@@ -297,11 +297,11 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
     case 0:
     case 3:
     case 5: {
-        Vec02 pos;
-        Vec02 vel;
-        Vec02 accel;
-        Vec02 k;
-        Mat02 basis;
+        Vec4 pos;
+        Vec4 vel;
+        Vec4 accel;
+        Vec4 k;
+        Mat3 basis;
         f32 t = self->stateEnd + dt - g_gameClock[1];
         EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
@@ -317,8 +317,8 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
     }
     case 1:
         AddColliderForce(self, &self->gravity);
-        SteerColliderTowardPosition(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallPositionSteer, dt);
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, g_cyclerFallRotationSteer, dt);
+        SteerColliderTowardPosition(self, 0, 0, (Vec4*)&g_zeroVector, g_cyclerFallPositionSteer, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec4*)&g_zeroVector, g_cyclerFallRotationSteer, dt);
         break;
     case 6:
         StepCollider(self, dt);
@@ -502,9 +502,9 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
         }
         if (self->group != 0) {
             GroupForwardMessage loc;
-            loc.f0 = 6;
-            loc.f20 = r->origin;
-            loc.f10 = r->target;
+            loc.kind = 6;
+            loc.origin = r->origin;
+            loc.target = r->target;
             self->group->desc->m1B(self->group, &loc);
         }
     }
@@ -513,7 +513,7 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 
 struct ScatterController;
 extern u8 g_scatterController[];
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // Leaves the old state (stopping its flag, calling method 2, or for 6 clearing anchors and
@@ -584,7 +584,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
     }
     case 1:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f690, self->f694);
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->scatterCount, self->scatterSkipsCountdown);
         self->stateEnd += 2.0f;
         break;
     case 2:
@@ -593,11 +593,11 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
         self->stateStart = g_gameClock[1];
         return;
     case 6: {
-        Mat02 m;
+        Mat3 m;
         RotateMatrixUpright(&self->m110, 0, &m);
         self->desc02()->m1E(self, &m);
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec4*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec4*)&g_zeroVector);
         SetColliderAnchors(self, 3, 0, 3, 0);
         self->index = 0;
         self->nextAdvanceTime = g_gameClock[1] + RandomFloatInRange(self->p658.a, self->p658.b);
@@ -620,13 +620,13 @@ void SendObjectCyclerMessage(ObjectCycler* self)
 {
     GroupForwardMessage loc;
     if (self->receiver678 && self->nextMessageTime <= g_gameClock[1]) {
-        loc.f0 = 6;
+        loc.kind = 6;
         if (self->source67C)
-            ConvertPositionToWorld(self->source67C, (Vec02*)&loc.f20);
+            ConvertPositionToWorld(self->source67C, (Vec4*)&loc.origin);
         else
-            loc.f20 = *(Quad16*)&self->v140;
-        Vu0::Q(loc.f10) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
-        ((f32*)&loc.f10)[2] = 0.0f;
+            loc.origin = *(Quad16*)&self->v140;
+        Vu0::Q(loc.target) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-1.0f));
+        ((f32*)&loc.target)[2] = 0.0f;
         self->receiver678->desc->m1B(self->receiver678, &loc);
         self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
     }
@@ -639,7 +639,7 @@ struct ListedFrameItem {
     BaseObject* item;       // 0x34
     ListedFrameItem* next;  // 0x38
 };
-typedef void (*ItemPointFn)(BaseObject* self, Vec02* in, s32 a, Vec02* out, s32 b, s32 c, s32 d);
+typedef void (*ItemPointFn)(BaseObject* self, Vec4* in, s32 a, Vec4* out, s32 b, s32 c, s32 d);
 
 // nearest is read at its own address (*(u128*)&nearest): through Vu0::Q the address stays in
 // a pseudo that CSE keeps in a saved register across the walk, where retail forms it again.
@@ -648,11 +648,11 @@ typedef void (*ItemPointFn)(BaseObject* self, Vec02* in, s32 a, Vec02* out, s32 
 s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out)
 {
     ListFrame frame;
-    Vec02 hit;
+    Vec4 hit;
     f32 best = D_0024A218[0];
     for (ListedFrameItem* n = (ListedFrameItem*)self->world->list1C9C.head; n != 0; n = n->next) {
-        Vec02 from;
-        Vec02 nearest;
+        Vec4 from;
+        Vec4 nearest;
         TransformPointBetweenFrames(0, (PlacedObject*)n->frame, &self->v140, &from);
         ItemPointFn fn = (ItemPointFn)((void**)n->item->desc)[10];
         if (fn != 0) {
@@ -666,7 +666,7 @@ s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out)
     }
     if (best < D_0024A218[0]) {
         ColliderSpan span;
-        Vec02 below;
+        Vec4 below;
         s32 count;
         Collider** list;
         PushBackMemoryMark();
@@ -724,7 +724,7 @@ static inline f32 LengthSquared(u128 d)
 // waits for the store, as retail's lqc2 order shows.
 s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
 {
-    Vec02 point;
+    Vec4 point;
     PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
     if (active != 0) {
         Vu0::Vec pos = Vu0::Vec::Of(active->v140);

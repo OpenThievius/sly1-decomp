@@ -29,7 +29,7 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
             t.farRange = ReadBufferedS32((BufferedStream*)r);
             t.baseVolume = ReadBufferedFloat((BufferedStream*)r);
             t.pitch = ReadBufferedFloat((BufferedStream*)r);
-            t.f20 = ReadBufferedFloat((BufferedStream*)r);
+            t.startParam = ReadBufferedFloat((BufferedStream*)r);
             t.count = 1;
             t.cur = 0;
             k = i - 1;

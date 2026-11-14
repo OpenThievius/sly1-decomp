@@ -6,17 +6,17 @@
 
 #include "common.h"
 
+struct BodyContactTable;
 struct Collider;
 struct ContactRow03;
 struct ContactRowList;
 struct ContactRowNode;
 struct ContactRowSource;
-struct Contacts03;
 struct World;
 
-void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr);
+void SetContactPairFlags(World* w, BodyContactTable* a, BodyContactTable* b, u8 set, u8 clr);
 ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src);
-ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
+ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, BodyContactTable* key);
 void* FindContactRow(Collider* self, Collider* other);
 s32 GetContactRowHead(Collider* self, Collider* other);
 void AddColliderToSweepAxes(World* self, void* arg);

@@ -52,7 +52,7 @@
 
 
 
-struct ContactPairLink { Contact03* f0; s32 f4; ContactPairLink* f8; Collider* fC; };
+struct ContactPairLink { BodyContact* f0; s32 f4; ContactPairLink* f8; Collider* fC; };
 
 struct ContactRowNode;
 struct ContactRowList;
@@ -63,7 +63,7 @@ struct ContactRowSource;
 // symmetric for both orders). When the pair becomes active (all four low bits set, or bit 0x40) it
 // is linked in both objects' contact rows; when it stops being active the rows are unlinked, the
 // pair's contacts freed, the objects' root tries cleared and the row slots returned.
-void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr) {
+void SetContactPairFlags(World* w, BodyContactTable* a, BodyContactTable* b, u8 set, u8 clr) {
     ContactPairLink* n1;
     ContactPairLink* n2;
     s32 ia = a - w->tables;
@@ -118,7 +118,7 @@ ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSour
 
 // Removes from the singly linked list the row whose other collider is the table's owner and
 // gives it back, or 0 when there is none.
-ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key)
+ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, BodyContactTable* key)
 {
     ContactRow03* node = *head;
     Collider* wanted = key->owner;
@@ -312,7 +312,7 @@ void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask)
 {
     Collider* n = owner->root03();
     if (n) {
-        n->f4B8 &= ~mask;
+        n->stateBits &= ~mask;
     }
 }
 
@@ -325,8 +325,8 @@ void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask)
 
 struct ContactCursor
 {
-    Contact03* prev;
-    Contact03* it;
+    BodyContact* prev;
+    BodyContact* it;
 };
 
 
@@ -380,12 +380,12 @@ void UpdateWorldContacts(World* w, s32 arg)
             pair[1]->bits538 |= marked;
             if (((pair[0]->kind ^ 1) & 1) || ((pair[1]->kind ^ 1) & 1))
             {
-                Contact03* old = node->f0;
+                BodyContact* old = node->f0;
                 if (old)
                 {
                     FreePooledContactChain(w, old);
                 }
-                Contact03* nw = (Contact03*)BuildObjectPairContacts(w, (ColliderPair*)pair, arg);
+                BodyContact* nw = (BodyContact*)BuildObjectPairContacts(w, (ColliderPair*)pair, arg);
                 node->f0 = nw;
                 node->f8->f0 = nw;
                 if ((old == 0) != (node->f0 == 0))
@@ -448,8 +448,8 @@ void UpdateWorldContacts(World* w, s32 arg)
 // the two classes' method 38 says the pair is to be handled.
 void InitContactPairFlags(World* self, Collider* obj)
 {
-    obj->f4B8 = 0;
-    Contacts03* n = self->usedTables;
+    obj->stateBits = 0;
+    BodyContactTable* n = self->usedTables;
     while (n != 0) {
         if (n->owner != obj) {
             s32 s2 = 0;

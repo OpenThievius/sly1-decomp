@@ -44,7 +44,7 @@ struct TargetPoint : PointObject {
 
 // 0x80: registers itself in the table D_00264088 (slots 6, 7); an object id resolved after
 // loading (slot 16, func_0015A418 with 0x104).
-struct C80 : PointObject {
+struct TargetFindingPoint : PointObject {
     KeptBits keep;          // 0x50
     u8 pad58[0x5C - 0x58];
     s32 targetId;           // 0x5C: -1 for none
@@ -71,7 +71,7 @@ struct TextPointObject : PointObject {
 // Each class ends at its descriptor's size.
 typedef char check_PointObject[sizeof(PointObject) == 0x50 ? 1 : -1];
 typedef char check_TargetPoint[sizeof(TargetPoint) == 0x80 ? 1 : -1];
-typedef char check_C80[sizeof(C80) == 0x70 ? 1 : -1];
+typedef char check_C80[sizeof(TargetFindingPoint) == 0x70 ? 1 : -1];
 typedef char check_ListedPointObject[sizeof(ListedPointObject) == 0x60 ? 1 : -1];
 typedef char check_TextPointObject[sizeof(TextPointObject) == 0x60 ? 1 : -1];
 
@@ -84,10 +84,10 @@ void RegisterTargetPoint(TargetPoint* self);                       // 0x7F slot 
 void UnregisterTargetPoint(TargetPoint* self);                       // 0x7F slot 7
 void CopyTargetPoint(TargetPoint* self, TargetPoint* src);                       // 0x7F slot 9
 void PostLoadTargetPoint(TargetPoint* self);                       // 0x7F slot 15
-void RegisterPointObject(C80* self);                       // 0x80 slot 6
-void UnregisterPointObject(C80* self);                       // 0x80 slot 7
-void CopyPointObject(C80* self, C80* src);             // 0x80 slot 9
-void StartPointObject(C80* self);                       // 0x80 slot 16
+void RegisterPointObject(TargetFindingPoint* self);                       // 0x80 slot 6
+void UnregisterPointObject(TargetFindingPoint* self);                       // 0x80 slot 7
+void CopyPointObject(TargetFindingPoint* self, TargetFindingPoint* src);             // 0x80 slot 9
+void StartPointObject(TargetFindingPoint* self);                       // 0x80 slot 16
 void InitListedPointObject(ListedPointObject* self);                       // 0x81 slot 0
 void RegisterListedPointObject(ListedPointObject* self);                       // 0x81 slot 6
 void UnregisterListedPointObject(ListedPointObject* self);                       // 0x81 slot 7

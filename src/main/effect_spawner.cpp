@@ -69,8 +69,8 @@ struct SpawnTargetRecord;
 
 struct BumpAllocator;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -81,11 +81,11 @@ struct ScaledTransform;
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 void SetEffectSpawnerInactive(EffectSpawner* self);
 
-Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
-void SetSpawnRecordKind(Rec50* self,s32 kind);
+EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+void SetSpawnRecordKind(EffectSpawnerRecord* self,s32 kind);
 
 void* GetOwnedSpawnRecord(void* a0, s32 a1);
-void SetSpawnRecordKind(Rec50* self,s32 kind);
+void SetSpawnRecordKind(EffectSpawnerRecord* self,s32 kind);
 
 // The message SendPointEventToWorldListener sends (kind 12): a point and a float.
 struct PointEventMessage {
@@ -131,14 +131,14 @@ void InitSpawnRecord(void* mem);
 s32 ReadBufferedS8(BufferedStream* self);
 void ReadSpawnMesh(void* p, void* other);
 u16 ReadBufferedU16(BufferedStream* self);
-Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 struct CappedWordList;
 void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src);
 
 
 struct SpawnerLinkedObject { u8 pad00[0x18]; void* target; u8 pad1C[0x18]; s32 value; };
 
-Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
+EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
@@ -152,7 +152,7 @@ void SetEffectSpawnerActiveForever(); // stays without its argument: SetEffectSp
 
 s32 IsEffectSpawnerActive(EffectSpawner* self);
 
-void SetListLinkOffset(List01* self, s32 offset);
+void SetListLinkOffset(ObjectList* self, s32 offset);
 
 struct RangeEmitter;
 void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner);
@@ -171,9 +171,9 @@ void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
 
 struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; s32 ownerArgument; };
-void FillLookDirectionBlock(Effect* a, Rec50* b);
+void FillLookDirectionBlock(Effect* a, EffectSpawnerRecord* b);
 f32 RandomFloatInRange(f32 a, f32 b);
-s32 IsListEmpty(List01* p);
+s32 IsListEmpty(ObjectList* p);
 
 typedef void (*VFn)();
 
@@ -222,7 +222,7 @@ struct SpawnFlags { s32 z; s32 b; s32 c; SpawnFlags() { FillMemory(this, 0, size
 struct __attribute__((aligned(16))) SpawnRecord { u8 pad0[0x20]; Quad16 self_copy; u8 pad1[0x30]; Quad16 a1_copy; u8 pad2[0x30]; SpawnBlock blk; s32 f120; u8 pad3[0x8C]; SpawnTail tail; u8 pad4[0x10]; };
 
 void InitSpawnRecord(void* mem);
-void SpawnEffectsFromRecord(s32 count, Rec50* rec, void* flags);
+void SpawnEffectsFromRecord(s32 count, EffectSpawnerRecord* rec, void* flags);
 
 
 struct BriefEffectParams { u8 pad0[0xC]; s32 fC; };
@@ -263,7 +263,7 @@ extern PackedFloatPair g_cyclerAdvanceDelayRange;
 extern PackedFloatPair g_cyclerWrapDelayRange;
 extern PackedFloatPair g_cyclerMessageIntervalRange;
 
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 void* CloneSharedSpawnRecord(void* x);
 
@@ -278,7 +278,7 @@ extern f32 g_gameClock[];
 
 struct ListLink;
 void ClearListLinks(ListLink* p);
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 void HandleSpawnMessage(void* self, void* body);
 
 
@@ -314,11 +314,11 @@ f32 RandomFloatInRange(f32 a, f32 b);
 
 
 
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 
 
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 extern f32 g_frameDt;
 struct RampProfile;
@@ -339,7 +339,7 @@ void CloseDmaTag(PacketWriter* self);
 extern f32 g_gameTime;
 
 
-void AppendToList(List01* self, void* item);
+void AppendToList(ObjectList* self, void* item);
 
 
 
@@ -358,16 +358,16 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-s32 IsInList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
+s32 IsInList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // The colour UpdateColorFade blends, word-aligned, and its request: DeferredRequest's layout
@@ -376,9 +376,9 @@ struct __attribute__((aligned(4))) FadeColor { u8 c[4]; };
 struct FadeEffectRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
 extern s32 D_00275BC4;
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 extern f32 g_gameTime;
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 void DrawScreenFill(u8* a0);
 
 struct RangeEntry {
@@ -418,7 +418,7 @@ extern f32 g_gameClock[];
 
 s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out);
 f32 RandomFloatInRange(f32 a, f32 b);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 
@@ -426,7 +426,7 @@ extern f32 g_gameClock[];
 
 
 void HandleSpawnMessage(void* a, void* b);
-void RemoveFromList(List01* list, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -444,8 +444,8 @@ extern s32 g_objectCyclerLoadLinks[6];
 
 struct BufferedStream;
 void FindOrBuildMemberGroup(void** out, void* self);
-s32 IsInList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
+s32 IsInList(ObjectList* self, void* item);
+void RemoveFromList(ObjectList* list, void* item);
 
 #include "cycler_draw_params.h"
 extern f32 g_gameTime;
@@ -519,9 +519,9 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 struct GroundCandidate;
 struct GroundFilterContext;
 void PushBackMemoryMark(void* self);
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 g_lastDmaRefStart;
@@ -532,12 +532,12 @@ void EndGifPacket(void* obj);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-void ClearList(List01* p);
+void ClearList(ObjectList* p);
 extern "C" s32 PostSemaphore(void* a);
 
-extern List01 g_deferredReleaseListA;
-extern List01 g_deferredReleaseListB;
-extern List01 g_deferredReleaseListC;
+extern ObjectList g_deferredReleaseListA;
+extern ObjectList g_deferredReleaseListB;
+extern ObjectList g_deferredReleaseListC;
 extern s32 g_buildFrameData;
 extern void* g_frameReadySemaphore;
 
@@ -590,7 +590,7 @@ extern s32 g_codeChecksumFailed;
 extern void* g_frameDoneSemaphore;
 extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 extern "C" s32 AwaitSemaphore(void* a);
 
@@ -615,7 +615,7 @@ extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
 extern void* g_frameReadySemaphore;
 extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
-void SetListLinkOffset(List01* self, s32 value);
+void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
 void RunThread(void* a, s32 b);
@@ -628,7 +628,7 @@ extern void* g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
-extern s32 D_002626CC;
+extern s32 g_fieldOffsetMode;
 
 extern "C" s32 AwaitSemaphore(void* p);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
@@ -636,10 +636,10 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
 
-s32 IsListEmpty(List01* l);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
-void ClearList(List01* l);
+s32 IsListEmpty(ObjectList* l);
+void RemoveFromList(ObjectList* list, void* item);
+void AppendToList(ObjectList* self, void* item);
+void ClearList(ObjectList* l);
 
 
 
@@ -677,7 +677,7 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* self);
 
 // The spawn record (SpawnRecord above, 0x200 bytes) as InitSpawnRecord fills it: nine vectors,
-// an effect's spawn block (Blk05, the block SpawnBlock is a view of) and a table of thirteen
+// an effect's spawn block (EffectSpawnData, the block SpawnBlock is a view of) and a table of thirteen
 // quadwords.
 struct SpawnVectors {
     Quad16 q[9];
@@ -688,7 +688,7 @@ struct SpawnTable {
 struct SpawnRecordParts {
     s32 f0;                 // 0x00
     SpawnVectors vectors;   // 0x10
-    Blk05 block;            // 0xA0
+    EffectSpawnData block;            // 0xA0
     SpawnTable table;       // 0x120
     u8 pad1F0[0x200 - 0x1F0];
 };
@@ -702,10 +702,10 @@ void InitSpawnRecord(void* mem)
 {
     SpawnRecordParts* self = (SpawnRecordParts*)mem;
     static SpawnVectors vectors = { {
-        { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } },
-        *(Quad16*)&g_unitXVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, *(Quad16*)&D_00248D30
+        { { 0, 0, 0, 0 } }, *(Quad16*)&g_zeroVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } },
+        *(Quad16*)&g_unitXVector, { { 0, 0, 0, 0 } }, { { 0, 0, 0, 0 } }, *(Quad16*)&g_zeroVector
     } };
-    static Blk05 block = {
+    static EffectSpawnData block = {
         { 750.0f, 750.0f, 1.0f }, { 0.0f, 0.0f, -1500.0f }, { -1.0f, 0.0f, 0.0f }, *(Quad16*)&g_unitZVector, 0.0f, 0.0f, 0.0f, 200,
         { 1.0f, 1.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
     };
@@ -732,7 +732,7 @@ void InitEffectSpawner(EffectSpawner* self)
     self->delayMin=10.0f;
     self->activeUntil=-1.0f;
     self->sharedId=-1;
-    SetListLinkOffset((List01*)self->list314,0x320);
+    SetListLinkOffset((ObjectList*)self->list314,0x320);
 }
 
 f32 ReadBufferedFloat(BufferedStream* r);
@@ -745,13 +745,13 @@ struct MeshTriangle {
 };
 struct MeshData {
     s32 vertexCount;        // 0x00
-    Vec02* vertices;        // 0x04
+    Vec4* vertices;        // 0x04
     s32 triangleCount;      // 0x08
     MeshTriangle* triangles;    // 0x0C
-    Vec02* normals;         // 0x10
+    Vec4* normals;         // 0x10
     f32 totalArea;          // 0x14
     u8 pad18[0x20 - 0x18];
-    Vec02 extent;           // 0x20
+    Vec4 extent;           // 0x20
 };
 
 // Reads a mesh for spawning on its surface from the stream: the vertices, then each triangle with
@@ -762,8 +762,8 @@ void ReadSpawnMesh(void* p, void* other)
     MeshData* m = (MeshData*)p;
     s32 i;
     m->vertexCount = ReadBufferedU16((BufferedStream*)other);
-    m->vertices = (Vec02*)AllocateFrontMemory(m->vertexCount << 4);
-    m->normals = (Vec02*)AllocateZeroedFrontMemory(m->vertexCount << 4);
+    m->vertices = (Vec4*)AllocateFrontMemory(m->vertexCount << 4);
+    m->normals = (Vec4*)AllocateZeroedFrontMemory(m->vertexCount << 4);
     for (i = 0; i < m->vertexCount; i++) {
         ReadBufferedVector3((BufferedStream*)other, &m->vertices[i]);
     }
@@ -782,7 +782,7 @@ void ReadSpawnMesh(void* p, void* other)
         u128 e2 = Vu0::Sub(Vu0::Q(m->vertices[t->corner[2]]), first);
         u128 n = Vu0::Cross(e1, e2);
         for (i = 0; i < 3; i++) {
-            Vec02* v = &m->normals[t->corner[i]];
+            Vec4* v = &m->normals[t->corner[i]];
             Vu0::Q(*v) = Vu0::Add(Vu0::Q(*v), n);
         }
     }
@@ -813,7 +813,7 @@ void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src
 void LoadEffectSpawner(EffectSpawner* self, BufferedStream* count)
 {
     void* mem = AllocateFrontMemory(0x200);
-    self->rec = (Rec50*)mem;
+    self->rec = (EffectSpawnerRecord*)mem;
     InitSpawnRecord(mem);
     LoadPlacedObject(self, count);
     s32 index = ReadBufferedS8(count);
@@ -830,7 +830,7 @@ void LoadEffectSpawner(EffectSpawner* self, BufferedStream* count)
     }
     s32 n = ReadBufferedU16(count);
     if (n != 0) {
-        Rec50* b = GetOwnSpawnRecord(self, 1);
+        EffectSpawnerRecord* b = GetOwnSpawnRecord(self, 1);
         ReadCappedWordList(&b->words130, n, self, count);
     }
 }
@@ -853,12 +853,12 @@ void ReparentEffectSpawnerToSource(EffectSpawner* self)
 // has a source object. Does nothing for a spawner with no ids.
 void ResolveEffectSpawnerLinks(EffectSpawner* self)
 {
-    Rec50* s2;
+    EffectSpawnerRecord* s2;
 
     PostLoadPlacedObject(self);
     if (self->key2F8 == -1 && self->id304 == -1 && self->id30C == -1 && self->id300 == -1) {
-        Rec50* p = self->rec;
-        if (p->kind != 3 && (p->f120 != 0 || p->f188 == -1)) goto tail;
+        EffectSpawnerRecord* p = self->rec;
+        if (p->kind != 3 && (p->effectMode != 0 || p->f188 == -1)) goto tail;
     }
     s2 = GetOwnSpawnRecord(self, 1);
     if (self->id2F8[0] != -1) {
@@ -894,8 +894,8 @@ void InheritFlaggedAncestorValue(EffectSpawner* self);
 void StartEffectSpawner(EffectSpawner* self)
 {
     StartPlacedObject(self);
-    if (self->rec->f1B0 != -1)
-        self->rec->f120 = 1;
+    if (self->rec->effectKind != -1)
+        self->rec->effectMode = 1;
     if (self->mode == -1) {
         if (self->chance != 0.0f || self->continuous != 0)
             self->mode = 3;
@@ -929,7 +929,7 @@ void StartEffectSpawner(EffectSpawner* self)
         break;
     }
     self->volumeScale = 1.0f;
-    Rec50* rec = self->rec;
+    EffectSpawnerRecord* rec = self->rec;
     if (rec->kind == 1) {
         f32* box = rec->box20;
         if (self->id2F8[0] != -1) {
@@ -950,7 +950,7 @@ void StartEffectSpawner(EffectSpawner* self)
         EffectSpawner* copy = (EffectSpawner*)FindFirstObjectByIdMode1(self->world, self->sharedId, 0);
         if (copy == 0) {
             copy = (EffectSpawner*)CreateTypedRecord(0x50, self->world, 0, self->sharedId, -1);
-            copy->rec = (Rec50*)AllocateFrontMemory(0x200);
+            copy->rec = (EffectSpawnerRecord*)AllocateFrontMemory(0x200);
             *copy->rec = *self->rec;
             copy->rec->target = 0;
             copy->mode = self->mode;
@@ -967,7 +967,7 @@ void StartEffectSpawner(EffectSpawner* self)
                 copy->desc->m0F(copy);
         }
         self->changed = 0;
-        AppendToList((List01*)copy->list314, self);
+        AppendToList((ObjectList*)copy->list314, self);
         InheritFlaggedAncestorValue(self);
     }
 }
@@ -988,13 +988,13 @@ void ReleaseEffectSpawnerHeld(EffectSpawner* self, s32 mode, BaseObject* p)
 
 // Gives a spawn record this owner may change: the record itself when only one owner uses it, else a
 // copy (with its own copy of the 0x28-byte entries for kind 3) with the use counts adjusted.
-Rec50* CloneSharedSpawnRecord(Rec50* self)
+EffectSpawnerRecord* CloneSharedSpawnRecord(EffectSpawnerRecord* self)
 {
-    Rec50* n;
+    EffectSpawnerRecord* n;
     if (self->uses < 2) return self;
-    n = (Rec50*)CopyToFrontMemory(0x200, self);
-    if (self->kind == 3 && self->f24 != 0) {
-        n->f24 = CopyToFrontMemory(0x28 * self->value20, self->f24);
+    n = (EffectSpawnerRecord*)CopyToFrontMemory(0x200, self);
+    if (self->kind == 3 && self->links != 0) {
+        n->links = CopyToFrontMemory(0x28 * self->value20, self->links);
     }
     n->uses = 1;
     self->uses -= 1;
@@ -1003,7 +1003,7 @@ Rec50* CloneSharedSpawnRecord(Rec50* self)
 
 // Gives the spawner's spawn record; with mode 1 it first makes it the spawner's own copy and marks
 // the spawner changed.
-Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
+EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode)
 {
     if (mode == 1) {
         self->changed = mode;
@@ -1038,14 +1038,14 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
     if (!(1e-4f < self->margin)) {
         return;
     }
-    Vec02 size;
-    Vec02 lo;
-    Vec02 hi;
+    Vec4 size;
+    Vec4 lo;
+    Vec4 hi;
     // One register value serves the box: the margin on every axis, then, with no target, its
     // negative for the low corner. The record is read between the splat and the copy
     // (docs/toolchain/gcse.md, "A splat split between a GPR and a VU0 copy").
     u128 margin = Vu0::Splat(self->margin);
-    Rec50* rec = self->rec;
+    EffectSpawnerRecord* rec = self->rec;
     u128 half = margin;
     Vu0::Q(size) = half;
     if (rec->target != 0) {
@@ -1057,7 +1057,7 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
         Vu0::Q(lo) = half;
     }
     Vu0::Q(size) = Vu0::Splat(self->margin + self->margin);
-    if (self->rec->f120 != 0) {
+    if (self->rec->effectMode != 0) {
         return;
     }
     WorldListedObject* w = (WorldListedObject*)self->held348;
@@ -1065,10 +1065,10 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
         return;
     }
     for (OwnedRecord* r = (OwnedRecord*)w->members.head; r != 0; r = r->next) {
-        Vec02* pts = r->points[r->bank];
+        Vec4* pts = r->points[r->bank];
         for (s32 i = 0; i < r->count; i++) {
-            Vec02* p = &pts[i];
-            Vec02 delta;
+            Vec4* p = &pts[i];
+            Vec4 delta;
             ListFrame frame;
             if (p->x < lo.x || hi.x < p->x) {
                 delta.x = lo.x + WrapModulo(p->x - lo.x, size.x) - p->x;
@@ -1087,7 +1087,7 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
 }
 
 void RandomizeEffectSpawnerDelay(EffectSpawner* self);
-s32 CountListItems(List01* list);
+s32 CountListItems(ObjectList* list);
 void WrapSpawnerParticlesIntoBox(EffectSpawner* self);
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
@@ -1108,7 +1108,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
     if (self->sharedId != -1) {
         return;
     }
-    if (!IsListEmpty((List01*)self->list314)) {
+    if (!IsListEmpty((ObjectList*)self->list314)) {
         PlacedObject* o = *(PlacedObject**)self->list314;
         Camera* cam;
         s32 near;
@@ -1124,7 +1124,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
                 }
                 cam = g_camera;
                 near = 1;
-                r = o->fadeDistanceFar * cam->fB0;
+                r = o->fadeDistanceFar * cam->rangeScale;
                 d = Vu0::Sub(Vu0::Q(o->v140), Vu0::Q(cam->position));
                 if (!(r * r > Vu0::ToFloatMoved(Vu0::Dot(d, d)))) {
                     near = 0;
@@ -1140,7 +1140,7 @@ void UpdateEffectSpawner(EffectSpawner* self, f32 dt)
     } else {
         if (self->parent != 0) {
             Camera* cam = g_camera;
-            f32 r = self->fadeDistanceFar * cam->fB0;
+            f32 r = self->fadeDistanceFar * cam->rangeScale;
             s32 far = 1;
             if (!(r * r < Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)),
                                                  Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(cam->position)))))) {
@@ -1212,7 +1212,7 @@ spawn:
         n = (s32)(self->targetCount * self->volumeScale);
         s32 have;
         BaseObject* held;
-        if (self->rec->f120 == 0) {
+        if (self->rec->effectMode == 0) {
             held = self->held348;
             have = held != 0 ? ((WorldListedObject*)held)->particleCount : 0;
         } else {
@@ -1360,9 +1360,9 @@ void SetEffectSpawnerContinuous(EffectSpawner* a0, s32 a1)
 
 // Stores the effect kind in the record and resets its three kind parameters: kind 24 gets 25, 0.8,
 // 0.8 and kind 27 gets -1 and 10.0; others get zeros.
-void SetSpawnRecordKind(Rec50* self,s32 kind)
+void SetSpawnRecordKind(EffectSpawnerRecord* self,s32 kind)
 {
-    self->f1B0=kind;
+    self->effectKind=kind;
     FillMemory(&self->f1F0,0,12);
     if (kind!=24) {
         if (kind==27) {
@@ -1380,21 +1380,21 @@ void SetSpawnRecordKind(Rec50* self,s32 kind)
 void SetEffectSpawnerKind(void* a0, s32 a1)
 {
     void* r = GetOwnSpawnRecord((EffectSpawner*)a0, 1);
-    SetSpawnRecordKind((Rec50*)r, a1);
+    SetSpawnRecordKind((EffectSpawnerRecord*)r, a1);
 }
 
 // Sets the effect kind on the member's own spawn record.
 void SetOwnedSpawnRecordKind(void* a0, s32 a1)
 {
     void* r = GetOwnedSpawnRecord(a0, 1);
-    SetSpawnRecordKind((Rec50*)r, a1);
+    SetSpawnRecordKind((EffectSpawnerRecord*)r, a1);
 }
 
 // The splash of an object on a surface: its sound by distance, the effect, and from 500 on a
 // burst through SpawnEffectsAt. The burst's two records are brace initialisers
 // (docs/toolchain/large-functions.md, "A brace initialiser's union member is a CLOBBER"): the
 // tail's two float groups each start with a union's member, and the block is the spawn block
-// (Blk05), built in a temporary and copied because two of its vectors are copied from memory;
+// (EffectSpawnData), built in a temporary and copied because two of its vectors are copied from memory;
 // the position is a local of its own, which takes the temporary's slot.
 struct __attribute__((aligned(16))) SplashTail {
     s32 f00;                // 0x00
@@ -1452,7 +1452,7 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
         } else {
             k = t;
         }
-        if (snd != 0 && set->f584 != 0) {
+        if (snd != 0 && set->splashSoundEnabled != 0) {
             f32 vol = k * 0.9f + 0.1f;
             PlayingSound* rec = (PlayingSound*)snd->playingSound;
             if (rec != 0) {
@@ -1484,14 +1484,14 @@ void SpawnSurfaceContactEffects(BaseObject* self, u8* cfg, Quad16* p, f32 chance
         if (snd != 0) {
             snd->surfaceEffectTime = g_gameTime;
         }
-        if (set->f588 != 0 && 500.0f < dist) {
+        if (set->splashBurstEnabled != 0 && 500.0f < dist) {
             SplashTail tail = { 2, -1, 0, 0, 1.0f, 0.0f, 0, 0, 8.0f, 12.0f, 0, 0, cfg };
-            Blk05 block = {
+            EffectSpawnData block = {
                 { dist * 0.5f, dist * 0.75f, 1.0f }, self->world->gravity, { 0.0f, 0.0f, 0.0f },
                 *(Quad16*)&g_unitZVector, 0.0f, 0.392699093f, 1.04719758f, 0,
                 { 1.0f, 5.0f, 0.0f }, { { 0, 0, 0, 0 } }, { 1.0f, 0.0f, -1.0f }
             };
-            Vec02 pos = *(Vec02*)at;
+            Vec4 pos = *(Vec4*)at;
             pos.z += 30.0f;
             SpawnEffectsAt((Quad16*)&pos, (Quad16*)&g_unitZVector, RandomIntInRange(4, 6), (SpawnTail*)&tail, (SpawnBlock*)&block, 0, 0);
         }
@@ -1515,7 +1515,7 @@ void SendPointEventToWorldListener(Quad16* a0, f32 f)
 }
 
 struct SpawnCurve;
-typedef void (*CurveEvalFn)(SpawnCurve* self, f32 t, Vec02* pos, Vec02* dir);
+typedef void (*CurveEvalFn)(SpawnCurve* self, f32 t, Vec4* pos, Vec4* dir);
 struct SpawnCurveClass { u8 pad0[8]; CurveEvalFn eval; };
 struct SpawnCurve {
     SpawnCurveClass* desc;  // 0x00
@@ -1545,10 +1545,10 @@ struct SpawnTriangle {
 
 struct SpawnMesh {
     u8 pad00[4];
-    Vec02* verts;           // 0x04
+    Vec4* verts;           // 0x04
     s32 count;              // 0x08
     SpawnTriangle* tris;    // 0x0C
-    Vec02* normals;         // 0x10
+    Vec4* normals;         // 0x10
     f32 area;               // 0x14
 };
 
@@ -1562,7 +1562,7 @@ struct SpawnShape {
     s32 kind;               // 0x00
     u8 pad04[0xC];
     union {
-        Vec02 point;        // 0x10
+        Vec4 point;        // 0x10
         struct {
             f32 lo[4];      // 0x10
             f32 hi[4];      // 0x20
@@ -1578,14 +1578,14 @@ struct SpawnShape {
     u8 pad30[0x40 - 0x30];
     s32 mode;               // 0x40
     u8 pad44[0x50 - 0x44];
-    Vec02 dir;              // 0x50
+    Vec4 dir;              // 0x50
     SpawnRange jitter;      // 0x60
     u8 pad68[4];
     void* anchor;           // 0x6C
 };
 
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
-void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 static inline f32 RandomInRange(const SpawnRange& r)
@@ -1593,7 +1593,7 @@ static inline f32 RandomInRange(const SpawnRange& r)
     return RandomFloatInRange(r.lo, r.hi);
 }
 
-static inline f32 RandomInRange(const Range50& r)
+static inline f32 RandomInRange(const ParticleRange& r)
 {
     return RandomFloatInRange(r.lo, r.hi);
 }
@@ -1616,7 +1616,7 @@ static inline Vu0::Vec NormalizedOr(Vu0::Vec v, Vu0::Vec fallback)
 // The point of a spawn shape for the index-th of count spawns, and its direction: a point, a
 // random point in a box, along a curve, on a ring of segments or on a mesh, the direction by the
 // shape's mode, then made unit length and the point moved along it by a random jitter.
-void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Vec02* axis)
+void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec4* pos, Vec4* axis)
 {
     switch (shape->kind) {
     case 0:
@@ -1644,7 +1644,7 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
             }
             goto normalize;
         case 3: {
-            Vec02 tangent;
+            Vec4 tangent;
             if (curve->desc->eval) {
                 curve->desc->eval(curve, t, pos, &tangent);
             }
@@ -1658,10 +1658,10 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
         f32 step = shape->ring.len / (f32)count;
         f32 d = RandomFloatInRange((f32)index * step, (f32)(index + 1) * step);
         SpawnSegment* seg;
-        Vec02 offset;
-        Mat02 frame;
-        Vec02 at;
-        Vec02 side;
+        Vec4 offset;
+        Mat3 frame;
+        Vec4 at;
+        Vec4 side;
         f32 roots[2];
         s32 i;
         for (i = 0; i < shape->ring.count; i++) {
@@ -1702,7 +1702,7 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
         SpawnMesh* mesh = &shape->mesh;
         f32 a = RandomFloatInRange(0.0f, 1.0f) * mesh->area;
         SpawnTriangle* tri;
-        Vec02 p[3];
+        Vec4 p[3];
         s32 i;
         for (i = 0; i < mesh->count; i++) {
             tri = &mesh->tris[i];
@@ -1720,7 +1720,7 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
         Vu0::Set(*pos, Vu0::MulXSum3(Vu0::Vec::Of(p[0]), Vu0::Vec::Scalar(s), Vu0::Vec::Of(p[1]),
                                      Vu0::Vec::Scalar(t), Vu0::Vec::Of(p[2]), Vu0::Vec::Scalar(w)).q);
         if (shape->mode == 5) {
-            Vec02 n[3];
+            Vec4 n[3];
             Vu0::Set(n[0], Vu0::Vec::Of(mesh->normals[tri->v[0]]).q);
             Vu0::Set(n[1], Vu0::Vec::Of(mesh->normals[tri->v[1]]).q);
             Vu0::Set(n[2], Vu0::Vec::Of(mesh->normals[tri->v[2]]).q);
@@ -1766,15 +1766,15 @@ struct AnchoredSpawn {
 
 // Brings a spawn position and direction into the anchor's frame. Unless mode 3 the direction is
 // turned too, and unless mode 2 the anchor's own motion at that point is added to it.
-void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
+void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec4* pos, Vec4* dir)
 {
-    Vec02 motion;
+    Vec4 motion;
     if (self->anchor) {
         TransformPointBetweenFrames(self->anchor, 0, pos, pos);
         if (self->mode != 3) {
             TransformDirectionBetweenFrames(self->anchor, 0, dir, dir);
             if (self->mode != 2) {
-                Vec02* ref = pos;
+                Vec4* ref = pos;
                 if (self->mode != 1)
                     ref = &self->anchor->v140;
                 ComputeObjectMotionInFrame(self->anchor, 0, ref, &motion, 0, 0, 0);
@@ -1789,16 +1789,16 @@ void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
 void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
-void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
+void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 
 // Gives the direction of particle number index of a ring spawn: the index is split into a step
 // along the ring (index / count) and one across it (index % count), each adds an angle (with
 // optional random jitter), the angles become a direction of a random length in the span, flattened
 // in z, and turned into the frame of axis.
-void ComputeSpawnRingDirection(SpawnRing* ring, SpawnSpan* range, Vec02* axis, s32 index, Vec02* out, f32 jitter, f32 flatten)
+void ComputeSpawnRingDirection(SpawnRing* ring, SpawnSpan* range, Vec4* axis, s32 index, Vec4* out, f32 jitter, f32 flatten)
 {
-    Vec02 dir;
-    Mat02 basis;
+    Vec4 dir;
+    Mat3 basis;
     s32 q = index / ring->count;
     s32 r = index % ring->count;
     f32 first = ring->phase + (f32)q * ring->step;
@@ -1831,10 +1831,10 @@ struct SpawnPlacement {
 // Picks a direction, start time and end time for particle index: the direction from the ring, a
 // start time randomly before now, the end time start plus life, and a random push of the position
 // along the direction.
-void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 unused, s32 index, Vec02* pos, Vec02* axis,
-                   Vec02* dir, f32* start, f32* end)
+void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 unused, s32 index, Vec4* pos, Vec4* axis,
+                   Vec4* dir, f32* start, f32* end)
 {
-    Vec02 k;
+    Vec4 k;
     ComputeSpawnRingDirection(ring, &self->range, axis, index, dir, self->jitter, self->flatten);
     *start = g_gameClock[1] - RandomFloatInRange(self->lo60, self->hi64);
     *end = *start + self->life;
@@ -1845,7 +1845,7 @@ void ChooseSpawnDirectionAndLifetime(SpawnPlacement* self, SpawnRing* ring, s32 
     }
 }
 
-// The part of the spawn record that SpawnRecordEffects reads, from 0x120 on (Rec50, effect_spawner.h).
+// The part of the spawn record that SpawnRecordEffects reads, from 0x120 on (EffectSpawnerRecord, effect_spawner.h).
 struct SpawnEffectParams {
     u8 pad00[0x90];
     s32 effectKind;         // 0x1B0: the kind of effect made for each point
@@ -1865,7 +1865,7 @@ struct SpawnEffectParams {
 // Spawns effects for a spawn record in its owner mode: finds (or acquires and caches in the slot h)
 // the effect owner for the record, copies the record's margin into it, and gives it n entries with
 // positions pos and the other arrays.
-void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
+void SpawnRecordEffects(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* q2, f32* v5, f32* v6)
 {
     PlacedObject* s7 = (PlacedObject*)self->target;
     EffectOwner* node = 0;
@@ -1923,7 +1923,7 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
             SetTrailSegmentAnchor(o, 1, it);
         }
         {
-            if (it->vt->m01) ((void (*)(Effect*, Rec50*))it->vt->m01)(it, self);
+            if (it->vt->m01) ((void (*)(Effect*, EffectSpawnerRecord*))it->vt->m01)(it, self);
         }
     }
     if (IsListEmpty(&node->list558)) {
@@ -1962,7 +1962,7 @@ struct ParticleChunk {
 // position and velocity, random frame numbers and spin, and the copy for the frame before.
 // Each array is written through its own pointer, the copy through the chunk's previous state:
 // loop.c then reduces the record's address and the copy's as two registers (docs/TOOLCHAIN.md).
-void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* vel, f32* size, f32* spin, Quad16* e, Quad16* g)
+void EmitParticleChunk(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad16* vel, f32* size, f32* spin, Quad16* e, Quad16* g)
 {
     WorldListedObject* set = 0;
     s32 i;
@@ -2006,15 +2006,15 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
             FillMemory(rec, 0, 0x10);
             s32 r = RandomIntInRange(0, set->colorCount - 1);
             rec->w[0] = r;
-            if (set->f614 != 0) rec->w[0] = r & 0xFFFFFFFE;
-            if (self->f178 != 0) rec->w[1] = RandomIntInRange(0, set->regCount - 1);
+            if (set->pairedColors != 0) rec->w[0] = r & 0xFFFFFFFE;
+            if (self->randomSecondFrame != 0) rec->w[1] = RandomIntInRange(0, set->regCount - 1);
             if (set->particleMode == 2) {
                 f32 f = RandomInRange(self->range19C);
                 *(f32*)&rec->w[2] = f;
-                if (self->f198 == 0) {
+                if (self->skipCameraFacing == 0) {
                     if (0.0f < Vu0::ToFloat(Vu0::Dot(Vu0::Q(g_camera->rot80.r[1]), Vu0::Q(*v)))) *(f32*)&rec->w[2] = -f;
                 }
-                if (self->f1A4 != 0) *(f32*)&rec->w[3] = RandomFloatInRange(-3.14159274f, 3.14159274f);
+                if (self->randomTurn != 0) *(f32*)&rec->w[3] = RandomFloatInRange(-3.14159274f, 3.14159274f);
             }
             if (set->mode == 2) {
                 ParticleExtra* x = &chunk->extra[k];
@@ -2036,10 +2036,10 @@ void EmitParticleChunk(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Quad
 // The frame of the object a spawn record follows (at 0x78): its position, the rotation, and the
 // velocity and spin it moves with.
 struct SpawnFrame {
-    Vec02 pos;              // 0x00
-    Mat02 rot;              // 0x10
-    Vec02 vel;              // 0x40
-    Vec02 spin;             // 0x50
+    Vec4 pos;              // 0x00
+    Mat3 rot;              // 0x10
+    Vec4 vel;              // 0x40
+    Vec4 spin;             // 0x50
     SpawnFrame() { FillMemory(this, 0, sizeof(*this)); }
 };
 
@@ -2051,28 +2051,28 @@ void GenerateSpawnArrays(s32 n, void* b, sptr* out)
     // the record is viewed through local types at fixed offsets (ring 0xE4, shape 0x10, placement 0xA0):
     // no one type of ours covers them
     SpawnRing ring;
-    Vec02 axis;
+    Vec4 axis;
     out[0] = (sptr)AllocateBackMemory(n * 16);
     out[1] = (sptr)AllocateBackMemory(n * 16);
     out[2] = (sptr)AllocateBackMemory(n * 4);
     out[3] = (sptr)AllocateBackMemory(n * 4);
     InitSpawnRing(*(s32*)(rec + 0xEC), (SpawnSpan*)(rec + 0xE4), n, &ring);
     for (s32 i = 0; i < n; i++) {
-        ChooseSpawnPosition((SpawnShape*)(rec + 0x10), i, n, (Vec02*)out[0] + i, &axis);
-        ChooseSpawnDirectionAndLifetime((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec02*)out[0] + i, &axis,
-                      (Vec02*)out[1] + i, (f32*)out[2] + i, (f32*)out[3] + i);
-        SpawnFrame* o = (SpawnFrame*)((Rec50*)b)->frame;
+        ChooseSpawnPosition((SpawnShape*)(rec + 0x10), i, n, (Vec4*)out[0] + i, &axis);
+        ChooseSpawnDirectionAndLifetime((SpawnPlacement*)(rec + 0xA0), &ring, (s32)(rec + 0x10), i, (Vec4*)out[0] + i, &axis,
+                      (Vec4*)out[1] + i, (f32*)out[2] + i, (f32*)out[3] + i);
+        SpawnFrame* o = (SpawnFrame*)((EffectSpawnerRecord*)b)->frame;
         if (o != 0) {
-            Vec02* pos = (Vec02*)(i * 16 + out[0]);
+            Vec4* pos = (Vec4*)(i * 16 + out[0]);
             Vu0::Q(*pos) = Vu0::Add(Vu0::Rotate(o->rot, Vu0::Q(*pos)), Vu0::Q(o->pos));
-            Vec02* vel = (Vec02*)(i * 16 + out[1]);
-            u128 rel = Vu0::Sub(Vu0::Q(*(Vec02*)(i * 16 + out[0])), Vu0::Q(o->pos));
+            Vec4* vel = (Vec4*)(i * 16 + out[1]);
+            u128 rel = Vu0::Sub(Vu0::Q(*(Vec4*)(i * 16 + out[0])), Vu0::Q(o->pos));
             u128 spun = Vu0::Cross(Vu0::Q(o->spin), rel);
             u128 moved = Vu0::Add(Vu0::Rotate(o->rot, Vu0::Q(*vel)), Vu0::Q(o->vel));
             Vu0::Q(*vel) = Vu0::Add(moved, spun);
         }
         if (out[4] != 0) {
-            ConvertSpawnToAnchorSpace((AnchoredSpawn*)(rec + 0x10), (Vec02*)out[0] + i, (Vec02*)out[1] + i);
+            ConvertSpawnToAnchorSpace((AnchoredSpawn*)(rec + 0x10), (Vec4*)out[0] + i, (Vec4*)out[1] + i);
         }
     }
 }
@@ -2080,7 +2080,7 @@ void GenerateSpawnArrays(s32 n, void* b, sptr* out)
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 // Left in this order: retail's call here evaluates the time before the pointers.
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 // Generates two sets of spawn arrays for the record (for the effects that need a start and an end):
 // the second set through the record's own sub-record, then, for each of the n entries, the pair of
@@ -2088,59 +2088,59 @@ void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec0
 void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* second)
 {
     SpawnFrame frame;
-    Vec02 P;
-    Vec02 V;
-    Vec02 W;
-    Mat02 M;
-    Vec02 tmp;
-    RecordMember* r = ((Rec50*)owner)->member;
-    Rec50* sub = (Rec50*)r->rec;
+    Vec4 P;
+    Vec4 V;
+    Vec4 W;
+    Mat3 M;
+    Vec4 tmp;
+    RecordMember* r = ((EffectSpawnerRecord*)owner)->member;
+    EffectSpawnerRecord* sub = (EffectSpawnerRecord*)r->rec;
     void* saved = sub->target;
     if (r->id94 == -1) {
         sub->target = r->parent;
     }
-    if (((Rec50*)r->rec)->target == r->parent) {
+    if (((EffectSpawnerRecord*)r->rec)->target == r->parent) {
         ComputeChainedWorldFrame(r, &frame.pos, &frame.rot);
-        ((Rec50*)r->rec)->frame = &frame;
+        ((EffectSpawnerRecord*)r->rec)->frame = &frame;
     }
     second->flag = 0;
-    GenerateSpawnArrays(n, (Rec50*)r->rec, second->out);
-    ((Rec50*)r->rec)->frame = 0;
+    GenerateSpawnArrays(n, (EffectSpawnerRecord*)r->rec, second->out);
+    ((EffectSpawnerRecord*)r->rec)->frame = 0;
     f32 last = 3.40282347e+38f;
     for (s32 i = 0; i < n; i++) {
-        if (((Rec50*)r->rec)->target != 0) {
+        if (((EffectSpawnerRecord*)r->rec)->target != 0) {
             f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
             if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
                 last = t;
-                ComputeObjectFrameAtTime((PlacedObject*)(((Rec50*)r->rec)->target), 0, last, &P, &M, &V, &W);
+                ComputeObjectFrameAtTime((PlacedObject*)(((EffectSpawnerRecord*)r->rec)->target), 0, last, &P, &M, &V, &W);
             }
-            Vec02* p = (Vec02*)(i * 16 + second->out[0]);
+            Vec4* p = (Vec4*)(i * 16 + second->out[0]);
             Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
             Vu0::Q(*p) = Vu0::Add(Vu0::Q(P), *(u128*)&tmp);
-            s32 kind = ((Rec50*)r->rec)->f80;
+            s32 kind = ((EffectSpawnerRecord*)r->rec)->secondVelocityMode;
             if (kind != 3) {
-                Vec02* v = (Vec02*)(i * 16 + second->out[1]);
+                Vec4* v = (Vec4*)(i * 16 + second->out[1]);
                 Vu0::Q(*v) = Vu0::Rotate(M, Vu0::Q(*v));
                 if (kind != 2) {
-                    u128 moved = Vu0::Add(Vu0::Q(*(Vec02*)(i * 16 + second->out[1])), Vu0::Q(V));
+                    u128 moved = Vu0::Add(Vu0::Q(*(Vec4*)(i * 16 + second->out[1])), Vu0::Q(V));
                     u128 spin = Vu0::Q(W);
-                    Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = Vu0::Add(moved,
-                        Vu0::Cross(spin, Vu0::Q(kind == 1 ? *(Vec02*)(second->out[0] + i * 16) : tmp)));
+                    Vu0::Q(*(Vec4*)(i * 16 + second->out[1])) = Vu0::Add(moved,
+                        Vu0::Cross(spin, Vu0::Q(kind == 1 ? *(Vec4*)(second->out[0] + i * 16) : tmp)));
                 }
             }
         }
         Vu0::Vec neg = Vu0::Vec::FromFloat(-1.0f);
-        u128 r = Vu0::MulX(Vu0::Q(*(Vec02*)(i * 16 + second->out[1])), neg.q);
+        u128 r = Vu0::MulX(Vu0::Q(*(Vec4*)(i * 16 + second->out[1])), neg.q);
         *(Vu0::Vec*)&tmp = neg;
-        Vu0::Q(*(Vec02*)(i * 16 + second->out[1])) = r;
+        Vu0::Q(*(Vec4*)(i * 16 + second->out[1])) = r;
     }
-    ((Rec50*)r->rec)->target = saved;
+    ((EffectSpawnerRecord*)r->rec)->target = saved;
 }
 
 // Generates the arrays for a spawn of "a" effects from record b, then spawns them as effect owners
 // (record kind 1) or as particle chunks (otherwise, with a second setup pair for kind 2). Memory
 // for the arrays is taken from the back-memory mark.
-void SpawnEffectsFromRecord(s32 a, Rec50* b, void* c)
+void SpawnEffectsFromRecord(s32 a, EffectSpawnerRecord* b, void* c)
 {
     SpawnSetup f;
     if (a == 0) {
@@ -2149,7 +2149,7 @@ void SpawnEffectsFromRecord(s32 a, Rec50* b, void* c)
     PushBackMemoryMark();
     f.flag = 1;
     GenerateSpawnArrays(a, b, f.out);
-    if (b->f120 == 1) {
+    if (b->effectMode == 1) {
         SpawnRecordEffects(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3]);
     } else {
         if (b->f130 == 2) {
@@ -2177,7 +2177,7 @@ void SpawnEffectsAt(Quad16* self, Quad16* a1, s32 a2, SpawnTail* a3, SpawnBlock*
     p.c = a6;
     f.f120 = 1;
     f.tail = *a3;
-    SpawnEffectsFromRecord(a2, (Rec50*)&f, &p);
+    SpawnEffectsFromRecord(a2, (EffectSpawnerRecord*)&f, &p);
 }
 
 LINKER_REMNANT(func_00157FF0);
@@ -2308,7 +2308,7 @@ void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner)
 ASM_FUNC(func_001583E8);
 
 // The spin record TurnMatrixBySpin reads (MoveEffect's at +0x100).
-struct SpinRecord_158480 {
+struct EffectSpinRecord {
     f32 scale;          // 0x00
     u8 pad4[0xC];
     f32 tx, ty, tz;     // 0x10
@@ -2325,7 +2325,7 @@ s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 // Builds the spawner's per-step transform: a scale and translation, turned by the spin's axis (in
 // the spin frame's world axes when the mode is 1) at rate times dt, multiplied and scaled by dt;
 // the result goes to out.
-void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
+void TurnMatrixBySpin(EffectSpinRecord* spin, f32 dt, f32* out)
 {
     Mat4A place = g_identityMatrix4;
     Mat4A turn;
@@ -2337,11 +2337,11 @@ void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
     if (spin->rate != 0.0f) {
         Quad16 axis;
         if (spin->mode == 1 && spin->frame != 0) {
-            TransformDirectionBetweenFrames((PlacedObject*)spin->frame, 0, (Vec02*)&spin->axis, (Vec02*)&axis);
+            TransformDirectionBetweenFrames((PlacedObject*)spin->frame, 0, (Vec4*)&spin->axis, (Vec4*)&axis);
         } else {
             axis = spin->axis;
         }
-        BuildAxisAngleMatrix((const Vec02*)&axis, (Mat02*)&turn, spin->rate * dt);
+        BuildAxisAngleMatrix((const Vec4*)&axis, (Mat3*)&turn, spin->rate * dt);
     }
     Mat4A term;
     Mat4A scaled;
@@ -2485,25 +2485,25 @@ void InitRecordMember(RecordMember* self)
 // list read from the stream).
 void LoadRecordMember(RecordMember* self, void* stream)
 {
-    Rec79* p = (Rec79*)AllocateZeroedFrontMemory(0x200);
+    TransformRecord* p = (TransformRecord*)AllocateZeroedFrontMemory(0x200);
     self->rec = p;
     InitSpawnRecord(p);
     ReadTransformObject(self, stream);
     s32 idx = ReadBufferedS8((BufferedStream*)stream);
     if (idx != -1) {
-        Rec79* n = GetOwnedSpawnRecord(self, 1);
+        TransformRecord* n = GetOwnedSpawnRecord(self, 1);
         n->curve20 = CreatePathCurve(idx);
         if (n->curve20->vt->m00 != 0) {
             n->curve20->vt->m00(n->curve20, stream);
         }
     }
-    Rec79* q = self->rec;
+    TransformRecord* q = self->rec;
     if (q->kind == 4) {
         ReadSpawnMesh(&q->curve20, stream);
     }
     s32 t = ReadBufferedU16((BufferedStream*)stream);
     if (t != 0) {
-        Rec79* m = GetOwnedSpawnRecord(self, 1);
+        TransformRecord* m = GetOwnedSpawnRecord(self, 1);
         ReadCappedWordList(&m->words130, t, self, stream);
     }
 }
@@ -2520,8 +2520,8 @@ void CopyRecordMember(RecordMember* self, RecordMember* src)
 // both ids are unset and the record has nothing of its own to resolve.
 void ResolveRecordMemberTargets(RecordMember* self)
 {
-    Rec79* r;
-    Rec79* c;
+    TransformRecord* r;
+    TransformRecord* c;
 
     if (self->id94 == -1 && self->id98 == -1) {
         c = self->rec;
@@ -2564,10 +2564,10 @@ void AddRecordMemberRangeEntry(RecordMember* self, s32 a, s32 b, f32 x, f32 y, f
 }
 
 // Gives the member's spawn record; with own 1 it first makes it the member's own copy.
-Rec79* GetOwnedSpawnRecord(RecordMember* self, s32 own)
+TransformRecord* GetOwnedSpawnRecord(RecordMember* self, s32 own)
 {
     if (own == 1) {
-        self->rec = (Rec79*)CloneSharedSpawnRecord(self->rec);
+        self->rec = (TransformRecord*)CloneSharedSpawnRecord(self->rec);
     }
     return self->rec;
 }
@@ -2585,7 +2585,7 @@ void InitHoldingMember(HoldingMember* self)
 // 0xB4, the last only if it is of kind 3) into the spawn record's found array.
 void ResolveHoldingMemberTargets(HoldingMember* self)
 {
-    Rec79* s;
+    TransformRecord* s;
     void* p;
 
     ResolveRecordMemberTargets(self);
@@ -2651,13 +2651,13 @@ void SendMessageAfterDelay(HoldingMember* self, void* message)
 s32 GetOrCreateSoundParams(void* self)
 {
     HoldingMember* o = (HoldingMember*)self;
-    if (o->fA0 == 0) {
-        InitSoundParams((SoundRecord**)&o->fA0);
+    if (o->soundParams == 0) {
+        InitSoundParams((SoundRecord**)&o->soundParams);
     }
-    return o->fA0;
+    return o->soundParams;
 }
 
-// The 0x200-byte spawn record (Rec79) as func_001590A0 changes its copy: the copy is written
+// The 0x200-byte spawn record (TransformRecord) as func_001590A0 changes its copy: the copy is written
 // field by field, so each store is a structure member's and the message's flags word is read
 // again after it (docs/TOOLCHAIN.md, "A store to a stack struct's member").
 struct __attribute__((aligned(16))) SpawnRecordView {
@@ -2666,11 +2666,11 @@ struct __attribute__((aligned(16))) SpawnRecordView {
     u8 pad14[0x20 - 0x14];
     union {
         Quad16 q20;         // 0x20: a point (kind 0), the first end (kind 1)
-        Vec02 v20;
+        Vec4 v20;
         u8* p20;            // 0x20: an object whose point at +0x18 is used (kind 2)
     };
-    Vec02 v30;              // 0x30: the second end (kind 1)
-    Vec02 v40;              // 0x40: kind 4's point
+    Vec4 v30;              // 0x30: the second end (kind 1)
+    Vec4 v40;              // 0x40: kind 4's point
     u8 pad50[0x60 - 0x50];
     Quad16 q60;             // 0x60
     u8 pad70[0x78 - 0x70];
@@ -2719,15 +2719,15 @@ struct ValueRange;
 f32 ClampToRange(ValueRange* span, f32 x);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
 extern f32 g_spawnScaleRatioRange[2];
-extern const Vec02 D_00248D30;
+extern const Vec4 g_zeroVector;
 
-// The sound a spawner member plays (HoldingMember::fA0): the sound, two radii, a volume and a pitch.
+// The sound a spawner member plays (HoldingMember::soundParams): the sound, two radii, a volume and a pitch.
 struct SpawnSoundParams {
     s32 id;
-    f32 f04;
-    f32 f08;
-    f32 f0C;
-    f32 f10;
+    f32 outerRange;
+    f32 innerRange;
+    f32 baseVolume;
+    f32 pitch;
 };
 
 // Handles a spawn message: starts from a copy of the spawner's record, overrides it with what the
@@ -2740,10 +2740,10 @@ void HandleSpawnMessage(void* self, void* body)
     SpawnRecordView rec;
     ChainFrame frame;
     void* chain[3];
-    Vec02 v;
-    Vec02 half;
-    Vec02 qa;
-    Vec02 qb;
+    Vec4 v;
+    Vec4 half;
+    Vec4 qa;
+    Vec4 qb;
     rec = *(SpawnRecordView*)((HoldingMember*)self)->rec;
 
     s32 count;
@@ -2804,8 +2804,8 @@ void HandleSpawnMessage(void* self, void* body)
     } else {
         cp = 0;
     }
-    SpawnEffectsFromRecord(count, (Rec50*)&rec, cp);
-    if (((HoldingMember*)self)->fA0 != 0) {
+    SpawnEffectsFromRecord(count, (EffectSpawnerRecord*)&rec, cp);
+    if (((HoldingMember*)self)->soundParams != 0) {
         switch (rec.kind) {
         case 0:
             v = rec.v20;
@@ -2816,10 +2816,10 @@ void HandleSpawnMessage(void* self, void* body)
             break;
         case 2:
             // the class of the object (kind 2) is not known: a pointer to its point at 0x18
-            v = **(Vec02**)(rec.p20 + 0x18);
+            v = **(Vec4**)(rec.p20 + 0x18);
             break;
         case 3:
-            v = D_00248D30;
+            v = g_zeroVector;
             break;
         case 4:
             v = rec.v40;
@@ -2830,8 +2830,8 @@ void HandleSpawnMessage(void* self, void* body)
             Vu0::Q(v) = Vu0::Add(Vu0::Rotate(fr->rot, Vu0::Q(v)), Vu0::Q(fr->pos));
         }
         TransformPointBetweenFrames((PlacedObject*)rec.target, 0, &v, &v);
-        SpawnSoundParams* snd = (SpawnSoundParams*)((HoldingMember*)self)->fA0;
-        StartSoundEffect(snd->id, 0, 0, &v, snd->f04, snd->f08, snd->f0C, snd->f10, 0.0f, 0, 0);
+        SpawnSoundParams* snd = (SpawnSoundParams*)((HoldingMember*)self)->soundParams;
+        StartSoundEffect(snd->id, 0, 0, &v, snd->outerRange, snd->innerRange, snd->baseVolume, snd->pitch, 0.0f, 0, 0);
     }
 }
 
@@ -3127,7 +3127,7 @@ void DrawScreenFill(u8* a0)
 void UpdateColorFade(ColorFade* self)
 {
     if (D_00275BC4 != 3) return;
-    s32 g = D_00270458;
+    s32 g = g_displayMode;
     if (g == 1) return;
     if (g == 2) return;
     FadeColor out; Rgba4 a, b;
@@ -3271,12 +3271,12 @@ struct GroupMemberLink {
 // An object of a hashed id list (GetHashedSlot): its id, the next with the same hash, and for a
 // group (its class flag 0x100) the list of its members.
 struct HashedObject {
-    const Desc01* desc;     // 0x00
+    const BaseObjectDescriptor* desc;     // 0x00
     u8 pad04[4];
     s32 id;                 // 0x08
     HashedObject* nextHashed; // 0x0C
     u8 pad10[0x30 - 0x10];
-    Alias01* alias;         // 0x30
+    ObjectAlias* alias;         // 0x30
     u8 pad34[0x2D0 - 0x34];
     GroupMemberLink* members; // 0x2D0
 };
@@ -3460,7 +3460,7 @@ s32 GatherObjectsById(World* world, u32 flags, s32 id, void* scope, s32 max, voi
             break;
         }
         for (i = id; i < 0x95 && IsClassOfKind(i, id); i++) {
-            for (obj = (PlacedObject*)world->f1884[i]; obj != 0; obj = (PlacedObject*)obj->nextById) {
+            for (obj = (PlacedObject*)world->objectsById[i]; obj != 0; obj = (PlacedObject*)obj->nextById) {
                 CollectObjectByMode(obj, kind, flags & 0x100, 0, root, max, &c, found, &min);
             }
         }
@@ -3502,8 +3502,8 @@ void InitScalingVolume(ScalingVolume* self)
 {
     InitPlacedObject(self);
     f32* v = self->v;
-    self->f2F0 = 1.0f;
-    self->f2EC = 1.0f;
+    self->targetScale = 1.0f;
+    self->currentScale = 1.0f;
     self->v[0] = 1.0f;
     v[1] = 0.2f;
     v[2] = 0.1f;
@@ -3520,14 +3520,14 @@ void LoadScalingVolume(ScalingVolume* self,void* other)
 void UpdateScalingVolume(ScalingVolume* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
-    self->f2EC = ApproachValueWithRamp((RampProfile*)self->v, 0, self->f2EC, self->f2F0, g_frameDt);
+    self->currentScale = ApproachValueWithRamp((RampProfile*)self->v, 0, self->currentScale, self->targetScale, g_frameDt);
 }
 
 // Draws the placed object with its transform scaled uniformly by its current scale (at 0x2EC).
 void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
 {
     ScaledDrawFrame f;
-    BuildUniformScaleAboutPoint(0, &f.q0, self->f2EC);
+    BuildUniformScaleAboutPoint(0, &f.q0, self->currentScale);
     BuildPlacedObjectTransform(self, (Quad16*)arg2, (ScaledTransform*)f.m40);
     MultiplyMatrices(f.m90, f.m40, &f.q0);
     f.m40[0] = f.m90[0];
@@ -3545,12 +3545,12 @@ s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 // and divided by its scale; false if the scale is almost zero.
 s32 IsPointInsideObjectFaces(ScalingVolume* self, void* point)
 {
-    Vec02 local;
-    Vec02 k;
-    if (self->f2EC < 0.0001f)
+    Vec4 local;
+    Vec4 k;
+    if (self->currentScale < 0.0001f)
         return 0;
-    TransformPointBetweenFrames(0, self, (Vec02*)point, &local);
-    Vu0::Q(k) = Vu0::FromFloat(1.0f / self->f2EC);
+    TransformPointBetweenFrames(0, self, (Vec4*)point, &local);
+    Vu0::Q(k) = Vu0::FromFloat(1.0f / self->currentScale);
     Vu0::Q(local) = Vu0::MulX(Vu0::Q(local), Vu0::Q(k));
     return IsPointInsideFaceTree((TreeNode03*)self->out2DC, (FacePoint*)&local);
 }

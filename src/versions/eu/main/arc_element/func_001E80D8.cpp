@@ -23,7 +23,7 @@ void DrawArcOutlinePacket(ArcDrawRequest_eu_1E80D8* request)
     if (first == last) {
         return;
     }
-    if (D_00270458 != 4) {
+    if (g_displayMode != 4) {
         if (AreFloatsNearlyEqual(g_camera->zoom, *(f32*)((u8*)self->current + 0x2D4), 1e-4f) == 0) {
             f32 zoom = g_camera->zoom;
             f32 f1C8 = g_camera->zoomGoal;

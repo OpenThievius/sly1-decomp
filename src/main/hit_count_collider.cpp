@@ -25,12 +25,12 @@
 #include "functions/state_walker.h"
 #include "functions/switched_collider.h"
 #include "functions/world.h"
-struct Vec02;
+struct Vec4;
 
 struct MemberObject;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -43,17 +43,17 @@ struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 // The file's .data, in retail's order.
 s32 g_hitCountColliderLinks[36] = { 4, 1317, 1632, 4, 1320, 1580, 2, 354, 1420, 2, 355, 1424, 6, 352, 1412, 0, 1319, 1636, 0, 1321, 1560, 0, 1322, 1564, 0, 1323, 1568, 0, 1324, 1572, 0, 1325, 1652, 0, 1326, 1656 };
 char D_00274A40[4] = "\r";
-f32 D_00274A44 = 150.0f;
+f32 g_hitCountHitRadius = 150.0f;
 PaddedQuadratic D_00274A50 = { { 0.2f, 0.0f, 0.0f } };
 f32 g_hitCountRotationRamp[3] = { 40.0f, 0.0f, 0.3f };
 PaddedQuadratic D_00274A70 = { { 1.0f, 0.0f, -0.75f } };
 PaddedQuadratic D_00274A80 = { { 0.7f, 0.3f, 0.0f } };
-f32 D_00274A90[2] = { 1200.0f, 1.0f };
-f32 D_00274A98 = 0.25f;
-f32 D_00274A9C = 3000.0f;
+f32 g_hitCountStickSpeedScale[2] = { 1200.0f, 1.0f };
+f32 g_hitCountMinSpeedLimit = 0.25f;
+f32 g_hitCountAccelLimit = 3000.0f;
 f32 D_00274AA0 = 0.1f;
 f32 g_hitCountTurnRamp[3] = { 20.0f, 0.0f, 0.3f };
-f32 D_00274AB4 = 1000.0f;
+f32 g_hitCountPushSpeed = 1000.0f;
 f32 g_hitCountItemSpeedRange[2] = { 0.0f, 300.0f };
 PaddedQuadratic g_hitCountItemSpinRange = { { -1.0f, 1.0f, 0.0f } };
 
@@ -88,10 +88,10 @@ void StartHitCountCollider(HitCountCollider* self)
     self->heading = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = self->aimObject;
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
-    *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)&((IdLinkedObject*)self->f62C)->f2DC;
-    T217D_E30* g1 = &g_hitCountCaptionA;
+    *(UnalignedFloatPair*)&self->drivenBaseX = *(UnalignedFloatPair*)&((IdLinkedObject*)self->drivenObject)->f2DC;
+    CounterCaption* g1 = &g_hitCountCaptionA;
     ((UnalignedPointer*)&g1->target)->p = (u8*)&self->collectedCount;
-    T217D_E30* g2 = &g_hitCountCaptionB;
+    CounterCaption* g2 = &g_hitCountCaptionB;
     ((UnalignedPointer*)&g2->target)->p = (u8*)&self->hitsLeft;
     *(void**)&g1->limit = D_00274A40;
     g2->rate = 4.0f;
@@ -107,12 +107,12 @@ extern f32 g_stepScale;
 extern f32 g_gameClock[];
 extern s32 D_0026E228[8];
 
-struct Vec02;
+struct Vec4;
 struct RampProfile;
-struct Mat02;
+struct Mat3;
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit);
 extern "C" f32 Cosine(f32 x);
 
 // Per-frame update of the hit-count collider: updates it as a switched collider, handles a
@@ -163,16 +163,16 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         g_stepScale = 1.0f;
         u = 0.0f;
     }
-    f32 w = u * D_00274A44 + (1.0f - u) * self->baseRadius;
+    f32 w = u * g_hitCountHitRadius + (1.0f - u) * self->baseRadius;
     self->radius3D0 = w;
     self->radius3CC = w;
     if (self->acceptedMark) {
-        if (g_gameTime[0] - self->f640 > 2.0f) self->acceptedMark = 0;
+        if (g_gameTime[0] - self->markStartTime > 2.0f) self->acceptedMark = 0;
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    BuildAxisAngleMatrix((const Vec02*)&g_unitZVector, (Mat02*)buf, self->aimHeading - ang);
-    ApproachRotationWithRamp(&self->aimObject->rot, (Mat02*)buf, (RampProfile*)g_hitCountRotationRamp, (Mat02*)buf2, 0, t);
-    self->aimObject->desc02()->m1E(self->aimObject, (Mat02*)buf2);
+    BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, (Mat3*)buf, self->aimHeading - ang);
+    ApproachRotationWithRamp(&self->aimObject->rot, (Mat3*)buf, (RampProfile*)g_hitCountRotationRamp, (Mat3*)buf2, 0, t);
+    self->aimObject->desc02()->m1E(self->aimObject, (Mat3*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
     if (self->acceptedMark) {
@@ -199,9 +199,9 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         ((u8*)ca)[1] = (s32)r1;
     }
     SetObjectTreeRecordValue(self, ca[0]);
-    ((IdLinkedObject*)self->f62C)->f2DC = self->f670 * self->f630;
-    ((IdLinkedObject*)self->f62C)->f2E0 = self->f670 * self->f634;
-    ((IdLinkedObject*)self->f62C)->linkId = 0;
+    ((IdLinkedObject*)self->drivenObject)->f2DC = self->stickGain * self->drivenBaseX;
+    ((IdLinkedObject*)self->drivenObject)->f2E0 = self->stickGain * self->drivenBaseY;
+    ((IdLinkedObject*)self->drivenObject)->linkId = 0;
 }
 
 bool AreMenusAndFadeClear();
@@ -240,18 +240,18 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
         }
     }
     if (self->state != 1) {
-        self->speedLimit = D_00274A98;
-        self->f650 = D_00248D30;
+        self->speedLimit = g_hitCountMinSpeedLimit;
+        self->desiredVelocity = g_zeroVector;
     } else {
         if (0.0f < ev->stickMagnitude) {
             ComputeCameraRelativeStickHeading(g_camera, ev, 0, &self->heading);
         }
-        f32 k = D_00274A90[0];
-        f32 m = D_00274A98;
+        f32 k = g_hitCountStickSpeedScale[0];
+        f32 m = g_hitCountMinSpeedLimit;
         m = m >? ev->stickMagnitude;
         self->speedLimit = m;
-        ComputePolarOffset((Vec3*)&self->f650, self->heading, k * ev->stickMagnitude, 0.0f);
-        self->f670 = (D_00274AA0 >? ev->stickMagnitude);
+        ComputePolarOffset((Vec3*)&self->desiredVelocity, self->heading, k * ev->stickMagnitude, 0.0f);
+        self->stickGain = (D_00274AA0 >? ev->stickMagnitude);
         if (0.0f < ev->secondStickMagnitude) {
             ComputeCameraRelativeStickHeading(g_camera, ev, 1, &self->aimHeading);
             if (self->walker != 0) {
@@ -266,7 +266,7 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
 }
 
 
-void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
+void ClampVectorLength(Vec4* v, Vec4* out, f32 max);
 void AddColliderForce(void* a, void* b);
 
 // Per-frame step: steps the collider, turns it toward its heading (yaw only) with the turn ramp,
@@ -274,14 +274,14 @@ void AddColliderForce(void* a, void* b);
 // maximum acceleration, divided by dt.
 void StepHitCountCollider(HitCountCollider* self, f32 dt)
 {
-    Mat02 rot;
-    Vec02 accel;
-    Vec02 t;
+    Mat3 rot;
+    Vec4 accel;
+    Vec4 t;
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
-    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->f650), Vu0::Q(self->v150));
-    ClampVectorLength(&accel, &accel, D_00274A9C * self->speedLimit * dt);
+    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->desiredVelocity), Vu0::Q(self->v150));
+    ClampVectorLength(&accel, &accel, g_hitCountAccelLimit * self->speedLimit * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Q(accel), Vu0::Q(t));
     AddColliderForce(self, &accel);
@@ -291,7 +291,7 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
 // Contact method: notes what touched the collider (the other end of the contact): a kind-0x21 body
 // sets hitPending while hits are left, else is kept as touchedObject unless hitPlayer is set; a
 // body with id 0x52F is kept as collectedObject.
-void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
+void NoteHitCountColliderContact(HitCountCollider* self, BodyContact* c, s32 end)
 {
     ContactEnd03* e = &c->end[1 - end];
     if (IsObjectOfKind(e->body, 0x21)) {
@@ -307,12 +307,12 @@ void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 
 // The velocity is read first, and each of the three references to the end takes its address
 // again through Q (docs/toolchain/reloads-and-stores.md, "Three adds of one address").
-void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
+void ResolveHitCountColliderContact(HitCountCollider* self, BodyContact* c, s32 end)
 {
     AnimationPlayer* p = self->hitPlayer;
     if (p != 0) {
         u128 vel = Vu0::Q(c->end[end].v30);
-        u128 k = Vu0::Scalar((D_00274A44 - self->baseRadius) / p->anim->length);
+        u128 k = Vu0::Scalar((g_hitCountHitRadius - self->baseRadius) / p->anim->length);
         u128 d = Vu0::Sub(Vu0::Q(c->end[end].point), Vu0::Q(self->v140));
         Vu0::Q(c->end[end].v30) = Vu0::MulAddX(vel, Vu0::DivX(d, Vu0::Length(d)), k);
     }
@@ -376,11 +376,11 @@ void PushRequesterAwayFromSender(void* c, void* receiver)
 {
     PlacedObject* from = (PlacedObject*)c;
     PlacedObject* to = (PlacedObject*)receiver;
-    Vec02 d;
-    Vec02 v;
+    Vec4 d;
+    Vec4 v;
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(to->v140), Vu0::Q(from->v140));
     d.z = 0.0f;
-    u128 s = Vu0::ScalarAt(D_00274AB4);
+    u128 s = Vu0::ScalarAt(g_hitCountPushSpeed);
     Vu0::Set(v, Vu0::MulX(Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_unitXVector)), s));
     to->desc02()->m20(to, &v);
 }
@@ -405,7 +405,7 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
 struct ScatterController;
 f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
-void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
+void SetPauseMenuLayerPage(PauseMenu* a, s32 b, s32 c);
 
 // Changes the collider's state (the value at +0x610). Leaving state 2 records the time and sets a
 // mark; entering state 2 or 3 stores the opposite of the heading as the facing angle, and each new
@@ -418,19 +418,19 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
     if (self->state == 2) {
         f32 t = g_gameClock[1];
         self->hitsLeft = 3;
-        self->f640 = t;
+        self->markStartTime = t;
     }
-    *(s32*)&self->f670 = 0;
+    *(s32*)&self->stickGain = 0;
     if (state < 4) if (state >= 2) {
-        Vec02 q;
+        Vec4 q;
         f32 a = ArctangentOfRatio(self->v150.y, self->v150.x);
         f32 b = WrapAngle(a + 3.14159274f);
         self->heading = b;
         self->aimHeading = b;
-        q = D_00248D30;
+        q = g_zeroVector;
         f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
         ApproachAngleWithRamp(r, self->heading, 0.0f, g_hitCountTurnRamp, &q.z);
-        self->desc02()->m21(self, (Vec02*)&q);
+        self->desc02()->m21(self, (Vec4*)&q);
         self->hitsLeft = 0;
         D_0026E228[0] = -1;
         if (state == 3) RaiseScatterLevels((ScatterController*)g_scatterController, 1.0f);
@@ -439,7 +439,7 @@ void SetHitCountColliderState(HitCountCollider* self, s32 state)
     switch (state) {
     case 0: s2 = self->stateAnims[0]; break;
     case 1: s2 = self->stateAnims[1]; break;
-    case 2: s2 = self->stateAnims[2]; self->f640 = 3.4028235e+38f; break;
+    case 2: s2 = self->stateAnims[2]; self->markStartTime = 3.4028235e+38f; break;
     case 3: s2 = self->stateAnims[3]; break;
     case 4:
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x1A);
@@ -475,9 +475,9 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
     }
     s32 n = i + 1;
     if (!IsObjectAttached(obj)) {
-        Vec02 p;
-        Vec02 best;
-        best = D_00248D30;
+        Vec4 p;
+        Vec4 best;
+        best = g_zeroVector;
         f32 bestDist = 0.0f;
         for (s32 j = 0; j < self->placePointCount; j++) {
             ConvertPositionToWorld(self->placePoints[j], &p);
@@ -498,8 +498,8 @@ void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)
         best.z = obj->pos.z;
         obj->desc02()->m1D(obj, &best);
         if (IsObjectOfKind(obj, 0x21)) {
-            Vec02 vel;
-            Vec02 spin;
+            Vec4 vel;
+            Vec4 spin;
             ComputePolarOffset((Vec3*)&vel, RandomFloatInRange(-3.1415927f, 3.1415927f), RandomFloatInRange(g_hitCountItemSpeedRange[0], g_hitCountItemSpeedRange[1]), 0.0f);
             obj->desc02()->m20(obj, &vel);
             Vu0::Set(spin, Vu0::FromFloats(0.0f, 0.0f, RandomFloatInRange(g_hitCountItemSpinRange.c[0], g_hitCountItemSpinRange.c[1])));

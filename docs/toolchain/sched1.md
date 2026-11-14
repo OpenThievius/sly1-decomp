@@ -761,7 +761,7 @@ VU_REGS: two references for the product's class, one leaving no code.
 ### A block-scoped struct local frees its slot for a later Scalar (func_00154088)
 
 Matched 2026-11-10 from the -dS dumps. LimitContactTangents (func_00154088) sums each contact's
-vector over the active items into a Vec02 `acc` on the stack, then, after the search loop,
+vector over the active items into a Vec4 `acc` on the stack, then, after the search loop,
 scales the best tangent by `Vu0::Scalar(1.0f / mag)`. Three separate differences, in cascade
 order:
 
@@ -926,7 +926,7 @@ neither flag on either side: `Vu0::Q(*p) = ...` stores through a `u128*` (no fla
 ScalarAt reads the weight's word through a cast pointer (no flag). The source that gives
 both:
 
-    Vec02* p = &d;
+    Vec4* p = &d;
     *(Vu0::Vec*)p = Vu0::NormalizeOr(Vu0::Vec::Of(d), Vu0::Vec::Of(g_unitXVector));
     Vu0::Q(r) = Vu0::MulXSum(Vu0::Q(d), Vu0::ScalarAtValue(D_00261360), ...);
 
@@ -1038,7 +1038,7 @@ sol` (875), `self->contacts` (880, r307) and its `->head` (882, mem/s through r3
   insn of the block is retail's, so no other dependent can lengthen 880's chain; and the
   store becomes MEM_SCALAR_P only as an addressable scalar (acc as a u128 read through
   `((f32*)&acc)[2]`), which purge_addressof allocates late (frame 0xA0, an extra saved s5
-  in the 2026-11-10 probe). down as a Vec02 in memory (copy = load + store, 880 between
+  in the 2026-11-10 probe). down as a Vec4 in memory (copy = load + store, 880 between
   them) swaps the frame slots and renumbers the counting loop's registers.
 
 - **No barrier (w37, 2026-11-12).** A loop note between the contacts load and the copy (`ct =
@@ -1220,7 +1220,7 @@ What it showed, with `-1.0`, `5.0`, `1.047` and `0.39` the block's four constant
   constants' stores and the world pointer is loaded before FillMemory); a constructor
   temporary assigned to the record (the same two differences); an inline holding the whole
   burst (`&blk` substituted as a constant: two insns short); the gravity through a `const
-  Vec02&` (CSE folds the address back); one float variable reused for 5.0 and -1.0 (they
+  Vec4&` (CSE folds the address back); one float variable reused for 5.0 and -1.0 (they
   share a register, but its first set rises to priority 7 and loads too early).
 
 **Matched 2026-11-12 (w40-fa).** The last two lines (the up vector's store before the
@@ -1367,7 +1367,7 @@ weights and four z weights (2026-11-10, still a near miss):
 Read from the `-dS -fsched-verbose-6` dumps of UpdateFrameCameraController (2026-11-08):
 
 - **The slot store waits for nothing once it follows the load.** `MulAddX(Vu0::Q(frame->v140),
-  ..., Scalar(10.0f))` (or a named `Vec02 k` stored first) expands the Scalar's slot store
+  ..., Scalar(10.0f))` (or a named `Vec4 k` stored first) expands the Scalar's slot store
   before the v140 load: the load, through a pointer loaded from memory, may alias the frame
   slot, so it depends on the store, which inherits its priority and issues first. Written with
   Vec values, `MulAddX(Vec::Of(frame->v140), Vec::Of(basis.r[0]), Vec::Scalar(10.0f))`, both
@@ -1543,7 +1543,7 @@ Read from local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-dS -dl` dumps 
 - **The deaths are the stores.** The rotated rows die at their last store, and those stores
   are dead copies to the helper's local, the return temporary and the matrix, all with
   sched1 priority 11 (they precede the next call): they issue by INSN_LUID, the two that kill a
-  register (weight -1) first. With `Mat02 out; ... return out;` the local's rows are stored as
+  register (weight -1) first. With `Mat3 out; ... return out;` the local's rows are stored as
   they are made and the return copy follows the last row, so sched1's tail is out0, out1, out2,
   tmp0, tmp1, tmp2 and row 0's product lives to the fifth store; its quantity (6 refs over 24)
   ranks below the plain row of 4 refs over 14, and the rotation's first row (8 refs) below the
@@ -1551,7 +1551,7 @@ Read from local-alloc.c and haifa-sched.c of GCC 2.95.3 and the `-dS -dl` dumps 
   to the return slot and row 1 three insns before row 2: a tail of out0, tmp0, out1, tmp1, out2,
   tmp2.
 - **The form.** g++'s named return value, as in the matrix file (func_0018A040 above):
-  `Mat02 RotateRowsBy(const Mat02& r, const Mat02& m) return out` with a local `t`, each row
+  `Mat3 RotateRowsBy(const Mat3& r, const Mat3& m) return out` with a local `t`, each row
   written to `t` and then to `out` before the next row is made. The frame keeps its three
   48-byte objects (t, the return slot, the matrix), the tail becomes per row, and the whole
   function matches. The third function where retail writes a returned matrix's rows to a local
@@ -1565,10 +1565,10 @@ local-alloc's VU quantities) (2026-11-09):
 
 - **What differed.** CombineChildPoseRotations turns the three rows of `*outRot` and the
   vector `*outVec` by one product matrix, then adds a child's offset. Written as three
-  in-place Rotate calls with two Mat02 copies and `Q(*outVec) = Add(Rotate(m, Q(*outVec)),
+  in-place Rotate calls with two Mat3 copies and `Q(*outVec) = Add(Rotate(m, Q(*outVec)),
   Q(tmpVec))`, every instruction was retail's but six VU registers, the order of the dead
   stores and the two saved registers of outVec and &tmpRot (87.5%).
-- **The two dead Mat02 copies are the return value.** `*outRot = RotateRowsBy(m, *outRot)`
+- **The two dead Mat3 copies are the return value.** `*outRot = RotateRowsBy(m, *outRot)`
   with func_001BA5B0's named-return helper (a local `t`, each row to `t` then to `out`) gives
   retail's dead-store order (out0 ... then t0, out1, t1, out2, t2 per row), and with it the
   saved registers (global-alloc's ranking of outVec and &tmpRot follows from the references).
@@ -1634,7 +1634,7 @@ Three other differences closed the near miss, each shrinking the size gap first:
 
 - **Each slot's real argument count.** Slots 51 to 53 (0xCC, 0xD0, 0xD4) take
   `(self, moved)`: retail sets only $a1. A cast array of three-argument pointers added a
-  `move a2, zero` per call. Called through Desc02/Desc03's members, they are retail's.
+  `move a2, zero` per call. Called through PlacedObjectDescriptor/ColliderDescriptor's members, they are retail's.
 - **A store from an asm stays out of the call's delay slot.** Retail's bounce loop has
   `sw a0, 200(s0); jal RandomFloatInRange; nop`: `Vu0::StoreX` (the store is the helper's
   asm, which reorg never puts in a delay slot) where `*(u32*)&c->speed = ToBits(..)` let reorg
@@ -1964,9 +1964,9 @@ off (2026-11-10, `-dS -fsched-verbose-6` dumps, haifa-sched.c and alias.c read):
   after the divide by its anti-dependence and gives retail's issue order for it, but it is
   not plausible source and leaves the registers off (18 lines).
 - **Ruled out (w15).** `b.y = 20; b.x = b.y`, `b.x = b.y = 20`, `b.y = b.x = 20`,
-  `Vec02 b = a` (CSE folds the copy to the constant store), b's initialisation after the
+  `Vec4 b = a` (CSE folds the copy to the constant store), b's initialisation after the
   clamp (the stores move to the join block), an inline setter for b or a, an inline
-  `(g_gameTime - e->start) / e->life`, the quadratic as an inline over `const Vec02&`, the
+  `(g_gameTime - e->start) / e->life`, the quadratic as an inline over `const Vec4&`, the
   clamp's parameters by const reference, dt's weight through a `const f32&` inline, and the
   whole update as an inline taking `(self, a, b, dt)` (the frame moves).
 
@@ -2316,7 +2316,7 @@ after MeasurePointToSegment, then tests the velocity's z against a floor. Read f
   and reload keeps it at 112(sp), loaded at each use. c2 is a local pseudo; it only had to
   stop being tied to the sum.
 - **A scalar global against a member store.** `ShortenEffectLife(self, D_0026B550)` after
-  `((Vec02*)&self->qA0)->z = D_0026B54C` loads the life before the z store only when the
+  `((Vec4*)&self->qA0)->z = D_0026B54C` loads the life before the z store only when the
   store is a member's (mem/s) and D_0026B550 a scalar float (mem/f): as an array element it
   is mem/s itself and waits. Retail's `lui; swc1; lwc1; move a0; jal` with the caller-save of
   vf8 in the delay slot is the independent form.
@@ -2364,7 +2364,7 @@ sets and uses: it reproduces every block of the function):
   and the next move's; ToFloatMoved's is an asm (no unit, latency 1). Both dot products of
   each impulse go through ToFloatMoved.
 - EXACT on US and PAL with `f32 D_0026B550 = 0.25f` (a scalar, which the life's load needs) and
-  the size curve after it a Vec02, whose alignment leaves retail's twelve zero bytes.
+  the size curve after it a Vec4, whose alignment leaves retail's twelve zero bytes.
 - **The tell.** A reload register one higher than the first free one, or a store that retail
   issues one cycle late with nothing in the gap: look for a weight (or any Scalar) the near
   miss named in a local and used twice, and write it at each use.
@@ -2386,7 +2386,7 @@ vf5. Read from the `-da -fsched-verbose-6` dumps and the replay (w46-c, 2026-11-
 - **corner after the product kept the dead row store only because of its slot.** flow1 deletes
   the product's `r.r[2]` store when the next store to that slot (0xB0) follows with no load
   through a pseudo address between. A Scalar's slot is the first free one when its statement
-  is expanded: with `Vec02 tilt; Mat4 proj;` declared before corner's statement they take
+  is expanded: with `Vec4 tilt; Mat4 proj;` declared before corner's statement they take
   0x60 and 0x70, and corner's Scalar gets 0xB0 right after the product (its vector loads are
   expanded after the slot store, as an inline's by-value memory arguments are). Declared after
   corner's statement, the Scalar takes 0x60 and the row store stays (780 bytes).

@@ -196,9 +196,9 @@ struct MpegDecoder {
     s32 f70;                // 0x070
     u8 pad74[0x078 - 0x074];
     s64 f78;                // 0x078
-    s32 f80;                // 0x080
+    s32 lastPts;            // 0x080: -1 when none
     u8 pad84[0x088 - 0x084];
-    s64 f88;                // 0x088
+    s64 lastFieldUnits;     // 0x088
     s32 f90;                // 0x090
     s32 pictureLimit[3];    // 0x094: how many frames, top fields and bottom fields to decode (-1: all)
     s32 pictureCount[3];    // 0x0A0: how many of each have been decoded
@@ -215,8 +215,8 @@ struct MpegDecoder {
     s32 outputMacroblocks;  // 0x0E4
     s32 fE8;                // 0x0E8
     u8 padEC[0x0F0 - 0x0EC];
-    s64 fF0;                // 0x0F0
-    s32 fF8;                // 0x0F8
+    s64 overridePts;        // 0x0F0: -1 when none
+    s32 overridePhase;      // 0x0F8: 0, 1 or 2
     u32 frameBuffer[3];     // 0x0FC: the three frames' addresses
     MpegRing ring;          // 0x108
     s32 pictureNumber;      // 0x118

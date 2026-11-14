@@ -21,11 +21,11 @@
 #include "functions/turning_collider.h"
 #include "functions/world_contacts.h"
 struct BaseObject;
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // The file's .data, in retail's order: the constants of its assembly.
@@ -79,8 +79,8 @@ void CreateThreeEntryBlend(void* a0, ThreeBlendRecord* a1, void** a2)
 // A row of the link's system: the response of the two objects to a unit impulse along one axis,
 // in direction (a) and in rotation (b).
 struct LinkRow {
-    Vec02 a;
-    Vec02 b;
+    Vec4 a;
+    Vec4 b;
 };
 
 // The right-hand side of the link's system, read as components by index.
@@ -89,24 +89,24 @@ struct __attribute__((aligned(16))) LinkVector {
 };
 
 struct VectorConstraint;
-void ApplyColliderInverseInertia(void* self, Vec02* in, Vec02* out);
-void ComputeColliderPointVelocity(void* self, void* data, LinkRow* row, Vec02* out);
+void ApplyColliderInverseInertia(void* self, Vec4* in, Vec4* out);
+void ComputeColliderPointVelocity(void* self, void* data, LinkRow* row, Vec4* out);
 
 // Works out the impulse at point that gives objects a and b the relative velocity target: for each
 // axis it measures how the point's velocity on each object changes per unit impulse (mass, inverse
 // inertia), then factors and solves the 3 by 3 system. Each object's linear and angular rows go to
 // out; the second object takes the opposite sign.
-void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const LinkVector* target, LinkRow* out)
+void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec4* point, const LinkVector* target, LinkRow* out)
 {
     PlacedObject* objs[2];
-    Vec02 pts[2];
-    Vec02 axis;
-    Vec02 cross;
-    Vec02 scaled;
-    Vec02 torque;
+    Vec4 pts[2];
+    Vec4 axis;
+    Vec4 cross;
+    Vec4 scaled;
+    Vec4 torque;
     LinkRow rows[2][3];
-    Vec02 vel[2];
-    Vec02 diff[3];
+    Vec4 vel[2];
+    Vec4 diff[3];
     f32 m[3][3];
     f32 factor[3][3];
     f32 rhs[3];
@@ -189,14 +189,14 @@ static inline f32 ClockTime(const LinkClock* c) { return c->time; }
 struct LinkAnchor { u8 pad0[0x18]; void* parent; u8 pad1C[0xB0 - 0x1C]; f32 fB0; };
 struct LinkSystem { u8 pad0[4]; PlacedObject* object; };
 
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* across);
+f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* across);
 f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
 
 // The player swinging on the link (states 0x32 and 0x34 pump it): the anchor's frame and
 // motion, the swing's turning about the anchor eased and damped, its length kept, and the
 // acceleration that gives it, handed to the link's system when there is one.
 // v made unit length in place, or the fallback when it is shorter than 0.0001; its length.
-static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
+static inline f32 NormalizeInPlace(Vec4* v, const Vec4& fallback)
 {
     u128 len = Vu0::Length(Vu0::Q(*v));
     if (Vu0::ToFloat(len) < 0.0001f) {
@@ -212,16 +212,16 @@ static inline f32 NormalizeInPlace(Vec02* v, const Vec02& fallback)
 // from them (relative to the link's across and along directions).
 void PlacePlayerOnLinkedObject(Player* self)
 {
-    Vec02 pos;
-    Vec02 delta;
-    Vec02 vel;
-    Vec02 dir;
-    Mat02 rot;
-    Vec02 rel;
-    Vec02 across;
-    Vec02 along;
-    Vec02 n1;
-    Vec02 w1;
+    Vec4 pos;
+    Vec4 delta;
+    Vec4 vel;
+    Vec4 dir;
+    Mat3 rot;
+    Vec4 rel;
+    Vec4 across;
+    Vec4 along;
+    Vec4 n1;
+    Vec4 w1;
     LinkAnchor* anchor = (LinkAnchor*)self->boundObject;
     GetObjectWorldPosition((BaseObject*)anchor, &pos);
     GetObjectWorldRotation((BaseObject*)self->boundObject, &rot);
@@ -235,12 +235,12 @@ void PlacePlayerOnLinkedObject(Player* self)
     Vu0::Set(w1, Vu0::MulX(a1, Vu0::Vec::Scalar(Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(across))) / dist)).q);
     Vu0::Vec gv = Vu0::Vec::Of(self->gravity);
     Vu0::Vec gp = Vu0::Sub(gv, Vu0::MulX(Vu0::Vec::Of(dir), Vu0::Dot(gv, Vu0::Vec::Of(dir))));
-    Vec02 g;
+    Vec4 g;
     Vu0::Set(g, gp.q);
     Vu0::Vec a2 = Vu0::NormalizeOr(Vu0::Cross(Vu0::Vec::Of(dir), gp), Vu0::Vec::Of(g_unitYVector));
-    Vec02 n2;
+    Vec4 n2;
     Vu0::Set(n2, a2.q);
-    Vec02 w2;
+    Vec4 w2;
     Vu0::Set(w2, Vu0::MulX(a2, Vu0::Vec::Scalar(Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(g))) / dist)).q);
     f32 gain;
     if (self->subState == 0x32 || self->subState == 0x34) {
@@ -248,9 +248,9 @@ void PlacePlayerOnLinkedObject(Player* self)
     } else {
         gain = g_linkRestAcrossDrag;
     }
-    Vec02 acc;
-    Vec02 accAlong;
-    Vec02 accAcross;
+    Vec4 acc;
+    Vec4 accAlong;
+    Vec4 accAcross;
     Vu0::Q(acc) = Vu0::MulAddX(Vu0::Q(w1), Vu0::Q(w2), Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock)));
     SplitVectorAlongAxis(&acc, &rot.r[1], &accAlong, &accAcross);
     f32 dt = ClockDt((LinkClock*)g_gameClock);
@@ -276,39 +276,39 @@ void PlacePlayerOnLinkedObject(Player* self)
     f32 lo = g_linkLengthMin;
     f32 hi = g_linkLengthMax;
     Vu0::Q(acc) = Vu0::MulX(Vu0::Q(acc), Vu0::Scalar((hi <? dist) / (lo >? r)));
-    Vec02 v2;
-    Vec02 lin;
-    Vec02 ang;
+    Vec4 v2;
+    Vec4 lin;
+    Vec4 ang;
     if (self->linkSystem != 0) {
         PlacedObject* o = ((LinkSystem*)self->linkSystem)->object;
         Attachment* a = o->positionAttachment;
         if (a != 0 && a->mode0 == 1) {
-            Vec02 p;
-            Vec02 v;
+            Vec4 p;
+            Vec4 v;
             a->vt->getPos(a, 0.0f, &p, &v);
             ComputePositionSpringAcceleration(o, ClockDt((LinkClock*)g_gameClock), &p, &v, &lin);
             TransformDirectionBetweenFrames((PlacedObject*)o->parent, 0, &lin, &lin);
         } else {
-            lin = D_00248D30;
+            lin = g_zeroVector;
         }
         a = o->orientationAttachment;
         if (a != 0 && a->mode1 == 1) {
-            Mat02 m;
-            Vec02 w;
+            Mat3 m;
+            Vec4 w;
             a->vt->getRot(a, 0.0f, &m, &w);
             ComputeRotationSpringAcceleration(o, ClockDt((LinkClock*)g_gameClock), &m, &w, &ang);
             TransformDirectionBetweenFrames((PlacedObject*)o->parent, 0, &ang, &ang);
         } else {
-            ang = D_00248D30;
+            ang = g_zeroVector;
         }
         u128 h = Vu0::ScalarAt(ClockDt((LinkClock*)g_gameClock));
         Vu0::Q(v2) = Vu0::MulAddX2(Vu0::Q(vel), Vu0::Q(lin), h, Vu0::Cross(Vu0::Q(ang), Vu0::Sub(Vu0::Q(pos), Vu0::Q(o->v140))), h);
     } else {
         v2 = vel;
     }
-    Vec02 p;
-    Vec02 v;
-    Mat02 m;
+    Vec4 p;
+    Vec4 v;
+    Mat3 m;
     Vu0::Q(lin) = Vu0::MulX(Vu0::Add(Vu0::Q(w1), Vu0::Q(acc)), Vu0::Scalar(ClockDt((LinkClock*)g_gameClock) * 0.5f));
     BuildRotationFromVector(&lin, &m);
     u128 nd = Vu0::Rotate(m, Vu0::Q(dir));
@@ -327,12 +327,12 @@ void PlacePlayerOnLinkedObject(Player* self)
 }
 
 // The product a b of two rotations: b's rows each rotated by a.
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotation(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
@@ -350,11 +350,11 @@ void AddColliderForce(void* target, void* slot);
 // toward it with the link turn ramp.
 void TurnPlayerTowardLinkedObject(Player* self)
 {
-    Vec02 pos;
-    Vec02 d;
-    Mat02 a;
-    Mat02 b;
-    Mat02 r;
+    Vec4 pos;
+    Vec4 d;
+    Mat3 a;
+    Mat3 b;
+    Mat3 r;
     AddColliderForce(self, &self->linkAcceleration);
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
@@ -396,19 +396,19 @@ static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
     return v;
 }
 
-struct LinkBlend_1CD0C8 { u8 pad0[0x34]; f32 f34; };
-struct LinkRoot_1CD0C8 { s32 pad0; void* root; };
-struct LinkMessage_1CD0C8 { u8 pad0[0x14]; f32 f14; f32 f18; };
+struct LinkedPartBlend { u8 pad0[0x34]; f32 f34; };
+struct LinkedRootHolder { s32 pad0; void* root; };
+struct LinkAimMessage { u8 pad0[0x14]; f32 f14; f32 f18; };
 
 // Per-frame control of the player while it is on a linked object: takes the heading from the object
 // (reversed when linkReversed), compares the camera-relative stick direction with it to see whether
 // the player pushes toward or away along the link, and moves the player accordingly.
 void ControlPlayerOnLinkedObject(Player* self, void* pad)
 {
-    Vec02 pos;
-    Vec02 dir;
-    Vec02 local;
-    Mat02 m;
+    Vec4 pos;
+    Vec4 dir;
+    Vec4 local;
+    Mat3 m;
     f32 stick;
     s32 toward = 0;
     s32 away = 0;
@@ -493,7 +493,7 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     SetPlayerState(self, 3, state);
     PlacePlayerOnLinkedObject(self);
     if (self->linkSystem != 0) {
-        ClearRootTries((PlacedObject*)(((LinkRoot_1CD0C8*)self->linkSystem)->root));
+        ClearRootTries((PlacedObject*)(((LinkedRootHolder*)self->linkSystem)->root));
     }
     f32 w0;
     f32 w1;
@@ -522,7 +522,7 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     self->linkIdleWeight = 1.0f - a;
     SetBlendItemWeights((BlendAnimationView*)self->linkBlend, 0xC, 3, &self->linkTowardWeight);
     f32 c = ClampBetween(angle / g_linkAngleScale, -1.0f, 1.0f);
-    ((LinkMessage_1CD0C8*)self->stateAnimPlayer)->f18 = ClampToMagnitude((((LinkBlend_1CD0C8*)self->linkBlend)->f34 * (c + 1.0f) * 0.5f - ((LinkMessage_1CD0C8*)self->stateAnimPlayer)->f14) / g_gameClock[2], g_linkAngleRateLimit);
+    ((LinkAimMessage*)self->stateAnimPlayer)->f18 = ClampToMagnitude((((LinkedPartBlend*)self->linkBlend)->f34 * (c + 1.0f) * 0.5f - ((LinkAimMessage*)self->stateAnimPlayer)->f14) / g_gameClock[2], g_linkAngleRateLimit);
 }
 
 
@@ -531,22 +531,22 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
 struct LinkedFrame : BaseObject {
     BaseObject* item;       // 0x34
     u8 pad38[0x40 - 0x38];
-    Vec02 point;            // 0x40
+    Vec4 point;            // 0x40
 };
-typedef void (*LinkItemFn)(BaseObject* self, Vec02* a, f32 t, s32 b, Vec02* c, s32 d, s32 e, void* f);
+typedef void (*LinkItemFn)(BaseObject* self, Vec4* a, f32 t, s32 b, Vec4* c, s32 d, s32 e, void* f);
 
 // Lets go of a linked object that has got too far: the first beyond 50 units, the second, after
 // asking its item, beyond 50 units squared.
 void ReleaseFarPlayerLinks(Player* self)
 {
-    Vec02 pos;
-    Vec02 q;
+    Vec4 pos;
+    Vec4 q;
     LinkedFrame* a = (LinkedFrame*)self->previousBoundObject;
     if (a != 0) {
         TransformPointBetweenFrames((PlacedObject*)a->parent, 0, &a->point, &pos);
         if (Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(((PlacedObject*)self->f23D4)->v140), Vu0::Q(pos)))) > 50.0f) {
             self->previousBoundObject = 0;
-            self->f4B8 = 0;
+            self->stateBits = 0;
         }
     } else {
         if (self->previousAimCurve != 0) {
@@ -580,17 +580,17 @@ void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
                                 flag != 0 ? 0x40 : 0, flag != 0 ? 0 : 0x40);
         }
     }
-    self->f4B8 = 0;
+    self->stateBits = 0;
 }
 
 struct PooledContact;
 
 // Adds the contacts of the player with the object node for the axes of flags (bits 1 2 4: always,
 // bits 8 0x10 0x20: when the offset along that axis is under 0.0001), in the frame of axis.
-void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* origin, Vec02* axis, Vec02* offset)
+void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec4* origin, Vec4* axis, Vec4* offset)
 {
-    Vec02 d;
-    Mat02 m;
+    Vec4 d;
+    Mat3 m;
     if (IsObjectAttached(node) == 0) {
         SetPlayerState(self, 2, 2);
         return;
@@ -602,15 +602,15 @@ void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* o
     while (n != 0 && (n->desc->flags & 2) == 0) {
         n = n->parent;
     }
-    Contact03** last;
-    Contact03** head;
+    BodyContact** last;
+    BodyContact** head;
     if (n != 0) {
         ContactRow03* row = self->contacts->head;
         void* want = ((PlacedObject*)n)->root;
         while (row != 0 && (void*)row->other != want) {
             row = row->next;
         }
-        head = (Contact03**)row;
+        head = (BodyContact**)row;
         last = row->link;
     } else {
         last = &self->contacts4B4;
@@ -649,7 +649,7 @@ void GetLinkedObjectHeading(Player* self, f32* heading)
     HeadingVector v;
     BaseObject* owner = self->boundObject;
     // the bound object's class is not known: a vector at 0x50
-    TransformDirectionBetweenFrames((PlacedObject*)owner->parent, 0, (Vec02*)((u8*)owner + 0x50), (Vec02*)&v);
+    TransformDirectionBetweenFrames((PlacedObject*)owner->parent, 0, (Vec4*)((u8*)owner + 0x50), (Vec4*)&v);
     *heading = ArctangentOfRatio(v.y, v.x);
 }
 
@@ -657,7 +657,7 @@ struct LinkSource {
     u8 pad00[0x18];
     void* frame;            // 0x18
     u8 pad1C[0x40 - 0x1C];
-    Vec02 point;            // 0x40
+    Vec4 point;            // 0x40
     u8 pad50[0xB0 - 0x50];
     f32 reach;              // 0xB0
 };
@@ -670,14 +670,14 @@ struct LinkRecord {
 // Computes the pose that the player's two link attachments should have: the vector from the
 // player's anchor on the bound object to the held object, the shortest-arc rotation from the x axis
 // to it, and the position and two rotations (the reach scaled) that go to the output.
-void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
+void ComputePlayerLinkPose(Player* self, Vec4* pos, Mat3* rotA, Mat3* rotB)
 {
-    Vec02 a;
-    Vec02 b;
-    Vec02 gap;
-    Mat02 arc;
-    Mat02 axis;
-    Vec02 k;
+    Vec4 a;
+    Vec4 b;
+    Vec4 gap;
+    Mat3 arc;
+    Mat3 axis;
+    Vec4 k;
     LinkSource* source = (LinkSource*)self->boundObject;
     PlacedObject* held = ((LinkRecord*)((PlacedObject*)self->f61C)->linkRecord)->object;
     TransformPointBetweenFrames((PlacedObject*)source->frame, self, &source->point, &a);
@@ -687,7 +687,7 @@ void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
     u128 here = Vu0::Q(a);
     u128 reach = Vu0::FromFloatAt(((LinkSource*)self->boundObject)->reach);
     Vu0::Q(k) = reach;
-    Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(D_00248D30)), reach);
+    Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(g_zeroVector)), reach);
     BuildAxisAngleMatrix(&g_unitXVector, &axis, g_linkPoseTiltA);
     MulRotation(rotA, arc, axis);
     BuildAxisAngleMatrix(&g_unitXVector, rotB, g_linkPoseTiltB);
@@ -701,31 +701,31 @@ void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB)
 }
 
 typedef u64 Quad128 __attribute__((mode(TI)));
-Quad128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
-struct Mat02;
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
+Quad128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec4* vel);
+struct Mat3;
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit);
 extern f32 g_gameClock[];
 
 struct LinkPoseTarget {
     u8 pad00[0x20];
-    Vec02 pos;              // 0x20
+    Vec4 pos;              // 0x20
     u8 pad30[0x40 - 0x30];
-    Mat02 rot;              // 0x40
+    Mat3 rot;              // 0x40
 };
 
 struct LinkPoseView {
     u8 pad00[0x22F0];
-    Vec02 offset;           // 0x22F0
-    Mat02 rotA;             // 0x2300
-    Mat02 rotB;             // 0x2330
+    Vec4 offset;           // 0x22F0
+    Mat3 rotA;             // 0x2300
+    Mat3 rotB;             // 0x2330
 };
 
-static inline void MulRotationInto(LinkPoseTarget* obj, const Mat02& a, const Mat02& b)
+static inline void MulRotationInto(LinkPoseTarget* obj, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
     r.r[0] = x;
     Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
@@ -740,19 +740,19 @@ static inline void MulRotationInto(LinkPoseTarget* obj, const Mat02& a, const Ma
 // both attachments.
 void UpdatePlayerLinkPose(Player* self)
 {
-    Vec02 pos;
-    Mat02 a;
-    Mat02 b;
+    Vec4 pos;
+    Mat3 a;
+    Mat3 b;
     LinkPoseView* v = (LinkPoseView*)self;
     ComputePlayerLinkPose(self, &pos, &a, &b);
-    *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&D_00248D30, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
-    ApproachRotationWithRamp(&v->rotA, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotA, 0, g_gameClock[2]);
-    ApproachRotationWithRamp(&v->rotB, (Mat02*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotB, 0, g_gameClock[2]);
-    Vu0::Q(((LinkPoseTarget*)self->f251C)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
-    MulRotationInto((LinkPoseTarget*)self->f251C, v->rotA, a);
-    MulRotationInto((LinkPoseTarget*)self->f2520, v->rotB, b);
-    ApplyPoseSource((Attachment*)self->f251C, 1);
-    ApplyPoseSource((Attachment*)self->f2520, 1);
+    *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&g_zeroVector, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
+    ApproachRotationWithRamp(&v->rotA, (Mat3*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotA, 0, g_gameClock[2]);
+    ApproachRotationWithRamp(&v->rotB, (Mat3*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotB, 0, g_gameClock[2]);
+    Vu0::Q(((LinkPoseTarget*)self->snapshotPoseFirst)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
+    MulRotationInto((LinkPoseTarget*)self->snapshotPoseFirst, v->rotA, a);
+    MulRotationInto((LinkPoseTarget*)self->snapshotPoseSecond, v->rotB, b);
+    ApplyPoseSource((Attachment*)self->snapshotPoseFirst, 1);
+    ApplyPoseSource((Attachment*)self->snapshotPoseSecond, 1);
 }
 
 
@@ -761,8 +761,8 @@ void UpdatePlayerLinkPose(Player* self)
 void GetPlayerPose(Player* self, f32 t, void* out, void* extra)
 {
     if (self->state == 3) {
-        GetPlacedObjectRotationAt(self, t, (Mat02*)out, (Vec02*)extra);
+        GetPlacedObjectRotationAt(self, t, (Mat3*)out, (Vec4*)extra);
     } else {
-        GetTurningColliderPose(self, out, (Vec02*)extra, t);
+        GetTurningColliderPose(self, out, (Vec4*)extra, t);
     }
 }

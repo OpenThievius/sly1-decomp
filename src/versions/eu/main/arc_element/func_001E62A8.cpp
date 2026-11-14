@@ -15,7 +15,7 @@ struct Self_1E62A8_eu {
 
 void WriteArcOutlineVertices(Self_1E62A8_eu* self, PacketWriter* c, s32 k)
 {
-    if (D_00270458 == 4) {
+    if (g_displayMode == 4) {
         f32 y = self->f538;
         f32 x = self->f534;
         s32 x0 = (s32)((x + 1728.0f) * 16.0f);

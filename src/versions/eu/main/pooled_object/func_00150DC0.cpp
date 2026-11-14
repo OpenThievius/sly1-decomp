@@ -43,16 +43,16 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
         }
         switch (msg->type) {
         case 1:
-            SetArcTarget(&D_002708E0, s2);
-            SetArcSpecialObject(&D_002708E0, s4);
+            SetArcTarget(&g_leftArcElement, s2);
+            SetArcSpecialObject(&g_leftArcElement, s4);
             self->p2F0 = s2;
             if (s2) {
                 self->waitFlags |= 2;
             }
             break;
         case 2:
-            SetArcTarget(&D_00271558, s2);
-            SetArcSpecialObject(&D_00271558, s4);
+            SetArcTarget(&g_rightArcElement, s2);
+            SetArcSpecialObject(&g_rightArcElement, s4);
             self->p2F4 = s2;
             if (s2) {
                 self->waitFlags |= 4;
@@ -65,12 +65,12 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
     case 3:
         if (self->p2F0 && MatchesObjectId((BaseObject*)self->p2F0, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F0;
-            SetArcFade(&D_002708E0, 1);
-            SetArcFade(&D_00271558, 0);
+            SetArcFade(&g_leftArcElement, 1);
+            SetArcFade(&g_rightArcElement, 0);
         } else if (self->p2F4 && MatchesObjectId((BaseObject*)self->p2F4, msg->f18)) {
             s2 = (CaptionSpeaker*)self->p2F4;
-            SetArcFade(&D_00271558, 1);
-            SetArcFade(&D_002708E0, 0);
+            SetArcFade(&g_rightArcElement, 1);
+            SetArcFade(&g_leftArcElement, 0);
         } else {
             s2 = 0;
         }

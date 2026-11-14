@@ -7,8 +7,8 @@
 #include "common.h"
 
 struct ArmedStateNotifier;
+struct BodyContact;
 struct Collider;
-struct Contact03;
 struct ContactObject;
 struct CountdownNotifier;
 struct DeadlineNotifier;
@@ -17,13 +17,13 @@ struct ScaledOffsetObject;
 struct SoundNotifier;
 struct StateNotifier;
 struct TimeRangeNotifier;
-struct Vec02;
+struct Vec4;
 struct World;
 
 void InitScaledOffsetObject(ScaledOffsetObject* self);
 void LoadScaledOffsetObject(ScaledOffsetObject* self, void* p);
 void StartScaledOffsetObject(ScaledOffsetObject* self);
-void ResolveScaledOffsetContact(ScaledOffsetObject* self, Contact03* c, s32 end);
+void ResolveScaledOffsetContact(ScaledOffsetObject* self, BodyContact* c, s32 end);
 void SetOffsetScale(ScaledOffsetObject* self, f32 v);
 void ApplyScaledOffset(ScaledOffsetObject* self);
 void InitStateNotifier(StateNotifier* self);
@@ -58,7 +58,7 @@ void UpdateNotifierWorldDeadline(DeadlineNotifier* self, f32 dt);
 void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode);
 s32 CompareFloatsDescending(const f32* first, const f32* second);
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out);
-s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotifier** arr);
+s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec4* a2, s32 n, StateNotifier** arr);
 void CompleteSoundNotifiers(World* self);
 void InitCountdownNotifier(CountdownNotifier* self);
 void CompleteCountdownNotifier(CountdownNotifier* self);

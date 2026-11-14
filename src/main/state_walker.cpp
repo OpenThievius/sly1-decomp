@@ -41,7 +41,7 @@
 extern f32 g_gameTime;
 // Two floats (CopyVec2).
 struct SoundLevelEntry;
-// A free slot of a world pool (Pool6C): its first word links the next.
+// A free slot of a world pool (FreeListPool): its first word links the next.
 struct FreeSlot { FreeSlot* next; };
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct T219CHook;
@@ -61,7 +61,7 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
 void* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
-extern f32 D_002746A0[8];
+extern f32 g_defaultLookPoint[8];
 void* AllocateBackMemory(s32 size);
 
 // A Shift-JIS code and the character it stands for (MapCharToCode).
@@ -89,7 +89,7 @@ SjisCharEntry g_sjisCharRanges[4] = {
 };
 f32 g_companionProbePointsA[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
 f32 g_companionProbePointsB[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
-f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
+f32 g_defaultLookPoint[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
 
 void CopyVec3(Vec3* dst, Vec3* src)
 {
@@ -107,7 +107,7 @@ void CopyVec2(Point2* a0, Point2* a1)
 void* MoveMemory(void* dst, void* src, s32 size);
 struct RampProfile;
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-struct Frame_166690;
+struct PartDrawRequest;
 // Drops the first entry of a three-entry window: the other two move down.
 template <class T>
 static inline void DropFirst(T* window)
@@ -137,17 +137,17 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
     if (self->cursor.record == 0 || *part != (void*)DrawModelPart) {
         return;
     }
-    Vec02 b;
-    Vec02 a;
-    Vec02 tri[3];
+    Vec4 b;
+    Vec4 a;
+    Vec4 tri[3];
     Point2 uv[3];
-    Vec02 edge[3];
+    Vec4 edge[3];
     f32 u;
     f32 v;
     BaseObject* end = obj->linkRecord->p64;
-    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)&((TransformObject*)end)->pos, &b);
+    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec4*)&((TransformObject*)end)->pos, &b);
     end = obj->linkRecord->p60;
-    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec02*)&((TransformObject*)end)->pos, &a);
+    TransformPointBetweenFrames((PlacedObject*)end->parent, obj, (Vec4*)&((TransformObject*)end)->pos, &a);
     CopyVec3((Vec3*)&tri[1], (Vec3*)&self->points[0]);
     CopyVec3((Vec3*)&tri[2], (Vec3*)&self->points[1]);
     CopyVec2(&uv[1], (Point2*)&self->coords[0]);
@@ -170,8 +170,8 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
         if (pt->flags & 0x8000) {
             continue;
         }
-        Vec02 n;
-        Vec02 p;
+        Vec4 n;
+        Vec4 p;
         s32 j;
         for (j = 0; j < 3; j++) {
             Vu0::Q(edge[j]) = Vu0::Sub(Vu0::Q(tri[order[(j + 1) % 3]]), Vu0::Q(tri[order[j]]));
@@ -180,7 +180,7 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
         Vu0::Vec e2 = Vu0::Vec::Of(edge[2]);
         Vu0::Vec c;
         {
-            Vec02 neg;
+            Vec4 neg;
             Vu0::Q(neg) = Vu0::FromFloat(-1.0f);
             c = Vu0::Cross(e0, Vu0::MulX(e2, Vu0::Vec::Of(neg)));
         }
@@ -199,7 +199,7 @@ void UpdateTriangleAnimatorCursor(TriangleAnimator* self, PlacedObject* obj, voi
         f32 su = 0.0f;
         f32 sv = 0.0f;
         for (j = 0; j < 3; j++) {
-            Vec02 m;
+            Vec4 m;
             Vu0::Vec e = Vu0::Cross(Vu0::Vec::Of(edge[j]), Vu0::Vec::Of(n));
             Vu0::Q(m) = Vu0::DivX(e, Vu0::Length(e)).q;
             f32 dv = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Vec::Of(m), Vu0::Vec::Of(tri[order[j]])));
@@ -292,8 +292,8 @@ void StartCameraPositionedObject(CameraPositionedObject* self)
 void MoveObjectToCamera(CameraPositionedObject* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
-    Vec02* src = (Vec02*)g_camera->position;
-    Vec02 q = *src;
+    Vec4* src = (Vec4*)g_camera->position;
+    Vec4 q = *src;
     if (self->followHeight == 0) {
         q.z = self->v140.z;
     }
@@ -302,7 +302,7 @@ void MoveObjectToCamera(CameraPositionedObject* self, f32 dt)
 
 // Links count slots of v bytes from the pool's base into a singly linked free list (each slot's
 // first word points to the next, the last to 0).
-void BuildFreeList(Pool6C* s, s32 v, s32 n)
+void BuildFreeList(FreeListPool* s, s32 v, s32 n)
 {
     u32 cur = (u32)s->base;
     s->size = v;
@@ -317,7 +317,7 @@ void BuildFreeList(Pool6C* s, s32 v, s32 n)
 }
 
 // Allocates count slots of size rounded up to 8 and builds the free list.
-void InitSlotPool(Pool6C* s, s32 size, s32 count)
+void InitSlotPool(FreeListPool* s, s32 size, s32 count)
 {
     s32 stride = (size + 7) & ~7;
     s->base = AllocateFrontMemory(stride * count);
@@ -326,7 +326,7 @@ void InitSlotPool(Pool6C* s, s32 size, s32 count)
 
 // Allocates size*count bytes (plus 0x30) and builds a free list of count slots, with the first
 // slot aligned to 0x40.
-void InitAlignedSlotPool(Pool6C* s, s32 size, s32 count)
+void InitAlignedSlotPool(FreeListPool* s, s32 size, s32 count)
 {
     s32 addr = (s32)AllocateFrontMemory(size * count + 0x30);
     s->base = (void*)((addr + 0x3F) & -0x40);
@@ -336,7 +336,7 @@ void InitAlignedSlotPool(Pool6C* s, s32 size, s32 count)
 LINKER_REMNANT(func_001B5E98);
 
 // Takes the first slot off the pool's free list, or gives back 0 when it is empty.
-void* PopFreeSlot(Pool6C* pool)
+void* PopFreeSlot(FreeListPool* pool)
 {
     FreeSlot* n = (FreeSlot*)pool->head;
     if (n != 0) {
@@ -345,13 +345,13 @@ void* PopFreeSlot(Pool6C* pool)
     return n;
 }
 
-void* TakePoolSlot(Pool6C* pool)
+void* TakePoolSlot(FreeListPool* pool)
 {
     return PopFreeSlot(pool);
 }
 
 // Takes a slot from the pool's free list, zeroed.
-void* PopZeroedFreeSlot(Pool6C* pool)
+void* PopZeroedFreeSlot(FreeListPool* pool)
 {
     void* p = PopFreeSlot(pool);
     FillMemory(p, 0, pool->size);
@@ -359,7 +359,7 @@ void* PopZeroedFreeSlot(Pool6C* pool)
 }
 
 // Puts a slot back at the head of the pool's free list (nothing for 0).
-void PushFreeSlot(Pool6C* list, void* item)
+void PushFreeSlot(FreeListPool* list, void* item)
 {
     if (item) {
         ((FreeSlot*)item)->next = (FreeSlot*)list->head;
@@ -893,7 +893,7 @@ void CallStateWalkerListeners(StateWalker* self, s32 a, void* b)
 // Adds a listener for the walker's messages to its call list (AddCallbackNode on the world).
 void AddStateWalkerListener(StateWalker* self, PlacedObject** p)
 {
-    AddCallbackNode(self->owner->world, (Callback01**)&self->calls, (void*)(*p)->link40.prev, p);
+    AddCallbackNode(self->owner->world, (ObjectCallback**)&self->calls, (void*)(*p)->link40.prev, p);
 }
 
 // Triggers script event 0xE on the graph with the walker and the keys of the two states (-1 for
@@ -931,7 +931,7 @@ void InitCompanionAgent(CompanionAgent* self)
     self->closeZoneId = -1;
     self->closeZone = 0;
     s32 i = 16;
-    Slot08* e = &self->lookEntries[16];
+    IdObjectSlot* e = &self->lookEntries[16];
     do {
         e->id = -1;
         i--;
@@ -947,7 +947,7 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
 {
     s32 best = -1;
     s32 j = 16;
-    Slot08* e = self->lookEntries;
+    IdObjectSlot* e = self->lookEntries;
     do {
         s32 key = e->id;
         if (key == best) {
@@ -979,9 +979,9 @@ void ResolveCompanionAgentObjects(CompanionAgent* self)
     PopBackMemoryMark();
     if (self->companion != 0) {
         self->poseSource = CreatePoseSource(self->world, (PlacedObject*)self->companion, (const T2195_Vt*)g_aimSwitchPoseSourceMethods);
-        ((T2195_790*)self->poseSource)->mode1 = 2;
-        ((T2195_790*)self->poseSource)->hasTarget = 1;
-        ((T2195_790*)self->poseSource)->f84 = ((T2195_790*)self->poseSource)->f80 = 0;
+        ((AimAttachment*)self->poseSource)->mode1 = 2;
+        ((AimAttachment*)self->poseSource)->hasTarget = 1;
+        ((AimAttachment*)self->poseSource)->f84 = ((AimAttachment*)self->poseSource)->f80 = 0;
         InsertAttachment((PlacedObject*)self->companion, (Attachment*)self->poseSource);
         self->bindingObject = (s32)self->companion;
     }
@@ -1016,7 +1016,7 @@ void StartCompanionAgent(CompanionAgent* self)
     }
     if (self->excludedCount > 0) {
         s32 i = 0;
-        Slot08* p = self->excludedObjects;
+        IdObjectSlot* p = self->excludedObjects;
         do {
             p->obj = (void*)FindFirstObjectById(self->world, 0x104, p->id, self);
             p++;
@@ -1049,8 +1049,8 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
 
 s32 IsPadSelectFlagHeld(World* world);
 struct ObjectGatherer;
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
 
@@ -1070,7 +1070,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
     PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
     if (target != 0) {
         if (self->companion == 0 || self->state == 0xB || self->state == 0x10) return 0;
-        Vec02 a;
+        Vec4 a;
         if (IsObjectOfKind(target, 6) != 0) {
             if (((TurningCollider*)target)->groundContact != 0) {
                 a = ((TurningCollider*)target)->groundContactPoint;
@@ -1081,7 +1081,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
         } else {
             a = target->v140;
         }
-        Vec02 delta;
+        Vec4 delta;
         Vu0::Q(delta) = Vu0::Sub(Vu0::Q(a), Vu0::Q(self->v140));
         f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(delta), Vu0::Q(delta))));
         s32 near;
@@ -1123,16 +1123,16 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
             n = 4;
             break;
         }
-        Vec02* pos = self->f734 != 0 ? &self->f734->v140 : &self->v140;
+        Vec4* pos = self->f734 != 0 ? &self->f734->v140 : &self->v140;
         PushBackMemoryMark();
-        Vec02 lo = *pos;
-        Vec02 hi = *pos;
-        Vec02* buf = (Vec02*)AllocateBackMemory(n << 4);
+        Vec4 lo = *pos;
+        Vec4 hi = *pos;
+        Vec4* buf = (Vec4*)AllocateBackMemory(n << 4);
         s32 count;
         Collider** list;
         s32 i;
         for (i = 0; i < n; i++) {
-            TransformPointBetweenFrames(target, 0, (Vec02*)(table + i * 4), &buf[i]);
+            TransformPointBetweenFrames(target, 0, (Vec4*)(table + i * 4), &buf[i]);
             Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(buf[i]));
             Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(buf[i]));
         }
@@ -1159,7 +1159,7 @@ void UpdateCompanionAgent(CompanionAgent* self, f32 dt)
 // agent's own target depending on the agent's roster state, and sets the companion's scale-like
 // value (field 2F0) to 1.0, 1.3 or 0.1 for the state.
 void AimCompanionAgentPose(CompanionAgent *self) {
-    T2195_790 *t;
+    AimAttachment *t;
     s32 r;
     s32 res;
     f32 f;
@@ -1167,17 +1167,17 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     if (self->companion == 0) {
         return;
     }
-    t = (T2195_790 *)self->poseSource;
+    t = (AimAttachment *)self->poseSource;
     r = GetAgentRosterState(self);
     switch (r) {
     case 0:
     case 1:
         if ((void *)self->lookTarget != 0) {
             t->target = (void *)self->lookTarget;
-            t->point = *(Vec02 *)&D_00248D30;
+            t->point = *(Vec4 *)&g_zeroVector;
         } else {
             t->target = self;
-            t->point = *(Vec02 *)D_002746A0;
+            t->point = *(Vec4 *)g_defaultLookPoint;
         }
         f = 1.3f;
         if (r == 0) {
@@ -1187,29 +1187,29 @@ void AimCompanionAgentPose(CompanionAgent *self) {
     case 2:
         if ((void *)self->lookTarget != 0) {
             t->target = (void *)self->lookTarget;
-            t->point = *(Vec02 *)&D_00248D30;
+            t->point = *(Vec4 *)&g_zeroVector;
         } else if (IsAgentFacingBlocked(self) != 0) {
             t->target = self;
-            t->point = *(Vec02 *)D_002746A0;
+            t->point = *(Vec4 *)g_defaultLookPoint;
         } else {
             res = (s32)self->desc08()->m62(self);
             if (res != 0) {
                 t->target = (void *)res;
-                t->point = *(Vec02 *)&D_00248D30;
+                t->point = *(Vec4 *)&g_zeroVector;
             } else {
                 t->target = self;
-                t->point = *(Vec02 *)D_002746A0;
+                t->point = *(Vec4 *)g_defaultLookPoint;
             }
         }
         f = 1.3f;
         break;
     case 3:
         t->target = self;
-        t->point = *(Vec02 *)D_002746A0;
+        t->point = *(Vec4 *)g_defaultLookPoint;
         f = 0.1f;
         break;
     }
-    ((ScalingVolume*)self->companion)->f2F0 = f;
+    ((ScalingVolume*)self->companion)->targetScale = f;
 }
 
 // After the base state entry: state 6 resets the clip-end count, state 0xB tells the companion

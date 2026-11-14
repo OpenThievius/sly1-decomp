@@ -10,7 +10,7 @@ void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
     BuildUniformScaleAboutPoint(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
     o = GetActiveSwitchedCollider();
     if (o != 0 && (o = o->desc05()->m53(o)) != 0 && o->desc05()->m4D(o) == 2) {
-        Vec02 v;
+        Vec4 v;
         f32 x, y;
         ProjectPointToCamera(g_camera, &o->v140, (f32*)&v);
         x = ClampHelper::Of(v.x * 320.0f + 320.0f, 10.0f, 630.0f);

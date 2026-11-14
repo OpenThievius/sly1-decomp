@@ -58,8 +58,8 @@ void InitMaskedCollider(MaskedCollider* self)
     InitCollider(self);
     o->scaleMin = 0.8f;
     o->scaleMax = 1.2f;
-    o->f68C = 1;
-    o->f624 = 1.0f;
+    o->hitLimit = 1;
+    o->impulseScale = 1.0f;
     o->tintByte4 = 16;
     o->tint[3] = 16;
     o->tint[2] = 16;
@@ -110,14 +110,14 @@ void CopyMaskedCollider(MaskedCollider* self, MaskedCollider* other)
 #include "memory_reader.h"
 #include "object_message.h"
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
 struct BaseObject;
 
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
-struct Mat02;
+struct Mat3;
 
 
 
@@ -152,13 +152,13 @@ void AttachMaskedColliderChildren(MaskedCollider* self)
     ListFrameWithFlag fr;
     MaskedCollider* n;
     s32 i;
-    Slot20* e;
+    MaskedQueueEntry* e;
     if (TestFlagTableBit((FlagTable*)g_flagTable, self->id688)) self->busy = 1;
     s32 l = (s32)&self->children;
     fr.cursor = l;
     fr.list = l;
     s32 old = *(s32*)&g_activeListFrames;
-    s32 link = ((List01*)l)->offset;
+    s32 link = ((ObjectList*)l)->offset;
     *(s32*)&g_activeListFrames = (s32)&fr;
     fr.prev = old;
     s32 h = (s32)self->children.head;
@@ -230,8 +230,8 @@ struct ContactEvent_0013D0B0 {
     u32 flags;              // 0x0C
     u32 flags10;            // 0x10
     u8 pad14[0x20 - 0x14];
-    Vec02 v20;              // 0x20
-    Vec02 v30;              // 0x30
+    Vec4 v20;              // 0x20
+    Vec4 v30;              // 0x30
 };
 
 extern u8 g_padRecord[];
@@ -242,8 +242,8 @@ extern u8 g_padRecord[];
 // script event 0x14 and calls its method 0x48 once the count reaches its limit.
 s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
 {
-    Vec02 push;
-    Vec02 k;
+    Vec4 push;
+    Vec4 k;
     s32* counter;
     s32 i;
 
@@ -273,7 +273,7 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
         return 1;
     }
     if ((ev->flags & 8) != 0) {
-        Vu0::Q(k) = Vu0::FromFloatAt(self->f624);
+        Vu0::Q(k) = Vu0::FromFloatAt(self->impulseScale);
         Vu0::Q(push) = Vu0::MulX(Vu0::Q(ev->v30), Vu0::Q(k));
         SetColliderAnchors(self, 0, 0, 0, 0);
         ApplyColliderImpulseEvent(self, ev->strength, &ev->v20, &push);
@@ -289,7 +289,7 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
     counter = &self->hitCount;
     self->hitCount++;
     TriggerScriptEvent(self, 0x14, 1, &counter);
-    if (self->hitCount >= self->f68C) {
+    if (self->hitCount >= self->hitLimit) {
         self->desc20()->m48(self);
     }
     return 1;
@@ -299,12 +299,12 @@ s32 HandleMaskedColliderEvent(MaskedCollider* self, ContactEvent_0013D0B0* ev)
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 s32 IsWorldBodyLimitReached(World* self, BaseObject* obj, u32 value);
 struct ScatterController;
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern u8 g_scatterController[];
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 // The sound a released zone plays (the block at 0x6B4, func_0013DAF0).
 struct ZoneSound {
@@ -331,7 +331,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
     wasSet = TestFlagTableBit((FlagTable*)g_flagTable, self->id688) != 0;
     if (self->quiet == 0) {
         for (i = 0; i < self->count550; i++) {
-            Slot20* e = &self->slots[i];
+            MaskedQueueEntry* e = &self->slots[i];
             MaskedCollider* node;
             ObjectMessage msg;
             if (e->kind == 0) {
@@ -345,8 +345,8 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 continue;
             }
             if ((node->desc->flags & 1) && !((u32)(e->kind - 2) < 2)) {
-                Vec02 v;
-                Vec02 w;
+                Vec4 v;
+                Vec4 w;
                 f32 x = RandomFloatInRange(-self->spread, self->spread);
                 f32 y = RandomFloatInRange(-self->spread, self->spread);
                 f32 z = RandomFloatInRange(-self->spread, self->spread);
@@ -374,13 +374,13 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
             }
             if (node->desc->flags & 1) {
                 if ((u32)(e->kind - 2) < 2) {
-                    node->desc02()->m20(node, (Vec02*)D_00248D30);
-                    node->desc02()->m21(node, (Vec02*)D_00248D30);
+                    node->desc02()->m20(node, (Vec4*)g_zeroVector);
+                    node->desc02()->m21(node, (Vec4*)g_zeroVector);
                 } else if (IsObjectOfKind(node, 0x2E) || IsObjectOfKind(node, 0x55)) {
-                    Mat02 m;
+                    Mat3 m;
                     RotateMatrixUpright(&node->rot, 0, &m);
                     node->desc02()->m1E(node, &m);
-                    node->desc02()->m21(node, (Vec02*)D_00248D30);
+                    node->desc02()->m21(node, (Vec4*)g_zeroVector);
                     if (IsObjectOfKind(node, 0x2E)) {
                         SetColliderAnchors(node, 0, 0, 3, 0);
                     } else if (IsObjectOfKind(node, 0x59)) {
@@ -395,7 +395,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
             node->desc->m0E(node, 15, &msg);
         }
         if (!wasSet) {
-            Vec02 point;
+            Vec4 point;
             SlotMessage release;
             f32 radius;
             BaseObject* other;
@@ -418,7 +418,7 @@ void HandleMaskedColliderActivation(MaskedCollider* self)
                 SendPointEventToWorldListener((Quad16*)&self->v140, radius);
             }
             TransformPointBetweenFrames(self, 0, &self->point6A0, &point);
-            ScatterObjectsAtPoint((ScatterController*)g_scatterController, &point, self->f698, self->scatter6B0);
+            ScatterObjectsAtPoint((ScatterController*)g_scatterController, &point, self->scatterCount, self->scatter6B0);
             ZoneSound* sound = (ZoneSound*)self->soundParams;
             if (sound != 0) {
                 StartSoundEffect(sound->sound, 0, 0, &self->v140, sound->farRange, sound->nearRange, sound->volume, 0.0f, 0.0f, 0, 0);
@@ -633,7 +633,7 @@ s32 TestTimedStateContact(TimedStateObject* node, Collider* src)
     s32 r;
     if (src->flags538 & (1ULL << 55)) return 0;
     if (node->acceptAll != 0) return 1;
-    Child27* c = node->child;
+    TimedStateFilterObject* c = node->child;
     if (c == 0 || c->f694 == 0) {
         r = IsObjectOfKind(src, 0x27);
         if (r != 0) return 0;
@@ -664,7 +664,7 @@ void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self)
 {
     InitMaskedCollider(self);
     self->mask = 5;
-    self->f698 = -1;
+    self->scatterCount = -1;
 }
 
 // Initialises the masked collider with mask 1, scale 1.0 and no anchor presets.
@@ -737,7 +737,7 @@ void UpdateLatchedSwitchCollider(LatchedSwitchCollider* self, f32 dt)
 
 // A face of a mesh's tree as the walk reads it: its plane.
 struct TreeFace {
-    Vec02 normal;           // 0x00
+    Vec4 normal;           // 0x00
     f32 d;                  // 0x10
 };
 
@@ -754,7 +754,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 // The spans of the segment a-b behind the faces of the tree at root, at most max of them, into
 // spans: each run of the segment behind one solid node (of the group groups gives it, when given),
 // from the point it enters to the point it leaves and the faces crossed there.
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans)
+s32 CollectTreeNodeSpans(TreeNode03* root, Vec4* a, Vec4* b, s32* groups, s32 max, ColliderSpan* spans)
 {
     TreeWalkEntry cur;
     TreeWalkEntry stack[32];
@@ -782,7 +782,7 @@ s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 
                     span->face54 = top->face;
                     Quad16* src = (Quad16*)top->face;
                     if (src == 0) {
-                        src = (Quad16*)D_00248D30;
+                        src = (Quad16*)g_zeroVector;
                     }
                     span->q[3] = *src;
                     span->time[1] = top->t;
@@ -860,7 +860,7 @@ s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 
 // A node of a plane tree: its plane and the two sides (the boxes D_002613D0 and D_002613E0 are
 // such nodes, with a box for a plane); func_0013E430 appends the nodes of the pieces it cuts.
 struct PlaneTreePlane {
-    Vec02 normal;           // 0x00
+    Vec4 normal;           // 0x00
     f32 offset;             // 0x10
 };
 
@@ -878,7 +878,7 @@ struct PlaneTreeOutput {
 // a plane, in which case the part of the tree that the point's neighbourhood reaches is copied into
 // out). It follows one side while the point is more than eps from the plane, and both sides when it
 // is within eps.
-s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out)
+s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec4* p, f32 eps, PlaneTreeOutput* out)
 {
     f32 d;
     s32 result;
@@ -955,7 +955,7 @@ void* AllocateFrontMemory(s32 size);
 // Copies a collision tree for a copy of its mesh: the counts, and a new node array (from front
 // memory) in which every face and node pointer is moved by the offset between the old mesh and the
 // new one.
-void CloneTreeNodes(Mesh03* self, Tree03* src, Mesh03* base, Tree03* dst)
+void CloneTreeNodes(CollisionMesh* self, MeshTree* src, CollisionMesh* base, MeshTree* dst)
 {
     dst->count = src->count;
     dst->count2 = src->count2;
@@ -973,7 +973,7 @@ void CloneTreeNodes(Mesh03* self, Tree03* src, Mesh03* base, Tree03* dst)
 
 // Looks up each id of the pair's list under its owner and, for each object found, adds it to
 // the queued objects and starts it.
-void ResolveZoneObjects(void* self, Pair28* list, void* context)
+void ResolveZoneObjects(void* self, ZoneSideRecord* list, void* context)
 {
     s32 n = list->seen.count;
     s32* items = list->seen.values;
@@ -988,7 +988,7 @@ void ResolveZoneObjects(void* self, Pair28* list, void* context)
 
 
 // Whether the object matches any id of the list.
-s32 IsObjectInIdList(Queue28* set, void* key)
+s32 IsObjectInIdList(IdQueue* set, void* key)
 {
     s32 i = set->count - 1;
     s32* base = set->values;
@@ -1006,13 +1006,13 @@ s32 IsObjectInIdList(Queue28* set, void* key)
 }
 
 // Adds an object to the pair's list of queued objects; false once the list has 16.
-bool AppendToQueuedObjects(Pair28* pair, BaseObject* value) {
+bool AppendToQueuedObjects(ZoneSideRecord* pair, BaseObject* value) {
 	pair->queued.values[pair->queued.count++] = value;
 	return pair->queued.count < 16;
 }
 
 // Adds a value to a queue of at most 16; false once it is full.
-bool AppendToObjectQueue(Queue28* queue, s32 value) {
+bool AppendToObjectQueue(IdQueue* queue, s32 value) {
 	queue->values[queue->count++] = value;
 	return queue->count < 16;
 }
@@ -1020,7 +1020,7 @@ bool AppendToObjectQueue(Queue28* queue, s32 value) {
 extern u8 g_flagTable[];
 
 // Gives the zone record a flag-table index and no sequence.
-void InitZoneRecord(Zone28* s)
+void InitZoneRecord(TriggerZoneRecord* s)
 {
     s->id120 = TakeFlagTableIndex((FlagTable*)g_flagTable);
     s->sequenceId = -1;
@@ -1034,7 +1034,7 @@ void InitZoneRecord(Zone28* s)
 
 // Takes the children of a collider that are of flag 0x40 into the zone record's first queue (and
 // records the collider as its owner), skipping the ones already seen in either of its queues.
-void CollectZoneChildren(Zone28* self, Collider* a1)
+void CollectZoneChildren(TriggerZoneRecord* self, Collider* a1)
 {
     ListFrame it;
     ListWalkBegin::Of(&it, &a1->children);
@@ -1058,10 +1058,10 @@ void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Starts a zone record: mode -1, resolves the objects of both pairs, and, for a persistent
 // record whose flag-table bit is set, queues DeferZoneRecordActivation.
-void StartZoneRecord(Zone28* self)
+void StartZoneRecord(TriggerZoneRecord* self)
 {
     s32 n;
-    Pair28* p;
+    ZoneSideRecord* p;
     void* target;
 
     self->mode = -1;
@@ -1085,7 +1085,7 @@ void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 // that activates the zone record, so the activation is deferred by a queue pass.
 void DeferZoneRecordActivation(void* selfp, s32 mode)
 {
-    Zone28* self = (Zone28*)selfp;
+    TriggerZoneRecord* self = (TriggerZoneRecord*)selfp;
     if (mode == 0) {
         AppendQueuedCall(self->owner->world, (void*)DeferZoneRecordActivation, self, 0xC, 0);
     } else {
@@ -1095,7 +1095,7 @@ void DeferZoneRecordActivation(void* selfp, s32 mode)
 
 struct ZoneTargetEntry;
 // Sets a zone target entry (a flag, then id, key and state) in the zone's table of 8.
-void SetZoneEntry(Zone28* self, s32 a, s32 b, s32 c, s32 d)
+void SetZoneEntry(TriggerZoneRecord* self, s32 a, s32 b, s32 c, s32 d)
 {
     UpsertKeyedEntry((ZoneTargetEntry*)self->table14C, 8, &self->count148, a, b, c, d);
 }
@@ -1105,7 +1105,7 @@ void ClearRootTries(PlacedObject* self);
 
 // Changes the zone record's mode and stamps the time; going from 0 to 1 activates the record,
 // going to 0 from any mode but -1 deactivates it.
-void SetZoneMode(Zone28* self, s32 b)
+void SetZoneMode(TriggerZoneRecord* self, s32 b)
 {
     s32 old = self->mode;
     if (b == old) {
@@ -1133,7 +1133,7 @@ void SetZoneMode(Zone28* self, s32 b)
     }
 }
 
-// An entry of Zone28::table14C (func_0013EC00 adds or updates one, func_0013ECB0 applies a
+// An entry of TriggerZoneRecord::table14C (func_0013EC00 adds or updates one, func_0013ECB0 applies a
 // list of them): an object's id, a key it answers to (-1 any), and the states to set it to.
 struct ZoneTargetEntry {
     s32 id;                 // 0x00
@@ -1219,7 +1219,7 @@ struct ZoneQueuedObject { u8 pad[0x40]; s32 key40; s32 flag44; };
 // Runs a zone record's queued objects for a mode: seeks the animation players of each (forward or
 // backward by the sign of the seek time and the reversed flag), sets the gathered walker targets
 // and, when the record has a step sequence, resets it (mode 1) or has it choose its state (mode 0).
-void RunZoneRecordEntries(Zone28* self, s32 mode, s32 p, s32 q)
+void RunZoneRecordEntries(TriggerZoneRecord* self, s32 mode, s32 p, s32 q)
 {
     s32 n = self->pairs[mode].queued.count;
     {
@@ -1272,13 +1272,13 @@ enum Kind_13EF50 { kind_13EF50_2 = 2 };
 
 extern u8 g_flagTable[];
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // Activates a zone record: raises script event 2 (0x16 when q is set) on its owner, plays its sound
 // unless silent, runs its queued entries, leaves the active mode unless it stays active, sets its
 // saved flag if persistent and sends its owner notification 0xC.
-void ActivateZoneRecord(Zone28* self, s32 p, s32 q)
+void ActivateZoneRecord(TriggerZoneRecord* self, s32 p, s32 q)
 {
     if (q != 0) {
         TriggerScriptEvent(self->owner, 0x16, 0, 0);
@@ -1302,7 +1302,7 @@ void ActivateZoneRecord(Zone28* self, s32 p, s32 q)
 
 
 // Triggers script event 3, runs the record's off entries and tells the owner (message 13).
-void DeactivateZoneRecord(Zone28* self, s32 p)
+void DeactivateZoneRecord(TriggerZoneRecord* self, s32 p)
 {
     TriggerScriptEvent(self->owner, 3, 0, 0);
     RunZoneRecordEntries(self, 1, p, 0);
@@ -1330,7 +1330,7 @@ void* MoveMemory(void* end, void* begin, s32 bytes);
 
 // Adds a quad to the trigger zone; an object matching id 0x200 puts its quad first (shifting
 // the others up), any other goes last.
-void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
+void AddTriggerZoneQuad(TriggerZone* self, void* a1, TriggerZoneQuad* q)
 {
     s32 n = self->quadCount;
     s32 idx;
@@ -1350,7 +1350,7 @@ void AddTriggerZoneQuad(TriggerZone* self, void* a1, Quad28* q)
 }
 
 // The 0x30-byte entry copied as three quadwords.
-struct __attribute__((aligned(16))) Rotation30 { u8 b[0x30]; };
+struct __attribute__((aligned(16))) ZoneEntryBlock { u8 b[0x30]; };
 
 // n rotations moved by one place: the size is the inline's own product, which retail multiplies
 // again apart from the destination's.
@@ -1358,7 +1358,7 @@ static inline void MoveRotations(void* dst, void* src, s32 n) { MoveMemory(dst, 
 
 // Adds a rotation entry to the trigger zone; an object matching id 0x200 puts its entry first
 // (shifting the others up), any other goes last.
-void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e)
+void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat3* e)
 {
     s32 n = self->count7E0;
     s32 idx;
@@ -1370,7 +1370,7 @@ void AddTriggerZoneRotation(TriggerZone* self, BaseObject* a1, Mat02* e)
     } else {
         idx = n;
     }
-    *(Rotation30*)&self->entries[idx] = *(Rotation30*)e;
+    *(ZoneEntryBlock*)&self->entries[idx] = *(ZoneEntryBlock*)e;
     self->count7E0++;
 }
 
@@ -1380,7 +1380,7 @@ struct ZoneListFrame {
     void* cursor;
     s32 next_off;
     ZoneListFrame* prev;
-    ZoneListFrame(List01* l)
+    ZoneListFrame(ObjectList* l)
     {
         list = l;
         cursor = l;
@@ -1394,15 +1394,15 @@ struct ZoneListFrame {
 
 void StartPlacedObject(PlacedObject* self);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat3* in, Mat3* out);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 void CopyMemory(void* dst, void* src, u32 size);
-extern const Vec02 g_unitXVector;
-extern const Vec02 g_unitYVector;
-extern const Vec02 g_unitZVector;
+extern const Vec4 g_unitXVector;
+extern const Vec4 g_unitYVector;
+extern const Vec4 g_unitZVector;
 
-static inline Vec02* RowOf(Mat02* m, s32 i)
+static inline Vec4* RowOf(Mat3* m, s32 i)
 {
     return &m->r[i];
 }
@@ -1414,7 +1414,7 @@ static inline Vec02* RowOf(Mat02* m, s32 i)
 void StartTriggerZone(TriggerZone* self)
 {
     ZoneListFrame frame(&self->children);
-    Vec02 v;
+    Vec4 v;
     StartPlacedObject(self);
     StartZoneRecord(&self->zone);
     SetTriggerZoneMode(self, 0);
@@ -1425,11 +1425,11 @@ void StartTriggerZone(TriggerZone* self)
     if (node != 0) {
         do {
             if (state == 0 && IsObjectOfKind(node, 0x7E)) {
-                TransformPointBetweenFrames(self, (PlacedObject*)self->parent, (Vec02*)&((TransformObject*)node)->pos, &v);
-                AddTriggerZoneQuad(self, node, (Quad28*)&v);
+                TransformPointBetweenFrames(self, (PlacedObject*)self->parent, (Vec4*)&((TransformObject*)node)->pos, &v);
+                AddTriggerZoneQuad(self, node, (TriggerZoneQuad*)&v);
             } else if (state == 1 && IsObjectOfKind(node, 0x73) && !IsObjectOfKind(node, 0x75)) {
-                Mat02 m;
-                TransformRotationBetweenFrames(self, (PlacedObject*)self->parent, (Mat02*)&((TransformObject*)node)->rot, &m);
+                Mat3 m;
+                TransformRotationBetweenFrames(self, (PlacedObject*)self->parent, (Mat3*)&((TransformObject*)node)->rot, &m);
                 AddTriggerZoneRotation(self, node, &m);
                 node->desc->m03(node);
             }
@@ -1456,33 +1456,33 @@ void StartTriggerZone(TriggerZone* self)
         break;
     }
     case 1: {
-        Mat02 rows;
-        Vec02 a;
-        Vec02 b;
-        Vec02 dir;
+        Mat3 rows;
+        Vec4 a;
+        Vec4 b;
+        Vec4 dir;
         s32 k = self->count7E0 - 1;
         TransformDirectionBetweenFrames((PlacedObject*)self->parent, self, &self->v460, &dir);
-        Vec02* side;
-        Vec02* last;
-        const Vec02* up;
+        Vec4* side;
+        Vec4* last;
+        const Vec4* up;
         if (0.9f < dir.x) {
-            rows.r[0] = ((Mat02*)self->entries)->r[2];
-            side = &((Mat02*)self->entries)->r[1];
+            rows.r[0] = ((Mat3*)self->entries)->r[2];
+            side = &((Mat3*)self->entries)->r[1];
             up = &g_unitYVector;
-            last = RowOf((Mat02*)&self->entries[k], 1);
-            rows.r[1] = ((Mat02*)&self->entries[k])->r[2];
+            last = RowOf((Mat3*)&self->entries[k], 1);
+            rows.r[1] = ((Mat3*)&self->entries[k])->r[2];
         } else if (0.9f < dir.y) {
-            rows.r[0] = ((Mat02*)self->entries)->r[0];
-            side = &((Mat02*)self->entries)->r[2];
+            rows.r[0] = ((Mat3*)self->entries)->r[0];
+            side = &((Mat3*)self->entries)->r[2];
             up = &g_unitZVector;
-            last = RowOf((Mat02*)&self->entries[k], 2);
-            rows.r[1] = ((Mat02*)&self->entries[k])->r[0];
+            last = RowOf((Mat3*)&self->entries[k], 2);
+            rows.r[1] = ((Mat3*)&self->entries[k])->r[0];
         } else {
-            rows.r[0] = ((Mat02*)self->entries)->r[1];
-            side = &((Mat02*)self->entries)->r[0];
+            rows.r[0] = ((Mat3*)self->entries)->r[1];
+            side = &((Mat3*)self->entries)->r[0];
             up = &g_unitXVector;
-            last = RowOf((Mat02*)&self->entries[k], 0);
-            rows.r[1] = ((Mat02*)&self->entries[k])->r[1];
+            last = RowOf((Mat3*)&self->entries[k], 0);
+            rows.r[1] = ((Mat3*)&self->entries[k])->r[1];
         }
         if (self->parent != 0) {
             rows.r[2] = self->pos;
@@ -1576,7 +1576,7 @@ s32 PassesTriggerFilters(TriggerZone* self, void* arg)
 }
 
 // The vector func_0013F8A0 loads.
-extern const Vec02 D_00249DD0 = { 3.4028235e+38f, 0.0f, 0.0f, 0.0f };
+extern const Vec4 D_00249DD0 = { 3.4028235e+38f, 0.0f, 0.0f, 0.0f };
 
 ASM_FUNC(func_0013F8A0);
 
@@ -1596,8 +1596,8 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
         return 0;
     }
     for (i = s->count7E0 - 1; i >= 0; i--) {
-        Entry28* e = &s->entries[i];
-        MultiplyMatrices3x3(&s->rot, (Mat02*)e, (Mat02*)&loc);
+        ZoneRotationEntry* e = &s->entries[i];
+        MultiplyMatrices3x3(&s->rot, (Mat3*)e, (Mat3*)&loc);
         f32 t = GetMatrixRotationCosine((f32*)&loc);
         if (best < t) {
             best = t;
@@ -1610,7 +1610,7 @@ s32 FindLargestEntryIndex(TriggerZone* s, f32* out)
     return idx;
 }
 
-extern u8 D_00248D30[];
+extern u8 g_zeroVector[];
 
 
 // The trigger zone's per-step motion: the collider's, then, in state 0 or 1, steers the zone toward
@@ -1626,7 +1626,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->chosenIndex << 4;
             }
-            SteerColliderTowardPosition(self, (Vec02*)p, (f32*)self->p20C, (Vec02*)D_00248D30, (f32*)self->p210, t);
+            SteerColliderTowardPosition(self, (Vec4*)p, (f32*)self->p20C, (Vec4*)g_zeroVector, (f32*)self->p210, t);
         }
         break;
     case 1:
@@ -1635,7 +1635,7 @@ void StepTriggerZone(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->chosenIndex * 0x30;
             }
-            SteerColliderTowardRotation(self, (Mat02*)p, (f32*)self->p214, (Vec02*)D_00248D30, (f32*)self->p218, t);
+            SteerColliderTowardRotation(self, (Mat3*)p, (f32*)self->p214, (Vec4*)g_zeroVector, (f32*)self->p218, t);
         }
         break;
     }
@@ -1649,10 +1649,10 @@ struct PooledContact;
 // bounce.
 void ReleaseTriggerZoneContacts(TriggerZone* self)
 {
-    Vec02 v[2];
-    Vec02 w[2];
-    Vec02 p;
-    Vec02* where;
+    Vec4 v[2];
+    Vec4 w[2];
+    Vec4 p;
+    Vec4* where;
     f32 fa;
     f32 fb;
     f32 ga;
@@ -1668,7 +1668,7 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
     for (i = 0; i < 2; i++) {
         if (i < self->quadCount) {
-            TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)&self->quads[i], &v[i]);
+            TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec4*)&self->quads[i], &v[i]);
         }
         TransformDirectionBetweenFrames((PlacedObject*)self->parent, 0, &(&self->v860)[i], &w[i]);
     }
@@ -1688,12 +1688,12 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
     f32 x = fa - ga;
     if (x < -1e-4f) {
-        Contact03* c = (Contact03*)CreatePooledContact(x, self, 0, where, &w[0], 10, 0, 0, &self->contacts4B4);
+        BodyContact* c = (BodyContact*)CreatePooledContact(x, self, 0, where, &w[0], 10, 0, 0, &self->contacts4B4);
         c->bounce = 0.0f;
     } else {
         x = fb - gb;
         if (x < -1e-4f) {
-            Contact03* c = (Contact03*)CreatePooledContact(x, self, 0, where, &w[1], 10, 0, 0, &self->contacts4B4);
+            BodyContact* c = (BodyContact*)CreatePooledContact(x, self, 0, where, &w[1], 10, 0, 0, &self->contacts4B4);
             c->bounce = 0.0f;
         }
     }
@@ -1759,7 +1759,7 @@ void UpdateTriggerZone(TriggerZone* self, f32 dt)
             ContactRow03* l = s4->contacts->head;
             r = 0;
             for (; l; l = l->next) {
-                Contact03* n = l->head;
+                BodyContact* n = l->head;
                 for (; n; n = n->next) {
                     s32 k = n->end[0].body != s4;
                     if (((ContactEnd03*)((u8*)n + (k << 6)))->part == self) {
@@ -1881,14 +1881,14 @@ void SetZoneColliderMode(ZoneCollider* self, s32 flag)
 
 // An object the zone watches (ZoneCollider's objs): its class, and the two places its position is.
 struct ZoneTarget {
-    const Desc01* desc;     // 0x00
+    const BaseObjectDescriptor* desc;     // 0x00
     u8 pad04[0x40 - 0x04];
-    Vec02 v40;              // 0x40
+    Vec4 v40;              // 0x40
     u8 pad50[0x140 - 0x50];
-    Vec02 v140;             // 0x140
+    Vec4 v140;             // 0x140
 };
 
-s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
+s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 void CopyMemory(void* dst, void* src, u32 size);
 
 // The zone collider's per-frame update: after the collider's, a timed mode (2) ends when its
@@ -1898,7 +1898,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 void UpdateZoneCollider(ZoneCollider* self, f32 dt)
 {
     ZoneTarget* found[8];
-    Vec02 pos;
+    Vec4 pos;
     ZoneTarget* obj;
     UpdateCollider(self, dt);
     switch (self->zone.mode) {
@@ -2008,7 +2008,7 @@ s32 TestListedEntriesAccepted(ZoneCollider* self, void* arg)
 
 void AppendZoneFirstQueue(void* a, void* b, s32 c)
 {
-    AppendToObjectQueue(&((Zone28*)a)->pairs[0].seen, c);
+    AppendToObjectQueue(&((TriggerZoneRecord*)a)->pairs[0].seen, c);
 }
 
 
@@ -2027,7 +2027,7 @@ void AppendZoneColliderFirstQueue(void* self, int value)
 
 void AppendZoneSecondQueue(void* self, void* unused, int value)
 {
-    AppendToObjectQueue(&((Zone28*)self)->pairs[1].seen, value);
+    AppendToObjectQueue(&((TriggerZoneRecord*)self)->pairs[1].seen, value);
 }
 
 

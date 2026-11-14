@@ -80,8 +80,8 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         }
         switch (msg->code) {
         case 0x138: {
-            Vec02 v;
-            Track83* track = src->anim->movedTrack;
+            Vec4 v;
+            AnimationTrack* track = src->anim->movedTrack;
             if (track == 0) {
                 break;
             }
@@ -90,7 +90,7 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
             Vu0::Q(v) = Vu0::Rotate(self->headingMatrix, Vu0::Q(v));
             self->desc02()->m20(self, &v);
             if (src == (void*)self->stateAnimPlayer) {
-                Vec02 w;
+                Vec4 w;
                 u128 s = Vu0::FromFloat(-1.0f);
                 Vu0::Q(self->headingVelocity) = Vu0::MulX(Vu0::Q(v), s);
                 Vu0::Q(w) = s;
@@ -99,9 +99,9 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
         }
         case 0x13C:
             if (self->subState == 8) {
-                self->spinTargetRate = (f32)D_002637D4;
+                self->spinTargetRate = (f32)g_spinTargetRateSubState8;
             } else {
-                self->spinTargetRate = (f32)D_002637D0;
+                self->spinTargetRate = (f32)g_spinTargetRateDefault;
             }
             break;
         case 0x13D:
@@ -207,15 +207,15 @@ void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg)
     }
     case 0xA:
         if (msg->obj == self) {
-            self->f2438 = (Collider*)msg->source;
+            self->containingCollider = (Collider*)msg->source;
             for (u32 k = 0; k < 8; k++) {
                 self->hitStamps[k].time = 0;
             }
         }
         break;
     case 0xB:
-        if (msg->obj == self && msg->source == self->f2438) {
-            self->f2438 = 0;
+        if (msg->obj == self && msg->source == self->containingCollider) {
+            self->containingCollider = 0;
         }
         break;
     case 2: {

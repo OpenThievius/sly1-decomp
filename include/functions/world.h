@@ -6,13 +6,13 @@
 
 #include "common.h"
 
-struct Attach03;
 struct BaseObject;
+struct BodyContactTable;
 struct BufferedStream;
 struct ClipPoint;
 struct Collider;
+struct ColliderAttachment;
 struct ColliderPose;
-struct Contacts03;
 struct CountedNotice;
 struct DrawScale;
 struct PackedColor;
@@ -23,8 +23,8 @@ struct PathFollower;
 struct PlacedObject;
 struct QueuedCall;
 struct T219CHook;
-struct Touch03;
-struct Vec02;
+struct TouchedObjectLink;
+struct Vec4;
 struct World;
 
 void ProcessPathFollowerContacts(PathFollower* self);
@@ -59,7 +59,7 @@ s32 GetCachedVoiceParamBuiltin(void* unused, s32 index);
 void* RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2);
 s32 IsWorldBodyLimitReached(World* self, BaseObject* obj, u32 value);
 void* TakeAttachRecord(World* self);
-void ReleaseAttachRecords(World* self, Attach03* node);
+void ReleaseAttachRecords(World* self, ColliderAttachment* node);
 void* TakeCallRecord(World* self);
 void ReleaseCallRecords(World* self, T219CHook* node);
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4);
@@ -68,16 +68,16 @@ void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32
 void RunQueuedCalls(World* self);
 void RunDueDelayedScriptCalls(World* self, f32 limit);
 void* AllocateTouchNode(World* self);
-void FreeTouchNodes(World* owner, Touch03* node);
+void FreeTouchNodes(World* owner, TouchedObjectLink* node);
 void PushCloneBatch(World* self, void* src, s32 n);
 s32 PopSpawnedClone(World* self, s32 index);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-void UnlinkContactTable(Contacts03* a0, Contacts03** a1);
+void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
+void UnlinkContactTable(BodyContactTable* a0, BodyContactTable** a1);
 void InitContactTables(World* self);
-void PushContactTable(Contacts03* node, Contacts03** head);
-Contacts03* TakeContactTable(World* owner, Collider* self);
-void ReleaseContactTable(World* owner, Contacts03* handle);
+void PushContactTable(BodyContactTable* node, BodyContactTable** head);
+BodyContactTable* TakeContactTable(World* owner, Collider* self);
+void ReleaseContactTable(World* owner, BodyContactTable* handle);
 void CreateConeVolumes(World* self);
 void SkipBufferedBlocks(BufferedStream* self);
 void SpawnListedObjectCopies(World* self);

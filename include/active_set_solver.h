@@ -40,10 +40,10 @@ struct ActiveSetSolver {
     };
     s32 count;              // 0x04: func_00153A50
     u8* items;              // 0x08: the 2n items of 0x60 bytes (func_00153528)
-    List01 active;          // 0x0C: func_00153528, func_00153A50; func_00153EC0 reads its head as a word
-    List01 atLow;           // 0x18: items func_00153A50 moves to and from the active list when one's value reaches zero
-    List01 atHigh;          // 0x24: the same when it reaches its upper bound
-    List01 pending;         // 0x30: func_00153EC0 walks it
+    ObjectList active;          // 0x0C: func_00153528, func_00153A50; func_00153EC0 reads its head as a word
+    ObjectList atLow;           // 0x18: items func_00153A50 moves to and from the active list when one's value reaches zero
+    ObjectList atHigh;          // 0x24: the same when it reaches its upper bound
+    ObjectList pending;         // 0x30: func_00153EC0 walks it
     s32 activeCount;        // 0x3C: the active list's length (func_00153A50, func_00153EC0)
     f32* matrix;            // 0x40: the active items' square matrix (func_00153A50)
     f32* factor;            // 0x44: what func_0014B0C0 makes of the matrix

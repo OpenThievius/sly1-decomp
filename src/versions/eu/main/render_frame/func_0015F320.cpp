@@ -10,7 +10,7 @@ void BlitFrameToDisplay(void)
     UsePacketBufferMemory(&w, 100, buf);
     BeginDmaTag(&w);
     BeginGifTag(&w, 0, 1, 0xE);
-    u64 frame = *(u64*)((g_displayFrameCounter & 1) ? D_002625F0 : D_00262500);
+    u64 frame = *(u64*)((g_displayFrameCounter & 1) ? g_drawEnvBlockOdd : g_drawEnvBlockEven);
     AddGifRegisterWrite(&w, 0x3F, (u64)0);
     AddGifRegisterWrite(&w, 0x4E, FrameBits(frame) | ((u64)1 << 32));
     u64 disp = *(u64*)((g_displayFrameCounter & 1) ? g_fieldOffsetPacket0 : g_fieldOffsetPacket1);

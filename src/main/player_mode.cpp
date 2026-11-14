@@ -28,7 +28,7 @@ struct MemberObject;
 struct PlacedObject;
 struct World;
 
-struct Mat02;
+struct Mat3;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -54,7 +54,7 @@ struct ContactEvent {
 
 void* HandleObjectEvent(Collider* a, void* event);
 
-void ExtractContactsByPartMode(Collider* self, Contact03** out);
+void ExtractContactsByPartMode(Collider* self, BodyContact** out);
 
 
 struct CountedTouchMessage {
@@ -63,7 +63,7 @@ struct CountedTouchMessage {
 };
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 struct AnimatedObject105 { u8 pad[0x7E0]; void* obj; };
@@ -72,7 +72,7 @@ struct AnimatedObject105 { u8 pad[0x7E0]; void* obj; };
 
 
 void StepCollider(Collider* self, f32 t);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
+void SteerColliderTowardRotation(Collider* self, Mat3* target, f32* pull, Vec4* aim, f32* turn, f32 limit);
 
 
 struct PooledContact;
@@ -280,7 +280,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         if ((u32)self->state < 2 && (pad->flags & 0x10) && self->f1518 != 0) {
             ClearPadPressedBits(pad, 0x10);
             if (IsObjectAttached((BaseObject*)self->f1518)) {
-                Vec02 d;
+                Vec4 d;
                 Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PlacedObject*)self->f1518)->v140), Vu0::Q(self->v140));
                 self->heading = ArctangentOfRatio(d.y, d.x);
                 TurnColliderTowardHeading(self);
@@ -383,7 +383,7 @@ void UpdateCountedCollider(CountedCollider* self, f32 dt)
     if (g_player != 0 && 2000.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(g_player->v140))))) {
         TakeCountedColliderTouch(self, g_player, 1);
     } else if (self->parent == 0) {
-        Contact03* c = (Contact03*)self->contacts;
+        BodyContact* c = (BodyContact*)self->contacts;
         if (c != 0) {
             s32 i = self->root == c->end[0].body;
             TakeCountedColliderTouch(self, c->end[i].part, 0);
@@ -401,14 +401,14 @@ void StepCountedCollider(CountedCollider* self, f32 t)
 
     StepCollider(self, t);
     if (self->parent == 0) {
-        RotateMatrixUpright(&self->rot, 0, (Mat02*)buf);
-        SteerColliderTowardRotation(self, (Mat02*)buf, (f32*)self->p214, (Vec02*)&D_00248D30, (f32*)self->p218, t);
+        RotateMatrixUpright(&self->rot, 0, (Mat3*)buf);
+        SteerColliderTowardRotation(self, (Mat3*)buf, (f32*)self->p214, (Vec4*)&g_zeroVector, (f32*)self->p218, t);
     }
 }
 
 void CollectCountedColliderContacts(CountedCollider* self)
 {
-    ExtractContactsByPartMode(self, (Contact03**)&self->contacts);
+    ExtractContactsByPartMode(self, (BodyContact**)&self->contacts);
 }
 
 // Slot 45 of the counted collider: handles the object event and, for a contact (flag 0x20), takes a
@@ -432,21 +432,21 @@ void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
 }
 
 struct FrameDescHolder;
-struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameDescHolder* self, Mat02* out); };
+struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameDescHolder* self, Mat3* out); };
 struct FrameDescHolder { FrameSourceDesc* desc; };
 typedef u64 Qword128 __attribute__((mode(TI)));
 void ComputeColliderWorldFrame(Collider* self);
-void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
+void TransformMeshToWorld(CollisionMesh* a, CollisionMesh* b, Qword128 q, Mat3* c);
 
 // Slot 19 of the counted collider: with a matrix attachment, rotates the attached frame by its own
 // and transforms its mesh into world space; without one, the plain collider frame.
 void ComputeCountedColliderWorldFrame(CountedCollider* self)
 {
     if (self->matrixAttachment != 0) {
-        Mat02 world;
-        Mat02 frame;
-        Mat02 copyA;
-        Mat02 copyB;
+        Mat3 world;
+        Mat3 frame;
+        Mat3 copyA;
+        Mat3 copyB;
         ComputePlacedObjectWorldFrame(self);
         FrameDescHolder* src = (FrameDescHolder*)self->matrixAttachment;
         src->desc->getFrame(src, &frame);

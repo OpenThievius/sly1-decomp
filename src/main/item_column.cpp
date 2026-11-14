@@ -33,32 +33,32 @@
 
 extern s32 D_00275BEC;
 extern f32 g_timeScale;
-extern T217D_Vt D_00218330;
+extern T217D_Vt g_buttonHintElementMethods;
 
 
 // Initialiser of the item column: a screen element that owns four items of the item's method
 // table (D_00218330), each initialised.
-void InitItemColumn(T217D_720* self)
+void InitItemColumn(StackedCaptionGroup* self)
 {
     u32 n;
 
     InitScreenElement(self, 0x20);
-    T217D_330* e = self->items;
+    ButtonHintElement* e = self->items;
     for (n = 0; n < 4; n++) {
-        e->vt = &D_00218330;
-        D_00218330.m00(e, 0x12);
+        e->vt = &g_buttonHintElementMethods;
+        g_buttonHintElementMethods.m00(e, 0x12);
         e++;
     }
 }
 
 // Sets the column up: its text, then each of its four items (font scale 0.8, one second to slide
 // in and out, no hold time).
-void SetupItemColumn(T217D_720* self)
+void SetupItemColumn(StackedCaptionGroup* self)
 {
-    T217D_330* e;
+    ButtonHintElement* e;
     u32 i;
 
-    e = (T217D_330*)self;
+    e = (ButtonHintElement*)self;
     SetupScreenElementText(e);
     e = self->items;
     for (i = 0; i < 4; i++) {
@@ -74,10 +74,10 @@ void SetupItemColumn(T217D_720* self)
 }
 
 // Gives the column and each of its four items the new clock.
-void UpdateItemColumn(T217D_720* self, f32* clock)
+void UpdateItemColumn(StackedCaptionGroup* self, f32* clock)
 {
     SetScreenElementClock(self, clock);
-    T217D_330* e = self->items;
+    ButtonHintElement* e = self->items;
     for (u32 i = 0; i < 4; i++) {
         e->vt->m17(e, clock);
         e++;
@@ -85,24 +85,24 @@ void UpdateItemColumn(T217D_720* self, f32* clock)
 }
 
 // Updates the column's slide and then that of each item shown.
-void UpdateItemColumnSlide(T217D_720* self)
+void UpdateItemColumnSlide(StackedCaptionGroup* self)
 {
     UpdateScreenElementSlide(self);
     for (s32 i = 0; i < self->count; i++) {
-        T217D_330* s = &self->items[i];
+        ButtonHintElement* s = &self->items[i];
         s->vt->m02(s);
     }
 }
 
 // Draws the column's items stacked downward from its position, each scaled in blend by
 // g_timeScale for the draw, while D_00275BEC is 1.
-void DrawItemColumn(T217D_720* self)
+void DrawItemColumn(StackedCaptionGroup* self)
 {
     if (D_00275BEC == 1) {
         f32 acc = self->y;
         s32 i;
         for (i = 0; i < self->count; i++) {
-            T217D_330* e = &self->items[i];
+            ButtonHintElement* e = &self->items[i];
             f32 saved = e->blend;
             f32 base = self->x;
             f32 scaled = saved * g_timeScale;
@@ -118,7 +118,7 @@ void DrawItemColumn(T217D_720* self)
 
 // Sets the column to show n items, with the place offset (x, y), and resizes it to n lines of the
 // font's height.
-void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y)
+void ResizeItemColumn(StackedCaptionGroup* self, s32 n, f32 x, f32 y)
 {
     self->place->dx = x;
     self->place->dy = y;
@@ -129,7 +129,7 @@ void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y)
 }
 
 // Calls slot 16 of the column with 0, which clears it.
-void ClearItemColumn(T217D_720* self)
+void ClearItemColumn(StackedCaptionGroup* self)
 {
     self->vt->m16(self, 0);
 }
@@ -138,9 +138,9 @@ void ClearItemColumn(T217D_720* self)
 // column to the widest item and a line's height times the number of items and, with a hold time,
 // shows the item for that time less its own slide-in and slide-out time (at least one frame, 1/60
 // s).
-void PostItemColumnEntry(T217D_720* self, s32 index, char* text, f32 hold)
+void PostItemColumnEntry(StackedCaptionGroup* self, s32 index, char* text, f32 hold)
 {
-    T217D_330* item = &self->items[index];
+    ButtonHintElement* item = &self->items[index];
     for (char* p = text; *p != 0; p++) {
         if (*p == '_') {
             *p = ' ';

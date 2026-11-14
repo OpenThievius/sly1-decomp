@@ -20,7 +20,7 @@ void InitCyclingGlyphElement(Obj_1AE758_eu* self)
     SetScreenElementSlideOutTime(self, k);
     SetScreenElementHoldTime(self, 0.0f);
     void* r = GetFontById(1);
-    f32 g = *(f32*)&D_002744AC;
+    f32 g = *(f32*)&g_cyclingGlyphElementScale;
     self->f4 = r;
     SetScreenElementScale(self, g);
     v = GetCyclingGlyph();

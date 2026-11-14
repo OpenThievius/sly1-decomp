@@ -93,12 +93,12 @@ extern s32 D_00270454;
 extern u8 g_memoryCard[];
 extern s32 D_00275C34;
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 // A list walk's frame (as ListFrame), pushed by its constructor.
 struct ListWalkFrame {
     s32 list; s32 cursor; s32 link; s32 prev;
-    ListWalkFrame(List01* l) {
+    ListWalkFrame(ObjectList* l) {
         cursor = (s32)l;
         list = (s32)l;
         link = l->offset;
@@ -113,16 +113,16 @@ struct GridCell { s32 corner[4]; };
 struct LoadStream;
 struct BufferedStream;
 struct BufferedStream;
-struct Mesh03;
+struct CollisionMesh;
 void* AllocateZeroedFrontMemory(s32 n);
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ListWalker;
 struct ListWalker {
-    List01 *list;
+    ObjectList *list;
     s32 *cur;
     s32 step;
     ListWalker *prev;
-    ListWalker(List01 *l)
+    ListWalker(ObjectList *l)
     {
         list = l;
         cur = (s32 *)&l->head;
@@ -153,11 +153,11 @@ f32 g_numberedItemSpinRange[2] = { 0.8f, 1.2f };
 f32 g_numberedItemJitterRange[2] = { 0.9f, 1.1f };
 f32 g_numberedItemReachRadius = 300.0f;
 T219C_Params g_numberedItemEffectParams = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, (void (*)(void*))SetNumberedItemFlag };
-s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
-// The links func_0019A1E0 resolves for a C17, and two words after them that retail's label
+s32 g_levelBitTable[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
+// The links func_0019A1E0 resolves for a ProgressCollider, and two words after them that retail's label
 // holds as zeros (the label runs to the next table, D_0026AB90; nothing reads them).
-struct C17LinkTable { ObjectLink e[26]; s32 end[2]; };
-C17LinkTable D_0026AA50 = { {
+struct ProgressLinkTable { ObjectLink e[26]; s32 end[2]; };
+ProgressLinkTable D_0026AA50 = { {
     { 0, 0x376, 0x610 }, { 0, 0x37C, 0x618 }, { 4, 0x377, 0x61C }, { 4, 0x378, 0x628 }, { 4, 0x379, 0x634 }, { 6, 0x3A2, 0x768 }, { 6, 0x3A4, 0x76C }, { 6, 0x3A5, 0x770 }, { 6, 0x3A6, 0x774 }, { 6, 0x3A7, 0x77C }, { 6, 0x3A8, 0x780 }, { 6, 0x3A9, 0x784 }, { 6, 0x3AB, 0x788 }, { 6, 0x3AC, 0x78C }, { 6, 0x3AD, 0x790 }, { 6, 0x3AE, 0x794 }, { 6, 0x3AF, 0x798 }, { 6, 0x3B0, 0x79C }, { 6, 0x3B1, 0x7A0 }, { 6, 0x3B2, 0x7A4 }, { 6, 0x3B3, 0x7A8 }, { 6, 0x3B4, 0x7C4 }, { 6, 0x3B5, 0x7C8 }, { 6, 0x3B6, 0x7CC }, { 6, 0x3B7, 0x7D0 }, { 6, 0x3D8, 0x7D4 } }, { 0, 0 } };
 ObjectLink g_objectGathererLoadLinks[1] = { { 0x0, 0x268, 0x5EC } };
 ObjectLink g_objectGathererStartLinks[1] = { { 0x4, 0x267, 0x5FC } };
@@ -172,7 +172,7 @@ s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
 void InitObjectSet(ObjectSet* self)
 {
     InitCollider(self);
-    self->f554 = 1;
+    self->activated = 1;
 }
 
 // Loads the collider and the member group, then walks the children: each child whose class flags
@@ -180,7 +180,7 @@ void InitObjectSet(ObjectSet* self)
 void LoadObjectSet(ObjectSet* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
-    FindOrBuildMemberGroup(&self->f584, self);
+    FindOrBuildMemberGroup(&self->memberGroup, self);
     ListWalkFrame fr(&self->children);
     fr.cursor = (s32)self->children.head + fr.link;
     BaseObject* p = (BaseObject*)self->children.head;
@@ -244,10 +244,10 @@ struct ActiveReach {
 // target, on the ground away from the set.
 void UpdateObjectSet(ObjectSet* self, f32 dt)
 {
-    Vec02 d;
+    Vec4 d;
     UpdateCollider(self, dt);
-    s32 held = self->f59C;
-    self->f59C = 0;
+    s32 held = self->contactLatched;
+    self->contactLatched = 0;
     SwitchedCollider* a = (SwitchedCollider*)GetActiveSwitchedCollider();
     if (a == 0) {
         return;
@@ -275,7 +275,7 @@ void UpdateObjectSet(ObjectSet* self, f32 dt)
     d.z = 0.0f;
     u128 base = Vu0::Q(r->target->v150);
     u128 out = Vu0::ScalarAt(g_objectSetPushSpeed);
-    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(D_00248D30)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(g_objectSetLiftSpeed));
+    Vu0::Q(d) = Vu0::MulAddX2(base, Vu0::NormalizeOr(Vu0::Q(d), Vu0::Q(g_zeroVector)), out, Vu0::Q(g_unitZVector), Vu0::ScalarAt(g_objectSetLiftSpeed));
     self->desc02()->m20(self, &d);
     ((SlotFn*)self->desc)[77](self);
 }
@@ -298,7 +298,7 @@ void CollectObjectSet(ObjectSet* self)
 // Sends message kind 1, naming this set, to its member group's object, if there is one.
 void NotifyObjectSetTarget(ObjectSet* self)
 {
-    BaseObject* t = (BaseObject*)self->f584;
+    BaseObject* t = (BaseObject*)self->memberGroup;
     if (t != 0) {
         SlotMessage msg;
         msg.kind = 1;
@@ -311,7 +311,7 @@ void NotifyObjectSetTarget(ObjectSet* self)
 s32 GetObjectSetActivationState(ObjectSet* self)
 {
     if (IsObjectAttached(self)) {
-        return (self->f554 != 0) ? 1 : 2;
+        return (self->activated != 0) ? 1 : 2;
     }
     return 0;
 }
@@ -354,7 +354,7 @@ s32 TestObjectSetMayContact(ObjectSet* unused, void* obj)
 
 // Sets f59C when the active switched collider's collider is a descendant of one end of the contact
 // pair (the one that is not idx).
-void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
+void LatchObjectSetContact(ObjectSet* self, BodyContact* elems, s32 idx)
 {
     ActiveColliderData* r = (ActiveColliderData*)GetActiveSwitchedColliderData();
     if (r->collider == 0) return;
@@ -362,7 +362,7 @@ void LatchObjectSetContact(ObjectSet* self, Contact03* elems, s32 idx)
         s32 one = 1;
         ContactEnd03* e = (ContactEnd03*)((u8*)elems + ((one - idx) << 6));
         if (IsObjectDescendantOf(e->part, (BaseObject*)r->collider) != 0) {
-            self->f59C = one;
+            self->contactLatched = one;
         }
     }
 }
@@ -443,8 +443,8 @@ void StartStateWalkerGroup(StateWalkerGroup* self)
     s32 s4 = (g_currentLevelRecord->f448 & self->flagMask) ? 0x22F : 0x22E;
     for (i = 0; i < self->objectCount; i++) {
         e = (StateWalkerObject*)self->objects[i];
-        e->f2D4 = CreateStateWalker((StateGraph*)e->f2D0, e, -1, 0);
-        SetStateWalkerTarget((StateWalker*)e->f2D4, s4);
+        e->walker = CreateStateWalker((StateGraph*)e->stateGraph, e, -1, 0);
+        SetStateWalkerTarget((StateWalker*)e->walker, s4);
     }
     self->walker = CreateStateWalker((StateGraph*)self->graph, self, -1, 0);
     SetStateWalkerTarget((StateWalker*)self->walker, s4);
@@ -565,8 +565,8 @@ struct ActiveColliderTarget {
 // passed after the test, where retail forms it afresh (docs/TOOLCHAIN.md, "CSE").
 void UpdateNumberedItem(NumberedItem* self, f32 dt)
 {
-    Vec02 first;
-    Vec02 second;
+    Vec4 first;
+    Vec4 second;
     UpdateObjectSet(self, dt);
     if ((MaskWorldBitsBySave() & 0x20000) == 0) {
         return;
@@ -590,7 +590,7 @@ void UpdateNumberedItem(NumberedItem* self, f32 dt)
     ComputeObjectMotionInFrame(self, 0, &self->v140, &second, 0, 0, 0);
     u128 rel = Vu0::Sub(Vu0::Q(second), Vu0::Q(first));
     u128 away = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(data->collider->v140));
-    u128 dir = Vu0::NormalizeOrMoved(away, Vu0::Q(D_00248D30));
+    u128 dir = Vu0::NormalizeOrMoved(away, Vu0::Q(g_zeroVector));
     if (Vu0::ToFloat(Vu0::Dot(rel, dir)) > -50.0f) {
         ((SlotFn*)self->desc)[77](self);
     }
@@ -647,7 +647,7 @@ L980:
 void CollectNumberedItem(NumberedItem* self)
 {
     Quad16 loc;
-    T217D_E30* g = &g_collectedItemCaption;
+    CounterCaption* g = &g_collectedItemCaption;
     g->vt->m14(g);
     Effect* n = CreateEffect(0x10, 0);
     if (n != 0) {
@@ -657,9 +657,9 @@ void CollectNumberedItem(NumberedItem* self)
         }
         n->p134 = self;
         n->params = &g_numberedItemEffectParams;
-        TransformPointBetweenFrames(self, 0, &((PlacedObject*)self->f5BC)->pos, (Vec02*)&loc);
+        TransformPointBetweenFrames(self, 0, &((PlacedObject*)self->anchorObject)->pos, (Vec4*)&loc);
         n->vt->m00(n, &loc, 1.0f, 0);
-        n->i20 = *(s32*)&self->f5BC;
+        n->i20 = *(s32*)&self->anchorObject;
     } else {
         SetNumberedItemFlag(self);
     }
@@ -727,7 +727,7 @@ s32 HandleNumberedItemObjectEvent(NumberedItem* self, ObjectEvent* a1)
 }
 
 struct SpinFrame4 {
-    Vec02 r[4];
+    Vec4 r[4];
 };
 
 struct SpinKeyframe {
@@ -738,12 +738,12 @@ struct SpinKeyframe {
 
 SpinFrame4 MultiplyMatrices(const SpinFrame4& a, const SpinFrame4& b);
 
-static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+static inline void MulRotation(Mat3* out, const Mat3& a, const Mat3& b)
 {
-    Mat02 r;
-    Vec02 x;
-    Vec02 y;
-    Vec02 z;
+    Mat3 r;
+    Vec4 x;
+    Vec4 y;
+    Vec4 z;
     const u128* rows = (const u128*)&a;
     u128 a0 = rows[0];
     u128 a1 = rows[1];
@@ -761,10 +761,10 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 // phase picks in the ring of its objects.
 void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
 {
-    Mat02 axis;
-    Mat02 turned;
+    Mat3 axis;
+    Mat3 turned;
     SpinFrame4 base;
-    Vec02 unused;
+    Vec4 unused;
     if (self->flags & ((u64)0x8000 << 17)) {
         return;
     }
@@ -789,7 +789,7 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
             index = twice - m;
         }
         SpinKeyframe* k = ((SpinKeyframe**)self->keyframes)[index];
-        BuildMatrixFromRotationAndTranslation((const Vec02*)k->from, (const Mat02*)k->to, (Mat4A*)&key);
+        BuildMatrixFromRotationAndTranslation((const Vec4*)k->from, (const Mat3*)k->to, (Mat4A*)&key);
         base = MultiplyMatrices(base, key);
     }
     ApplyPlacedObjectTransform(self, (Camera*)a1, (ScaledTransform*)&base);
@@ -869,7 +869,7 @@ void MarkAllLevelRecordsComplete()
 }
 
 // Initialises the switched collider with its trigger and extra ids unset (-1).
-void InitC17Collider(C17* self)
+void InitC17Collider(ProgressCollider* self)
 {
     InitSwitchedCollider(self);
     self->triggerId = -1;
@@ -877,7 +877,7 @@ void InitC17Collider(C17* self)
 }
 
 // Finds the marker object (id 0x37A), resolves and starts it, and creates a state walker on it.
-void StartC17Marker(C17Marker* self, s32 x)
+void StartC17Marker(ProgressMarker* self, s32 x)
 {
     self->object = FindFirstObjectById(g_currentWorld, 0x101, 0x37A, (void*)self->owner);
     ResolveAndStartObject(self->object);
@@ -888,7 +888,7 @@ void StartC17Marker(C17Marker* self, s32 x)
 // 0x384) and, unless the entry has bit 4 (walker to 0x38F, stop), finds the objects of its six
 // sequence groups (random start in each) plus the extra and trigger objects, then works out which
 // level-completion bit it stands for (levelBit, levelBitIndex).
-void StartC17Collider(C17* o)
+void StartC17Collider(ProgressCollider* o)
 {
     u32 i;
     StartPlacedObject(o);
@@ -905,7 +905,7 @@ void StartC17Collider(C17* o)
     }
     o->world->f1CE4 = o;
     for (s32 e = 0; e < 6; e++) {
-        Ent17* en = &o->sequenceGroups[e];
+        StepSequenceGroup* en = &o->sequenceGroups[e];
         for (s32 k = 0; k < en->count; k++) {
             BaseObject* r = FindFirstObjectByIdMode4(o->world, en->keys[k], o);
             if (r) {
@@ -951,14 +951,14 @@ void StartC17Collider(C17* o)
         return;
     o->levelBitIndex = 0;
 lookup:
-    if (D_0026A9E0[0] != (s32)o->levelBit) {
+    if (g_levelBitTable[0] != (s32)o->levelBit) {
         do {
             o->levelBitIndex++;
             if (o->levelBitIndex >= 0x1C) {
                 o->levelBitIndex = -1;
                 return;
             }
-        } while (D_0026A9E0[o->levelBitIndex] != (s32)o->levelBit);
+        } while (g_levelBitTable[o->levelBitIndex] != (s32)o->levelBit);
     }
     if (o->levelBitIndex >= 0x1C)
         o->levelBitIndex = -1;
@@ -968,7 +968,7 @@ lookup:
 // step repeat, queues the first-time object 0x39A or 0x39B (by the save's option bits) and the
 // extra object, copies the player's block. Off: walker to 0x384, clears the queue and, if mask bit
 // 4 is set, fades out and queues movie 4.
-void HandleC17ColliderActivation(C17* self, void* flag)
+void HandleC17ColliderActivation(ProgressCollider* self, void* flag)
 {
     s32 r;
     s32 flags;
@@ -1023,7 +1023,7 @@ tail:
 // The combination lock: the pad turns the three dials (each key 0x385..0x38D a dial and a digit
 // band, 0x38E open, 0x38F done), the dials matching f640's digits open it, and the queued step
 // sequences run one at a time.
-void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
+void ControlC17Collider(ProgressCollider* self, PadRecord* pad, f32 dt)
 {
     s32 cur;
     s32 target;
@@ -1147,7 +1147,7 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
         s32 i = 0;
         s32 code = self->markerCode;
         for (; i < 3; i++, code *= 10) {
-            C17Marker* m = &self->markers[i];
+            ProgressMarker* m = &self->markers[i];
             s32 t;
             s32 c;
             GetStateWalkerTargetKey(m->walker, &t);
@@ -1173,7 +1173,7 @@ void ControlC17Collider(C17* self, PadRecord* pad, f32 dt)
 // player to a state aimed at this collider (when f654 is set) or picks one of six sequence groups
 // from how much of the world is collected (under 0.5, 0.8, or more, all but one, all) and starts
 // that group's next step sequence in turn.
-void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
+void HandleC17ColliderNotification(ProgressCollider* self, s32 msg, s32* rec)
 {
     HandleSwitchedColliderNotification(self, msg, rec);
     if (msg == 12 && rec[1] == (s32)self->triggerObject) {
@@ -1206,7 +1206,7 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
                 }
             }
             if (k != -1) {
-                Ent17* e = &self->sequenceGroups[k];
+                StepSequenceGroup* e = &self->sequenceGroups[k];
                 *(s32*)((StepSequence*)e->list[e->pick])->target304 = 0;
                 ChooseStepSequenceState((StepSequence*)e->list[e->pick]);
                 e->pick = (e->pick + 1) % e->n;
@@ -1216,9 +1216,9 @@ void HandleC17ColliderNotification(C17* self, s32 msg, s32* rec)
 }
 
 // Appends a key to record index of the entry list (at most 4 per record, 0x2C bytes each).
-void AddEntryRecordKey(C17* list, u32 index, s32 key)
+void AddEntryRecordKey(ProgressCollider* list, u32 index, s32 key)
 {
-    Ent17* record = &list->sequenceGroups[index];
+    StepSequenceGroup* record = &list->sequenceGroups[index];
     u32 count = record->count;
     if (count < 4) {
         record->keys[count] = key;
@@ -1230,7 +1230,7 @@ void AddEntryRecordKey(C17* list, u32 index, s32 key)
 // level bit is a valid one, counts it in the level record and the save (options bits 8 then 0x10),
 // sets flag 4 of the entry, applies the completion flags (where mask bit 4), starts the object
 // 0x37E or 0x37F (saving the memory card for the second), and queues the level bit's own object.
-void RecordC17ColliderCompletion(C17* self)
+void RecordC17ColliderCompletion(ProgressCollider* self)
 {
     s32 sel;
     s32 idx;
@@ -1300,7 +1300,7 @@ void InitC71Object(C71* self)
 {
     InitObject(self);
     self->targetId = -1;
-    self->f4C = 3.4028235e+38f;
+    self->maxHeightAbove = 3.4028235e+38f;
 }
 
 // Registers the object and appends it to the world list at 0x1C90.
@@ -1343,7 +1343,7 @@ void InitObjectGatherer(ObjectGatherer* self)
     self->idleTimeMax = 1.0f;
     self->idleTimeMin = 0.5f;
     self->nextSoundTime = RandomGaussian(*(f32*)g_gameTime + 3.0f, 1.0f, 2.5f);
-    self->f664 = -1;
+    self->scatterCount = -1;
 }
 
 // Loads the collider, joins its member group, resolves its links, and gathers the objects with ids
@@ -1407,16 +1407,16 @@ struct GatherCandidate {
     u8 pad00[0x18];
     void* frame;            // 0x18
     u8 pad1C[0x40 - 0x1C];
-    Vec02 pos;              // 0x40
+    Vec4 pos;              // 0x40
 };
 // Physics step of the gatherer: after the collider step it turns toward its wander point (state 1)
 // or its candidate's point (state 2) in the horizontal plane, and otherwise steers its rotation
 // toward zero.
 void StepObjectGatherer(ObjectGatherer* self, f32 dt)
 {
-    Vec02 delta;
-    Mat02 basis;
-    Vec02 target;
+    Vec4 delta;
+    Mat3 basis;
+    Vec4 target;
     StepCollider(self, dt);
     switch (self->state) {
     case 1:
@@ -1433,7 +1433,7 @@ void StepObjectGatherer(ObjectGatherer* self, f32 dt)
         TurnColliderTowardRotation(self, dt, &basis, g_gathererTurnRamp);
         break;
     default:
-        SteerColliderTowardRotation(self, 0, 0, (Vec02*)&D_00248D30, (f32*)self->p214, dt);
+        SteerColliderTowardRotation(self, 0, 0, (Vec4*)&g_zeroVector, (f32*)self->p214, dt);
         break;
     }
 }
@@ -1455,8 +1455,8 @@ template <class T> struct NextInList {
 // Each update: the state's sound, push and speed.
 void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
 {
-    Vec02 dir;
-    Vec02 target;
+    Vec4 dir;
+    Vec4 target;
     SwitchedCollider* act = (SwitchedCollider*)GetActiveSwitchedCollider();
     UpdateCollider(self, dt);
     s32 state = self->state;
@@ -1499,7 +1499,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                 go = FindColliderFloorContact(self, 0, &side) != 0;
             }
             if (go) {
-                Vec02 push;
+                Vec4 push;
                 Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->state1Speed * 0.7f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->upwardPush));
                 self->desc02()->m20(self, &push);
                 break;
@@ -1519,7 +1519,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                 go = FindColliderFloorContact(self, 0, &side) != 0;
             }
             if (go) {
-                Vec02 push;
+                Vec4 push;
                 Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(self->m110.r[0]), Vu0::Scalar(self->state2Speed * 0.5f), Vu0::Q(g_unitZVector), Vu0::ScalarAt(self->upwardPush));
                 self->desc02()->m20(self, &push);
                 break;
@@ -1553,8 +1553,8 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
                 }
                 g_activeListFrames = frame.prev;
             } else {
-                self->desc02()->m20(self, (Vec02*)&D_00248D30);
-                self->desc02()->m21(self, (Vec02*)&D_00248D30);
+                self->desc02()->m20(self, (Vec4*)&g_zeroVector);
+                self->desc02()->m21(self, (Vec4*)&g_zeroVector);
             }
             break;
         }
@@ -1569,7 +1569,7 @@ void UpdateObjectGatherer(ObjectGatherer* self, f32 dt)
             speed = self->state1Speed;
         } else {
             speed = self->state2Speed;
-            Vec02 at;
+            Vec4 at;
             TransformPointBetweenFrames((PlacedObject*)(((GatherCandidate*)self->candidate)->frame), 0, &((GatherCandidate*)self->candidate)->pos, &at);
             u128 d = Vu0::Sub(Vu0::Q(at), Vu0::Q(self->v140));
             f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(d, d)));
@@ -1611,7 +1611,7 @@ ASM_FUNC(func_0019BB90);
 // (state 4) or when flag bit 32 is set.
 void ApplyObjectGathererLodObject(ObjectGatherer* self, void* a1, void* a2)
 {
-    Vec02 tmp[4];
+    Vec4 tmp[4];
     ListFrame frame;
     PlacedObject* obj;
     if (self->state == 4) {
@@ -1679,7 +1679,7 @@ s32 HandleObjectGathererObjectEvent(ObjectGatherer* self, GatherTrigger* src)
 void ChooseObjectGathererCandidate(ObjectGatherer* self)
 {
     ListFrame frame;
-    Vec02 point;
+    Vec4 point;
     f32 t;
     f32 dist;
     f32 bestDist;
@@ -1721,14 +1721,14 @@ void ChooseObjectGathererCandidate(ObjectGatherer* self)
 void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         RemoveFromList(&self->world->list1C60, self);
-        ((BaseObject *)self->f5FC)->desc->m03((BaseObject *)self->f5FC);
+        ((BaseObject *)self->companionObject)->desc->m03((BaseObject *)self->companionObject);
     } else {
         Quad4 buf;
         AppendToList(&self->world->list1C60, self);
-        ((BaseObject *)self->f5FC)->desc->m02((BaseObject *)self->f5FC);
+        ((BaseObject *)self->companionObject)->desc->m02((BaseObject *)self->companionObject);
         TransformPointBetweenFrames((PlacedObject*)((GatherCandidate*)self->candidate)->frame, 0,
-                      &((GatherCandidate*)self->candidate)->pos, (Vec02*)&buf);
-        PlaceColliderClearOfContacts((Collider*)self, (Vec02*)&buf, (Vec02*)&g_unitZVector);
+                      &((GatherCandidate*)self->candidate)->pos, (Vec4*)&buf);
+        PlaceColliderClearOfContacts((Collider*)self, (Vec4*)&buf, (Vec4*)&g_unitZVector);
     }
     SetColliderPartListed(self, a1 == 0);
     ListWalker it(&self->parts);
@@ -1737,8 +1737,8 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
         SetColliderPartListed((ObjectGatherer *)node, a1 == 0);
         node = it.Next();
     }
-    self->desc02()->m20(self, (Vec02 *)&D_00248D30);
-    self->desc02()->m21(self, (Vec02 *)&D_00248D30);
+    self->desc02()->m20(self, (Vec4 *)&g_zeroVector);
+    self->desc02()->m21(self, (Vec4 *)&g_zeroVector);
 }
 
 // Switches the gatherer to a new mode (nothing if unchanged): leaving 4 un-suspends it; mode 0 is
@@ -1747,7 +1747,7 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
 // scatters objects at its position, and 4 suspends it for 3 to 15 s.
 void SetObjectGathererState(ObjectGatherer* self, s32 mode)
 {
-    Vec02 offset;
+    Vec4 offset;
     if (self->state == mode) {
         return;
     }
@@ -1755,7 +1755,7 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         SetObjectGathererSuspended(self, 0);
         self->candidate = 0;
     }
-    ((PlacedObject*)self->f5FC)->visibilityMask = 14;
+    ((PlacedObject*)self->companionObject)->visibilityMask = 14;
     self->modeEndTime = g_gameClock[1];
     switch (mode) {
     case 0:
@@ -1779,7 +1779,7 @@ void SetObjectGathererState(ObjectGatherer* self, s32 mode)
         break;
     case 3:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f664, self->f668);
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->scatterCount, self->scatterHoldsCounts);
         self->desc->m03(self);
         break;
     case 4:
@@ -1912,7 +1912,7 @@ void StartAimBlendGrid(AimBlendGrid* self)
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
     SetBlendItemWeights(self->blendAnimation, 0x20, 0x18, self->slots);
     SampleAnimationFrameChain(self->blendAnimation, self->blendAnimation->pC0->p8->f8, 0.0f, (PlacedObject*)self->sampledObject, (PlacedObject*)self->rootObject, 1,
-                  (Vec02*)&self->blendPoint, 0, 0, 0);
+                  (Vec4*)&self->blendPoint, 0, 0, 0);
     self->sampleTime = self->blendAnimation->pC0->p8->f8;
     if (self->hasSecondVector != 0) {
         ComputeGridBlendWeights(self, buf, self->secondBlendX, self->secondBlendY, self->secondBlendZ);
@@ -1921,7 +1921,7 @@ void StartAimBlendGrid(AimBlendGrid* self)
         for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
         SetBlendItemWeights(self->blendAnimation, 0x20, 0x18, self->slots);
         SampleAnimationFrameChain(self->blendAnimation, self->blendAnimation->pC0->p8->f8, 0.0f, (PlacedObject*)self->sampledObject, (PlacedObject*)self->rootObject, 1,
-                      (Vec02*)&self->originPoint, 0, 0, 0);
+                      (Vec4*)&self->originPoint, 0, 0, 0);
     } else {
         self->originPoint = self->blendPoint;
     }
@@ -1934,9 +1934,9 @@ void StartAimBlendGrid(AimBlendGrid* self)
 void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
 {
     s32 tri[3];
-    Vec02 side1;
-    Vec02 side2;
-    Vec02 normal;
+    Vec4 side1;
+    Vec4 side2;
+    Vec4 normal;
     f32 weight[4];
     s32 i;
     s32 j;
@@ -1945,7 +1945,7 @@ void BlendCellCornerRecords(AimBlendGrid* self, GridCell* cell, Quad16* point)
         for (j = 0; j < 3; j++) {
             tri[j] = cell->corner[(i + j + 1) % 4];
         }
-        Vec02* points = (Vec02*)self->mesh.verts;
+        Vec4* points = (Vec4*)self->mesh.verts;
         Vu0::Q(side1) = Vu0::Sub(Vu0::Q(points[tri[1]]), Vu0::Q(points[tri[0]]));
         Vu0::Q(side2) = Vu0::Sub(Vu0::Q(points[tri[2]]), Vu0::Q(points[tri[0]]));
         Vu0::Q(normal) = Vu0::Cross(Vu0::Q(side1), Vu0::Q(side2));
@@ -2067,16 +2067,16 @@ struct FramePoint_0019CE50 {
     u8 pad0[0x18];
     void* object;           // 0x18
     u8 pad1C[0x40 - 0x1C];
-    Vec02 point;            // 0x40
+    Vec4 point;            // 0x40
 };
 
 
 // Gives where a point fixed to an object's frame is at time t: the object's position and rotation
 // at t applied to the point.
-void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
+void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec4* out, f32 t)
 {
-    Vec02 pos;
-    Mat02 rot;
+    Vec4 pos;
+    Mat3 rot;
     ComputeObjectFrameAtTime((PlacedObject*)p->object, 0, &pos, &rot, 0, 0, t);
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
 }
@@ -2090,24 +2090,24 @@ struct FrameOwner_0019CEC0 {
 // The point func_0019CE50 places at time t, in the frame of self's object at that time.
 void PlaceFramePointInOwnerFrame(void* self, void* p, void* out, f32 t)
 {
-    Vec02 pos;
-    Vec02 point;
-    Mat02 rot;
+    Vec4 pos;
+    Vec4 point;
+    Mat3 rot;
     PlaceFramePointAtTime(self, (FramePoint_0019CE50*)p, &point, t);
     ComputeObjectFrameAtTime((PlacedObject*)(((FrameOwner_0019CEC0*)self)->object), 0, &pos, &rot, 0, 0, t);
     Vu0::Q(point) = Vu0::Sub(Vu0::Q(point), Vu0::Q(pos));
-    Vu0::Q(*(Vec02*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
+    Vu0::Q(*(Vec4*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
 }
 
 struct TreePlane {
-    Vec02 normal;
+    Vec4 normal;
     f32 dist;
 };
 
 // Walks the plane tree from node (the root if null) to the leaf cell that holds pt: it goes to the
 // child on the side of the node's plane that the point is on (distance within 0.0001 counts as on
 // the plane and tries the far child first, then the near one) and gives the cell found.
-u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec02* pt)
+u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec4* pt)
 {
     if (node == 0) {
         node = self->nodes;
@@ -2149,12 +2149,12 @@ u8* FindPlaneTreeLeafAtPoint(AimBlendGrid* self, AimPlaneNode* node, Vec02* pt)
 void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void* e)
 {
     u8* self = (u8*)a;
-    Vec02* from = (Vec02*)b;
-    Vec02* out = (Vec02*)c;
+    Vec4* from = (Vec4*)b;
+    Vec4* out = (Vec4*)c;
     s32* hit = (s32*)d;
     f32* dist = (f32*)e;
-    Vec02 point;
-    Vec02 best;
+    Vec4 point;
+    Vec4 best;
     s32 first = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, from);
     s32 found;
     if (first != 0) {
@@ -2174,7 +2174,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
     f32 hi = 1.0f;
     for (s32 i = 9; i >= 0; i--) {
         f32 t = (lo + hi) * 0.5f;
-        Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec02*)&((AimBlendGrid*)self)->originPoint), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
+        Vu0::Q(point) = Vu0::MulXSum(Vu0::Q(*(Vec4*)&((AimBlendGrid*)self)->originPoint), Vu0::Scalar(1.0f - t), Vu0::Q(*from), Vu0::Scalar(t));
         s32 r = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, &point);
         if (r != 0) {
             found = r;
@@ -2185,7 +2185,7 @@ void FindNearestAcceptedPointOnSegment(void* a, void* b, void* c, void* d, void*
         }
     }
     if (found == 0) {
-        best = *(Vec02*)&((AimBlendGrid*)self)->blendPoint;
+        best = *(Vec4*)&((AimBlendGrid*)self)->blendPoint;
         found = (s32)FindPlaneTreeLeafAtPoint((AimBlendGrid*)self, 0, &best);
     }
     if (out != 0) {
@@ -2229,12 +2229,12 @@ void TrackAimTargetPoint(Player* self, AimBlendGrid* dst, PathCurveObject* src, 
     Quad16 q3;
     GridCell* w40;
     s32 w44;
-    TransformPointBetweenFrames(0, (PlacedObject*)src->parent, &self->v140, (Vec02*)&q0);
+    TransformPointBetweenFrames(0, (PlacedObject*)src->parent, &self->v140, (Vec4*)&q0);
     PathCurve* o = src->curve;
     if (o->vt->m12 != 0) {
         o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);
     }
-    TransformPointBetweenFrames((PlacedObject*)src->parent, (PlacedObject*)self, (Vec02*)&q1, (Vec02*)&q2);
+    TransformPointBetweenFrames((PlacedObject*)src->parent, (PlacedObject*)self, (Vec4*)&q1, (Vec4*)&q2);
     FindNearestAcceptedPointOnSegment(dst, &q2, &q3, &w40, &w44);
     BlendCellCornerRecords(dst, w40, &q3);
 }

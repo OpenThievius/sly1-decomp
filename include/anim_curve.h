@@ -6,7 +6,7 @@
 // Four factories make them, each by the curve's kind (stored at +4): func_00120FB0 the
 // position curves (tables D_002196B8, D_002196C8, D_002196D8), func_00121050 the rotation
 // curves (D_002196E8, D_002196F8, D_00219708), func_001210F0 the scale curves (D_00219718,
-// D_00219728) and func_00121160 the weight curves (D_00219668 ... D_002196A8). Track83 holds
+// D_00219728) and func_00121160 the weight curves (D_00219668 ... D_002196A8). AnimationTrack holds
 // them (func_0012B8C8). Each family has its own base table (D_00219600's words 10..25: four
 // tables of four slots nothing refers to), so the families are four classes of their own, with
 // no common type but the prefix every curve begins with, {table, kind}: AnimCurve.
@@ -162,9 +162,9 @@ struct PositionCurve {
 struct __attribute__((aligned(16))) VectorKey {
     f32 time;               // 0x00
     u8 pad04[0x10 - 0x04]; // 0x04
-    Vec02 v0;               // 0x10
-    Vec02 v1;               // 0x20
-    Vec02 v2;               // 0x30
+    Vec4 v0;               // 0x10
+    Vec4 v1;               // 0x20
+    Vec4 v2;               // 0x30
 };
 
 // Kind 0 (D_002196B8, 0x30 bytes): a base vector and a weight curve for each axis (func_0011F798
@@ -172,7 +172,7 @@ struct __attribute__((aligned(16))) VectorKey {
 struct AxisPositionCurve : PositionCurve {
     s32 closed;                 // 0x08: the first and last values are under 1.0 apart (or there are none)
     u8 pad0C[0x10 - 0x0C]; // 0x0C
-    Vec02 base;                 // 0x10
+    Vec4 base;                 // 0x10
     WeightCurve* axis[3];      // 0x20
     u8 pad2C[0x30 - 0x2C]; // 0x2C
 };
@@ -219,7 +219,7 @@ struct RotationCurve {
 struct AxisRotationCurve : RotationCurve {
     s32 closed;                 // 0x08
     u8 pad0C[0x10 - 0x0C]; // 0x0C
-    Vec02 base;                 // 0x10
+    Vec4 base;                 // 0x10
     WeightCurve* axis[3];      // 0x20
     u8 pad2C[0x30 - 0x2C]; // 0x2C
 };
@@ -260,7 +260,7 @@ struct ScaleCurve {
 // Kind 0 (D_00219718, 0x30 bytes): as the position curves' kind 0.
 struct AxisScaleCurve : ScaleCurve {
     u8 pad08[0x10 - 0x08]; // 0x08
-    Vec02 base;                 // 0x10
+    Vec4 base;                 // 0x10
     WeightCurve* axis[3];      // 0x20
     u8 pad2C[0x30 - 0x2C]; // 0x2C
 };

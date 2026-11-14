@@ -33,7 +33,7 @@ void FormatCounterCaption(Self_1AB2B8_eu* self)
         }
         break;
     case 6:
-        if (g_currentWorld->f2354 != 0) {
+        if (g_currentWorld->scatterCountEnabled != 0) {
             FormatToStringBounded(buf, 0x200, "%c%d", 0x43, self->f570);
         } else {
             buf[0] = 0;

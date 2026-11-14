@@ -365,7 +365,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 // the playing animation players' times so they stay at the same phase of the new duration.
 void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 {
-    AnimationPlayer* node = (AnimationPlayer*)self->f6C;
+    AnimationPlayer* node = (AnimationPlayer*)self->playerList;
     s32 i;
     s32 count;
     BlendSequence* ent;
@@ -373,24 +373,24 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 
     if (node != 0) {
         do {
-            node->time = node->time / self->f34;
+            node->time = node->time / self->blendedDuration;
             node = node->animNext;
         } while (node != 0);
     }
-    CopyMemory(self->fB8, a3, a2 * a1);
-    count = self->fBC;
+    CopyMemory(self->itemWeights, a3, a2 * a1);
+    count = self->sequenceCount;
     if (count == 0) {
-        ComputeBlendedDuration(a1, a2, a3, 0, 0, 0, &self->f34);
+        ComputeBlendedDuration(a1, a2, a3, 0, 0, 0, &self->blendedDuration);
     } else {
         for (i = 0; i < count; i++) {
             ent = (BlendSequence*)((u8*)self->pC0 + i * 12);
-            ComputeBlendedDuration(a1, a2, a3, ent->stride, ent->count, ent->pairs, &self->f34);
+            ComputeBlendedDuration(a1, a2, a3, ent->stride, ent->count, ent->pairs, &self->blendedDuration);
         }
     }
-    node = (AnimationPlayer*)self->f6C;
+    node = (AnimationPlayer*)self->playerList;
     if (node != 0) {
         do {
-            node->time = node->time * self->f34;
+            node->time = node->time * self->blendedDuration;
             SettleListedPoseSources(node);
             node = node->animNext;
         } while (node != 0);

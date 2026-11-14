@@ -13,7 +13,7 @@ struct FadeCubic {
     f32 Eval(f32 t) const { return c[0] + t * (c[1] + t * (c[2] + t * c[3])); }
 };
 struct ModelPartFade {
-    Vec02 axis;             // 0x00: the part's facing, turned by the object's transform
+    Vec4 axis;             // 0x00: the part's facing, turned by the object's transform
     FadeCubic cubic;        // 0x10: its weight by how squarely the camera sees it
 };
 struct ModelPartHook;
@@ -25,7 +25,7 @@ struct ModelPartHook {
     const ModelPartHookVt* vt;
 };
 struct ModelPart {
-    Vec02 pos;              // 0x00: the part's point in the object
+    Vec4 pos;              // 0x00: the part's point in the object
     f32 radius;             // 0x10
     s32 kind;               // 0x14
     u8 pad18[0x1C - 0x18];
@@ -37,7 +37,7 @@ struct ModelPart {
     void* cameraFacing;     // 0x34: a camera-facing matrix source
     ModelPartHook* hook;    // 0x38
     u8 pad3C[0x60 - 0x3C];
-    s32 f60;                // 0x60
+    s32 usesFarFade;        // 0x60: nonzero: a second fade by the far distance
     u8 pad64[0x68 - 0x64];
     void* matrix;           // 0x68: a matrix the transform is multiplied by
     u8 pad6C[0x70 - 0x6C];

@@ -12,11 +12,11 @@ void SetTextLayoutVerticalPlacement(Out_eu_1AD438* out, s32 v);
 void SetTextLayoutHorizontalAlign(Out_eu_1AD438* out, void* p);
 struct Out_eu_1AD438 {
     u8 d[0x20];
-    void Pos(f32 x, f32 y) { ((Layout_137228*)this)->Pos(x, y); }
-    void Size(f32 x, f32 y) { ((Layout_137228*)this)->Size(x, y); }
-    void Color(s32* c) { ((Layout_137228*)this)->Color(c); }
+    void Pos(f32 x, f32 y) { ((TextBoxLayout*)this)->Pos(x, y); }
+    void Size(f32 x, f32 y) { ((TextBoxLayout*)this)->Size(x, y); }
+    void Color(s32* c) { ((TextBoxLayout*)this)->Color(c); }
     void Link(void* p) { SetTextLayoutHorizontalAlign(this, p); }
-    void FlagB(s32 f) { ((Layout_137228*)this)->SetF18(f); }
+    void FlagB(s32 f) { ((TextBoxLayout*)this)->SetF18(f); }
     void FlagC(s32 f) { SetTextLayoutVerticalPlacement(this, f); }
 };
 struct Attach_eu_1AD438 { u8 pad0[0x18]; T217D_Word col; };

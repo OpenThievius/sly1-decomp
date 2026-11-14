@@ -38,8 +38,8 @@
 struct ObjectLink;
 struct PlacedObject;
 struct World;
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 struct DeferredRequest;
 // Types other files define, named by the parameters of their functions declared here.
 
@@ -210,20 +210,20 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
-        g_camera->ctl460.f20 = 100.0f;
+        g_camera->ctl460.zoomDivisor = 100.0f;
         PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
         SetTextPanelState(&g_typedTextCaptionBox, 5);
         g_camera->ctl460.anchorObject = (void*)self->f61C;
         if (self->f630 != 0) {
             *(Quad16*)g_camera->rotation = *(Quad16*)&self->m110.r[0];
-            *(Quad16*)g_camera->f90 = *(Quad16*)&self->m110.r[1];
-            *(Quad16*)g_camera->fA0 = *(Quad16*)&self->m110.r[2];
+            *(Quad16*)g_camera->rotationRow1 = *(Quad16*)&self->m110.r[1];
+            *(Quad16*)g_camera->rotationRow2 = *(Quad16*)&self->m110.r[2];
         }
         PushCameraController(g_camera, 6, &g_camera->ctl460, self, 0);
         PushStackValue(&g_camera->ctl460, self->f644);
         SetStateWalkerTarget(self->stateWalker, 0x359);
     } else {
-        g_camera->ctl460.f20 = 10.0f;
+        g_camera->ctl460.zoomDivisor = 10.0f;
         PopStackElement((ElementStack*)g_elementStack);
         RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, self, 0);
         PopStackValue(&g_camera->ctl460);
@@ -258,13 +258,13 @@ s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
 }
 
 struct SpanHit {
-    Vec02 point;
+    Vec4 point;
     u8 pad10[0x60];
 };
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-u8* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
+u8* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
 struct PlacementRecord;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
@@ -281,10 +281,10 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         u8* ang = (u8*)&pool->f150;
         f32 cx;
         f32 cy;
-        Vec02 a;
-        Vec02 b;
-        Vec02 lo;
-        Vec02 hi;
+        Vec4 a;
+        Vec4 b;
+        Vec4 lo;
+        Vec4 hi;
         Collider** list;
         s32 n;
 
@@ -293,14 +293,14 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vu0::Set(b, Vu0::FromFloats(cx * 0.003125f - 1.0f, 1.0f - cy * 0.0040584416f, 80000.0f));
         UnprojectCameraPoint(g_camera, (f32*)&a, &lo);
         UnprojectCameraPoint(g_camera, (f32*)&b, &hi);
-        Vec02 pos;
+        Vec4 pos;
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
         Collider* found = (Collider*)FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
         if (found != 0 && found->id != 1) {
             *(u8**)e0 = (u8*)found;
-            TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec02*)&hit, (Vec02*)&pool->fF0);
+            TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec4*)&hit, (Vec4*)&pool->fF0);
             pos = hit.point;
             if (IsObjectOfKind(found->root, 0xE) != 0 || IsObjectOfKind(found->root, 7) != 0) {
                 g_typedTextCaptionBox.palette = 2;
@@ -329,14 +329,14 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         } else {
             *(u8**)e0 = 0;
             // a field access here changes retail's code (the record pointer e0 is kept in a register)
-            *(Vec02*)(e0 + 0x10) = hi;
+            *(Vec4*)(e0 + 0x10) = hi;
             g_typedTextCaptionBox.palette = 0;
             pos = hi;
         }
         PopBackMemoryMark();
-        Vec02 c0;
-        Mat02 rot;
-        Vec02 d;
+        Vec4 c0;
+        Mat3 rot;
+        Vec4 d;
         GetPlacementRecordTransform((PlacementRecord*)place, &c0, rot.r, 0);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(c0));
         // a field access here changes retail's code (the record pointer is kept in a register)
@@ -458,7 +458,7 @@ struct ArcPointStep {
 // Initialises the arc element (its kinds 0x1A and the other one mirror each other): size 160 by
 // 125.4, the edge positions and the 57 points, each with an angular step of 1/57 and its start
 // state.
-void InitArcPoints(T217D_3F0* self, s32 kind)
+void InitArcPoints(HeldItemSparkle* self, s32 kind)
 {
     self->w = 160.0f;
     self->h = 125.4f;
@@ -533,7 +533,7 @@ void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 // Creates the arc's sprite: a cone volume object (class 0x51) in mode 1 with the global cone volume
 // colour, angles and levels and the arc's own range.
-void CreateArcSprite(T217D_3F0* self)
+void CreateArcSprite(HeldItemSparkle* self)
 {
     SetupScreenElementText(self);
     self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
@@ -551,16 +551,16 @@ void CreateArcSprite(T217D_3F0* self)
 
 // Gives back the first and one-past-last of the arc's 57 points that are visible: size (0 to 1) of
 // the 57 points, centred.
-void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
+void GetArcVisibleRange(HeldItemSparkle* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 // Writes the GIF vertices of the arc's outline: in display mode 4 a plain rectangle at the
 // element's shown position and size (with the y scale for the screen), otherwise the visible part
 // of the arc, between the arc's two edges, as a strip.
-void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
+void WriteArcOutlineVertices(HeldItemSparkle* self, PacketWriter* c, s32 k)
 {
-    if (D_00270458 == 4) {
+    if (g_displayMode == 4) {
         f32 y = self->shownY;
         f32 x = self->shownX;
         s32 x0 = (s32)((x + 1728.0f) * 16.0f);
@@ -614,7 +614,7 @@ struct ColorLerp {
 // The arc's points: a quad from the edge to each point, coloured from its own colour toward
 // grey by its level, then sparkles scattered at random over each point's span, more the
 // brighter it is.
-void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf)
+void WriteArcPointVertices(HeldItemSparkle* self, PacketWriter* buf)
 {
     s32 first, last;
     GetArcVisibleRange(self, &first, &last);
@@ -693,7 +693,7 @@ struct FadeClamp {
 // Writes the GIF vertex data for the arc's tick marks: the colour is blended from
 // g_arcTickColorFrom to g_arcTickColorTo by a fade value that moves over 0.2 s (fade 0 up, fade 1
 // down) since fadeSince, then each visible tick's vertices are added.
-void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
+void WriteArcTickVertices(HeldItemSparkle* self, PacketWriter* buf)
 {
     Rgba4 c;
     f32 t;
@@ -754,12 +754,12 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 
 extern u8 g_gsPacketWriter[];
 
-void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf);
-void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf);
+void WriteArcPointVertices(HeldItemSparkle* self, PacketWriter* buf);
+void WriteArcTickVertices(HeldItemSparkle* self, PacketWriter* buf);
 
 // When drawing the arc is allowed, writes a GIF tag with two register writes (0x47, 0x42) and then
 // the arc's point and tick vertices to the GS packet.
-void DrawArc(T217D_3F0* self)
+void DrawArc(HeldItemSparkle* self)
 {
     u8* s = g_gsPacketWriter;
     if (IsArcDrawAllowed()) {
@@ -774,7 +774,7 @@ void DrawArc(T217D_3F0* self)
 extern f32 g_elapsedTime;
 
 // Sets the arc's fade state and notes the elapsed time it changed at.
-void SetArcFade(T217D_3F0* a0, s32 a1)
+void SetArcFade(HeldItemSparkle* a0, s32 a1)
 {
     if (a1 != a0->fade) {
         a0->fade = a1;
@@ -782,26 +782,26 @@ void SetArcFade(T217D_3F0* a0, s32 a1)
     }
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 // Makes the arc's target its current object: the old one gets its method 3 (unless it is the
 // special object in display mode 4), the new one its method 2, the tree-records value (not in mode
 // 4) and flag bit 32 of its flags.
-void ApplyArcTarget(T217D_3F0* self)
+void ApplyArcTarget(HeldItemSparkle* self)
 {
     PlacedObject* cur = (PlacedObject*)self->current;
     if ((PlacedObject*)self->target == cur) {
         return;
     }
     if (cur != 0) {
-        if (!(D_00270458 == 4 && cur == (PlacedObject*)self->special)) {
+        if (!(g_displayMode == 4 && cur == (PlacedObject*)self->special)) {
             cur->desc->m03(cur);
         }
     }
     self->current = self->target;
     if (self->current != 0) {
         ((PlacedObject*)self->current)->desc->m02((PlacedObject*)self->current);
-        if (D_00270458 != 4) {
+        if (g_displayMode != 4) {
             SetObjectTreeRecordsValue((PlacedObject*)self->current, self);
         }
         ((PlacedObject*)self->current)->flags |= 0x100000000UL;
@@ -810,12 +810,12 @@ void ApplyArcTarget(T217D_3F0* self)
 
 extern f32 g_gameClock[];
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // Changes the arc's phase: 0 plays sound 0x8C and resets the 57 points to full level with random
 // targets and fixed rates, 2 plays sound 0x8D, and the other phases set their own point levels.
-void SetArcPhase(T217D_3F0* self, s32 mode)
+void SetArcPhase(HeldItemSparkle* self, s32 mode)
 {
     if (mode == self->phase) {
         return;
@@ -848,18 +848,18 @@ void SetArcPhase(T217D_3F0* self, s32 mode)
     self->phaseSince = g_gameClock[4];
 }
 
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 // Sets the arc's screen element mode; on leaving mode 0 it sets the element's offset and size by
 // the display mode (640 by 360 in mode 4, 160 by 125.4 otherwise), and with mode 2 it restarts the
 // phase 3.
-void SetArcMode(T217D_3F0* self, s32 value)
+void SetArcMode(HeldItemSparkle* self, s32 value)
 {
     s32 old = self->mode;
     SetScreenElementMode(self, value);
     if (old == value) return;
     if (old != 0) goto done;
-    if (D_00270458 == 4) {
+    if (g_displayMode == 4) {
         self->place->dy = 0.0f;
         SetScreenElementSize(self, 640.0f, 360.0f);
     } else {
@@ -868,21 +868,21 @@ void SetArcMode(T217D_3F0* self, s32 value)
     }
 done:
     if (value != 2) return;
-    if (D_00270458 == 4) return;
+    if (g_displayMode == 4) return;
     self->phase = -1;
     SetArcPhase(self, 3);
 }
 
 extern f32 g_gameClock[];
 extern s32 D_00270448;
-extern s32 D_00270458;
+extern s32 g_displayMode;
 
 struct RampProfile;
 
 // Per-frame update of the arc screen element (a ring of 57 points): works out the mode and phase
 // from whether it has a current and a target object and the display mode, calls SetArcMode and
 // SetArcPhase, and steps each point's level and target by their rates.
-void UpdateArc(T217D_3F0* self)
+void UpdateArc(HeldItemSparkle* self)
 {
     UpdateScreenElementSlide(self);
     s32 state = self->mode;
@@ -938,7 +938,7 @@ void UpdateArc(T217D_3F0* self)
             }
             break;
         }
-        if (D_00270458 != 4)
+        if (g_displayMode != 4)
         {
             self->pulse = ApproachValueWithRamp((RampProfile*)&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
             if (AreFloatsNearlyEqual(self->pulse, self->pulseTarget, 1e-4f) != 0)
@@ -1014,7 +1014,7 @@ struct ArcDrawRequest;
 void DrawArcOutlinePacket(ArcDrawRequest* request);
 void DrawArcTickPacket(ArcDrawRequest* request);
 
-// What an arc holds (T217D_3F0::current): the camera zoom it is seen at, where on the screen it
+// What an arc holds (HeldItemSparkle::current): the camera zoom it is seen at, where on the screen it
 // stands (a depth and the fractions of the arc's box), its offset from the point found, and its
 // point in the special object's frame.
 struct ArcHeld : PlacedObject {
@@ -1024,13 +1024,13 @@ struct ArcHeld : PlacedObject {
     f32 u;                  // 0x2DC
     f32 v;                  // 0x2E0
     u8 pad2E4[0x2F0 - 0x2E4];
-    Vec02 offset;           // 0x2F0: in the camera's frame
-    Vec02 point;            // 0x300: in the special object's frame
+    Vec4 offset;           // 0x2F0: in the camera's frame
+    Vec4 point;            // 0x300: in the special object's frame
 };
 
 // A placement handed to slot 36: a matrix with its translation and a scale.
 struct ArcPlacement {
-    Vec02 rows[4];
+    Vec4 rows[4];
     f32 scaleX;
     f32 scaleY;
 };
@@ -1041,7 +1041,7 @@ struct ArcQueueRequest {
     s32 f04;                // 0x04
     s32 count;              // 0x08
     u8 pad0C[0x60 - 0x0C];
-    T217D_3F0* arc;         // 0x60
+    HeldItemSparkle* arc;         // 0x60
     u8 pad64[0x80 - 0x64];
 };
 
@@ -1059,13 +1059,13 @@ static inline void ClearArcQueueRequest(ArcQueueRequest* request)
 // unprojected at its depth, then (state 2 and 3) 20 above and 150 out from the camera, moved by
 // the stick in state 2, or (state 4) at the special object's point; it is placed there and the
 // outline and the ticks are queued, the camera's zoom put back.
-void QueueArcDraw(T217D_3F0* self)
+void QueueArcDraw(HeldItemSparkle* self)
 {
-    Vec02 screen;
-    Vec02 world;
-    Vec02 aim;
-    Vec02 dir;
-    Mat02 basis;
+    Vec4 screen;
+    Vec4 world;
+    Vec4 aim;
+    Vec4 dir;
+    Mat3 basis;
     ArcPlacement place;
     s32 first;
     s32 last;
@@ -1116,19 +1116,19 @@ void QueueArcDraw(T217D_3F0* self)
                 dist = -dist;
             }
             cam = g_camera;
-            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->fA0), Vu0::Scalar(height)));
-            Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->f90), Vu0::Scalar(dist)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Vec::Of(cam->position).q, Vu0::MulX(Vu0::Q(cam->rotationRow2), Vu0::Scalar(height)));
+            Vu0::Q(aim) = Vu0::Add(Vu0::Q(aim), Vu0::MulX(Vu0::Q(cam->rotationRow1), Vu0::Scalar(dist)));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(aim), Vu0::Q(world));
-            BuildBasisFromXAndZHint(&dir, (const Vec02*)&cam->fA0, &basis);
+            BuildBasisFromXAndZHint(&dir, (const Vec4*)&cam->rotationRow2, &basis);
             BuildMatrixFromRotationAndTranslation(&world, &basis, (Mat4A*)&place);
-            Vec02 pos;
-            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat02*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));
+            Vec4 pos;
+            Vu0::Q(pos) = Vu0::Add(Vu0::Q(aim), Vu0::Rotate(*(Mat3*)&g_camera->rotation, Vu0::Q(((ArcHeld*)self->current)->offset)));
             ((PlacedObject*)self->sprite)->desc02()->m1D((PlacedObject*)self->sprite, &pos);
             break;
         }
         case 4: {
             PlacedObject* special = (PlacedObject*)self->special;
-            Vec02 pos;
+            Vec4 pos;
             if (special == 0) {
                 goto done;
             }
@@ -1169,14 +1169,14 @@ done:
 // The deferred request QueueArcDraw queues: the arc at 0x60.
 struct ArcDrawRequest {
     u8 pad00[0x60];
-    T217D_3F0* arc;         // 0x60
+    HeldItemSparkle* arc;         // 0x60
 };
 
 extern PacketWriter g_vifPacketWriter;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 
-void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* buf, s32 a);
+void WriteArcOutlineVertices(HeldItemSparkle* self, PacketWriter* buf, s32 a);
 
 // Draw callback of the arc's outline: skips an empty visible range, resets the camera's zoom to the
 // current object's for the draw when the two differ (and restores it after), then builds the packet
@@ -1185,12 +1185,12 @@ void DrawArcOutlinePacket(ArcDrawRequest* request)
 {
     PacketWriter buf;
     s32 first, last;
-    T217D_3F0* self = request->arc;
+    HeldItemSparkle* self = request->arc;
     GetArcVisibleRange(self, &first, &last);
     if (first == last) {
         return;
     }
-    if (D_00270458 != 4) {
+    if (g_displayMode != 4) {
         if (AreFloatsNearlyEqual(g_camera->zoom, ((ArcHeld*)self->current)->zoom, 1e-4f) == 0) {
             f32 zoom = g_camera->zoom;
             f32 f1C8 = g_camera->zoomGoal;
@@ -1243,7 +1243,7 @@ void DrawArcTickPacket(ArcDrawRequest* request)
 {
     PacketWriter buf;
     s32 first, last;
-    T217D_3F0* self = request->arc;
+    HeldItemSparkle* self = request->arc;
     GetArcVisibleRange(self, &first, &last);
     if (first == last) {
         return;
@@ -1286,12 +1286,12 @@ void DrawArcTickPacket(ArcDrawRequest* request)
     PopBackMemoryMark();
 }
 
-void SetArcSpecialObject(T217D_3F0* self, void* a1);
+void SetArcSpecialObject(HeldItemSparkle* self, void* a1);
 
 // Sets the object the arc points at. When the caption box is in state 4 the arc is retargeted at
 // once: with a target it goes to phase 1 and fades up, without one it goes to phase 3 and clears
 // its special object.
-void SetArcTarget(T217D_3F0* self, void* value)
+void SetArcTarget(HeldItemSparkle* self, void* value)
 {
     if (value == self->target) return;
     if (self->target == 0) {
@@ -1320,7 +1320,7 @@ void SetArcTarget(T217D_3F0* self, void* value)
 
 // Replaces the arc's special object, clearing flag bit 32 on the old one and setting it on the new
 // one.
-void SetArcSpecialObject(T217D_3F0* self, void* a1)
+void SetArcSpecialObject(HeldItemSparkle* self, void* a1)
 {
     PlacedObject* old = (PlacedObject*)self->special;
     if (old != 0) {
@@ -1333,7 +1333,7 @@ void SetArcSpecialObject(T217D_3F0* self, void* a1)
 }
 
 // Resets the arc element: size, current and target object cleared and phase 3.
-void ResetArc(T217D_3F0* self)
+void ResetArc(HeldItemSparkle* self)
 {
     ResetScreenElement(self);
     self->size = 0;

@@ -7,9 +7,9 @@
 #include "common.h"
 
 struct BaseObject;
-struct Callback01;
 struct ConeVolume;
 struct LinePoints;
+struct ObjectCallback;
 struct Quad16;
 struct R11B008Node;
 struct U64P;
@@ -33,8 +33,8 @@ void GetObjectAttached(BaseObject* a0, s32* out);
 void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 void CloneObject(BaseObject* self, BaseObject* src);
 void CopyObjectData(BaseObject* self, BaseObject* src);
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
-void RemoveCallbackNode(World* mgr, Callback01** link, void* fn, void* ctx);
+void AddCallbackNode(World* world, ObjectCallback** head, void* fn, void* ctx);
+void RemoveCallbackNode(World* mgr, ObjectCallback** link, void* fn, void* ctx);
 void AddObjectCallback(BaseObject* self, void* fn, void* ctx);
 void RemoveObjectCallback(BaseObject* self, void* fn, void* ctx);
 void AddObjectListener(BaseObject* self, BaseObject* src);

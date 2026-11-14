@@ -44,16 +44,16 @@
 #include "functions/text_panel.h"
 #include "functions/warp_menu.h"
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
 struct BaseObject;
 
 struct BaseObject;
-struct Mat02;
+struct Mat3;
 
 struct BaseObject;
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 // Types other files define, named by the parameters of their functions declared here.
@@ -68,11 +68,11 @@ struct StringLayout;
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PopFontScale(Font* font);
 void* InitTextReader(TextReader* self, char* text, Font* font);
-struct Layout_137228;
+struct TextBoxLayout;
 struct PacketWriter;
 struct TextReader;
 struct Vec4U;
-void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
+void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 
 void UnregisterObject(BaseObject* self);
 void ClearObjectPoolChoice(ObjectPool* p);
@@ -109,7 +109,7 @@ extern u8 g_memoryCard[];
 
 
 
-extern T217D_2E0 g_gaugeBarElement;
+extern GaugeBar g_gaugeBarElement;
 
 
 
@@ -149,11 +149,11 @@ struct PlacementRecord {
     void* frameObject;
     PlacedObject* placedObject;
     u8 pad0[4];
-    Vec02 pos;
-    Vec02 rot[3];
+    Vec4 pos;
+    Vec4 rot[3];
 };
 
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
+void GetObjectWorldRotation(BaseObject* self, Mat3* out);
 
 
 extern u8 g_elapsedTime[];
@@ -185,23 +185,23 @@ extern void* const g_screenElements[];
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 
-extern const Fn_Table D_00217E30[];
-extern const Fn_Table D_00217E80[];
+extern const Fn_Table g_reserveCountCaptionMethods[];
+extern const Fn_Table g_collectedItemCaptionMethods[];
 extern const Fn_Table D_00217ED0[];
 extern const Fn_Table D_00217F20[];
-extern const Fn_Table D_00217F70[];
+extern const Fn_Table g_pairControllerCountCaptionMethods[];
 extern const Fn_Table g_gaugeAmountCaptionMethods[];
 extern const Fn_Table D_00218010[];
-extern const Fn_Table D_00218060[];
-extern const Fn_Table D_002180B0[];
-extern const Fn_Table D_00218100[];
-extern const Fn_Table D_00218150[];
-extern const Fn_Table D_002181A0[];
-extern const Fn_Table D_002181F0[];
-extern const Fn_Table D_00218240[];
-extern const Fn_Table D_00218290[];
+extern const Fn_Table g_pathFollowerSecondCountCaptionMethods[];
+extern const Fn_Table g_pathFollowerFirstCountCaptionMethods[];
+extern const Fn_Table g_hitCountCaptionAMethods[];
+extern const Fn_Table g_hitCountCaptionBMethods[];
+extern const Fn_Table g_gaugeColliderCaptionMethods[];
+extern const Fn_Table g_completionPercentCaptionMethods[];
+extern const Fn_Table g_firstTallyCaptionMethods[];
+extern const Fn_Table g_secondTallyCaptionMethods[];
 extern const Fn_Table g_gaugeBarElementMethods[];
-extern const Fn_Table D_00218330[];
+extern const Fn_Table g_buttonHintElementMethods[];
 extern const Fn_Table g_pointerTextCaptionMethods[];
 extern const Fn_Table g_copiedTextCaptionMethods[];
 extern const Fn_Table g_hintGlyphElementMethods[];
@@ -280,7 +280,7 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key);
 
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 
@@ -293,7 +293,7 @@ void SetPauseMenuMode();
 void ShowPauseMenu();
 void HidePauseMenu();
 void DrawPauseMenu();
-struct T217D_3F0;
+struct HeldItemSparkle;
 void InitWarpMenu();
 void HandleWarpMenuInput();
 void SetWarpMenuOpen();
@@ -370,43 +370,43 @@ ElementPlaceTable g_elementPlaces = {
 
 // The 37 screen objects, in address order (D_002486B0 lists them in another order). They have
 // no initialiser: func_001A9C68 installs their tables at run time.
-T217D_E30 g_reserveCountCaption;
-T217D_E30 g_collectedItemCaption;
-T217D_E30 D_0026CBC8;
-T217D_E30 D_0026CE48;
-T217D_E30 g_pairControllerCountCaption;
-T217D_E30 g_gaugeAmountCaption;
-T217D_E30 g_pathFollowerFirstCountCaption;
-T217D_E30 D_0026D848;
-T217D_E30 g_pathFollowerSecondCountCaption;
-T217D_E30 g_hitCountCaptionA;
-T217D_E30 g_hitCountCaptionB;
-T217D_2E0 g_gaugeBarElement;
-T217D_E30 g_gaugeColliderCaption;
-T217D_510 g_timerElement;
-T217D_1380 g_timerCaption;
-T217D_330 g_buttonHintElement;
-T217D_380 g_pointerTextCaption;
-T217D_3D0 g_copiedTextCaption;
-T217D_420 g_hintGlyphElement;
-T217D_0F0 g_mapScreenList;
-T217D_12E0 g_selectionCaption;
-T217D_1330 g_gridSelector;
-T217D_6D0 g_pauseMenuElement;
-T217D_440 g_typedTextCaptionBox;
-T217D_BF0 g_spinningSpriteElement;
-T217D_3F0 D_002708E0;
-T217D_3F0 D_00271558;
-T217D_560 g_letterboxElement;
-T217D_E30 g_firstTallyCaption;
-T217D_E30 g_secondTallyCaption;
-T217D_470 g_titleElement;
-T217D_4C0 g_promptElement;
-T217D_720 g_stackedCaptionGroup;
-T217D_5B0 D_002739F0;
-T217D_5B0 D_00273C50;
-T217D_600 g_cyclingGlyphElement;
-T217D_E30 g_completionPercentCaption;
+CounterCaption g_reserveCountCaption;
+CounterCaption g_collectedItemCaption;
+CounterCaption D_0026CBC8;
+CounterCaption D_0026CE48;
+CounterCaption g_pairControllerCountCaption;
+CounterCaption g_gaugeAmountCaption;
+CounterCaption g_pathFollowerFirstCountCaption;
+CounterCaption D_0026D848;
+CounterCaption g_pathFollowerSecondCountCaption;
+CounterCaption g_hitCountCaptionA;
+CounterCaption g_hitCountCaptionB;
+GaugeBar g_gaugeBarElement;
+CounterCaption g_gaugeColliderCaption;
+TimerElement g_timerElement;
+SprintCaption g_timerCaption;
+ButtonHintElement g_buttonHintElement;
+PointerTextCaption g_pointerTextCaption;
+CopiedTextCaption g_copiedTextCaption;
+HintGlyphElement g_hintGlyphElement;
+WarpPageList g_mapScreenList;
+ObjectScreenCaption g_selectionCaption;
+ChoiceGridCaption g_gridSelector;
+PauseMenu g_pauseMenuElement;
+CaptionBox g_typedTextCaptionBox;
+AimReticle g_spinningSpriteElement;
+HeldItemSparkle g_leftArcElement;
+HeldItemSparkle g_rightArcElement;
+LetterboxElement g_letterboxElement;
+CounterCaption g_firstTallyCaption;
+CounterCaption g_secondTallyCaption;
+TitleElement g_titleElement;
+PromptElement g_promptElement;
+StackedCaptionGroup g_stackedCaptionGroup;
+BeatGlyphElement g_bossBeatGlyphElement;
+BeatGlyphElement g_beatPressGlyphElement;
+CyclingGlyphElement g_cyclingGlyphElement;
+CounterCaption g_completionPercentCaption;
 
 
 
@@ -460,7 +460,7 @@ void UnregisterObjectPool(ObjectPool* self)
 void* GetObjectPoolShare(ObjectPool* self)
 {
     if (self->sub == 0) {
-        Sub8C* p = (Sub8C*)AllocateZeroedFrontMemory(0x20);
+        LentRecord* p = (LentRecord*)AllocateZeroedFrontMemory(0x20);
         self->sub = p;
         *(ObjectPool**)p = self;
     }
@@ -512,9 +512,9 @@ void SpawnObjectPoolCopies(ObjectPool* self)
             goto done;
         c0:
             self->sub->f8 = 1;
-            SetListLinkOffset((List01*)&self->sub->lentTo, 0x18);
+            SetListLinkOffset((ObjectList*)&self->sub->lentTo, 0x18);
         c1: {
-                s32 r = CountListItems((List01*)&self->sub->lentTo);
+                s32 r = CountListItems((ObjectList*)&self->sub->lentTo);
                 s32 lim = r + 1;
                 s32 m = e->count;
                 s32 q = lim;
@@ -562,14 +562,14 @@ void CopyObjectPool(ObjectPool* self, ObjectPool* other)
             self->sub = 0;
         } else {
             other->sub->f8 = 1;
-            SetListLinkOffset((List01*)&other->sub->lentTo, 0x18);
+            SetListLinkOffset((ObjectList*)&other->sub->lentTo, 0x18);
             self->sub = 0;
         }
         GetObjectPoolShare(self);
         self->sub->lentOut = 1;
         self->sub->f8 = 2;
         self->sub->lentTo = other;
-        AppendToList((List01*)&other->sub->lentTo, self->sub);
+        AppendToList((ObjectList*)&other->sub->lentTo, self->sub);
     } else {
         self->items = (ObjectPoolEntry*)CopyToFrontMemory(other->count * 0x14, other->items);
     }
@@ -678,17 +678,17 @@ s32 IsObjectInPool(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->co
 // pool, not attached anywhere, and, for kinds 0x3B and 0x20, in their right state.
 s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
 {
-    Sub8C* group = self->sub;
+    LentRecord* group = self->sub;
 
     if (group != 0 && group->lentOut != 0) {
-        List01* list;
+        ObjectList* list;
         ObjectPool* skip;
         ListFrame it;
         u8* obj;
 
         switch (group->f8) {
         case 1:
-            list = (List01*)&group->lentTo;
+            list = (ObjectList*)&group->lentTo;
             skip = 0;
             break;
         case 2: {
@@ -697,7 +697,7 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key)
             if (e->chosenItem == (s32)key) {
                 return 0;
             }
-            list = (List01*)&e->sub->lentTo;
+            list = (ObjectList*)&e->sub->lentTo;
             break;
         }
         }
@@ -813,32 +813,32 @@ s32 HasObjectPoolChoice(ObjectPool* self)
 #include "object_message.h"
 #include "hit_target.h"
 #include "value_range.h"
-extern const Vec02 g_unitXVector;
-struct Released_1A8C90;
-typedef void (*ReleasedFn_1A8C90)(Released_1A8C90* self, void* a, void* b);
-struct ReleasedDesc_1A8C90 {
+extern const Vec4 g_unitXVector;
+struct ReleasedObject;
+typedef void (*ReleasedFn_1A8C90)(ReleasedObject* self, void* a, void* b);
+struct ReleasedObjectClass {
     u8 pad00[8];
     u32 flags;                      // 0x08
     u8 pad0C[0x18 - 0x0C];
-    void (*m18)(Released_1A8C90* self);                 // 0x18: into the parent's list
+    void (*m18)(ReleasedObject* self);                 // 0x18: into the parent's list
     u8 pad1C[0x84 - 0x1C];
-    void (*m84)(Released_1A8C90* self, Vec02* pos);     // 0x84: the position
-    void (*m88)(Released_1A8C90* self, void* rot);      // 0x88: the orientation
-    void (*m8C)(Released_1A8C90* self, Vec02* v);
-    void (*m90)(Released_1A8C90* self, Vec02* vel);     // 0x90: the velocity
-    void (*m94)(Released_1A8C90* self, Vec02* spin);    // 0x94: the spin
+    void (*m84)(ReleasedObject* self, Vec4* pos);     // 0x84: the position
+    void (*m88)(ReleasedObject* self, void* rot);      // 0x88: the orientation
+    void (*m8C)(ReleasedObject* self, Vec4* v);
+    void (*m90)(ReleasedObject* self, Vec4* vel);     // 0x90: the velocity
+    void (*m94)(ReleasedObject* self, Vec4* spin);    // 0x94: the spin
     u8 pad98[0x130 - 0x98];
-    void (*m130)(Released_1A8C90* self, void* frame, void* at);  // 0x130
+    void (*m130)(ReleasedObject* self, void* frame, void* at);  // 0x130
 };
-struct ReleasedTrack_1A8C90 { u8 pad00[0x60]; void* frame; u8 pad64[0xB0 - 0x64]; u32 flags; };
-struct Released_1A8C90 {
-    ReleasedDesc_1A8C90* desc;
+struct ReleasedObjectTrack { u8 pad00[0x60]; void* frame; u8 pad64[0xB0 - 0x64]; u32 flags; };
+struct ReleasedObject {
+    ReleasedObjectClass* desc;
     u8 pad004[0x190 - 0x004];
-    Vec02 v190;                     // 0x190
+    Vec4 v190;                     // 0x190
     u8 pad1A0[0x1D0 - 0x1A0];
-    Vec02 v1D0;                     // 0x1D0
+    Vec4 v1D0;                     // 0x1D0
     u8 pad1E0[0x224 - 0x1E0];
-    ReleasedTrack_1A8C90* track;    // 0x224
+    ReleasedObjectTrack* track;    // 0x224
     u8 pad228[0x554 - 0x228];
     f32 expiryTime;                 // 0x554: the game time at which the released object expires
     u8 pad558[0x690 - 0x558];
@@ -848,54 +848,54 @@ struct Released_1A8C90 {
     u8 pad6E8[0xC3C - 0x6E8];
     s32 fC3C;                       // 0xC3C
 };
-struct ReleaseHeading_1A8C90 { u32 flags; u8 pad04[0xC - 4]; f32 speed; };
-struct PoolOwner_1A8C90 { u8 pad00[8]; u32 flags; };
-struct PoolParent_1A8C90 { u8 pad00[0x50]; PoolOwner_1A8C90** root; };
-struct PoolView_1A8C90 {
+struct ReleaseDirection { u32 flags; u8 pad04[0xC - 4]; f32 speed; };
+struct ReleasePoolOwner { u8 pad00[8]; u32 flags; };
+struct ReleasePoolParent { u8 pad00[0x50]; ReleasePoolOwner** root; };
+struct ReleasePoolView {
     u8 pad000[0x18];
-    PoolParent_1A8C90* parent;      // 0x18
+    ReleasePoolParent* parent;      // 0x18
     u8 pad01C[0x3C - 0x1C];
-    Sub8C* sub;                     // 0x3C
+    LentRecord* sub;                     // 0x3C
     u8 pad040[0x48 - 0x40];
-    Released_1A8C90* chosen;        // 0x48
+    ReleasedObject* chosen;        // 0x48
     u8 pad04C[0x5C - 0x4C];
     void* frame;                    // 0x5C
     u8 pad060[0x68 - 0x60];
     void* mover;                    // 0x68
     u8 pad06C[0xB0 - 0x6C];
-    Vec02 velocity;                 // 0xB0
-    Vec02 spin;                     // 0xC0
+    Vec4 velocity;                 // 0xB0
+    Vec4 spin;                     // 0xC0
     ValueRange spinRange;           // 0xD0
     f32 life;                       // 0xD8
     u8 padDC[0xE0 - 0xDC];
     void* targetFrame;              // 0xE0
     PlacedObject* target;           // 0xE4
     u8 padE8[0xF0 - 0xE8];
-    Vec02 at;                       // 0xF0
+    Vec4 at;                       // 0xF0
     s32 aimMode;                    // 0x100
     u8 pad104[0x110 - 0x104];
     TimePolynomial poly;            // 0x110
     u8 pad11C[0x120 - 0x11C];
     ValueRange range;               // 0x120
     u8 pad128[0x150 - 0x128];
-    ReleaseHeading_1A8C90 heading;  // 0x150
+    ReleaseDirection heading;  // 0x150
 };
 
 struct FrameFollower;
-void GetPlacementRecordTransform(PlacementRecord* self, Vec02* a1, Vec02* a2, void* a3);
-void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, void* to);
+void GetPlacementRecordTransform(PlacementRecord* self, Vec4* a1, Vec4* a2, void* a3);
+void ComputeFrameFollowerPoint(FrameFollower* self, Vec4* target, Vec4* out, void* to);
 void GetPlacementRecordAngle(u8* self, f32* out, void* x);
 void GetPlacementRecordPitch(u8* self, f32* out, void* x);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void ForwardBallisticLaunchVelocity(f32 angle, Vec02* from, Vec02* to, Vec02* out, u8* rec);
+void ForwardBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-s32 ComputeBallisticLaunchVelocity(f32 angle, Vec02* from, Vec02* to, Vec02* out, u8* rec);
+s32 ComputeBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 // v made a unit vector, or the fallback when shorter than 1e-4; its length.
-static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
+static inline u128 NormalizeVectorOr(Vec4& v, const Vec4& fallback)
 {
     u128 len = Vu0::Length(Vu0::Q(v));
     if (Vu0::ToFloat(len) < 0.0001f) {
@@ -912,12 +912,12 @@ static inline u128 NormalizeVectorOr(Vec02& v, const Vec02& fallback)
 // event 0xD. Gives 1, or 0 when there is nothing to release.
 s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
 {
-    PoolView_1A8C90* self = (PoolView_1A8C90*)pool;
-    Vec02 pos;
-    Vec02 to;
-    Vec02 dir;
-    Mat02 rot;
-    Released_1A8C90* obj = self->chosen;
+    ReleasePoolView* self = (ReleasePoolView*)pool;
+    Vec4 pos;
+    Vec4 to;
+    Vec4 dir;
+    Mat3 rot;
+    ReleasedObject* obj = self->chosen;
     if (obj == 0) {
         ChooseObjectPoolItem((ObjectPool*)self);
         if (self->chosen == 0) {
@@ -936,7 +936,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     }
     if (self->frame != 0) {
         if (obj->track == 0) {
-            obj->track = (ReleasedTrack_1A8C90*)AllocateZeroedFrontMemory(0xC0);
+            obj->track = (ReleasedObjectTrack*)AllocateZeroedFrontMemory(0xC0);
         }
         obj->track->flags |= 0xC;
         obj->track->frame = self->frame;
@@ -946,24 +946,24 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     obj->desc->m84(obj, &pos);
     obj->desc->m88(obj, &rot);
     if (self->sub != 0 && self->sub->lentOut != 0) {
-        Vec02* q = (Vec02*)self->sub->f10;
+        Vec4* q = (Vec4*)self->sub->f10;
         obj->v190 = q[0];
         obj->v1D0 = q[1];
     }
     if (self->mover != 0) {
-        Vec02 vel;
-        Vec02 spin;
+        Vec4 vel;
+        Vec4 spin;
         ComputeObjectMotionInFrame((PlacedObject*)self->mover, 0, &((PlacedObject*)self->mover)->v140, &vel, &spin, 0, 0);
         obj->desc->m90(obj, &vel);
         obj->desc->m94(obj, &spin);
     } else {
-        Vec02* vel = vel;
+        Vec4* vel = vel;
         if (aim != 0) {
-            ReleaseHeading_1A8C90* h = &self->heading;
+            ReleaseDirection* h = &self->heading;
             if (IsObjectOfKind((BaseObject*)obj, 0x3E) || IsObjectOfKind((BaseObject*)obj, 0x3D)) {
-                Vec02 delta;
-                Vec02 scale;
-                Mat02 m;
+                Vec4 delta;
+                Vec4 scale;
+                Mat3 m;
                 f32 yaw;
                 f32 pitch;
                 Vu0::Q(delta) = Vu0::Sub(Vu0::Q(to), Vu0::Q(pos));
@@ -987,7 +987,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
                 Vu0::Q(scale) = Vu0::FromFloat(speed);
                 Vu0::Q(self->velocity) = Vu0::MulX(Vu0::Q(m.r[0]), Vu0::Q(scale));
             } else {
-                Vec02 delta;
+                Vec4 delta;
                 Vu0::Q(delta) = Vu0::Sub(Vu0::Q(to), Vu0::Q(pos));
                 if (h->flags & 2) {
                     f32 yaw;
@@ -1009,7 +1009,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
         }
         obj->desc->m90(obj, &self->velocity);
         if (0.0f < self->spinRange.hi) {
-            Vec02 spin;
+            Vec4 spin;
             f32 m = self->spinRange.Random();
             spin.x = RandomFloatInRange(-1.0f, 1.0f);
             spin.y = RandomFloatInRange(-1.0f, 1.0f);
@@ -1050,7 +1050,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
             obj->fC3C = 1;
         }
     }
-    Released_1A8C90** held = &obj;
+    ReleasedObject** held = &obj;
     TriggerScriptEvent((BaseObject*)self, 0xD, 1, &held);
     ClearObjectPoolChoice((ObjectPool*)self);
     return 1;
@@ -1064,7 +1064,7 @@ void ResetPlacementRecord(u8* self)
 {
     u8* p = self + 0x60;
     FillMemory(p, 0, 0x80);
-    *(Mat02*)(p + 0x20) = g_identityMatrix;
+    *(Mat3*)(p + 0x20) = g_identityMatrix;
 }
 
 // Clears the pool's release record (0x70 bytes) and sets its vector to (0, 1, 0) with a range of
@@ -1090,7 +1090,7 @@ void ClearObjectPoolHeadingRecord(u8* self)
 // Gives the release point of a placement record in a1 (position) and a2 (rotation): from its
 // position object, its frame object, its placed object, or its own position and rotation;
 // converted into the frame a3 when given.
-void GetPlacementRecordTransform(PlacementRecord* self, Vec02* a1, Vec02* a2, void* a3)
+void GetPlacementRecordTransform(PlacementRecord* self, Vec4* a1, Vec4* a2, void* a3)
 {
     if (self->positionObject != 0) {
         ConvertPositionToWorld((BaseObject*)self->positionObject, a1);
@@ -1099,7 +1099,7 @@ void GetPlacementRecordTransform(PlacementRecord* self, Vec02* a1, Vec02* a2, vo
         a2[2] = self->rot[2];
     } else if (self->frameObject != 0) {
         GetObjectWorldPosition((BaseObject*)self->frameObject, a1);
-        GetObjectWorldRotation((BaseObject*)self->frameObject, (Mat02*)a2);
+        GetObjectWorldRotation((BaseObject*)self->frameObject, (Mat3*)a2);
     } else {
         if (self->placedObject != 0) {
             a1[0] = self->placedObject->v140;
@@ -1116,7 +1116,7 @@ void GetPlacementRecordTransform(PlacementRecord* self, Vec02* a1, Vec02* a2, vo
     }
     if (a3 != 0) {
         TransformPointBetweenFrames(0, (PlacedObject*)a3, a1, a1);
-        TransformRotationBetweenFrames(0, (PlacedObject*)a3, (Mat02*)a2, (Mat02*)a2);
+        TransformRotationBetweenFrames(0, (PlacedObject*)a3, (Mat3*)a2, (Mat3*)a2);
     }
 }
 
@@ -1128,7 +1128,7 @@ struct FrameFollower {
     PlacedObject* frameObject;      // 0x00
     u8* anchor;                     // 0x04
     u8 pad08[0x10 - 0x08];
-    Vec02 pos;                      // 0x10
+    Vec4 pos;                      // 0x10
     s32 mode;                       // 0x20
     u8 pad24[0x50 - 0x24];
     f32 poly[3];                    // 0x50
@@ -1138,25 +1138,25 @@ struct FrameFollower {
 };
 
 // Left in this order: retail's call here evaluates the time before the pointers.
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 // Gives in *out the point a frame follower aims at, in the frame `to` (or the world): the point's
 // local position in its frame object (or its anchor's), in mode 0 as it is now, in modes 1 and 2
 // as the frame will be a time ahead (a clamped quadratic of the distance to the target).
-void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, void* to)
+void ComputeFrameFollowerPoint(FrameFollower* self, Vec4* target, Vec4* out, void* to)
 {
-    Vec02 here;
-    Mat02 rot;
-    Vec02 pos2;
-    Mat02 rot2;
+    Vec4 here;
+    Mat3 rot;
+    Vec4 pos2;
+    Mat3 rot2;
     void* frame;
-    Vec02* local;
+    Vec4* local;
     if (self->frameObject != 0 || self->anchor == 0) {
         frame = self->frameObject;
         local = &self->pos;
     } else {
         frame = *(void**)(self->anchor + 0x18);
-        local = (Vec02*)(self->anchor + 0x40);
+        local = (Vec4*)(self->anchor + 0x40);
     }
     switch (self->mode) {
     case 0:
@@ -1196,10 +1196,10 @@ void GetPlacementRecordAngle(u8* self, f32* out, void* x)
     f32 v[12];
     if (*(void**)(self + 0x10) != 0) {
         GetObjectWorldRotation(*(void**)(self + 0x10), v);
-        TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat02*)v, (Mat02*)v);
+        TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat3*)v, (Mat3*)v);
         *out = ArctangentOfRatio(v[1], v[0]);
     } else if (*(u8**)(self + 0x14) != 0) {
-        TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat02*)(*(u8**)(self + 0x14) + 0x110), (Mat02*)v);
+        TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat3*)(*(u8**)(self + 0x14) + 0x110), (Mat3*)v);
         *out = ArctangentOfRatio(v[1], v[0]);
     } else {
         *out = *(f32*)(self + 0x8);
@@ -1213,7 +1213,7 @@ void GetPlacementRecordPitch(u8* self, f32* out, void* x)
     f32 v[12] __attribute__((aligned(16)));
     if (*(void**)(self + 0x10) != 0) {
         GetObjectWorldRotation(*(void**)(self + 0x10), v);
-        TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat02*)v, (Mat02*)v);
+        TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat3*)v, (Mat3*)v);
         u128 r = Vu0::Q(*(u128*)v);
         *out = ArctangentOfRatio(v[2], Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(r, r))));
     } else {
@@ -1233,7 +1233,7 @@ s32 IsWorld4BossFree(World4Boss* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0)
         return 0;
-    return self->fC24;
+    return self->freeFlag;
 }
 
 // Slot 94 of the fourth boss: the agent's goal, and in state 0x10 the position of the object its
@@ -1300,7 +1300,7 @@ typedef void (*VFn_1A9AE8)(void* self, SlotMessage* msg);
 struct AgentHit;
 struct Agent;
 extern Player* g_player;
-extern const Vec02 g_unitXVector;
+extern const Vec4 g_unitXVector;
 
 
 // Object event handler of the world 4 boss: on an event with flag 0x20 it counts the hit, lowers
@@ -1308,8 +1308,8 @@ extern const Vec02 g_unitXVector;
 // the event's extra flags and the player's aim mode); then handles the event as an agent.
 s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
 {
-    if (self->fC14 != 0 && (ev->eventFlags & 0x20) != 0) {
-        self->fC10 = self->fC10 + 1;
+    if (self->hitAnimation != 0 && (ev->eventFlags & 0x20) != 0) {
+        self->hitCount = self->hitCount + 1;
         DecrementGaugeCount(&g_gaugeBarElement);
         if (self->memberGroup != 0) {
             SlotMessage msg;
@@ -1322,13 +1322,13 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
         Animation* which;
         if ((ev->extraFlags & 2) != 0) {
             if (g_player == 0 || g_player->aimMode == 4 || g_player->aimMode == 6)
-                which = self->fC14;
+                which = self->hitAnimation;
             else
-                which = self->fC18;
+                which = self->altHitAnimation;
         } else if ((ev->extraFlags & 4) != 0) {
-            which = self->fC1C;
+            which = self->thirdHitAnimation;
         } else {
-            which = self->fC14;
+            which = self->hitAnimation;
         }
         ReplaceAnimationPlayer(which, self, 1, &self->hitPlayer, 0.0f, 1.0f);
         ev->eventFlags &= ~0x20;
@@ -1339,9 +1339,9 @@ s32 HandleWorld4BossObjectEvent(World4Boss* self, ObjectEvent* ev)
 // Stores three animation values in the fourth boss (+0xC14, +0xC18, +0xC1C).
 void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation* c)
 {
-    self->fC14 = a;
-    self->fC18 = b;
-    self->fC1C = c;
+    self->hitAnimation = a;
+    self->altHitAnimation = b;
+    self->thirdHitAnimation = c;
 }
 
 // Sets the method table of each screen element global (captions, gauges, timer, prompts, menus,
@@ -1349,22 +1349,22 @@ void SetWorld4BossValues(World4Boss* self, Animation* a, Animation* b, Animation
 // the screen fade.
 void InstallScreenElements()
 {
-    g_reserveCountCaption.vt = (const T217D_Vt*)D_00217E30;
-    g_collectedItemCaption.vt = (const T217D_Vt*)D_00217E80;
+    g_reserveCountCaption.vt = (const T217D_Vt*)g_reserveCountCaptionMethods;
+    g_collectedItemCaption.vt = (const T217D_Vt*)g_collectedItemCaptionMethods;
     D_0026CBC8.vt = (const T217D_Vt*)D_00217ED0;
     D_0026CE48.vt = (const T217D_Vt*)D_00217F20;
-    g_pairControllerCountCaption.vt = (const T217D_Vt*)D_00217F70;
+    g_pairControllerCountCaption.vt = (const T217D_Vt*)g_pairControllerCountCaptionMethods;
     g_gaugeAmountCaption.vt = (const T217D_Vt*)g_gaugeAmountCaptionMethods;
-    g_pathFollowerFirstCountCaption.vt = (const T217D_Vt*)D_002180B0;
+    g_pathFollowerFirstCountCaption.vt = (const T217D_Vt*)g_pathFollowerFirstCountCaptionMethods;
     D_0026D848.vt = (const T217D_Vt*)D_00218010;
-    g_pathFollowerSecondCountCaption.vt = (const T217D_Vt*)D_00218060;
-    g_hitCountCaptionA.vt = (const T217D_Vt*)D_00218100;
-    g_hitCountCaptionB.vt = (const T217D_Vt*)D_00218150;
+    g_pathFollowerSecondCountCaption.vt = (const T217D_Vt*)g_pathFollowerSecondCountCaptionMethods;
+    g_hitCountCaptionA.vt = (const T217D_Vt*)g_hitCountCaptionAMethods;
+    g_hitCountCaptionB.vt = (const T217D_Vt*)g_hitCountCaptionBMethods;
     g_gaugeBarElement.vt = (const T217D_Vt*)g_gaugeBarElementMethods;
-    g_gaugeColliderCaption.vt = (const T217D_Vt*)D_002181A0;
+    g_gaugeColliderCaption.vt = (const T217D_Vt*)g_gaugeColliderCaptionMethods;
     g_timerElement.vt = (const T217D_Vt*)g_timerElementMethods;
     g_timerCaption.vt = (const T217D_Vt*)g_timerCaptionMethods;
-    g_buttonHintElement.vt = (const T217D_Vt*)D_00218330;
+    g_buttonHintElement.vt = (const T217D_Vt*)g_buttonHintElementMethods;
     g_pointerTextCaption.vt = (const T217D_Vt*)g_pointerTextCaptionMethods;
     g_copiedTextCaption.vt = (const T217D_Vt*)g_copiedTextCaptionMethods;
     g_hintGlyphElement.vt = (const T217D_Vt*)g_hintGlyphElementMethods;
@@ -1374,18 +1374,18 @@ void InstallScreenElements()
     g_pauseMenuElement.vt = (const T217D_Vt*)g_pauseMenuElementMethods;
     g_typedTextCaptionBox.vt = (const T217D_Vt*)g_typedTextCaptionBoxMethods;
     g_spinningSpriteElement.vt = (const T217D_Vt*)g_spinningSpriteElementMethods;
-    D_002708E0.vt = (const T217D_Vt*)g_arcElementMethods;
-    D_00271558.vt = (const T217D_Vt*)g_arcElementMethods;
-    g_firstTallyCaption.vt = (const T217D_Vt*)D_00218240;
-    g_secondTallyCaption.vt = (const T217D_Vt*)D_00218290;
+    g_leftArcElement.vt = (const T217D_Vt*)g_arcElementMethods;
+    g_rightArcElement.vt = (const T217D_Vt*)g_arcElementMethods;
+    g_firstTallyCaption.vt = (const T217D_Vt*)g_firstTallyCaptionMethods;
+    g_secondTallyCaption.vt = (const T217D_Vt*)g_secondTallyCaptionMethods;
     g_titleElement.vt = (const T217D_Vt*)g_titleElementMethods;
     g_promptElement.vt = (const T217D_Vt*)g_promptElementMethods;
     g_letterboxElement.vt = (const T217D_Vt*)g_letterboxElementMethods;
     g_stackedCaptionGroup.vt = (const T217D_Vt*)g_stackedCaptionGroupMethods;
-    D_002739F0.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
-    D_00273C50.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
+    g_bossBeatGlyphElement.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
+    g_beatPressGlyphElement.vt = (const T217D_Vt*)g_letterGlyphElementMethods;
     g_cyclingGlyphElement.vt = (const T217D_Vt*)g_cyclingGlyphElementMethods;
-    g_completionPercentCaption.vt = (const T217D_Vt*)D_002181F0;
+    g_completionPercentCaption.vt = (const T217D_Vt*)g_completionPercentCaptionMethods;
     for (s32 i = 0x24; i >= 0; i--) {
         ((ScreenElement**)g_screenElements)[i]->vt->m00(((ScreenElement**)g_screenElements)[i], i);
     }
@@ -1482,7 +1482,7 @@ void DrawScreenElements(void)
         }
     }
     DrawScreenFade((ScreenFade*)g_screenFade);
-    DrawCyclingGlyphElement((T217D_600*)&g_cyclingGlyphElement);
+    DrawCyclingGlyphElement((CyclingGlyphElement*)&g_cyclingGlyphElement);
 }
 
 // Sets up a screen element from its placement record number: slide times of 0.25, the default

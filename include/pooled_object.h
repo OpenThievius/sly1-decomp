@@ -9,7 +9,7 @@
 struct BufferedStream;
 
 // Eight bytes at an odd word offset, which slot 9 keeps across the copy (func_0014EF40).
-struct __attribute__((packed)) Keep46 {
+struct __attribute__((packed)) PooledKeptPair {
     u64 value;
 };
 
@@ -24,7 +24,7 @@ struct PooledObject : Collider {
     f32 landEventValue;     // 0x560: handed to SendPointEventToWorldListener when it lands (func_0014F270)
     f32 fadeOutTime;        // 0x564: handed to func_00126D60 when the state becomes 5
     f32 delay;              // 0x568: slot 17 waits this long in state 4
-    Keep46 keep56C;         // 0x56C: kept by slot 9
+    PooledKeptPair keep56C;         // 0x56C: kept by slot 9
     void* watchedAnimation; // 0x574: not read here
     void* watched;        // 0x578: the object whose message (kind 6) clears it (slot 13)
     union {

@@ -6,15 +6,15 @@
 
 #include "common.h"
 
-struct T217D_720;
+struct StackedCaptionGroup;
 
-void InitItemColumn(T217D_720* self);
-void SetupItemColumn(T217D_720* self);
-void UpdateItemColumn(T217D_720* self, f32* clock);
-void UpdateItemColumnSlide(T217D_720* self);
-void DrawItemColumn(T217D_720* self);
-void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y);
-void ClearItemColumn(T217D_720* self);
-void PostItemColumnEntry(T217D_720* self, s32 index, char* text, f32 hold);
+void InitItemColumn(StackedCaptionGroup* self);
+void SetupItemColumn(StackedCaptionGroup* self);
+void UpdateItemColumn(StackedCaptionGroup* self, f32* clock);
+void UpdateItemColumnSlide(StackedCaptionGroup* self);
+void DrawItemColumn(StackedCaptionGroup* self);
+void ResizeItemColumn(StackedCaptionGroup* self, s32 n, f32 x, f32 y);
+void ClearItemColumn(StackedCaptionGroup* self);
+void PostItemColumnEntry(StackedCaptionGroup* self, s32 index, char* text, f32 hold);
 
 #endif

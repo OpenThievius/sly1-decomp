@@ -7,44 +7,44 @@
 #include "common.h"
 
 struct HomogeneousMatrix;
-struct Mat02;
+struct Mat3;
 struct Mat4;
 struct Mat4A;
 struct Matrix3x4;
 struct Quad16;
-struct Vec02;
 struct Vec3;
+struct Vec4;
 
 void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 void* CopyRotationMatrix(Quad16* destination, const Quad16* source);
 void InitIdentityMatrix(Mat4* self);
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
+void TransformByMatrixWithW(const Quad16* m, const Vec4* v, f32 w, Vec4* out);
 void CopyTransposedMatrix(Quad16* src, Quad16* dst);
 void AddMatrices(f32* a, f32* b, f32* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
+void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle);
+void BuildRotationFromVector(Vec4* v, Mat3* mat);
 void BuildEulerRotationMatrix(f32* in, f32* out);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
+void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out);
 void InvertRigidTransform(void* a, void* b, Quad16* out);
 void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
 f32 GetMatrixRotationCosine(f32* p);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
+void MatrixToAxisAngle(Mat3* m, f32* angle, Vec4* axis);
 void MatrixToEulerAngles(Mat4* self, Vec3* out);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MultiplyMatrices3x3(Mat3* a, Mat3* b, Mat3* out);
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
 void VectorToAngles(Vec3* v, f32* a1, f32* a2);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
+void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat3* out);
+void BuildBasisFromX(Vec4* x, Mat3* out);
+void RotateMatrixUpright(Mat3* self, Mat3* scratch, Mat3* out);
 s32 InvertSquareMatrix(s32 n, f32* a, f32* b);
 s32 InvertMatrix3x3(Matrix3x4* in, Matrix3x4* out);
 s32 InvertMatrix4x4(void* a0, void* a1);
-void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
+void BuildBasisFromXAndYHint(Vec4* x, Vec4* hint, Mat3* out);
+void BuildBasisFromXAndZHint(const Vec4* x, const Vec4* hint, Mat3* out);
+void BuildShortestArcRotation(const Vec4* from, const Vec4* to, Mat3* out);
 void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
 void BuildUniformScaleAboutPoint(void* point, void* out, f32 s);
-void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out);
-void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m);
+void BuildScaleAboutFrame(Vec4* pos, Mat3* rot, f32* scale, Mat4A* out);
+void BuildRotationBetweenVectors(Vec4* a, Vec4* b, f32* m);
 
 #endif

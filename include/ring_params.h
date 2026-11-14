@@ -25,7 +25,7 @@
 struct AnimRecord;
 struct PlacedObject;
 struct DeferredRequest;
-struct Vec02;
+struct Vec4;
 
 // A point the ring goes around: an object's position (+0x140) and how far its offsets reach.
 struct RingAnchor {
@@ -63,6 +63,6 @@ typedef char check_RingParams[sizeof(RingParams) == 0x80 ? 1 : -1];
 
 // func_001D5678 (player_request.cpp). Its callers pass the request they draw for, which it
 // does not read.
-void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params, DeferredRequest* request);
+void DrawAngleSortedRing(Vec4* at, s32 nOffsets, Point2* offsets, s32 nAnchors, RingAnchor* anchors, RingParams* params, DeferredRequest* request);
 
 #endif

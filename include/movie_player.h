@@ -63,7 +63,7 @@ struct MovieStream {
 struct MovieDecoder {
     s32 width;              // 0x00: the picture's width (UploadMovieFrame, DrawMovieFrame)
     s32 height;             // 0x04: its height
-    s32 f08;                // 0x08: zero when the decoded picture is to be shown
+    s32 skipPicture;        // 0x08: zero when the decoded picture is to be shown
     u8 pad0C[0x48 - 0x0C];
 };
 

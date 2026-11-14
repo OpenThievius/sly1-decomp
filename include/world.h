@@ -13,30 +13,30 @@
 #include "placed_object.h"
 #include "shapes.h"      // U64P
 
-struct C17;
+struct ProgressCollider;
 struct KeyRecord;
 struct EffectOwner;
-struct Contacts03;
+struct BodyContactTable;
 struct QueuedCall;     // an entry of the callback list at 0x1EC8 (queued_call.h)
 
-struct Actor6C;
+struct UpdatedObject;
 
 // The methods slots 0x118 and 0x11C of an object that the world updates every frame.
 struct ActorVtbl6C {
     u8 pad0[0x8];
     s32 f8;                 // 0x8
     u8 padC[0x118 - 0xC];
-    void (*update)(Actor6C* self, f32 dt);   // 0x118
-    void (*post)(Actor6C* self);             // 0x11C
+    void (*update)(UpdatedObject* self, f32 dt);   // 0x118
+    void (*post)(UpdatedObject* self);             // 0x11C
 };
 
 // An object in one of the world's lists (func_001EA118).
-struct Actor6C {
+struct UpdatedObject {
     ActorVtbl6C* vtable;    // 0x00
     u8 pad4[0x1C - 0x4];
-    void* f1C;              // 0x1C
+    void* nextSibling;      // 0x1C: the next object of the same parent
     u8 pad20[0x34 - 0x20];
-    void* f34;              // 0x34
+    void* firstChild;       // 0x34: the first child
     u8 pad38[0x228 - 0x38];
     s32 tries;              // 0x228: how often func_00129D70 failed it
     u8 pad22C[0x30C];
@@ -44,10 +44,10 @@ struct Actor6C {
 };
 
 // A list head: the first element, the one after it, and the offset of the link in an element.
-struct ActorList6C { Actor6C* head; u8 pad4[4]; s32 offset; };
+struct ActorList6C { UpdatedObject* head; u8 pad4[4]; s32 offset; };
 
 // A pool of free records of one size (func_001B5EA0 takes the first, func_001B5EE0 clears it).
-struct Pool6C { s32 size; void* base; void* head; };
+struct FreeListPool { s32 size; void* base; void* head; };
 
 // A setting of an IOP channel: the index into its table and the value (func_001C08B0).
 // A sound of the level (20 bytes; func_001C0A50 appends one, func_001C0B38 starts them all):
@@ -69,33 +69,33 @@ struct IopChannelSetting { s32 index; s32 value; };   // base: the records' bloc
 struct World : BaseObject {
     s32 count34;            // 0x34: the 0x03 objects in the world (func_001B7A98, func_001B7B78)
     s32 count38;            // 0x38: the bodies among them (0x03 objects without a parent)
-    List01 bodies;          // 0x3C: the bodies, linked at Collider::link2D0 (offset 0x2D0)
-    List01 list48;          // 0x48: the objects without a parent (func_00182C80)
-    List01 list54;          // 0x54: the placed objects without a parent (func_001240F8)
+    ObjectList bodies;          // 0x3C: the bodies, linked at Collider::link2D0 (offset 0x2D0)
+    ObjectList list48;          // 0x48: the objects without a parent (func_00182C80)
+    ObjectList list54;          // 0x54: the placed objects without a parent (func_001240F8)
     ActorList6C list60;     // 0x60: the objects func_00129D70 tries to start
     ActorList6C list6C;     // 0x6C: the objects updated every frame
-    List01 list78;          // 0x78: the placed objects without a parent that have +0x294 set
-    List01 hashLists[0x200]; // 0x84: the 0x200 hash lists (link offset 0xC, InitWorldHashLists)
-    void* f1884[0x95];      // 0x1884: the objects by id, chained at BaseObject::nextById (func_0015A4F0)
+    ObjectList list78;          // 0x78: the placed objects without a parent that have +0x294 set
+    ObjectList hashLists[0x200]; // 0x84: the 0x200 hash lists (link offset 0xC, InitWorldHashLists)
+    void* objectsById[0x95]; // 0x1884: the objects by id, chained at BaseObject::nextById (func_0015A4F0)
     void* buf1AD8;          // 0x1AD8: 0x4800 bytes
     void* buf1ADC;          // 0x1ADC: 0x10000 bytes, a byte for each pair of contact tables (func_001DC828)
-    Contacts03* tables;     // 0x1AE0: the bodies' contact tables (func_001DC828 numbers one by its place)
-    Contacts03* freeTables; // 0x1AE4: the tables not in use (func_001DC7D0 takes the first)
-    Contacts03* usedTables; // 0x1AE8: the tables in use
+    BodyContactTable* tables;     // 0x1AE0: the bodies' contact tables (func_001DC828 numbers one by its place)
+    BodyContactTable* freeTables; // 0x1AE4: the tables not in use (func_001DC7D0 takes the first)
+    BodyContactTable* usedTables; // 0x1AE8: the tables in use
     s32 sweepSorted;        // 0x1AEC: whether the sweep axes are sorted
-    Pool6C pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
-    Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
-    Pool6C pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
-    Pool6C pool1B14;        // 0x1B14: the 0x14-byte QueuedCall entries (func_001DBBD8, func_001DBC18)
-    Pool6C pool1B20;        // 0x1B20: the Attachment records (func_00121228 takes one, func_00121358 gives it back)
-    Pool6C pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
+    FreeListPool pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
+    FreeListPool pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
+    FreeListPool pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
+    FreeListPool pool1B14;        // 0x1B14: the 0x14-byte QueuedCall entries (func_001DBBD8, func_001DBC18)
+    FreeListPool pool1B20;        // 0x1B20: the Attachment records (func_00121228 takes one, func_00121358 gives it back)
+    FreeListPool pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
     EffectOwner* freeEffectOwners;  // 0x1B38: the unused effect owners, linked through saved564
     EffectOwner* sharedEffectOwner; // 0x1B3C: the owner handed to every flag 0 request
-    Pool6C pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
-    Pool6C pool1B4C;        // 0x1B4C: the pooled slots a render node holds (PushFreeSlot in render_frame)
-    Pool6C pool1B58;        // 0x1B58: the 0xEC-byte AnimationPlayer records (func_0012D3F8)
+    FreeListPool pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
+    FreeListPool pool1B4C;        // 0x1B4C: the pooled slots a render node holds (PushFreeSlot in render_frame)
+    FreeListPool pool1B58;        // 0x1B58: the 0xEC-byte AnimationPlayer records (func_0012D3F8)
     union {
-        List01 list1B64;    // 0x1B64: the animation players (link offset 0x34)
+        ObjectList list1B64;    // 0x1B64: the animation players (link offset 0x34)
         struct {
             void* animationPlayers; // 0x1B64: the list of animation players
             s32 f1B68;      // 0x1B68
@@ -103,67 +103,67 @@ struct World : BaseObject {
         };
     };
     union {
-        List01 list1B70;    // 0x1B70: the second list of animation players (link offset 0x34)
+        ObjectList list1B70;    // 0x1B70: the second list of animation players (link offset 0x34)
         struct {
-            void* f1B70;    // 0x1B70
+            void* listedAnimationPlayers; // 0x1B70: the animation players of listed objects
             s32 f1B74;      // 0x1B74
             s32 f1B78;      // 0x1B78
         };
     };
     ActorList6C list1B7C;   // 0x1B7C
-    Pool6C pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
-    List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
-    Pool6C pool1BA0;        // 0x1BA0: the free sound records (func_001C0808)
-    List01 list1BAC;        // 0x1BAC: the sound records (func_001C0808 walks them)
-    Pool6C pool1BB8;        // 0x1BB8: the sound level entries (func_001BEDF8 gives one back)
-    List01 list1BC4;        // 0x1BC4: the sound level entries in use (func_001BEE48 walks them)
-    Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
-    List01 list1BDC;        // 0x1BDC
-    List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
-    Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::rangeRecord
-    List01 list1C00;        // 0x1C00: the PlacedObject::rangeRecord records in use
-    Pool6C pool1C0C;        // 0x1C0C: the 8-byte touch nodes (func_001DC0C8, func_001DC108)
-    Pool6C pool1C18;        // 0x1C18: the nodes of the two lists below (func_00155AB0's AddObjectNodeToWorld)
+    FreeListPool pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
+    ObjectList list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
+    FreeListPool pool1BA0;        // 0x1BA0: the free sound records (func_001C0808)
+    ObjectList list1BAC;        // 0x1BAC: the sound records (func_001C0808 walks them)
+    FreeListPool pool1BB8;        // 0x1BB8: the sound level entries (func_001BEDF8 gives one back)
+    ObjectList list1BC4;        // 0x1BC4: the sound level entries in use (func_001BEE48 walks them)
+    FreeListPool pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
+    ObjectList list1BDC;        // 0x1BDC
+    ObjectList list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
+    FreeListPool pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::rangeRecord
+    ObjectList list1C00;        // 0x1C00: the PlacedObject::rangeRecord records in use
+    FreeListPool pool1C0C;        // 0x1C0C: the 8-byte touch nodes (func_001DC0C8, func_001DC108)
+    FreeListPool pool1C18;        // 0x1C18: the nodes of the two lists below (func_00155AB0's AddObjectNodeToWorld)
     union {
-        List01 list1C24;    // 0x1C24: the nodes of objects on the world clock
+        ObjectList list1C24;    // 0x1C24: the nodes of objects on the world clock
         struct {
-            u8* f1C24;      // 0x1C24
+            u8* worldClockNodes; // 0x1C24
             s32 f1C28;      // 0x1C28
             s32 f1C2C;      // 0x1C2C
         };
     };
     union {
-        List01 list1C30;    // 0x1C30: the nodes of objects on the frame step clock
+        ObjectList list1C30;    // 0x1C30: the nodes of objects on the frame step clock
         struct {
-            void* f1C30;    // 0x1C30
+            void* stepClockNodes; // 0x1C30
             s32 f1C34;      // 0x1C34
             s32 f1C38;      // 0x1C38
         };
     };
-    List01 list1C3C;        // 0x1C3C: class 0x53's objects
-    List01 list1C48;        // 0x1C48: class 0x40's objects (offset 0x5DC)
-    List01 list1C54;        // 0x1C54: the 0x55 family's objects
-    List01 list1C60;        // 0x1C60: class 0x41's objects (offset 0x600)
-    List01 list1C6C;        // 0x1C6C: class 0x7C's objects (func_0019C3D0, func_0019C408)
-    List01 list1C78;        // 0x1C78: class 0x46's objects (offset 0x56C)
-    List01 list1C84;        // 0x1C84: class 0x81's objects
-    List01 list1C90;        // 0x1C90: class 0x71's objects
-    List01 list1C9C;        // 0x1C9C: class 0x72's objects
-    List01 list1CA8;        // 0x1CA8: class 0x31's objects (offset 0xAF0)
-    List01 list1CB4;        // 0x1CB4: class 0x4D's objects
-    List01 list1CC0;        // 0x1CC0: class 0x4D's objects
-    List01 list1CCC;        // 0x1CCC: class 0x10's objects (offset 0xC10)
-    List01 list1CD8;        // 0x1CD8: the colour fades that are running (StartColorFade)
-    C17* f1CE4;             // 0x1CE4: the class 0x17 object (func_0019A1E0)
+    ObjectList list1C3C;        // 0x1C3C: class 0x53's objects
+    ObjectList list1C48;        // 0x1C48: class 0x40's objects (offset 0x5DC)
+    ObjectList list1C54;        // 0x1C54: the 0x55 family's objects
+    ObjectList list1C60;        // 0x1C60: class 0x41's objects (offset 0x600)
+    ObjectList list1C6C;        // 0x1C6C: class 0x7C's objects (func_0019C3D0, func_0019C408)
+    ObjectList list1C78;        // 0x1C78: class 0x46's objects (offset 0x56C)
+    ObjectList list1C84;        // 0x1C84: class 0x81's objects
+    ObjectList list1C90;        // 0x1C90: class 0x71's objects
+    ObjectList list1C9C;        // 0x1C9C: class 0x72's objects
+    ObjectList list1CA8;        // 0x1CA8: class 0x31's objects (offset 0xAF0)
+    ObjectList list1CB4;        // 0x1CB4: class 0x4D's objects
+    ObjectList list1CC0;        // 0x1CC0: class 0x4D's objects
+    ObjectList list1CCC;        // 0x1CCC: class 0x10's objects (offset 0xC10)
+    ObjectList list1CD8;        // 0x1CD8: the colour fades that are running (StartColorFade)
+    ProgressCollider* f1CE4;             // 0x1CE4: the class 0x17 object (func_0019A1E0)
     union {
         BaseObject* slot1CE8[31];  // 0x1CE8: objects by key, at the index func_0011ECA0 gives (func_0011ECB8)
         struct {
             u8 pad1CE8[0x1D14 - 0x1CE8];
-            s32 f1D14;      // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
+            s32 defaultBeamObject; // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
             u8 pad1D18[0x1D28 - 0x1D18];
             s32 f1D28;      // 0x1D28
             u8 pad1D2C[0x1D60 - 0x1D2C];
-            BaseObject* f1D60;     // 0x1D60: told (slot 27) when a 0x55-family object ends
+            BaseObject* endListener; // 0x1D60: told (slot 27) when a 0x55-family object ends
         };
     };
     union {
@@ -175,8 +175,8 @@ struct World : BaseObject {
         };
         Rgba4 color1D64;    // 0x1D64: the colour the screen is filled with at load
     };
-    f32 f1D68;              // 0x1D68
-    f32 f1D6C;              // 0x1D6C
+    f32 lightingParamB;     // 0x1D68
+    f32 lightingParamA;     // 0x1D6C
     s32 soundBank;          // 0x1D70: -1
     KeyRecord* stagedBank;  // 0x1D74: the staged sound bank (RequestStagedBank, PlayStagedBank)
     s32 volumeChannel2On;   // 0x1D78: 0 silences volume channel 2 at load (func_001DCEA0)
@@ -192,7 +192,7 @@ struct World : BaseObject {
         PlacedObject** regroupObjects; // the queue func_0015F678 appends to
     };
     u8 pad1ED8[0x1EE0 - 0x1ED8];
-    Vec02 gravity;          // 0x1EE0: every 0x03 object's at set-up (func_001B7968)
+    Vec4 gravity;          // 0x1EE0: every 0x03 object's at set-up (func_001B7968)
     s32 scriptEntryCount;   // 0x1EF0: the number of f1EF4 entries
     void* scriptEntries;    // 0x1EF4: 8-byte entries, a key and a value (func_001C1190, func_001C1390, func_001C13E8)
     s32 scopeVariableId;    // 0x1EF8
@@ -201,7 +201,7 @@ struct World : BaseObject {
     u8 pad1F40[0x2300 - 0x1F40];
     s32 count2300;          // 0x2300: numbers class 0x2E's objects (func_001993F0)
     s32 count2304;          // 0x2304: numbers class 0x38's objects (func_001411A8)
-    f32 f2308;              // 0x2308
+    f32 deadlineTime;       // 0x2308: the game time the timer notifier waits for
     f32 timerDuration;      // 0x230C
     void* commentaryRecord; // 0x2310
     void* creditsText;      // 0x2314
@@ -213,7 +213,7 @@ struct World : BaseObject {
     s32 channel2Count;      // 0x2348
     f32 value;              // 0x234C: the value that approaches valueTarget
     f32 valueTarget;        // 0x2350
-    s32 f2354;              // 0x2354
+    s32 scatterCountEnabled; // 0x2354
     s32 f2358;              // 0x2358: 1 after func_001EBEB0 (class 0x13)
     s32 flagBits;           // 0x235C
 };

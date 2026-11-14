@@ -13,7 +13,7 @@
 struct TrackedNodeOffer;
 struct ScaledTransform;
 struct Camera;
-struct C37;
+struct OverlapTracker;
 
 
 struct ContactTracker;
@@ -21,7 +21,7 @@ struct ContactTracker;
 // The record at +0x550 (func_001F5590 sets it up, func_001F55A8 fills its two lists from the
 // owner's children and from the ids it keeps, func_001F5840 adds an id, func_001F5868 adds an
 // object, func_001F5930 removes one).
-struct Rec36 {
+struct ContactTrackerRecord {
     ContactTracker* owner;             // 0x00: the object it is in
     u32 f04;                // 0x04: 0 at set-up
     f32 f08;                // 0x08: 150.0 at set-up
@@ -34,30 +34,30 @@ struct Rec36 {
 };
 
 // A held contact: the object it touches and two vectors of the contact (func_001F5008).
-struct Slot36 {
+struct HeldContact {
     Collider* obj;               // 0x00
     u8 pad04[0x10 - 0x04];
-    Vec02 point;            // 0x10
-    Vec02 normal;           // 0x20
+    Vec4 point;            // 0x10
+    Vec4 normal;           // 0x20
 };
 
 // 0x36: set up by func_001F4F70, which marks the part (f4E0 = 1, flag bits 36 to 39 = 2) and
 // sets up the record; slot 17 (func_001F5008) collects up to ten of the other bodies' objects it
 // touches in `slots`.
 struct ContactTracker : Collider {
-    Rec36 rec;              // 0x550
-    Slot36 slots[10];       // 0x670
+    ContactTrackerRecord rec;              // 0x550
+    HeldContact slots[10];       // 0x670
     s32 count;              // 0x850
     u8 pad854[0x860 - 0x854];
 };
 
 // 0x37: the same layout; it also sets bit 43 of the flags and puts v440 and v460 in mode 3.
-struct C37 : ContactTracker {
+struct OverlapTracker : ContactTracker {
 };
 
-typedef char check_Rec36[sizeof(Rec36) == 0x120 ? 1 : -1];
+typedef char check_Rec36[sizeof(ContactTrackerRecord) == 0x120 ? 1 : -1];
 typedef char check_ContactTracker[sizeof(ContactTracker) == 0x860 ? 1 : -1];
-typedef char check_C37[sizeof(C37) == 0x860 ? 1 : -1];
+typedef char check_C37[sizeof(OverlapTracker) == 0x860 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitContactTracker(ContactTracker* self);                       // 0x36 slot 0
@@ -66,6 +66,6 @@ void StartContactTracker(ContactTracker* self);                       // 0x36 sl
 void CollectTouchingObjects(ContactTracker* self, f32 dt);                       // 0x36 slot 17
 void ApplyContactTrackerTransform(ContactTracker* self, Camera* cam, ScaledTransform* xf); // 0x36 slot 36 (the common slot)
 int RequestContactTrackerLaunch(ContactTracker* self, void* source, TrackedNodeOffer* offer);                        // 0x36 slot 71
-void InitC37(C37* o);                       // 0x37 slot 0
+void InitC37(OverlapTracker* o);                       // 0x37 slot 0
 
 #endif

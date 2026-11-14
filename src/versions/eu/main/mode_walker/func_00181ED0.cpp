@@ -12,11 +12,11 @@ struct T217D_BF0Eu {
     void* target;               // 0x590
 };
 
-void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
+void SteerWalkerAimAtNearestTarget(AimReticle* element, PadStick* pad)
 {
     T217D_BF0Eu* self = (T217D_BF0Eu*)element;
-    Vec02 p;
-    Vec02 best;
+    Vec4 p;
+    Vec4 best;
     f32 bestScore = 3.40282347e+38f;
     Vu0::Q(best) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     Class75Object* chosen = 0;
@@ -40,15 +40,15 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* element, PadStick* pad)
             chosen = o;
         }
     }
-    self->rateX = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateX, pad->x, g_gameClock[2]);
+    self->rateX = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateX, pad->x, g_gameClock[2]);
     f32 y = pad->y;
     if (g_saveData->optionFlags & 0x400) {
         y = -y;
     }
-    self->rateY = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateY, y, g_gameClock[2]);
-    self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * D_002641A4, -1.0f, 1.0f);
-    self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * D_002641A4, -1.0f, 1.0f);
+    self->rateY = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateY, y, g_gameClock[2]);
+    self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * g_walkerAimRateScale, -1.0f, 1.0f);
+    self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * g_walkerAimRateScale, -1.0f, 1.0f);
     f32 far = 1000.0f;
-    self->aim[2] = ApproachValueWithRamp((RampProfile*)D_002641A8, 0, self->aim[2], far >? best.z, g_gameClock[2]);
+    self->aim[2] = ApproachValueWithRamp((RampProfile*)g_walkerAimDistanceRamp, 0, self->aim[2], far >? best.z, g_gameClock[2]);
     self->target = chosen;
 }

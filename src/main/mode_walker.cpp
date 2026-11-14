@@ -52,7 +52,7 @@ struct PathFollower;
 struct ColliderPose;
 struct BaseObject;
 
-struct Mat02;
+struct Mat3;
 
 
 struct ScaledTransform;
@@ -129,7 +129,7 @@ s32 FindAnimRecord(s32 key);
 
 
 
-extern Rgba4 D_002623E0[];
+extern Rgba4 g_defaultModelColor[];
 
 extern "C" f32 Cosine(f32 x);
 
@@ -139,28 +139,28 @@ extern "C" f32 Cosine(f32 x);
 
 // The file's .data, 0x2640B0 to 0x264230, in retail's order. GCC puts an object of eight bytes
 // or more on 8, so the words after D_00264128, D_00264154 and D_00264190 are padding: the three
-// vectors at 0x264160 are on 16 (Vec02; func_00128018 loads D_00264180 with lqc2).
+// vectors at 0x264160 are on 16 (Vec4; func_00128018 loads D_00264180 with lqc2).
 ObjectLink g_modeWalkerLinks[10] = {
     { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
     { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
 };
-f32 D_00264128 = 0.150000006f;
-f32 D_00264130[3] = { 30.0f, 0.0f, 0.5f };
+f32 g_walkerButtonPressWindow = 0.150000006f;
+f32 g_walkerRotationRamp[3] = { 30.0f, 0.0f, 0.5f };
 f32 D_0026413C = 0.5f;
 f32 D_00264140[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 f32 D_00264150 = 6.0f;
 f32 D_00264154 = 3.0f;
-Vec02 D_00264160 = { 1.0f, 0.0f, -0.75f, 0.0f };
-Vec02 D_00264170 = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
-Vec02 D_00264180 = { -300.0f, 0.0f, 200.0f, 0.0f };
+Vec4 D_00264160 = { 1.0f, 0.0f, -0.75f, 0.0f };
+Vec4 D_00264170 = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
+Vec4 D_00264180 = { -300.0f, 0.0f, 200.0f, 0.0f };
 f32 D_00264190 = 150.0f;
-f32 D_00264198[3] = { 20.0f, 0.0f, 0.100000001f };
-f32 D_002641A4 = 1.5f;
-f32 D_002641A8[4] = { 5000.0f, 500.0f, 0.150000006f, 0.0f };
-f32 D_002641B8[3] = { 5.0f, 0.0f, 0.100000001f };
-f32 D_002641C4 = 3.0f;
-f32 D_002641C8[10] = { 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
+f32 g_walkerAimRateRamp[3] = { 20.0f, 0.0f, 0.100000001f };
+f32 g_walkerAimRateScale = 1.5f;
+f32 g_walkerAimDistanceRamp[4] = { 5000.0f, 500.0f, 0.150000006f, 0.0f };
+f32 g_walkerAlphaRamp[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 g_walkerSpinRate = 3.0f;
+f32 g_walkerQuadTexCoords[10] = { 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+f32 g_walkerQuadCorners[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
 
 // Registers the object and appends it to the world's list at 0x1C9C.
 void RegisterListedKeepObject(ListedKeepObject* self)
@@ -206,7 +206,7 @@ void StartModeWalkerObject(ModeWalker* self)
     TransformPointBetweenFrames(0, self->fBC0, &self->fBCC->v140, &self->vBE0);
     SetModeWalkerMode(self, 1);
     self->paceChangeTime = 3.4028234663852886e+38f;
-    T217D_BF0* base = &g_spinningSpriteElement;
+    AimReticle* base = &g_spinningSpriteElement;
     ((T217D_Float*)&base->alphaScale)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
@@ -222,12 +222,12 @@ struct PadStick {
     u16 pressed;            // 0xAA: func_00181078 tests and clears 0x40
 };
 
-extern T217D_BF0 g_spinningSpriteElement;
+extern AimReticle g_spinningSpriteElement;
 extern u8 g_blankPadRecord[];
-extern u8 D_002708C0[];
+extern u8 g_modeWalkerScreenPoint[];
 void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
-void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad);
-typedef void (*FrameFn)(void* self, Mat02* m);
+void SteerWalkerAimAtNearestTarget(AimReticle* self, PadStick* pad);
+typedef void (*FrameFn)(void* self, Mat3* m);
 
 // The rotation's weight is a Scalar passed straight to MulX (its expand-time slot, a scalar's
 // memory, stored after the product as retail's is), and m2 and the axis are declared after
@@ -236,9 +236,9 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
 {
     s32 cur;
     s32 target;
-    Mat02 m;
-    Vec02 pos;
-    Vec02 d;
+    Mat3 m;
+    Vec4 pos;
+    Vec4 d;
     f32 angle;
     ControlPathFollower(self, pad, dt);
     GetStateWalkerCurrentKey(self->stateWalker, &cur);
@@ -259,7 +259,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
                 ClearPadPressedBits((PadRecord*)pad, 0x40);
                 self->buttonPressTime = g_gameTime;
             }
-            if (self->fC00 != 0 && g_gameTime - self->buttonPressTime < D_00264128) {
+            if (self->pressArmed != 0 && g_gameTime - self->buttonPressTime < g_walkerButtonPressWindow) {
                 self->desc05()->m50(self);
                 TeleportStateWalker(self->stateWalker, 0x35F);
                 GetStateWalkerCurrentKey(self->stateWalker, &cur);
@@ -275,22 +275,22 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             }
             SteerWalkerAimAtNearestTarget(&g_spinningSpriteElement, pad);
             Vu0::Q(m.r[2]) = Vu0::Q(self->m110.r[2]);
-            u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(*(Vec02*)g_camera->rotation)), *(u128*)&self->m110.r[1]);
+            u128 n = Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(m.r[2]), Vu0::Q(*(Vec4*)g_camera->rotation)), *(u128*)&self->m110.r[1]);
             Vu0::Q(m.r[1]) = n;
             Vu0::Q(m.r[0]) = Vu0::Cross(n, Vu0::Q(m.r[2]));
             TransformRotationBetweenFrames(0, (PlacedObject*)(self->fBC4->parent), &m, &m);
-            ApproachRotationWithRamp(&self->fBC4->rot, &m, (RampProfile*)D_00264130, &m, 0, dt);
+            ApproachRotationWithRamp(&self->fBC4->rot, &m, (RampProfile*)g_walkerRotationRamp, &m, 0, dt);
             (*(FrameFn**)self->fBC4)[34](self->fBC4, &m);
-            UnprojectCameraPoint(g_camera, (f32*)D_002708C0, &pos);
+            UnprojectCameraPoint(g_camera, (f32*)g_modeWalkerScreenPoint, &pos);
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->fBC0->v140));
-            BuildBasisFromXAndZHint(&d, (const Vec02*)&g_unitZVector, &m);
+            BuildBasisFromXAndZHint(&d, (const Vec4*)&g_unitZVector, &m);
             TransformRotationBetweenFrames(0, (PlacedObject*)(self->fBC0->parent), &m, &m);
             (*(FrameFn**)self->fBC0)[34](self->fBC0, &m);
             u128 v = Vu0::Q(self->vBE0);
             u128 rot = Vu0::RotateUntied(m, v);
             Vu0::Q(d) = Vu0::MulX(Vu0::Sub(rot, v), Vu0::ScalarAt(D_0026413C));
-            Mat02 m2;
-            Vec02 k;
+            Mat3 m2;
+            Vec4 k;
             TransformDirectionBetweenFrames((PlacedObject*)self->fBC0->parent, (PlacedObject*)self->fBCC->parent, &d, &self->fBD0->pos);
             MultiplyMatrices3x3(&self->fBC0->m1A0, &m, &m2);
             TransformRotationBetweenFrames((PlacedObject*)self->fBC0->parent, (PlacedObject*)self->fBCC->parent, &m2, &m2);
@@ -309,7 +309,7 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     s32 buf[4];
     UpdatePathFollower(self, dt);
     if (self->contactChainHead != 0) {
-        Contact03* n = (Contact03*)self->contactChainHead;
+        BodyContact* n = (BodyContact*)self->contactChainHead;
         do {
             s32 j = (n->end[0].body != self);
             Collider* c = n->end[1 - j].part;
@@ -317,14 +317,14 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
             if (c != 0 && (c->partMode == 1 || c->partMode == 4)) {
                 InitOwnerMessage((OwnerMessage*)buf, 0, c);
                 while (c != 0) {
-                    if (((s32 (*)(Collider*, Contact03*, void*))c->desc03()->m47)(c, n, buf) != 0) break;
+                    if (((s32 (*)(Collider*, BodyContact*, void*))c->desc03()->m47)(c, n, buf) != 0) break;
                     c = (Collider*)c->parent;
                 }
-                ((Desc05*)self->desc)->m4C(self, buf);
+                ((SwitchedColliderDescriptor*)self->desc)->m4C(self, buf);
             }
             n = n->next;
         } while (n != 0);
-        FreePooledContactChain((World*)self->world, (Contact03*)self->contactChainHead);
+        FreePooledContactChain((World*)self->world, (BodyContact*)self->contactChainHead);
         self->contactChainHead = 0;
     }
     f32 t = g_gameClock[1] - self->pulseStartTime;
@@ -341,12 +341,12 @@ void UpdateModeWalkerObject(ModeWalker* self, f32 dt)
     if (self->pulseActive != 0 && self->walkerMode != 2 && g_gameClock[1] - self->pulseFadeStart > 2.0f) self->pulseActive = 0;
 }
 
-typedef void (*PathSampleFn)(PathCurve* self, f32 t, Vec02* pos, Vec02* dir);
+typedef void (*PathSampleFn)(PathCurve* self, f32 t, Vec4* pos, Vec4* dir);
 
 // A matrix set from three rows passed by reference as the signed 128-bit type: the unsigned rows
 // the caller passes are each copied to a temporary of their own, a scalar's memory, which retail's
 // frame keeps after the matrix locals (docs/TOOLCHAIN.md, "Rows bound by reference as s128").
-static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s128& c)
+static inline void SetMatrixRows(Mat3& m, const s128& a, const s128& b, const s128& c)
 {
     Vu0::Q(m.r[0]) = (u128)a;
     Vu0::Q(m.r[1]) = (u128)b;
@@ -359,29 +359,29 @@ static inline void SetMatrixRows(Mat02& m, const s128& a, const s128& b, const s
 void RecomputeModeWalker(ModeWalker* self)
 {
     RecomputePathFollowerFrame(self);
-    if (self->path != 0 && self->fC08 != 0) {
-        Vec02 pos;
-        Vec02 dir;
-        Mat02 m1;
-        Mat02 m2;
+    if (self->path != 0 && self->pathFrameObject != 0) {
+        Vec4 pos;
+        Vec4 dir;
+        Mat3 m1;
+        Mat3 m2;
         PathCurve* curve = self->path->curve;
         PathSampleFn fn = (PathSampleFn)curve->vt->m01;
         if (fn) {
             fn(curve, self->pathTime, &pos, &dir);
         }
-        MultiplyMatrices3x3(&self->m1A0, &self->fC08->m1A0, &m1);
-        BuildBasisFromXAndZHint(&dir, (const Vec02*)&g_unitZVector, &m2);
+        MultiplyMatrices3x3(&self->m1A0, &self->pathFrameObject->m1A0, &m1);
+        BuildBasisFromXAndZHint(&dir, (const Vec4*)&g_unitZVector, &m2);
         u128 r0 = Vu0::Q(m1.r[0]);
         u128 r1 = Vu0::Q(m1.r[1]);
         u128 r2 = Vu0::Q(m1.r[2]);
         u128 x = Vu0::RotateRows(r0, r1, r2, Vu0::Q(m2.r[0]));
         u128 y = Vu0::RotateRows(r0, r1, r2, Vu0::Q(m2.r[1]));
         u128 z = Vu0::RotateRows(r0, r1, r2, Vu0::Q(m2.r[2]));
-        Mat02 rot;
+        Mat3 rot;
         SetMatrixRows(rot, x, y, z);
         m2 = rot;
-        self->fC08->desc02()->m1D(self->fC08, &pos);
-        self->fC08->desc02()->m1E(self->fC08, &m2);
+        self->pathFrameObject->desc02()->m1D(self->pathFrameObject, &pos);
+        self->pathFrameObject->desc02()->m1E(self->pathFrameObject, &m2);
     }
 }
 
@@ -392,7 +392,7 @@ void HandleModeWalkerActivation(ModeWalker* self, void* active)
 {
     HandlePathFollowerActivation(self, active);
     if (active) {
-        T217D_BF0* e = &g_spinningSpriteElement;
+        AimReticle* e = &g_spinningSpriteElement;
         e->vt->m16(e, 2);
         Vu0::Q(e->aim) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     } else {
@@ -423,12 +423,12 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
         f32 y = ClampHelper::Of(q, g_unitRange[0], g_unitRange[1]);
         f32 w = x * y;
         f32 u = 1.0f - w;
-        c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
-        c.g = (u8)(u * D_002623E0[0].g + w * from[1]);
-        c.b = (u8)(u * D_002623E0[0].b + w * from[2]);
-        c.a = D_002623E0[0].a;
+        c.r = (u8)(u * g_defaultModelColor[0].r + w * from[0]);
+        c.g = (u8)(u * g_defaultModelColor[0].g + w * from[1]);
+        c.b = (u8)(u * g_defaultModelColor[0].b + w * from[2]);
+        c.a = g_defaultModelColor[0].a;
     } else {
-        c = D_002623E0[0];
+        c = g_defaultModelColor[0];
     }
     SetObjectTreeRecordValue(o, *(u32*)&c);
     ApplyPlacedObjectTransform(o, (Camera*)a, (ScaledTransform*)b);
@@ -439,7 +439,7 @@ void ApplyModeWalkerTint(ModeWalker* o, void* a, void* b)
 
 void CaptureModeWalkerTarget(ModeWalker* self, void* outv)
 {
-    Vec02* out = &((ColliderPose*)outv)->position;
+    Vec4* out = &((ColliderPose*)outv)->position;
     CapturePathFollowerPose((PathFollower*)self, (ColliderPose*)outv);
     *out = self->fBC0->v140;
 }
@@ -468,8 +468,8 @@ void FinishModeWalker(ModeWalker* self)
 void LaunchPlayerFromModeWalker(void* unused, void* obj_)
 {
     Player* obj = (Player*)obj_;
-    Vec02 first;
-    Vec02 second;
+    Vec4 first;
+    Vec4 second;
 
     TransformPointBetweenFrames((PlacedObject*)unused, 0, &D_00264180, &first);
     ComputeColliderJumpVelocity(obj, (f32*)&first, (f32*)&second, D_00264190);
@@ -508,8 +508,8 @@ s32 AcceptModeWalkerRequest(ModeWalker* self, s32* arg)
     goto tail;
 then_block:
     g_player->desc->m02(g_player);
-    g_player->desc02()->m1F(g_player, (PlacedObject*)self->fBC8);
-    ((BaseObject*)self->fBC8)->desc->m03((BaseObject*)self->fBC8);
+    g_player->desc02()->m1F(g_player, (PlacedObject*)self->playerFrameObject);
+    ((BaseObject*)self->playerFrameObject)->desc->m03((BaseObject*)self->playerFrameObject);
     SetSwitchedColliderEnabled((SwitchedCollider*)g_player, 1);
     SetPlayerState(g_player, 2, 2);
     ActivateSwitchedCollider((void*)g_player);
@@ -537,10 +537,10 @@ void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
             s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
-                    self->fC00 = 0;
+                    self->pressArmed = 0;
                 }
             } else {
-                self->fC00 = 1;
+                self->pressArmed = 1;
             }
         }
     }
@@ -550,7 +550,7 @@ void HandleModeWalkerNotification(ModeWalker* self, s32 code, MessageBody* rec)
 // Extracts the contacts by part mode into the contact list at offset 0xC04.
 void ExtractModeWalkerContacts(ModeWalker* self)
 {
-    ExtractContactsByPartMode(self, (Contact03**)&self->contactChainHead);
+    ExtractContactsByPartMode(self, (BodyContact**)&self->contactChainHead);
 }
 
 // Changes the walker's mode (0 to 4): leaving mode 2 or 3 records the time of the change for the
@@ -607,10 +607,10 @@ extern u8 g_class75List[];
 // is in front of the camera (depth at least 100) is projected to the screen, scored by its distance
 // from the current aim point scaled by its apparent size, and the best one is chosen; the pad stick
 // input is then applied around it.
-void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
+void SteerWalkerAimAtNearestTarget(AimReticle* self, PadStick* pad)
 {
-    Vec02 p;
-    Vec02 best;
+    Vec4 p;
+    Vec4 best;
     f32 bestScore = 3.40282347e+38f;
     Vu0::Q(best) = Vu0::FromFloats(0.0f, 0.0f, 2000.0f);
     Class75Object* chosen = 0;
@@ -634,16 +634,16 @@ void SteerWalkerAimAtNearestTarget(T217D_BF0* self, PadStick* pad)
             chosen = o;
         }
     }
-    self->rateX = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateX, pad->x, g_gameClock[2]);
+    self->rateX = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateX, pad->x, g_gameClock[2]);
     f32 y = pad->y;
     if (g_saveData->optionFlags & 0x400) {
         y = -y;
     }
-    self->rateY = ApproachValueWithRamp((RampProfile*)D_00264198, 0, self->rateY, y, g_gameClock[2]);
-    self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * D_002641A4, -1.0f, 1.0f);
-    self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * D_002641A4, -1.0f, 1.0f);
+    self->rateY = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateY, y, g_gameClock[2]);
+    self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * g_walkerAimRateScale, -1.0f, 1.0f);
+    self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * g_walkerAimRateScale, -1.0f, 1.0f);
     f32 far = 1000.0f;
-    self->aim[2] = ApproachValueWithRamp((RampProfile*)D_002641A8, 0, self->aim[2], far >? best.z, g_gameClock[2]);
+    self->aim[2] = ApproachValueWithRamp((RampProfile*)g_walkerAimDistanceRamp, 0, self->aim[2], far >? best.z, g_gameClock[2]);
     self->target = chosen;
 }
 
@@ -662,11 +662,11 @@ extern f32 g_frameStep;
 // Draws the spinning sprite element (an icon): its alpha fades toward 1 while menus and fades are
 // clear and toward 0 otherwise (snapping at once when the camera snaps), and when visible it draws
 // the icon turned by the element's angle.
-void DrawSpinningSpriteElement(T217D_BF0* self)
+void DrawSpinningSpriteElement(AimReticle* self)
 {
     Rgba4 col;
-    Mat02 m;
-    Vec02 p;
+    Mat3 m;
+    Vec4 p;
     if (self->icon == 0) {
         return;
     }
@@ -674,7 +674,7 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
     if (g_camera->snapping != 0) {
         self->alphaScale = target;
     } else {
-        self->alphaScale = ApproachValueWithRamp((RampProfile*)D_002641B8, 0, self->alphaScale, target, g_frameStep);
+        self->alphaScale = ApproachValueWithRamp((RampProfile*)g_walkerAlphaRamp, 0, self->alphaScale, target, g_frameStep);
     }
     if (self->alphaScale == 0.0f) {
         return;
@@ -684,16 +684,16 @@ void DrawSpinningSpriteElement(T217D_BF0* self)
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
     AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x30000);
     *(u32*)&col = 0x80FFFFFF;
-    BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * D_002641C4);
+    BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * g_walkerSpinRate);
     BeginGifTag(&g_gsPacketWriter, 0x5C, 3, 0x412);
     col.a = (u8)(s32)(self->alphaScale * (f32)col.a);
     for (u32 i = 0; i < 4; i++) {
         f32 sx = self->aim[0] * 320.0f + 320.0f;
         f32 sy = self->aim[1] * -246.400009f + 246.400009f;
-        Vu0::Q(p) = Vu0::Rotate(m, Vu0::Q(D_002641F0[i * 4]));
+        Vu0::Q(p) = Vu0::Rotate(m, Vu0::Q(g_walkerQuadCorners[i * 4]));
         p.x = p.x + sx;
         p.y = p.y + sy;
-        AddGifStEntry(&g_gsPacketWriter, D_002641C8[i * 2], D_002641C8[i * 2 + 1], 1.0f);
+        AddGifStEntry(&g_gsPacketWriter, g_walkerQuadTexCoords[i * 2], g_walkerQuadTexCoords[i * 2 + 1], 1.0f);
         AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&col);
         f32 left = 1728.0f;
         s32 px = (s32)((p.x + left) * 16.0f);

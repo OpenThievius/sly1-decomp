@@ -7,7 +7,7 @@
 
 #include "base_object.h"
 #include "camera_controller.h"
-#include "placed_object.h"   // Vec02
+#include "placed_object.h"   // Vec4
 #include "shapes.h"          // Mat4
 
 // func_00143648 (slot 0) fills the identity frame at 0x80 and the settings at 0x1C0..0x208,
@@ -27,12 +27,12 @@ struct Camera : BaseObject {
                 s32 rotation[4];    // 0x80: the camera's rotation rows
                 f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
             };
-            s32 f90[4];             // 0x90
-            s32 fA0[4];             // 0xA0
+            s32 rotationRow1[4];    // 0x90: the camera's second rotation row
+            s32 rotationRow2[4];    // 0xA0: the camera's third rotation row
         };
-        Mat02 rot80;        // 0x80: the three rows as a matrix
+        Mat3 rot80;        // 0x80: the three rows as a matrix
     };
-    f32 fB0;                // 0xB0: scales a spawner's range (func_00155AB0)
+    f32 rangeScale;         // 0xB0: scales a spawner's range (func_00155AB0)
     u8 padB4[0xC0 - 0xB4];
     union {
         struct {
@@ -45,20 +45,20 @@ struct Camera : BaseObject {
     };
     union {
         struct {
-            Vec02 f100; // 0x100
-            Mat02 m110;             // 0x110
+            Vec4 f100; // 0x100
+            Mat3 m110;             // 0x110
         };
         Mat4 viewProjection;    // 0x100: the view and projection together (UpdateCameraMatrices)
     };
     union {
         struct {
-            Vec02 f140; // 0x140
-            Vec02 f150; // 0x150
+            Vec4 f140; // 0x140
+            Vec4 f150; // 0x150
             u8 pad160[0x180 - 0x160];
         };
         Mat4 inverseViewProjection; // 0x140
     };
-    Vec02 frustum[4];       // 0x180: the side normals of the view frustum (BuildFrustumSideNormals); planes copies them
+    Vec4 frustum[4];       // 0x180: the side normals of the view frustum (BuildFrustumSideNormals); planes copies them
     f32 distanceScale;      // 0x1C0: scales the spawner range and the VU1 draw distance
     f32 zoom;               // 0x1C4: the current zoom
     f32 zoomGoal;           // 0x1C8: the zoom UpdateCamera approaches
@@ -71,7 +71,7 @@ struct Camera : BaseObject {
     f32 aspectScale;        // 0x1E0: scales the yaw offset with f1C4 (func_00144BE8)
     f32 nearDistance;       // 0x1E4: the near clip distance
     f32 farDistance;        // 0x1E8: the far clip distance
-    f32 f1EC; // 0x1EC
+    f32 nearClearance; // 0x1EC: the radius the near plane's corners need
     f32 projectionScaleX;   // 0x1F0: ProjectPointToCamera divides the screen x by it
     f32 projectionScaleY;   // 0x1F4: and the screen y
     f32 fogNear;            // 0x1F8: the distance fog starts
@@ -81,31 +81,31 @@ struct Camera : BaseObject {
     f32 fogTerms[4];        // 0x208: ComputeCameraFogTerms' result for strength 1
 
     f32 swingStartTime;     // 0x218: the game time the view swing started
-    s32 f21C;               // 0x21C
+    s32 areaMask;           // 0x21C: the mask looked up at the camera's position
     s32 snapQueued;         // 0x220: set to ask for a snap on the next update
     s32 snapping;           // 0x224: a snap is in progress this frame
     s32 hasSnapValue;       // 0x228: set when the snap carries a value
     f32 snapValue;          // 0x22C: the value a snap with a source carries
-    Vec02 v230;             // 0x230: from p to the screen point's place on the view ray (func_00145610)
-    Vec02 v240;             // 0x240: D_00248D30 at func_00145610
+    Vec4 v230;             // 0x230: from p to the screen point's place on the view ray (func_00145610)
+    Vec4 v240;             // 0x240: D_00248D30 at func_00145610
     u8 pad250[0x270 - 0x250];
-    Vec02 v270;             // 0x270: the offset the on-off controllers spring (func_001E3380)
-    Vec02 v280;             // 0x280: its goal
+    Vec4 v270;             // 0x270: the offset the on-off controllers spring (func_001E3380)
+    Vec4 v280;             // 0x280: its goal
     u8 pad290[0x2B0 - 0x290];
-    f32 f2B0;               // 0x2B0
-    f32 f2B4;               // 0x2B4
-    f32 f2B8;               // 0x2B8
-    f32 f2BC;               // 0x2BC
-    f32 f2C0;               // 0x2C0
+    f32 headingRate;        // 0x2B0: the rate of the heading of the view around the focus
+    f32 pitchRate;          // 0x2B4: the rate of the pitch of the view around the focus
+    f32 distanceRate;       // 0x2B8: the rate of the distance to the focus
+    f32 yawRate;            // 0x2BC: the rate of the camera's own yaw
+    f32 tiltRate;           // 0x2C0: the rate of the camera's own tilt
     u8 pad2C4[0x2D0 - 0x2C4];
-    s32 f2D0[4];            // 0x2D0
+    s32 lookFocus[4];       // 0x2D0: the point the view was last looking at
     void* currentTarget;    // 0x2E0: the target object the camera last tracked
     void* f2E4; // 0x2E4
     void* f2E8; // 0x2E8
     BaseObject* f2EC; // 0x2EC
-    Vec02 f2F0; // 0x2F0
-    Vec02 f300; // 0x300
-    Vec02 f310; // 0x310
+    Vec4 f2F0; // 0x2F0
+    Vec4 f300; // 0x300
+    Vec4 f310; // 0x310
     u8 pad320[0x334 - 0x320];
     s32 f334; // 0x334
     s32 f338; // 0x338
@@ -116,7 +116,7 @@ struct Camera : BaseObject {
     u8 pad368[0x370 - 0x368];
     s32 f370; // 0x370
     u8 pad374[0x3A0 - 0x374];
-    Mat02 rot3A0;           // 0x3A0: a rotation DrawPhasedEffect turns each piece of its strip by
+    Mat3 rot3A0;           // 0x3A0: a rotation DrawPhasedEffect turns each piece of its strip by
     s32 stackCount;         // 0x3D0: how many entries are in use
     CameraControllerEntry stack[8];    // 0x3D4: the first is in action
     CameraController ctl454;           // 0x454: D_00217398

@@ -129,7 +129,7 @@ struct RampParams { s64 a __attribute__((packed)); s32 b; };
 // What func_001A3C40 turns its object with: the yaw matrix it builds and the ramp it approaches the
 // heading by.
 struct HeadingFrame {
-    Mat02 rot;          // 0x00
+    Mat3 rot;          // 0x00
     RampParams ramp;    // 0x30
 };
 
@@ -252,11 +252,11 @@ void SetHitTargetState(HitTarget* self, s32 value);
 
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 
@@ -267,7 +267,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 
 
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern s32 g_hitTargetStateIds[10];
@@ -276,7 +276,7 @@ void RemoveFinishedHitTarget(PairController* self, HitTarget* obj);
 
 
 
-struct Contact03;
+struct BodyContact;
 struct ContactEnd03;
 struct ImpulseRow;
 
@@ -341,7 +341,7 @@ void SetWalkerColliderState(WalkerCollider* self, s32 n);
 struct ScatterController;
 
 
-void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
+void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 
 
 
@@ -416,8 +416,8 @@ s32 g_padPatternSetting = 0;
 
 
 
-f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-extern const Vec02 g_unitZVector;
+f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
+extern const Vec4 g_unitZVector;
 
 // Slot 0 of the walker collider: switched-collider init, both states -1 and a speed scale of
 // 2000.0.
@@ -478,7 +478,7 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src, f32 dt)
     f.ramp = *(RampParams*)g_walkerControlRamp;
     f32 r = ArctangentOfRatio(((PlacedObject*)self->f64C)->m110.r[0].y, ((PlacedObject*)self->f64C)->m110.r[0].x);
     r = ApproachAngleWithRamp(r, self->aimHeading, g_frameDt, &f.ramp, 0);
-    BuildYawPitchMatrix(r, 0.0f, (Mat02*)&f.rot);
+    BuildYawPitchMatrix(r, 0.0f, (Mat3*)&f.rot);
     TransformRotationBetweenFrames(0, self, &f.rot, &f.rot);
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
@@ -505,11 +505,11 @@ void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
 {
     UpdateSwitchedCollider(self, dt);
     if (HasAnimationDrivenAttachment(self) != 0) {
-        Vec02 pos;
-        Vec02 vel;
-        Vec02 diff;
-        Vec02 dir;
-        Vec02 split;
+        Vec4 pos;
+        Vec4 vel;
+        Vec4 diff;
+        Vec4 dir;
+        Vec4 split;
         RampProfile ramp;
         f32 out;
         self->positionAttachment->vt->getPos(self->positionAttachment, 0.0f, &pos, &vel);
@@ -741,8 +741,8 @@ void StepWalkerCollider(WalkerCollider* self, f32 dt)
 {
     f32 buf[12];
     StepCollider(self, dt);
-    BuildYawPitchMatrix(self->heading, 0.0f, (Mat02*)buf);
-    TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, g_walkerTurnRamp);
+    BuildYawPitchMatrix(self->heading, 0.0f, (Mat3*)buf);
+    TurnColliderTowardRotation(self, g_frameDt, (Mat3*)buf, g_walkerTurnRamp);
 }
 
 
@@ -750,19 +750,19 @@ void StepWalkerCollider(WalkerCollider* self, f32 dt)
 // with its entries of 0x40 bytes, each with a point at +0x30.
 struct Walker_001A4538 {
     u8 pad0[0x630];
-    Vec02 point;            // 0x630
+    Vec4 point;            // 0x630
 };
 
 struct ContactEntry_001A4538 {
     u8 pad0[0x30];
-    Vec02 point;            // 0x30
+    Vec4 point;            // 0x30
 };
 
 union Contact_001A4538 {
     ContactEntry_001A4538 entries[1];   // 0x00
     struct {
         u8 pad0[0x80];
-        Vec02 normal;       // 0x80
+        Vec4 normal;       // 0x80
     };
 };
 
@@ -771,8 +771,8 @@ union Contact_001A4538 {
 void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s32 i)
 {
     if (HasAnimationDrivenAttachment((SwitchedCollider*)self) == 0) {
-        Vec02* p = &c->entries[i].point;
-        Vec02 d;
+        Vec4* p = &c->entries[i].point;
+        Vec4 d;
         Vu0::Vec e = Vu0::Vec::Of(*p);
         Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->point),
                              Vu0::MulX(Vu0::Q(c->normal), Vu0::Dot(Vu0::Q(self->point), Vu0::Q(c->normal))));
@@ -782,7 +782,7 @@ void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s3
 
 // Slot 0x100 of the walker collider: unless animation-driven, a contact whose normal points up (z
 // above 0.7) gets friction 20.
-void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
+void ComputeWalkerColliderContactValue(WalkerCollider* ctx, BodyContact* obj)
 {
     if (HasAnimationDrivenAttachment(ctx) != 0) {
         return;
@@ -797,8 +797,8 @@ void ComputeWalkerColliderContactValue(WalkerCollider* ctx, Contact03* obj)
 // that call, then restores both.
 void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
-    Vec02 s0;
-    Vec02 s1;
+    Vec4 s0;
+    Vec4 s1;
     s32 n = *(s32*)(a2 + ((1 - a3) << 6));
     s0 = self->v440;
     s1 = self->q450;
@@ -808,7 +808,7 @@ void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, 
             self->v440 = g_unitZVector;
         }
     }
-    ComputeColliderImpulseResponse(self, a1, (Contact03*)a2, a3, (ContactEnd03*)a4, (ImpulseRow*)a5);
+    ComputeColliderImpulseResponse(self, a1, (BodyContact*)a2, a3, (ContactEnd03*)a4, (ImpulseRow*)a5);
     self->v440 = s0;
     self->q450 = s1;
 }
@@ -842,13 +842,13 @@ void InitPairController(PairController* self)
     PairPose tmp;
 
     InitPlacedObject(self);
-    SetListLinkOffset((List01*)self->list35C, 0x5A0);
-    SetListLinkOffset((List01*)self->list368, 0x5A0);
-    SetListLinkOffset((List01*)self->list374, 0x5A0);
-    SetListLinkOffset((List01*)self->list384, 0x5B0);
-    SetListLinkOffset((List01*)self->list390, 0x5B0);
-    SetListLinkOffset((List01*)self->list3A0, 0x568);
-    SetListLinkOffset((List01*)self->list3AC, 0x568);
+    SetListLinkOffset((ObjectList*)self->list35C, 0x5A0);
+    SetListLinkOffset((ObjectList*)self->list368, 0x5A0);
+    SetListLinkOffset((ObjectList*)self->list374, 0x5A0);
+    SetListLinkOffset((ObjectList*)self->list384, 0x5B0);
+    SetListLinkOffset((ObjectList*)self->list390, 0x5B0);
+    SetListLinkOffset((ObjectList*)self->list3A0, 0x568);
+    SetListLinkOffset((ObjectList*)self->list3AC, 0x568);
     self->id2D0 = -1;
     self->id2D4 = -1;
     self->id2D8 = -1;
@@ -915,12 +915,12 @@ s32 GetCurrentEntryVariant(void)
 // the result b's register, as retail's pose counts are).
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
 
-struct Controlled558 {
+struct ControlledSoundObject {
     u8 pad[0x558];
     void* controller;
 };
 
-struct Controlled678 {
+struct ControlledWatchedObject {
     u8 pad[0x678];
     void* controller;
 };
@@ -937,7 +937,7 @@ void ResolvePairControllerLinks(PairController* self)
         u8* s = (u8*)self;
         void* first = FindFirstObjectByIdMode4(g_currentWorld, self->id2D8, self);
         self->watchedObject = first;
-        ((Controlled678*)first)->controller = self;
+        ((ControlledWatchedObject*)first)->controller = self;
         PairedObject* a = (PairedObject*)FindFirstObjectByIdMode4(g_currentWorld, self->id2D0, self);
         a->controller = self;
         PairedObject* b = (PairedObject*)FindFirstObjectByIdMode4(g_currentWorld, self->id2D4, self);
@@ -954,7 +954,7 @@ void ResolvePairControllerLinks(PairController* self)
             } else {
                 o = CreateObjectCopy(a, g_currentWorld, a->parent);
             }
-            AppendToList((List01*)(s + 0x374), o);
+            AppendToList((ObjectList*)(s + 0x374), o);
         }
         for (i = 0; (f32)i < MaxF(self->poseA[9], self->poseB[9]); i++) {
             void* o;
@@ -963,7 +963,7 @@ void ResolvePairControllerLinks(PairController* self)
             } else {
                 o = CreateObjectCopy(b, g_currentWorld, b->parent);
             }
-            AppendToList((List01*)(s + 0x390), o);
+            AppendToList((ObjectList*)(s + 0x390), o);
         }
         for (i = 0; i < self->idCount; i++) {
             void* found[4];
@@ -975,8 +975,8 @@ void ResolvePairControllerLinks(PairController* self)
                     break;
                 }
             }
-            ((Controlled558*)hit)->controller = self;
-            AppendToList((List01*)(s + 0x3A0), hit);
+            ((ControlledSoundObject*)hit)->controller = self;
+            AppendToList((ObjectList*)(s + 0x3A0), hit);
         }
     }
 }
@@ -1139,7 +1139,7 @@ void SetPairControllerState(PairController* self, s32 state)
         }
         void* w = self->link;
         if (w) {
-            T217D_440* box = &g_typedTextCaptionBox;
+            CaptionBox* box = &g_typedTextCaptionBox;
             ((PtrP*)&box->child)->v = w;
             PushStackElement((ElementStack*)g_elementStack, box);
         }
@@ -1184,16 +1184,16 @@ void SetPairControllerState(PairController* self, s32 state)
     }
 }
 
-extern const Vec02 g_unitZVector;
+extern const Vec4 g_unitZVector;
 
 // Whether the spot is within reach of n: the xy distance to its position is less than the two radii.
-static inline s32 IsNearSpot(const Vec02& pos, PairedObject* n, PairedObject* o)
+static inline s32 IsNearSpot(const Vec4& pos, PairedObject* n, PairedObject* o)
 {
     s32 near = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140)), Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140))))) < o->radius3D0 + n->radius3D0;
     return near;
 }
 
-static inline s32 IsNearSpotOf(const Vec02& pos, PairedObject* n, PairedObject* o)
+static inline s32 IsNearSpotOf(const Vec4& pos, PairedObject* n, PairedObject* o)
 {
     s32 near = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140)), Vu0::Sub(Vu0::Q(pos), Vu0::Q(n->v140))))) < n->radius3D0 + o->radius3D0;
     return near;
@@ -1205,9 +1205,9 @@ static inline s32 IsNearSpotOf(const Vec02& pos, PairedObject* n, PairedObject* 
 // active list, paired with the nearest waiting object, and the next start is scheduled.
 void SpawnPairedObject(PairController* self)
 {
-    Vec02 pos;
-    Vec02 spare;
-    Mat02 turn;
+    Vec4 pos;
+    Vec4 spare;
+    Mat3 turn;
     PairedObject* o;
     PairedObject* n;
     PairedObject* m;
@@ -1225,7 +1225,7 @@ void SpawnPairedObject(PairController* self)
         other = (PairedObject*)GetActiveSwitchedCollider();
         ComputePolarOffset((Vec3*)&pos, angle, radius, 0.0f);
         pos.y = pos.y * self->tune34C;
-        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->f330), Vu0::Q(pos));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->spawnCentre), Vu0::Q(pos));
         if (other != 0 && IsNearSpot(pos, other, o)) {
             continue;
         }
@@ -1263,12 +1263,12 @@ void SpawnPairedObject(PairController* self)
         f32 spin = RandomFloatInRange(0.0f, 6.2831855f);
         BuildAxisAngleMatrix(&g_unitZVector, &turn, spin);
         o->desc02()->m1E(o, &turn);
-        o->desc02()->m20(o, (Vec02*)&D_00248D30);
-        o->desc02()->m21(o, (Vec02*)&D_00248D30);
-        SetColliderAnchors(o, 2, (Vec02*)&g_unitZVector, 3, 0);
+        o->desc02()->m20(o, (Vec4*)&g_zeroVector);
+        o->desc02()->m21(o, (Vec4*)&g_zeroVector);
+        SetColliderAnchors(o, 2, (Vec4*)&g_unitZVector, 3, 0);
         SetHitTargetState((HitTarget*)o, 0);
-        RemoveFromList((List01*)self->list374, o);
-        AppendToList((List01*)self->list368, o);
+        RemoveFromList((ObjectList*)self->list374, o);
+        AppendToList((ObjectList*)self->list368, o);
         PairWithNearestWaitingObject(self, o);
         self->nextStartTime = g_gameTime + RandomFloatInRange(self->startDelayMin, self->startDelayMax);
     }
@@ -1284,9 +1284,9 @@ void StartPairedObjects(PairController* self)
         self->nextAttachTime = 3.4028234663852886e+38f;
     } else {
         PairedObject* owner = *(PairedObject**)(self->list390);
-        s32 count = CountListItems((List01*)self->list3A0);
+        s32 count = CountListItems((ObjectList*)self->list3A0);
         if (count != 0) {
-            ListWalk w((List01*)self->list3A0);
+            ListWalk w((ObjectList*)self->list3A0);
             u8* node;
             s32 r = RandomIntInRange(0, count - 1);
             s32 j = r;
@@ -1296,19 +1296,19 @@ void StartPairedObjects(PairController* self)
                     node = (u8*)w.Next();
                 } while (j-- >= 0);
             }
-            RemoveFromList((List01*)self->list3A0, node);
-            AppendToList((List01*)self->list3AC, node);
-            RemoveFromList((List01*)self->list390, owner);
-            AppendToList((List01*)self->list384, owner);
+            RemoveFromList((ObjectList*)self->list3A0, node);
+            AppendToList((ObjectList*)self->list3AC, node);
+            RemoveFromList((ObjectList*)self->list390, owner);
+            AppendToList((ObjectList*)self->list384, owner);
             owner->attachment = (SoundStateObject*)node;
             (self->count39C)++;
             owner->desc->m02(owner);
-            owner->desc02()->m1D(owner, (Vec02*)(node + 0x140));
-            owner->desc02()->m1E(owner, (Mat02*)(node + 0x110));
+            owner->desc02()->m1D(owner, (Vec4*)(node + 0x140));
+            owner->desc02()->m1E(owner, (Mat3*)(node + 0x110));
             SetPairedState(owner, 1);
             SetSoundStateObjectState(owner->attachment, 1);
-            owner->maxSpeed = self->f644;
-            owner->maxTurn = self->f648;
+            owner->maxSpeed = self->blendedSpeed;
+            owner->maxTurn = self->blendedTurn;
             f32* fp = &self->attachDelayMin;
             self->nextAttachTime = g_gameClock[1] + RandomFloatInRange(self->attachDelayMin, fp[1]);
             StartSoundEffect(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1335,11 +1335,11 @@ void UpdatePairControllerTuning(PairController* self, f32 dt)
 
     f32 t2;
     ClampedQuadratic::Get(t2, &self->blend.speed.q, dt);
-    self->f644 = (1.0f - t2) * self->blend.speed.value[0] + t2 * self->blend.speed.value[1];
+    self->blendedSpeed = (1.0f - t2) * self->blend.speed.value[0] + t2 * self->blend.speed.value[1];
 
     f32 t3;
     ClampedQuadratic::Get(t3, &self->blend.turn.q, dt);
-    self->f648 = (1.0f - t3) * self->blend.turn.value[0] + t3 * self->blend.turn.value[1];
+    self->blendedTurn = (1.0f - t3) * self->blend.turn.value[0] + t3 * self->blend.turn.value[1];
 
     f32 t4;
     ClampedQuadratic::Get(t4, &self->blend.limit.q, dt);
@@ -1369,11 +1369,11 @@ void RemoveFinishedHitTarget(PairController* self, HitTarget* obj)
     self->finishedCount = n;
     UpdatePairControllerTuning(self, (f32)n / x);
     if (obj->partner != 0) {
-        RemoveFromList((List01*)self->list35C, obj);
+        RemoveFromList((ObjectList*)self->list35C, obj);
     } else {
-        RemoveFromList((List01*)self->list368, obj);
+        RemoveFromList((ObjectList*)self->list368, obj);
     }
-    AppendToList((List01*)self->list374, obj);
+    AppendToList((ObjectList*)self->list374, obj);
     if (obj->partner != 0) {
         if (PairWithNearestFreeObject(self, obj->partner) != 0) {
             SetPairedState((PairedObject*)obj->partner, 3);
@@ -1395,8 +1395,8 @@ void RemoveFinishedHitTarget(PairController* self, HitTarget* obj)
 // 0 and clears the field.
 void ReleasePairedAttachment(u8* self, PairedObject* obj)
 {
-    RemoveFromList((List01*)(self + 0x3AC), obj->attachment);
-    AppendToList((List01*)(self + 0x3A0), obj->attachment);
+    RemoveFromList((ObjectList*)(self + 0x3AC), obj->attachment);
+    AppendToList((ObjectList*)(self + 0x3A0), obj->attachment);
     SetSoundStateObjectState(obj->attachment, 0);
     obj->attachment = 0;
 }
@@ -1408,11 +1408,11 @@ void AttachPairedPartner(void* a0, void* a1)
     PairedObject* s = (PairedObject*)a1;
     ((Collider*)s->partner)->desc->m15((Collider*)s->partner, (BaseObject*)a1);
     s = (PairedObject*)a1;
-    ((Collider*)s->partner)->desc02()->m20((Collider*)s->partner, (Vec02*)&D_00248D30);
+    ((Collider*)s->partner)->desc02()->m20((Collider*)s->partner, (Vec4*)&g_zeroVector);
     s = (PairedObject*)a1;
-    ((Collider*)s->partner)->desc02()->m21((Collider*)s->partner, (Vec02*)&D_00248D30);
+    ((Collider*)s->partner)->desc02()->m21((Collider*)s->partner, (Vec4*)&g_zeroVector);
     SetColliderAnchors((Collider*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
-    StartSoundEffect(0x151, (PlayingSound**)0, 0, (Vec02*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x151, (PlayingSound**)0, 0, (Vec4*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
 // Releases the partner from its parent, stops its velocity and spin and lets it move only along z
@@ -1423,9 +1423,9 @@ void DetachPairedPartner(PairController* unused, PairedObject* h)
 
     (void)unused;
     o->desc->m15(o, 0);
-    o->desc02()->m20(o, (Vec02*)&D_00248D30);
-    o->desc02()->m21(o, (Vec02*)&D_00248D30);
-    SetColliderAnchors(o, 2, (Vec02*)&g_unitZVector, 3, 0);
+    o->desc02()->m20(o, (Vec4*)&g_zeroVector);
+    o->desc02()->m21(o, (Vec4*)&g_zeroVector);
+    SetColliderAnchors(o, 2, (Vec4*)&g_unitZVector, 3, 0);
 }
 
 // Sets the paired object's attachment to state 1; SetPairedState calls it on the transition from
@@ -1442,12 +1442,12 @@ void ActivatePairedAttachment(void* unused, PairedObject* obj)
 void FinishPairedObjectTransition(PairController* self, PairedObject* obj)
 {
     self->transitionCount = self->transitionCount + 1;
-    RemoveFromList((List01*)self->list35C, obj->partner);
-    AppendToList((List01*)self->list374, obj->partner);
-    RemoveFromList((List01*)self->list384, obj);
-    AppendToList((List01*)self->list390, obj);
-    RemoveFromList((List01*)self->list3AC, obj->attachment);
-    AppendToList((List01*)self->list3A0, obj->attachment);
+    RemoveFromList((ObjectList*)self->list35C, obj->partner);
+    AppendToList((ObjectList*)self->list374, obj->partner);
+    RemoveFromList((ObjectList*)self->list384, obj);
+    AppendToList((ObjectList*)self->list390, obj);
+    RemoveFromList((ObjectList*)self->list3AC, obj->attachment);
+    AppendToList((ObjectList*)self->list3A0, obj->attachment);
     {
         PairedObject* p = (PairedObject*)obj->partner;
         p->desc->m15(p, 0);
@@ -1480,11 +1480,11 @@ void FinishPairedObjectTransition(PairController* self, PairedObject* obj)
 // had been reached, the next attach time scheduled.
 void RemovePairedObject(PairController* self, PairedObject* obj)
 {
-    RemoveFromList((List01*)self->list384, obj);
-    AppendToList((List01*)self->list390, obj);
+    RemoveFromList((ObjectList*)self->list384, obj);
+    AppendToList((ObjectList*)self->list390, obj);
     if (obj->attachment != 0) {
-        RemoveFromList((List01*)self->list3AC, obj->attachment);
-        AppendToList((List01*)self->list3A0, obj->attachment);
+        RemoveFromList((ObjectList*)self->list3AC, obj->attachment);
+        AppendToList((ObjectList*)self->list3A0, obj->attachment);
         SetSoundStateObjectState(obj->attachment, 0);
     }
     PairedObject* child = (PairedObject*)obj->partner;
@@ -1492,8 +1492,8 @@ void RemovePairedObject(PairController* self, PairedObject* obj)
         if (child->parent == obj) {
             DetachPairedPartner(self, obj);
         }
-        RemoveFromList((List01*)self->list35C, child);
-        AppendToList((List01*)self->list368, child);
+        RemoveFromList((ObjectList*)self->list35C, child);
+        AppendToList((ObjectList*)self->list368, child);
         if (PairWithNearestWaitingObject(self, child) == 0) {
             child->partner = 0;
         }
@@ -1515,7 +1515,7 @@ s32 PairWithNearestFreeObject(void* self, void* child)
     ListFrame frame;
     PairController* c = (PairController*)self;
     PairedObject* o = (PairedObject*)child;
-    if (IsListEmpty((List01*)c->list368) != 0) {
+    if (IsListEmpty((ObjectList*)c->list368) != 0) {
         return 0;
     }
     f32 best = 3.4028234663852886e+38f;
@@ -1530,8 +1530,8 @@ s32 PairWithNearestFreeObject(void* self, void* child)
     }
     o->partner = found;
     found->partner = o;
-    RemoveFromList((List01*)c->list368, found);
-    AppendToList((List01*)c->list35C, found);
+    RemoveFromList((ObjectList*)c->list368, found);
+    AppendToList((ObjectList*)c->list35C, found);
     return 1;
 }
 
@@ -1548,12 +1548,12 @@ void LinkPairedObjects(u8* self, PairedObject* obj, PairedObject* node)
     obj->partner = node;
     node->partner = obj;
     if (s2 == 0) {
-        RemoveFromList((List01*)(self + 0x368), node);
-        AppendToList((List01*)(self + 0x35C), node);
+        RemoveFromList((ObjectList*)(self + 0x368), node);
+        AppendToList((ObjectList*)(self + 0x35C), node);
     }
     if (cur != 0) {
-        RemoveFromList((List01*)(self + 0x35C), cur);
-        AppendToList((List01*)(self + 0x368), cur);
+        RemoveFromList((ObjectList*)(self + 0x35C), cur);
+        AppendToList((ObjectList*)(self + 0x368), cur);
         cur->partner = 0;
         PairWithNearestWaitingObject(self, cur);
     }
@@ -1591,8 +1591,8 @@ s32 PairWithNearestWaitingObject(void* self, void* child)
     }
     o->partner = found;
     found->partner = o;
-    RemoveFromList((List01*)c->list368, o);
-    AppendToList((List01*)c->list35C, o);
+    RemoveFromList((ObjectList*)c->list368, o);
+    AppendToList((ObjectList*)c->list35C, o);
     SetPairedState(found, 3);
     return 1;
 }
@@ -1603,7 +1603,7 @@ s32 PairWithNearestWaitingObject(void* self, void* child)
 s32 AssignNearestListedObjectToPair(PairController* self, PairedObject* obj)
 {
     ListFrame frame;
-    if (IsListEmpty((List01*)self->list3A0) != 0) {
+    if (IsListEmpty((ObjectList*)self->list3A0) != 0) {
         return 0;
     }
     f32 best = 3.4028234663852886e+38f;
@@ -1616,8 +1616,8 @@ s32 AssignNearestListedObjectToPair(PairController* self, PairedObject* obj)
             found = p;
         }
     }
-    RemoveFromList((List01*)self->list3A0, found);
-    AppendToList((List01*)self->list3AC, found);
+    RemoveFromList((ObjectList*)self->list3A0, found);
+    AppendToList((ObjectList*)self->list3AC, found);
     obj->attachment = found;
     return 1;
 }
@@ -1647,7 +1647,7 @@ void InitPairedObject(PairedObject* self)
     self->state = -1;
     self->offsetWaitMin = 1.0f;
     self->offsetWaitMax = 2.5f;
-    SetColliderAnchors(self, 1, (Vec02*)&g_unitZVector, 2, (Vec02*)&g_unitZVector);
+    SetColliderAnchors(self, 1, (Vec4*)&g_unitZVector, 2, (Vec4*)&g_unitZVector);
 }
 
 // Slot 10 of the paired object: loads the collider, resolves its six object links and sets up its
@@ -1676,7 +1676,7 @@ void StartPairedObject(PairedObject* self)
 }
 
 s32 ChoosePairedObjectState(PairedObject* self);
-void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 flag);
+void SteerPairedObjectWithinArea(PairedObject* self, Vec4* goal, s32 flag);
 
 // The distance from b to a on the ground (their x and y).
 static inline f32 GroundDistance(u128 a, u128 b)
@@ -1688,7 +1688,7 @@ static inline f32 GroundDistance(u128 a, u128 b)
 // Each frame: the state the object should be in, then where it steers in it.
 void UpdatePairedObject(PairedObject* self, f32 dt)
 {
-    Vec02 v;
+    Vec4 v;
     UpdateCollider(self, dt);
     s32 s;
     for (;;) {
@@ -1727,8 +1727,8 @@ void UpdatePairedObject(PairedObject* self, f32 dt)
     case 8:
     case 9:
     case 10:
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
-        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec4*)&g_zeroVector);
+        self->desc02()->m21(self, (Vec4*)&g_zeroVector);
         break;
     }
 }
@@ -1736,12 +1736,12 @@ void UpdatePairedObject(PairedObject* self, f32 dt)
 // The ground a paired object keeps to (its controller): a circle around center.
 struct PairArea {
     u8 pad000[0x330];
-    Vec02 center;           // 0x330
+    Vec4 center;           // 0x330
     f32 radius;             // 0x340
 };
 
 // v made unit length (no test for zero; func_001A6788).
-static inline u128 Normalized(Vec02 v)
+static inline u128 Normalized(Vec4 v)
 {
     return Vu0::DivX(Vu0::Q(v), Vu0::Length(Vu0::Q(v)));
 }
@@ -1754,11 +1754,11 @@ static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 // area (a goal outside is moved to 1.5 radii from the centre on the line it crosses). Facing more
 // than 3 degrees off it stops and turns; otherwise it moves at up to maxSpeed (backwards if asked)
 // and turns at up to maxTurn per second.
-void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
+void SteerPairedObjectWithinArea(PairedObject* self, Vec4* goal, s32 backwards)
 {
-    Vec02 from;
-    Vec02 to;
-    Vec02 delta;
+    Vec4 from;
+    Vec4 to;
+    Vec4 delta;
     from = self->v140;
     from.z = 0.0f;
     to = *goal;
@@ -1767,8 +1767,8 @@ void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
     if (0.0001f < area->radius) {
         ColliderSpan span;
         if (CollectBoundsSpans(&area->center, &from, &to, area->radius, 1, &span)) {
-            Vec02 mid;
-            Vec02 dir;
+            Vec4 mid;
+            Vec4 dir;
             Vu0::Q(mid) = Vu0::MulXSum(Vu0::Q(span.q[0]), Vu0::Scalar(0.5f), Vu0::Q(span.q[1]), Vu0::Scalar(0.5f));
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(mid), Vu0::Q(((PairArea*)self->controller)->center));
             Vu0::Q(dir) = Normalized(dir);
@@ -1783,13 +1783,13 @@ void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
     }
     f32 turn = WrapAngle(bearing - heading);
     if (0.05235988f < __builtin_fabsf(turn)) {
-        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+        self->desc02()->m20(self, (Vec4*)&g_zeroVector);
     } else {
         f32 speed = MinF(Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(delta))) / g_gameClock[2], self->maxSpeed);
         if (backwards) {
             speed = -speed;
         }
-        Vec02 v;
+        Vec4 v;
         Vu0::Q(v) = Vu0::FromFloats(speed, 0.0f, 0.0f);
         SetPlacedObjectLocalVelocity(self, &v);
     }
@@ -1810,7 +1810,7 @@ void* FindHitTargetChild(Collider* self);
 // it (4); then back to an attachment (5) and close in on it (6, then 0); 9 ends in 10.
 s32 ChoosePairedObjectState(PairedObject* self)
 {
-    Vec02 v;
+    Vec4 v;
     s32 s = self->state;
     switch (s) {
     case 1: {
@@ -1996,7 +1996,7 @@ void InitHitTarget(HitTarget* self)
 {
     s32* z;
     InitCollider(self);
-    SetColliderAnchors(self, 2, (Vec02*)&g_unitZVector, 3, 0);
+    SetColliderAnchors(self, 2, (Vec4*)&g_unitZVector, 3, 0);
     f32 one = 1.0f;
     f32 pt2 = 0.2f;
     z = (s32*)&self->scalePoly;
@@ -2086,13 +2086,13 @@ void StepHitTarget(HitTarget* self, f32 dt)
     StepCollider(self, dt);
     if (self->parent == 0) {
         u8 buf[0x30];
-        RotateMatrixUpright(&self->m110, 0, (Mat02*)buf);
-        TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, g_hitTargetTurnRamp);
+        RotateMatrixUpright(&self->m110, 0, (Mat3*)buf);
+        TurnColliderTowardRotation(self, g_frameDt, (Mat3*)buf, g_hitTargetTurnRamp);
     }
 }
 
 // Slot 0x100 of the hit target: scales the contact's bounce by 0.6.
-void ComputeHitTargetContactValue(HitTarget* self, Contact03* obj)
+void ComputeHitTargetContactValue(HitTarget* self, BodyContact* obj)
 {
     obj->bounce = obj->bounce * 0.6f;
 }
@@ -2295,7 +2295,7 @@ void StartObjectCreator(ObjectCreator* self)
 s32 ChooseObjectCreatorState(ObjectCreator* self);
 
 // dir = d made unit length, or fallback when d is shorter than 0.0001.
-static inline void SetDirectionOr(Vec02& dir, u128 d, const Vec02& fallback)
+static inline void SetDirectionOr(Vec4& dir, u128 d, const Vec4& fallback)
 {
     Vu0::Q(dir) = d;
     u128 len = Vu0::Length(d);
@@ -2311,9 +2311,9 @@ static inline void SetDirectionOr(Vec02& dir, u128 d, const Vec02& fallback)
 // it creates for, at a speed taken from a ramp (limit 3000) and turned to face it.
 void UpdateObjectCreator(ObjectCreator* self, f32 dt)
 {
-    Vec02 dir;
+    Vec4 dir;
     RampProfile ramp;
-    Vec02 vel;
+    Vec4 vel;
     UpdateCollider(self, dt);
     s32 v;
     while ((v = ChooseObjectCreatorState(self)) != self->state) {
@@ -2328,7 +2328,7 @@ void UpdateObjectCreator(ObjectCreator* self, f32 dt)
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(speed));
         PlacedObject* o = (PlacedObject*)self->created;
         o->desc02()->m20(o, &vel);
-        Mat02 basis;
+        Mat3 basis;
         BuildBasisFromX(&dir, &basis);
         ((PlacedObject*)self->created)->desc02()->m1E((PlacedObject*)self->created, &basis);
     }

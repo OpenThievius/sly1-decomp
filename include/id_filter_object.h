@@ -16,8 +16,8 @@
 
 struct IdFilterObject : Collider {
     s32 acceptsListed;      // 0x550: 1 when the lists name what it reacts to, 0 when they name what it leaves out
-    Ids03 objectIds;        // 0x554: object ids (func_0012FCB0)
-    Ids03 classIds;        // 0x568: class ids (func_0012FCD0)
+    ObjectIdList objectIds;        // 0x554: object ids (func_0012FCB0)
+    ObjectIdList classIds;        // 0x568: class ids (func_0012FCD0)
     u8 pad57C[0x580 - 0x57C];
     s32 mode;               // 0x580: 1 when f590 holds a position taken from the one child, 2 when it holds the
                             // object that was found by id
@@ -25,7 +25,7 @@ struct IdFilterObject : Collider {
     union {
         s32 id;             // 0x590: -1 at set-up, then the id to find
         PlacedObject* found;         // 0x590: the object found by that id (mode 2)
-        Vec02 pos;          // 0x590: the child's placement in this object's frame (mode 1)
+        Vec4 pos;          // 0x590: the child's placement in this object's frame (mode 1)
     };
     PlacedObject* pendingTarget;     // 0x5A0: the object slot 17 sets the placement of, then keeps in f5A4
     PlacedObject* placedTarget;      // 0x5A4

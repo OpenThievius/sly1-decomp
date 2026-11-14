@@ -19,8 +19,8 @@ struct ScalingVolume : PlacedObject {
     s32 out2D8;             // 0x2D8: the link count
     void* out2DC;           // 0x2DC: and the links (the face tree IsPointInsideFaceTree walks)
     f32 v[3];               // 0x2E0: 1.0, 0.2, 0.1 at setup
-    f32 f2EC;               // 0x2EC: 1.0 at setup; read by slots 17 and 37
-    f32 f2F0;               // 0x2F0: 1.0 at setup; read by slot 17
+    f32 currentScale;       // 0x2EC: 1.0 at setup; read by slots 17 and 37
+    f32 targetScale;        // 0x2F0: 1.0 at setup; read by slot 17
     u8 pad2F4[0x300 - 0x2F4];
 };
 

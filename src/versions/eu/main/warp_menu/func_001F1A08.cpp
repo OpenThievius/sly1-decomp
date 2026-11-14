@@ -19,7 +19,7 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
 
     if (self->f570 == 0) return;
     if (self->f570->mode != 2) return;
-    if (self->f570->f560 != 0) return;
+    if (self->f570->warpChosen != 0) return;
     if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
         PopStackElement((ElementStack*)g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
@@ -46,7 +46,7 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
         if (self->f570->cursor != GetCurrentWarpEntry()) {
             if (s3 != 0) {
                 IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
-                self->f570->f560 = 1;
+                self->f570->warpChosen = 1;
                 PopStackElement((ElementStack*)g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
@@ -60,7 +60,7 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
     if (s3 != 0) {
         self->f590 = 1.0f;
     } else {
-        self->f590 = D_00275FC0;
+        self->f590 = g_scaleTargetSmall;
     }
-    self->f58C = ApproachValueWithRamp((RampProfile*)D_00276278, 0, self->f58C, self->f590, g_gameClock.step);
+    self->f58C = ApproachValueWithRamp((RampProfile*)g_warpLevelRampKind2, 0, self->f58C, self->f590, g_gameClock.step);
 }

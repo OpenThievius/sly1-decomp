@@ -6,7 +6,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
 {
     s32 q[2];
     s32 s1;
-    Ent65* s2;
+    StepSequenceHost* s2;
 
     UpdatePlacedObject(self, dt);
     if (!(((Gl_150AE8_eu*)&g_timerCaption)->f570 < 2 && ((Gl_150AE8_eu*)&g_timerCaption)->f57C == 0 && IsStreamVoiceLocked() == 0 && g_resumeSoundSetupDone != 1)) {
@@ -59,7 +59,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
                 ShowStepSequenceText(self, s2);
                 s1 = self->state2D4;
             } else if (o != self) {
-                if (o->f328 == 0 && o->state2D4 == 3) {
+                if (o->otherSkipBlocked == 0 && o->state2D4 == 3) {
                     SkipRemainingSteps(o);
                 }
             }

@@ -46,12 +46,12 @@
 #include "functions/switched_collider.h"
 #include "functions/warp_menu.h"
 struct BaseObject;
-struct Vec02;
+struct Vec4;
 
 struct BaseObject;
 
-struct Mat02;
-struct Vec02;
+struct Mat3;
+struct Vec4;
 
 
 extern Player* g_player;
@@ -66,14 +66,14 @@ s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
 #include "sin_cos_pair.h"
 
 struct PlayingSound;
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
 
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 // What StartCameraSounds keeps of each sound it starts: the IOP voice at +0x18 it pauses.
@@ -94,9 +94,9 @@ extern u8 g_camera[];
 extern u8 g_identityMatrix[];
 extern u8 g_identityMatrix[];
 extern u8 g_identityMatrix[];
-void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
+void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-extern T217D_Vt D_00218330;
+extern T217D_Vt g_buttonHintElementMethods;
 
 
 extern f32 g_gameTime[];
@@ -108,21 +108,21 @@ extern f32 g_gameTime[];
 
 
 f32 D_00261BF0 = 0.0f;
-f32 D_00261BF4 = 0.300000012f;
-f32 D_00261BF8 = 7e+01f;
-f32 D_00261BFC = -1.0f;
+f32 g_cameraPlacementEase = 0.300000012f;
+f32 g_cameraTargetHeight = 7e+01f;
+f32 g_cameraPitchMin = -1.0f;
 // The upper bound of the tilt, a float of its own: func_00149760 reads it as a scalar (the alias
 // rule, docs/TOOLCHAIN.md). The 16-aligned offsets after it pad it to 0x261C10.
-f32 D_00261C00 = 1.0f;
-Vec02 D_00261C10 = { -150.0f, 0.0f, 0.0f, 0.0f };
-Vec02 D_00261C20 = { -25.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00261C30[4] = { 2.0f, 0.0f, -1.0f, 0.0f };
-f32 D_00261C40[4] = { 0.200000003f, 0.0f, 0.5f, 1.0f };
-f32 D_00261C50[4] = { 0.25f, 0.0f, 0.75f, 2.25f };
-f32 D_00261C60[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00261C70[4] = { 1.0f, 0.400000006f, 1.5f, 0.0f };
-f32 D_00261C80[3] = { 5.0f, 0.0f, 0.5f };
-f32 D_00261C8C = 24.0f;
+f32 g_cameraPitchMax = 1.0f;
+Vec4 g_cameraEyeOffset = { -150.0f, 0.0f, 0.0f, 0.0f };
+Vec4 g_cameraEyeOffsetSubState22 = { -25.0f, 0.0f, 0.0f, 0.0f };
+f32 g_cameraStickSpeedCurve[4] = { 2.0f, 0.0f, -1.0f, 0.0f };
+f32 g_cameraZoomRampFar[4] = { 0.200000003f, 0.0f, 0.5f, 1.0f };
+f32 g_cameraZoomRampNear[4] = { 0.25f, 0.0f, 0.75f, 2.25f };
+f32 g_cameraZoomSpeedDecayRamp[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
+f32 g_cameraZoomFractionRamp[4] = { 1.0f, 0.400000006f, 1.5f, 0.0f };
+f32 g_cameraTurnSpeedDecayRamp[3] = { 5.0f, 0.0f, 0.5f };
+f32 g_cameraAimPushSpeed = 24.0f;
 
 void SetCameraControllerOwner(CameraController* self, Camera* owner)
 {
@@ -152,11 +152,11 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
 {
     Quad16 r;
     if (self->anchorObject != 0) {
-        ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec02*)&r);
+        ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec4*)&r);
     } else {
         if (GetActiveSwitchedCollider() != 0) {
             r = *(Quad16*)&((PlacedObject*)GetActiveSwitchedCollider())->v140;
-            *(f32*)&r.w[2] = *(f32*)&r.w[2] + D_00261BF8;
+            *(f32*)&r.w[2] = *(f32*)&r.w[2] + g_cameraTargetHeight;
         } else {
             r = *(Quad16*)(*(Camera**)g_camera)->position;
         }
@@ -169,12 +169,12 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
 Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
 {
     Quad16 r;
-    Mat02 m;
-    Vec02* offset;
+    Mat3 m;
+    Vec4* offset;
     if (g_player != 0 && g_player->subState == 0x22) {
-        offset = &D_00261C20;
+        offset = &g_cameraEyeOffsetSubState22;
     } else {
-        offset = &D_00261C10;
+        offset = &g_cameraEyeOffset;
     }
     BuildYawPitchMatrix(*(f32*)&self->value, self->pitch, &m);
     Quad16 target = GetCameraControllerTargetPoint(self);
@@ -232,9 +232,9 @@ void InitTargetCameraController(TargetCameraController* self, Camera* owner)
 {
     SetCameraControllerOwner(self, owner);
     self->count = 0;
-    self->f20 = 10.0f;
+    self->zoomDivisor = 10.0f;
     PushStackValue(self, 0);
-    self->f54 = 0.5f;
+    self->distanceFactor = 0.5f;
     self->sizeOverride = -1.0f;
     self->f50 = 0;
 }
@@ -247,7 +247,7 @@ void ActivateTargetCameraController(TargetCameraController* self)
     Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
     VectorToAngles((Vec3*)eng->g80, &self->g08, &self->pitch);
-    f32 d = self->f20;
+    f32 d = self->zoomDivisor;
     self->pitch = D_00261BF0;
     self->f0C = 0;
     self->f14 = 0;
@@ -276,17 +276,17 @@ static inline f32 ClampFloat(f32 v, f32 lo, f32 hi)
 extern Player* g_player;
 extern u8 g_camera[];
 extern f32 g_gameTime[];
-extern f32 D_00261BF4;
-extern f32 D_00261BFC;
-extern f32 D_00261C00;
-extern Vec02 D_00261C20;
-extern f32 D_00261C30[4];
-extern f32 D_00261C40[4];
-extern f32 D_00261C50[4];
-extern f32 D_00261C60[4];
-extern f32 D_00261C70[4];
-extern f32 D_00261C80[3];
-extern f32 D_00261C8C;
+extern f32 g_cameraPlacementEase;
+extern f32 g_cameraPitchMin;
+extern f32 g_cameraPitchMax;
+extern Vec4 g_cameraEyeOffsetSubState22;
+extern f32 g_cameraStickSpeedCurve[4];
+extern f32 g_cameraZoomRampFar[4];
+extern f32 g_cameraZoomRampNear[4];
+extern f32 g_cameraZoomSpeedDecayRamp[4];
+extern f32 g_cameraZoomFractionRamp[4];
+extern f32 g_cameraTurnSpeedDecayRamp[3];
+extern f32 g_cameraAimPushSpeed;
 Quad16 GetCameraControllerTargetPoint(TargetCameraController* self);
 Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self);
 s32 PeekStackValue(TargetCameraController* s);
@@ -331,16 +331,16 @@ static inline f32 Blend(f32 t, f32 a, f32 b)
     return (1.0f - t) * a + t * b;
 }
 
-extern const Vec02 g_unitXVector;
-extern const Vec02 g_unitYVector;
-extern const Vec02 g_unitZVector;
+extern const Vec4 g_unitXVector;
+extern const Vec4 g_unitYVector;
+extern const Vec4 g_unitZVector;
 extern void* D_002704F4;
 extern f32 D_002704F8;
 extern s32 D_00270518;
 extern "C" f32 Arctangent(f32 x);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
+void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec4* target, const Vec4* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt);
 
 // Per-frame update of the target camera controller. Its mode (from a value stack) picks how the
@@ -352,7 +352,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     Quad16 target = GetCameraControllerTargetPoint(self);
     Quad16 eye;
     Camera* cam = self->owner;
-    f32 ease = D_00261BF4;
+    f32 ease = g_cameraPlacementEase;
     s32 mode;
     s32 flag;
     f32 blend;
@@ -366,7 +366,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     switch (mode) {
     case 0: {
         f32 t = self->zoomFraction;
-        f32 speed = (D_00261C30[0] + t * (D_00261C30[1] + t * D_00261C30[2])) * pad->secondStickY * __builtin_fabsf(pad->secondStickY);
+        f32 speed = (g_cameraStickSpeedCurve[0] + t * (g_cameraStickSpeedCurve[1] + t * g_cameraStickSpeedCurve[2])) * pad->secondStickY * __builtin_fabsf(pad->secondStickY);
         self->zoomSpeed = speed;
         self->zoomFraction = ClampFloat(t + speed * dt, 0.0f, 1.0f);
         break;
@@ -377,14 +377,14 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         s32 near = 0;
         f32 zoom;
         if (obj != 0) {
-            Vec02 pos;
-            Vec02 span;
-            Vec02 mid;
-            Vec02 d;
-            Vec02 e;
+            Vec4 pos;
+            Vec4 span;
+            Vec4 mid;
+            Vec4 d;
+            Vec4 e;
             f32 size = (0.0f < self->sizeOverride) ? self->sizeOverride : ((PlacedObject*)obj)->boundRadius;
             f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->position), Vu0::Vec::Of(((PlacedObject*)obj)->v140))));
-            f32 fov = 2.0f * Arctangent(size / (self->f54 * dist));
+            f32 fov = 2.0f * Arctangent(size / (self->distanceFactor * dist));
             fov = self->zoomMin >? fov;
             ComputeObjectFrameAtTime((PlacedObject*)obj, 0, &pos, 0, 0, 0, 0.1f);
             Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(((PlacedObject*)obj)->v140)).q;
@@ -392,7 +392,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(((PlacedObject*)obj)->v140), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
             f32 reach = size + Vu0::ToFloatMoved(Vu0::Length(Vu0::Vec::Of(span))) * 0.5f;
             Vu0::Q(d) = Vu0::Sub(Vu0::Vec::Of(mid), Vu0::Vec::Of(gc->position)).q;
-            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat02*)gc->rotation, Vu0::Vec::Of(d)).q;
+            Vu0::Q(d) = Vu0::RotateTransposed(*(Mat3*)gc->rotation, Vu0::Vec::Of(d)).q;
             e.x = -d.y;
             e.y = d.z;
             e.z = d.x;
@@ -419,23 +419,23 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
                 f32 gap = __builtin_fabsf(zoom - self->zoomFraction);
                 f32 w[2] = { 1.0f, 4.0f };
                 f32 s = (1.0f - gap) * w[0] + gap * w[1];
-                scaled = *(RampProfile*)D_00261C40;
+                scaled = *(RampProfile*)g_cameraZoomRampFar;
                 scaled.maxAccel *= s;
                 scaled.maxSpeed *= s;
                 scaled.endSpeed *= s;
                 profile = &scaled;
             } else {
-                profile = D_00261C50;
+                profile = g_cameraZoomRampNear;
             }
             self->zoomFraction = ApproachValueClampingVelocity(self->zoomFraction, self->zoomSpeed, zoom, dt, profile, &self->zoomSpeed);
         } else {
-            self->zoomSpeed = ApproachValueWithRamp(self->zoomSpeed, 0.0f, dt, (RampProfile*)D_00261C60, 0);
+            self->zoomSpeed = ApproachValueWithRamp(self->zoomSpeed, 0.0f, dt, (RampProfile*)g_cameraZoomSpeedDecayRamp, 0);
             self->zoomFraction = ClampFloat(self->zoomFraction + self->zoomSpeed * dt, 0.0f, 1.0f);
         }
         break;
     }
     case 3: {
-        f32 v = ClampFloat(ApproachValueWithRamp(self->zoomFraction, D_002704F8, dt, (RampProfile*)D_00261C70, 0), 0.0f, 1.0f);
+        f32 v = ClampFloat(ApproachValueWithRamp(self->zoomFraction, D_002704F8, dt, (RampProfile*)g_cameraZoomFractionRamp, 0), 0.0f, 1.0f);
         f32 prev = self->zoomFraction;
         self->zoomFraction = v;
         self->zoomSpeed = (v - prev) / dt;
@@ -492,12 +492,12 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         if (pitch * self->pitchSpeed <= zero) {
             self->pitchSpeed = zero;
         }
-        self->yawSpeed = ApproachValueWithRamp(self->yawSpeed, zero, dt, (RampProfile*)D_00261C80, 0);
-        self->pitchSpeed = ApproachValueWithRamp(self->pitchSpeed, zero, dt, (RampProfile*)D_00261C80, 0);
+        self->yawSpeed = ApproachValueWithRamp(self->yawSpeed, zero, dt, (RampProfile*)g_cameraTurnSpeedDecayRamp, 0);
+        self->pitchSpeed = ApproachValueWithRamp(self->pitchSpeed, zero, dt, (RampProfile*)g_cameraTurnSpeedDecayRamp, 0);
         self->yawSpeed = ClampToMagnitude(self->yawSpeed + yaw * dt, limit * 0.9f);
         self->pitchSpeed = ClampToMagnitude(self->pitchSpeed + pitch * dt, limit * 0.8f);
         self->g08 = WrapAngle(self->g08 + self->yawSpeed * dt);
-        self->pitch = ClampFloat(self->pitch + self->pitchSpeed * dt, D_00261BFC, D_00261C00);
+        self->pitch = ClampFloat(self->pitch + self->pitchSpeed * dt, g_cameraPitchMin, g_cameraPitchMax);
         eye = GetTargetCameraControllerEyePoint(self);
         f32 since = (g_gameTime[0] - cam->controllerSwitchTime) * 2.0f;
         blend = ClampFloat(since, 0.0f, 1.0f);
@@ -517,16 +517,16 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         Quad16 pt;
         pt = GetCameraControllerTargetPoint(self);
         PlayerLinkedCollider* coll = (PlayerLinkedCollider*)GetActiveSwitchedCollider();
-        Mat02 basis;
-        Vec02 dir;
+        Mat3 basis;
+        Vec4 dir;
         if (coll->f634 != 0) {
             Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->keptObject)->v140), Vu0::Vec::Of(pt)).q;
         } else {
-            Vec02 screen;
-            Vec02 moved;
-            Vec02 ahead;
-            Vec02 world;
-            Vec02 push;
+            Vec4 screen;
+            Vec4 moved;
+            Vec4 ahead;
+            Vec4 world;
+            Vec4 push;
             const u128* rows = (const u128*)cam->rotation;
             Vu0::Vec r0, r1, r2;
             r0.q = rows[0];
@@ -541,7 +541,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
                 push.y = -pad->stickY;
             }
             push.z = 0.0f;
-            Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(D_00261C8C * dt)).q;
+            Vu0::Q(moved) = Vu0::MulAddX(Vu0::Vec::Of(screen), Vu0::Vec::Of(push), Vu0::Vec::Scalar(g_cameraAimPushSpeed * dt)).q;
             UnprojectCameraPoint(*(Camera**)g_camera, (f32*)&moved, &world);
             Vu0::Q(dir) = Vu0::Sub(Vu0::Vec::Of(world), Vu0::Vec::Of(pt)).q;
         }
@@ -563,10 +563,10 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
     case 3: {
         u8* obj = (u8*)D_002704F4;
         if (obj != 0) {
-            Vec02 n;
+            Vec4 n;
             Vu0::Q(n) = Normalized(Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)obj)->v140), Vu0::Vec::Of(target))).q;
             self->g08 = ArctangentOfRatio(n.y, n.x);
-            Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(D_00261C20)))))).q;
+            Vu0::Q(eye) = Vu0::Add(Vu0::Vec::Of(target), Vu0::MulX(Vu0::Vec::Of(n), Vu0::Vec::Scalar(-Vu0::ToFloat(Vu0::Length(Vu0::Vec::Of(g_cameraEyeOffsetSubState22)))))).q;
         } else {
             eye = GetTargetCameraControllerEyePoint(self);
         }
@@ -577,11 +577,11 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         break;
     }
     case 4: {
-        T217D_3F0* s;
-        if (D_002708E0.fade == 1) {
-            s = &D_002708E0;
+        HeldItemSparkle* s;
+        if (g_leftArcElement.fade == 1) {
+            s = &g_leftArcElement;
         } else {
-            s = (D_00271558.fade == 1) ? &D_00271558 : 0;
+            s = (g_rightArcElement.fade == 1) ? &g_rightArcElement : 0;
         }
         u8* obj = (u8*)D_002704F4;
         if (obj == 0 && s != 0) {
@@ -595,9 +595,9 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         f32 sy = *(f32*)((u8*)s->target + 0x324) * 2.0f - 1.0f;
         f32 sx = *(f32*)((u8*)s->target + 0x320) * 2.0f - 1.0f;
         f32 reach = *(f32*)((u8*)s->target + 0x2D8) * 0.22222222f;
-        Vec02 dir;
+        Vec4 dir;
         if (self->anchorObject != 0) {
-            ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec02*)&target);
+            ConvertPositionToWorld((BaseObject*)self->anchorObject, (Vec4*)&target);
             Vu0::Q(dir) = Normalized(Vu0::Sub(Vu0::Vec::Of(target), Vu0::Vec::Of(pos))).q;
         } else {
             Vu0::Vec fwd = Vu0::Vec::Of(((PlacedObject*)obj)->m110.r[0]);
@@ -606,34 +606,34 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         }
         // the object's class is not known
         u8* tg = (u8*)s->target;
-        Vu0::Q(target) = Vu0::Add(Vu0::Add(Vu0::Vec::Of(pos), Vu0::MulX(Vu0::Vec::Of(dir), ScalarHere(reach * 2.0f))), Vu0::Vec::Of(*(Vec02*)(tg + 0x310))).q;
+        Vu0::Q(target) = Vu0::Add(Vu0::Add(Vu0::Vec::Of(pos), Vu0::MulX(Vu0::Vec::Of(dir), ScalarHere(reach * 2.0f))), Vu0::Vec::Of(*(Vec4*)(tg + 0x310))).q;
         f32 heading;
         f32 tilt;
         f32 length;
-        ConvertOffsetToSpherical((const Vec02*)&target, (const Vec02*)&pos, &heading, &tilt, &length);
+        ConvertOffsetToSpherical((const Vec4*)&target, (const Vec4*)&pos, &heading, &tilt, &length);
         f32 z = cam->zoom;
         f32 a = heading + 3.1415927f + sx * z * cam->aspectScale * 0.5f;
         f32 b = -tilt - sy * z * 0.5f;
-        Vec02 off;
+        Vec4 off;
         ComputeDirectionFromAngles((Vec3*)&off, heading, tilt, length);
         Vu0::Q(cam->position) = Vu0::Add(Vu0::Vec::Of(pos), Vu0::Vec::Of(off)).q;
-        Mat02 mz;
-        Mat02 my;
-        Mat02 mx;
+        Mat3 mz;
+        Mat3 my;
+        Mat3 mx;
         BuildAxisAngleMatrix(&g_unitZVector, &mz, a);
         BuildAxisAngleMatrix(&g_unitYVector, &my, -b);
         // the object's class is not known
         BuildAxisAngleMatrix(&g_unitXVector, &mx, *(f32*)((u8*)s->target + 0x328));
-        Mat02 rot;
-        Mat02 m;
+        Mat3 rot;
+        Mat3 m;
         MulRotationThenCopy(&m, mz, my);
-        MulRotationThenCopyVia((Mat02*)cam->rotation, rot, m, mx);
+        MulRotationThenCopyVia((Mat3*)cam->rotation, rot, m, mx);
         UpdateCameraMatrices(cam);
-        *(Quad16*)cam->f2D0 = pos;
+        *(Quad16*)cam->lookFocus = pos;
         return;
     }
     }
-    UpdateOrbitCameraPlacement(cam, flag, (const Vec02*)&eye, (const Vec02*)&target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
+    UpdateOrbitCameraPlacement(cam, flag, (const Vec4*)&eye, (const Vec4*)&target, 0, Blend(blend, 20.0f, far), Blend(blend, -7.0f, rise),
                   Blend(blend, 1.0f, 0.25f), 0.0f, ease, dt);
 }
 
@@ -648,7 +648,7 @@ void DeactivateTargetCameraController(TargetCameraController* self)
     n = (Camera*)self->owner;
     StopSoundRecord((PlayingSound*)self->zoomSound, 0);
     StopSoundRecord((PlayingSound*)self->p4C, 500);
-    PlaceCameraLookingAt(n, (const Vec02*)&b, (const Vec02*)&a);
+    PlaceCameraLookingAt(n, (const Vec4*)&b, (const Vec4*)&a);
     if (AreFloatsNearlyEqual(n->zoom, self->zoomMax, 1e-4f) == 0) {
         SnapCameraZoom(n, self->zoomMax);
     }
@@ -673,7 +673,7 @@ void ActivateFrameCameraController(FrameCameraController* self)
     SetCameraLookAnchor(parent, (Quad16*)&((Collider*)parent->stack[0].target)->v370);
 }
 
-void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
+void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec4* target, const Vec4* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt);
 
 // Places the camera relative to the placed object at the top of its stack: the eye sits 10 units
@@ -684,14 +684,14 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
 {
     Camera* cam = self->owner;
     PlacedObject* frame = (PlacedObject*)cam->stack[0].target;
-    Mat02 basis;
-    Vec02 rv;
-    Vec02 eye;
-    Vec02 target;
-    MulRotationCopied(&basis, frame->m110, *(Mat02*)&self->frame20);
+    Mat3 basis;
+    Vec4 rv;
+    Vec4 eye;
+    Vec4 target;
+    MulRotationCopied(&basis, frame->m110, *(Mat3*)&self->frame20);
     Vu0::Q(eye) = Vu0::MulAddX(Vu0::Vec::Of(frame->v140), Vu0::Vec::Of(basis.r[0]), Vu0::Vec::Scalar(10.0f)).q;
     // a vector view over four fields of different roles
-    Vu0::Q(rv) = Vu0::Rotate(frame->m110, Vu0::Q(*(Vec02*)((u8*)self + 0x10)));
+    Vu0::Q(rv) = Vu0::Rotate(frame->m110, Vu0::Q(*(Vec4*)((u8*)self + 0x10)));
     Vu0::Q(target) = Vu0::Add(Vu0::Q(frame->v140), Vu0::Q(rv));
     Vu0::Q(eye) = Vu0::Add(Vu0::Q(eye), Vu0::Q(rv));
     f32 one = 1.0f;
@@ -721,9 +721,9 @@ struct CameraRigObject : PlacedObject {
     void* lookPoint;        // 0x2D4: an object whose position the camera looks at
     PlacedObject* lookObject; // 0x2D8: an object the camera looks at (tried first)
     u8 pad2DC[0x2E0 - 0x2DC];
-    Vec02 anchor;           // 0x2E0: the camera's place in this object's frame
-    Vec02 forwardHint;      // 0x2F0
-    Vec02 upHint;           // 0x300
+    Vec4 anchor;           // 0x2E0: the camera's place in this object's frame
+    Vec4 forwardHint;      // 0x2F0
+    Vec4 upHint;           // 0x300
 };
 
 // Sets the camera's position and orientation from a placed object that carries them: the position
@@ -732,12 +732,12 @@ struct CameraRigObject : PlacedObject {
 // object's matrix. Ends with SetCameraPlacement.
 void UpdateValueCameraController(ValueCameraController* ctl)
 {
-    Vec02 pos;
-    Mat02 basis;
-    Vec02 v40;
-    Vec02 v50;
-    Mat02 t1;
-    Mat02 t2;
+    Vec4 pos;
+    Mat3 basis;
+    Vec4 v40;
+    Vec4 v50;
+    Mat3 t1;
+    Mat3 t2;
     CameraRigObject* o = (CameraRigObject*)ctl->ptr;
     Camera* cam = ctl->owner;
     TransformPointBetweenFrames(o, 0, &o->anchor, &pos);
@@ -750,7 +750,7 @@ void UpdateValueCameraController(ValueCameraController* ctl)
         BuildBasisFromX(&v50, &basis);
     } else {
         BuildBasisFromXAndZHint(&o->forwardHint, &o->upHint, &basis);
-        const Mat02& m = o->m110;
+        const Mat3& m = o->m110;
         u128 r0 = Vu0::RotateUntied(m, Vu0::Q(basis.r[0]));
         u128 r1 = Vu0::RotateUntied(m, Vu0::Q(basis.r[1]));
         u128 r2 = Vu0::RotateUntied(m, Vu0::Q(basis.r[2]));

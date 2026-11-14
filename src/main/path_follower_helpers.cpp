@@ -11,7 +11,7 @@
 // Choice: no boundary signal shows either edge; the cut was decided on 2026-11-12 on the threshold
 // evidence. The edges are where the data cuts with the fewest crossings. This file's .data runs
 // from 0x275500 (func_001D8E40's ranges) to 0x2755FC (func_001D9678's curves) and starts on 16
-// because it holds the Vec02 at 0x275530 (retail's eight zero bytes before it show an object on
+// because it holds the Vec4 at 0x275530 (retail's eight zero bytes before it show an object on
 // 16 or a new file there; the type is ours). Starting it at 0x275518, past func_001D8E40's ranges,
 // would need D_00275524 to be a 12-byte object no reader shows; starting at 0x275530 would leave
 // D_00275518 and D_00275524 in path_follower.cpp, read only here. As cut, D_002751D8 (also read
@@ -37,7 +37,7 @@
 #include "functions/state_walker.h"
 #include "functions/switched_collider.h"
 #include "functions/warp_menu.h"
-struct Mat02;
+struct Mat3;
 
 
 extern f32 g_gameTime;
@@ -62,7 +62,7 @@ f32 g_wheelParticleTurnRangeWorld3[2] = { 0.0500000007f, 0.300000012f };
 f32 g_wheelParticleTiltRange[2] = { 0.100000001f, 0.400000006f };
 f32 g_followerSpeedRamp[3] = { 10.0f, 0.0f, 0.100000001f };
 f32 g_followerSoundSpeedScale = 4000.0f;
-Vec02 g_followerEngineAPitchCoefficients = { -0.5f, 0.699999988f, 0.0f, 0.0f };
+Vec4 g_followerEngineAPitchCoefficients = { -0.5f, 0.699999988f, 0.0f, 0.0f };
 f32 g_followerEngineAVolumeCoefficients[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
 f32 g_followerEngineAVolumeLimits[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 f32 g_followerEngineBPitchCoefficients[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
@@ -91,9 +91,9 @@ struct WheelEmit {
 
 // Where and how a wheel's particles start: a point, a basis and a velocity.
 struct WheelSpawn {
-    Vec02 pos;              // 0x00
-    Mat02 basis;            // 0x10
-    Vec02 vel;              // 0x40
+    Vec4 pos;              // 0x00
+    Mat3 basis;            // 0x10
+    Vec4 vel;              // 0x40
     u8 pad50[0x60 - 0x50];
 };
 
@@ -117,13 +117,13 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
     f32 zero = 0.0f;
     WheelSpawn spawn;
     for (u32 i = 0; i < 4; i++) {
-        Slot19* s = &self->wheels[i];
+        FollowerObjectSlot* s = &self->wheels[i];
         if (one <= s->firstEmitterOwed) {
             if (500.0f < self->targetSpeed) {
-                Vec02 off;
-                Vec02 dir;
-                Mat02 m;
-                Mat02 n;
+                Vec4 off;
+                Vec4 dir;
+                Mat3 m;
+                Mat3 n;
                 f32* range = (g_currentWorld->soundBank == 3) ? g_wheelParticleTurnRangeWorld3 : g_wheelParticleTurnRange;
                 // The angle is a statement of its own: &m is formed at the call, after it.
                 f32 a = RandomFloatInRange(range[0], range[1]);
@@ -168,7 +168,7 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                 rec.spawn = &spawn;
                 PathEmitter* e = (self->activeZone != 0) ? self->activeZone->firstEmitter : self->firstEmitter;
                 if (e != 0) {
-                    if (e->f18 == 0) {
+                    if (e->takesLocalSpawn == 0) {
                         TransformStateToAncestorFrame(self, 0, &spawn.pos, &spawn.basis, &spawn.vel, 0);
                     }
                     ((EmitFn)e->vt[0x7C / 4])(e, &rec);
@@ -177,7 +177,7 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
             s->firstEmitterOwed = s->firstEmitterOwed - (f32)(s32)s->firstEmitterOwed;
         }
         if (one <= s->secondEmitterOwed) {
-            Vec02 dir;
+            Vec4 dir;
             WheelEmit rec;
             FillMemory(&spawn, 0, 0x60);
             TransformPointBetweenFrames(0, self, &s->contactPoint, &spawn.pos);
@@ -310,7 +310,7 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 }
 
 struct PlayingSound;
-extern const Vec02 g_unitXVector;
+extern const Vec4 g_unitXVector;
 
 // Per-frame update of the follower's engine sound (when its sound is playing): eases a speed value
 // toward the target speed (as a 0..1 fraction of g_followerSoundSpeedScale) and derives the sound's
@@ -349,8 +349,8 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     SetSoundRecordPitch(*(PlayingSound**)self->engineSoundB, ((QuadraticCurve*)g_followerEngineBPitchCoefficients)->Eval(mix) + self->engineBPitchOffset);
     SetSoundRecordVolume(*(PlayingSound**)self->engineSoundB,
                          ((ValueRange*)g_followerEngineBVolumeLimits)->Clamp(((QuadraticCurve*)g_followerEngineBVolumeCoefficients)->Eval(mix)));
-    Vec02 local;
-    Vec02 drift;
+    Vec4 local;
+    Vec4 drift;
     TransformDirectionBetweenFrames(0, self, &self->v150, &local);
     Vu0::Q(drift) = Vu0::MulAddX(Vec::Of(local), Vec::Of(g_unitXVector), Vec::Scalar(-self->targetSpeed)).q;
     drift.x = drift.x * g_followerSlideSidewaysFactor;
