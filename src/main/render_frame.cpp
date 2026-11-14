@@ -34,6 +34,12 @@
 #include "layout_137228.h"
 #include "scope_marker.h"
 #include "vu0.h"
+#include "functions/anim_record.h"
+#include "functions/display.h"
+#include "functions/game_progress.h"
+#include "functions/point_graph.h"
+#include "functions/state_walker.h"
+#include "functions/system_calls.h"
 
 // The world and the camera (globals.h, which this file does not include: it defines the packet
 // writers that header declares as PacketWriter, at their own sizes, below).
@@ -91,8 +97,6 @@ void AppendToList(List01* self, void* item);
 
 
 void RemoveFromList(List01* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
 void BeginDmaTag(PacketWriter* self);
 void CloseDmaTag(PacketWriter* self);
 
@@ -101,7 +105,6 @@ void AppendToList(List01* self, void* item);
 void RemoveFromList(List01* list, void* item);
 void RemoveFromList(List01* list, void* item);
 void RemoveFromList(List01* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -133,11 +136,7 @@ typedef u64 UQuadword128 __attribute__((mode(TI)));
 extern u8 g_groupMicroprogram[];
 extern u8 g_groupMicroprogramEnd[];
 
-PacketWriter* InitGifPacket(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
-void EndGifPacket(PacketWriter* self);
 void WriteVifFlush(PacketWriter* b);
 void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
 void AddDmaRefTagIfChanged(void* self, void* a, void* b);
@@ -147,15 +146,11 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
 void BeginDmaTag(PacketWriter* self);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 
-void SendGsPacketAndWait(s32 channel, void* b);
-PacketWriter* InitGifPacket(PacketWriter* self);
 void* InitPacketWriter(PacketWriter* self);
 void ActivateRenderFrame(void* a, s32 b);
 
@@ -165,9 +160,6 @@ void ConstructPacketWriters(s32 flag, s32 code);
 void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 g_lastDmaRefStart;
 
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
-void EndGifPacket(PacketWriter* self);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
@@ -188,10 +180,8 @@ extern s32 g_drawFrameData;
 extern s32 g_maskedImagesPacket;
 extern s32 g_gifChannel;
 
-void SwitchActiveImageMask(s32 value);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
-PacketWriter* InitGifPacket(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 
@@ -208,11 +198,7 @@ extern s32 D_002626CC;
 extern "C" s32 AwaitSemaphore(void* a);
 void SendRenderFrameToDma(RenderFrame* self, s32 flag);
 void BlitFrameToDisplay(void);
-void FlipDisplayFrame(void);
 void ReleaseFrameNodes(RenderFrame* self);
-void ClearScreenOwner(s32 owner);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
@@ -222,7 +208,6 @@ extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(List01* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-s32 EnableInterruptCause(s32 a0);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
 void RunThread(s32 thread, void* arg);
 void func_0015E678(void);
@@ -237,11 +222,8 @@ extern s32 D_002626CC;
 void VerifyCodeChecksum(void);
 extern "C" s32 AwaitSemaphore(void* p);
 void ActivateRenderFrame(RenderFrame* f);
-void ApplyPendingDisplayFlip(void);
-void SendGsPacketAndWait(s32 channel, void* b);
 void BlitFrameToDisplay(void);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
-void FlipDisplayFrame(void);
 
 
 struct FrameNode {
@@ -266,7 +248,6 @@ extern void* g_frameDoneSemaphore;
 extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
-void SetScreenOwner(s32 v);
 extern "C" s32 AwaitSemaphore(void* a);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* self);
@@ -379,7 +360,7 @@ void BeginRenderFrame(void)
     ReleaseFrameNodes(g_buildFrame);
     {
         RenderFrame* slot = g_buildFrame;
-        s32 v = *(s32*)((u8*)g_camera + 0x21C);
+        s32 v = g_camera->f21C;
         slot->flags = 0;
         slot->imageMask = v;
         slot->hasMaskedImages = 0;
@@ -524,7 +505,7 @@ void ReleaseFrameNodes(RenderFrame* self)
         BeginListWalk::Of(&it, &self->detachedRecords);
         while ((n = NextInList<FrameNode>::Of(&it)) != 0) {
             if (n->pooledSlot != 0) {
-                PushFreeSlot((Pool6C*)((u8*)g_currentWorld + 0x1B4C), n->pooledSlot);
+                PushFreeSlot(&g_currentWorld->pool1B4C, n->pooledSlot);
             }
             RemoveFromList(&self->detachedRecords, n);
             PushFreeSlot(&g_currentWorld->pool1B40, n);
@@ -579,8 +560,6 @@ extern u8 g_fieldOffsetPacket1[];
 extern u8 D_002625F0[];
 extern s32 g_displayFrameCounter;
 extern s32 g_displayFieldParity;
-void AddGifUvEntry(PacketWriter* p, s32 u, s32 v);
-void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 // A FRAME word's buffer base and the low bits of its pixel format, without width or mask.
 static inline u64 FrameBits(const u64& f)

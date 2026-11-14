@@ -35,6 +35,16 @@
 #include "mul_rotation.h"
 #include "pad_record.h"
 #include "ramp_profile.h"
+#include "functions/agent.h"
+#include "functions/camera.h"
+#include "functions/iop_commands.h"
+#include "functions/matrix.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
 struct BaseObject;
 struct Vec02;
 
@@ -50,40 +60,21 @@ extern f32 g_timeScale;
 
 void SetCameraControllerOwner(CameraController* self, Camera* owner);
 
-void VectorToAngles(Vec3* v, f32* a1, f32* a2);
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
-void SetCameraLookAnchor(Camera* self, Quad16* arg);
-void SetCameraNearDistance(void* eng, f32 x);
-void RegisterAgent(Agent* self);
-void AppendToList(List01* self, void* item);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 struct SinCosPair { f32 a; f32 b; s32 value; };
 
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
-void UnregisterAgent(Agent* self);
-void RemoveFromList(List01* list, void* item);
-void CopyAgent(Agent* self, void* src);
-void InitAgent(Agent* self);
-void StartAgent(Agent* self);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
-void StopSoundRecord(PlayingSound* self, s32 n);
-void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus);
-void StopSoundRecord(void* self, s32 n);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
-void SnapCameraZoom(void* self, f32 x);
-void SetCameraNearDistance(void* self, f32 x);
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void PauseIopVoice(s32 a);
 
 // What StartCameraSounds keeps of each sound it starts: the IOP voice at +0x18 it pauses.
 struct CameraSound {
@@ -100,24 +91,19 @@ struct CameraSoundOwner {
 };
 
 extern u8 g_camera[];
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 extern u8 g_identityMatrix[];
 extern u8 g_identityMatrix[];
 extern u8 g_identityMatrix[];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern T217D_Vt D_00218330;
-void RemoveFromList(List01* list, void* item);
 
-void* GetActiveSwitchedCollider(void);
 
 extern f32 g_gameTime[];
 
-void AppendToList(List01* self, void* item);
 
 extern f32 g_gameTime[];
 
-void* GetActiveSwitchedCollider(void);
 extern f32 g_gameTime[];
 
 
@@ -244,7 +230,7 @@ void ActivateTargetCameraController(TargetCameraController* self)
 {
     Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
-    VectorToAngles((Vec3*)((u8*)eng + 0x80), (f32*)((u8*)self + 8), (f32*)((u8*)self + 0x10));
+    VectorToAngles((Vec3*)eng->g80, (f32*)((u8*)self + 8), &self->pitch);
     f32 d = self->f20;
     self->pitch = D_00261BF0;
     self->f0C = 0;
@@ -288,12 +274,6 @@ extern f32 D_00261C8C;
 Quad16 GetCameraControllerTargetPoint(TargetCameraController* self);
 Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self);
 s32 PeekStackValue(TargetCameraController* s);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
-void SnapCameraZoom(void* self, f32 x);
-void PauseIopVoice(s32 a);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void* GetActiveSwitchedCollider(void);
-void VectorToAngles(Vec3* v, f32* a1, f32* a2);
 
 // The fraction of the way v lies from r[0] to r[1], 0 when the two are equal.
 static inline f32 RangeFraction(const f32* r, f32 v)
@@ -342,25 +322,8 @@ extern void* D_002704F4;
 extern f32 D_002704F8;
 extern s32 D_00270518;
 extern "C" f32 Arctangent(f32 x);
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-f32 ApproachValueClampingVelocity(f32 value, f32 speed, f32 target, f32 dt, void* profile, f32* out);
-void ResumeIopVoice(s32 a0);
-void SetSoundRecordPitch(PlayingSound* p, f32 a);
-void SetSoundRecordVolume(PlayingSound* self, f32 a);
-f32 ClampToMagnitude(f32 a, f32 b);
-f32 WrapAngle(f32 a);
-f32 ClampToRange(ValueRange* span, f32 x);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
-void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void UpdateCameraMatrices(Camera* self);
 void UpdateOrbitCameraPlacement(Camera* self, s32 flags, const Vec02* target, const Vec02* focus, s32 e, f32 gain, f32 damp,
                    f32 unused, f32 yawOffset, f32 pitchOffset, f32 dt);
 
@@ -717,11 +680,6 @@ void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj-
 
 void DeactivateValueCameraController(ValueCameraController* obj) { obj->value = 0; }
 
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void SetCameraPlacement(Camera* self, Quad16* a, Quad16* b);
 
 void UpdateValueCameraController(ValueCameraController* ctl)
 {

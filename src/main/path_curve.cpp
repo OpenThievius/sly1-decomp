@@ -8,6 +8,13 @@
 #include "shapes.h"
 #include "placed_object.h"
 #include "vu0.h"
+#include "functions/buffered_stream.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/curve_segment.h"
+#include "functions/matrix.h"
+#include "functions/path_curve.h"
+#include "functions/world.h"
 struct PackedColor;
 struct ClipPoint;
 
@@ -45,63 +52,17 @@ typedef void (*Fn_Table)();
 extern const Fn_Table g_pathCurveKind0Methods[];
 extern const Fn_Table g_pathCurveKind1Methods[];
 
-f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 dur, f32 end);
 struct CurvePoint;
 void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
                        CurvePoint* out, f32 start, f32 end);
 struct BufferedStream;
-s32 ReadBufferedU8(BufferedStream* self);
-f32 ReadBufferedFloat(BufferedStream* r);
 struct BufferedStream;
-void ReadBufferedVector3(BufferedStream* src, void* dst);
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
-void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 n);
-void DrawProjectedLine(ClipPoint* a, ClipPoint* b, PackedColor* color, u8* d, s32 e);
-void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, u8* e, s32 f, f32 x);
 typedef f32 (*MinimumFn)(void* ctx, f32 x);
 void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY);
 
-f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
-f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x);
-s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi);
-void FindNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT);
-void WalkToNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, s32 idx, s32 wrap, Vec02* outPoint, Vec02* outDir, s32* outIdx, f32* outT);
-void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self);
-PathCurve* CreatePathCurve(s32 kind);
-f32 GetBaseCurveLengthAtTime(void);
-f32 GetBaseCurveTimeAtLength(void);
-s32 FindPathCurveSegmentByTime(PathCurve* self, f32 t, f32* a, f32* b);
-s32 FindPathCurveSegmentByLength(PathCurve* self, f32 t, f32* a1, f32* a2);
-f32 MeasureSplinePathDistance(NearestTimeQuery* self);
-f32 GetPathCurveEndTime(PathCurve* obj);
-f32 GetPathCurveEndLength(PathCurve* obj);
 void func_0014DB70(void);
-f32 MeasurePathCurveDistance(NearestTimeQuery* self);
-void FindPathCurveNearestTime(PathCurve* self, Vec02* a1, Vec02* a2, Vec02* a3, Vec02* a4, f32* a5, f32* a6, f32 f12);
-f32 GetPathCurveSearchStep(PathCurve* self);
-void ReadPathCurve(PathCurve* self, void* src);
-void SamplePathCurveAtTime(PathCurve* self, f32 t, Vec02* pos, Vec02* tan);
-void SamplePathCurveAtLength(PathCurve* self, f32 t, Vec02* pos, Vec02* tan);
-void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, u8* a3, void* a4, s32 a5);
-void TransformPathCurvePoints(PathCurve* self, void* a, void* b);
-f32 GetPathCurveLengthAtTime(PathCurve* self, f32 t);
-f32 GetPathCurveTimeAtLength(PathCurve* self, f32 t);
-f32 FillPathCurveLengths(PathCurve* self);
-void FindPathCurveNearestPoint(PathCurve* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1);
-void ProjectOntoPathCurveNearTime(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
-void ProjectOntoPathCurveNearLength(PathCurve* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6);
-void ReadSplinePathCurve(SplinePathCurve* self, void* src);
-void ResetSplineSegmentCache(SplinePathCurve* obj);
-void SampleSplineSegment(SplinePathCurve* self, s32 i);
-void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2);
-f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t);
-f32 GetSplineTimeAtLength(SplinePathCurve* self, f32 t);
-void FillSplinePathLengths(SplinePathCurve* self);
-void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
-void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other)
 {
@@ -156,7 +117,6 @@ s32 FindPathCurveSegment(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
 }
 
 struct VectorConstraint;
-void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 extern const Vec02 g_unitXVector;
 
 void InterpolatePathCurvePoint(f32 t, s32 count, Vec02* points, f32* times, s32 wrap, Vec02* pos, Vec02* tan)
@@ -578,9 +538,6 @@ void SampleSplineSegment(SplinePathCurve* self, s32 i)
     }
 }
 
-// The Hermite evaluation (func_00130540) with its three floats first: retail sets $f12 and
-// $f13 among the pointer arguments, which the floats' place in the list decides.
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
 {

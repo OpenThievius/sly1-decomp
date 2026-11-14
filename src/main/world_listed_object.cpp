@@ -28,6 +28,22 @@
 #include "vu0.h"
 #include "placed_object.h"
 #include "collider.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/child_group_object.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/curve_segment.h"
+#include "functions/effect_spawner.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/object_properties.h"
+#include "functions/placed_object.h"
+#include "functions/placed_object_model.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
+#include "functions/world_contacts.h"
+#include "functions/world_listed_object.h"
 struct Mat4A;
 
 struct DeferredRequest;
@@ -39,7 +55,6 @@ s32 g_alphaStatePacket1 = 0;
 s32 g_alphaStatePacket2 = 0;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-void InitCollider(Collider* self);
 
 
 struct ContactPairLink { s32 f0; s32 f4; ContactPairLink* f8; Collider* fC; };
@@ -47,11 +62,6 @@ struct ContactPairLink { s32 f0; s32 f4; ContactPairLink* f8; Collider* fC; };
 struct ContactRowNode;
 struct ContactRowList;
 struct ContactRowSource;
-ContactRowNode* PushContactRow(World* self, ContactRowList* list, ContactRowSource* src);
-ContactRow03* UnlinkContactRow(void* unused, ContactRow03** head, Contacts03* key);
-void FreePooledContactChain(World* world, Contact03* head);
-void ClearRootTries(PlacedObject* self);
-void PushFreeSlot(Pool6C* list, void* item);
 
 struct ContactBody;
 struct ContactPart;
@@ -103,7 +113,6 @@ struct ContactBody
     u8 pad5[0x538 - 0x4BC];
     u64 bits538;
 };
-void ClearRootTries(PlacedObject* self);
 
 void* InitGifPacket(PacketWriter* f);
 void AllocatePacketBuffer(PacketWriter* f, s32 n);
@@ -128,7 +137,6 @@ void BuildAlphaStatePacket(s32 idx, void* arg)
 }
 
 
-void BuildAlphaStatePacket(s32 idx, void* arg);
 
 void InitAlphaStatePackets(void)
 {
@@ -136,8 +144,6 @@ void InitAlphaStatePackets(void)
     BuildAlphaStatePacket(2, &g_alphaStatePacket2);
 }
 
-void* PopFreeSlot(Pool6C* pool);
-void PushFreeSlot(Pool6C* list, void* item);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void AppendToList(List01* self, void* item);
 
@@ -190,13 +196,10 @@ WorldListedObject* ResetFirstListedObject(World* self)
     return s0;
 }
 
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void StartChildGroupDelay(ChildGroupObject* p, f32 delta);
 
 
 void AppendToList(List01* self, void* item);
 void SetListLinkOffset(List01* self, s32 offset);
-void InitPlacedObject(PlacedObject* self);
 
 void InitWorldListedObject(WorldListedObject* self)
 {
@@ -214,7 +217,6 @@ void InitWorldListedObject(WorldListedObject* self)
 
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
-void RegisterPlacedObject(PlacedObject* self);
 
 void LeaveWorldLists(WorldListedObject* self)
 {
@@ -223,10 +225,8 @@ void LeaveWorldLists(WorldListedObject* self)
     RegisterPlacedObject(self);
 }
 
-void DetachOwnedRecord(OwnedRecord* o);
 void RemoveFromList(List01* list, void* item);
 void AppendToList(List01* self, void* item);
-void UnregisterPlacedObject(PlacedObject* self);
 
 void ReleaseWorldListedObject(WorldListedObject* self)
 {
@@ -258,8 +258,6 @@ void ReleaseWorldListedObject(WorldListedObject* self)
 
 
 extern s32 g_animRecords;
-AnimRecord* FindAnimRecord(s32 key);
-void RebuildAnimRecordEntries(WorldListedObject* self);
 
 void AssignAnimRecord(WorldListedObject* self, s32 x)
 {
@@ -282,11 +280,9 @@ void AssignAnimRecord(WorldListedObject* self, s32 x)
 }
 
 struct PooledContact;
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 
 
-u64 GetTextureRegisterBits(TextureTable* t, s32 i, s32 j);
 
 void RebuildAnimRecordEntries(WorldListedObject* self)
 {
@@ -362,7 +358,6 @@ struct LookSource {
     LookSourceTail tail;    // 0x120
 };
 
-void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out);
 void FillLookDirectionBlock(void* out, LookSource* src);
 
 void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
@@ -416,8 +411,6 @@ void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src)
     }
 }
 
-void UpdatePlacedObject(PlacedObject* self, f32 f);
-void ClearRootTries(PlacedObject* self);
 
 void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
 {
@@ -435,8 +428,6 @@ void UpdateWorldListedObject(WorldListedObject* self, f32 dt)
         self->desc->m03(self);
 }
 
-void AddObjectListener(BaseObject* self, BaseObject* src);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 s32 IsListEmpty(List01* p);
 
 void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
@@ -453,7 +444,6 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src)
     }
 }
 
-f32 WrapAngle(f32 x);
 extern f32 g_gameTime;
 
 // Runs the microprogram at 0x10 over count particles (Vu0::ParticleFilter): a particle whose
@@ -509,11 +499,8 @@ struct SprBlock {
 };
 
 struct SpinRecord_158480;
-void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out);
 struct DmaChannel;
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
-void StartToSprChain(s32 size, ...);
-void StartFromSprChain(void* first, ...);
 
 // The object's filter mode (0x618), read into the caller's variable.
 static inline void GetParticleMode(const WorldListedObject* self, s32* mode)
@@ -548,7 +535,7 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
     fr.prev = old;
     fr.offset = link;
     *(sptr*)&g_activeListFrames = (sptr)&fr;
-    TurnMatrixBySpin((SpinRecord_158480*)((u8*)self + 0x330), dt, (f32*)mat);
+    TurnMatrixBySpin((SpinRecord_158480*)self->block330, dt, (f32*)mat);
     sptr head = *(sptr*)fr.link;
     fr.link = head + fr.offset;
     OwnedRecord* node = (OwnedRecord*)head;
@@ -595,8 +582,6 @@ void StepListedObjectParticles(WorldListedObject* self, f32 dt)
 }
 
 extern f32 g_gameClock[];
-void StepListedObjectParticles(WorldListedObject* self, f32 dt);
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 // One entry of a record's extra block: the two vectors a mode-2 point's segment ends on.
 struct VecPair { Vec02 a; Vec02 b; };
@@ -706,8 +691,6 @@ struct DeferredRadiusRequest { void (*fn)(void* self); s32 zero; s32 count; u8 p
 struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void QueueDeferredRequest(DeferredRequest* src);
-void WriteListedObjectParticlePacket(void* self);
 
 void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, Src_13AD08* src)
 {
@@ -743,18 +726,11 @@ struct ViewedFrame { f32 m[4][4]; f32 fade; u8 pad44[0x50 - 0x44]; };
 void PushBackMemoryMark();
 void* AllocateBackMemory(s32 size);
 s32 CountListItems(List01* list);
-s32 IsObjectAttached(BaseObject* self);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 void BeginDmaTag(PacketWriter* w);
 void CloseDmaTag(PacketWriter* w);
-void FlipVifBaseOffset();
-void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* w, s32 tag, s32 size, void* src, s32 addr, s32 flag);
-void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifMscal(PacketWriter* w, void* addr);
-void WriteVifFlush(PacketWriter* w);
 extern const f32 g_identityMatrix4[28];
 extern u8 g_listedParticleProgram0[];
 extern u8 g_listedParticleProgram1[];
@@ -906,7 +882,6 @@ void WriteListedObjectParticlePacket(void* self)
 
 
 
-void RebuildAnimRecordEntries(WorldListedObject* node);
 
 void UpdateMatchingListedObjects(s32 mask)
 {

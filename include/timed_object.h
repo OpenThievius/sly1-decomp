@@ -69,7 +69,9 @@ struct TimedGroupChild {
     BaseObject* child;             // 0x00
     f32 riseScale;          // 0x04: the scale of the group's ramp (func_001B0360)
     f32 fallScale;          // 0x08: the same in the falling states 3 and 7
-    u8 pad0C[0x24 - 0x0C];
+    s32 fC; // 0xC
+    Vec02 f10; // 0x10
+    s32 f20; // 0x20
     s32 count;              // 0x24
     TimedGroupEntry items[5];       // 0x28
 };
@@ -77,11 +79,13 @@ struct TimedGroupChild {
 // 0x31: slot 9 (func_001AF3B8) clones the first group's entries into every other group; the
 // objects are kept in the world's list at +0x1CA8 (link at 0xAF0).
 struct TimedGroup : TimedObject {
-    u8 pad5D0[0x5D4 - 0x5D0];
+    s32 f5D0; // 0x5D0
     s32 groupCount;         // 0x5D4
     u8 pad5D8[0x5E0 - 0x5D8];
     TimedGroupChild groups[16];     // 0x5E0
-    u8 padAE0[0xAEC - 0xAE0];
+    s32 fAE0; // 0xAE0
+    void* fAE4; // 0xAE4
+    void* fAE8; // 0xAE8
     f32 repeatEndDuration;  // 0xAEC
     TimedGroup* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
     u8 padAF4[0xAF8 - 0xAF4];

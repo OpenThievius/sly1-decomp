@@ -6,6 +6,20 @@
 #include "switched_collider.h"
 #include "attachment.h"
 #include "value_range.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_link.h"
+#include "functions/pose_source.h"
+#include "functions/symmetric_solve.h"
+#include "functions/turning_collider.h"
+#include "functions/world_contacts.h"
 struct BaseObject;
 struct Mat02;
 struct Vec02;
@@ -43,9 +57,7 @@ float g_linkPoseRotationRamp[3] = {30.0f, 10.0f, 0.150000006f};
 
 struct BlendAnimation;
 struct Collider;
-void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
 struct BlendAnimationView;
-void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 
 struct ThreeBlendRecord { s32 f0; u8 pad0[0xC - 0x4]; s32 fC; u8 pad1[0x18 - 0x10]; f32 f18; };
 
@@ -75,12 +87,8 @@ struct __attribute__((aligned(16))) LinkVector {
 };
 
 struct VectorConstraint;
-void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 void ApplyColliderInverseInertia(void* self, Vec02* in, Vec02* out);
 void ComputeColliderPointVelocity(void* self, void* data, LinkRow* row, Vec02* out);
-void FactorSymmetricMatrix(s32 n, f32* a, f32* l);
-void SolveFactoredSystem(s32 n, f32* a, f32* b, f32* c);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const LinkVector* target, LinkRow* out)
 {
@@ -175,16 +183,8 @@ static inline f32 ClockTime(const LinkClock* c) { return c->time; }
 struct LinkAnchor { u8 pad0[0x18]; void* parent; u8 pad1C[0xB0 - 0x1C]; f32 fB0; };
 struct LinkSystem { u8 pad0[4]; PlacedObject* object; };
 
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* across);
 f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
-void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec02* a, Vec02* b, Vec02* out);
-void ComputeRotationSpringAcceleration(PlacedObject* self, f32 dt, Mat02* rot, Vec02* spin, Vec02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
-void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec02* point, const LinkVector* target, LinkRow* out);
 
 // The player swinging on the link (states 0x32 and 0x34 pump it): the anchor's frame and
 // motion, the swing's turning about the anchor eased and damped, its length kept, and the
@@ -335,10 +335,6 @@ static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
 
 extern f32 g_frameDt[];
 void AddColliderForce(void* target, void* slot);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 void TurnPlayerTowardLinkedObject(Player* self)
 {
@@ -349,7 +345,7 @@ void TurnPlayerTowardLinkedObject(Player* self)
     Mat02 r;
     AddColliderForce(self, (u8*)self + 0x22B0);
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
-    Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(*(Vec02*)((u8*)self + 0x140)));
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
     BuildShortestArcRotation(&g_unitZVector, &d, &a);
     BuildAxisAngleMatrix(&g_unitZVector, &b, self->heading);
     MulRotation(&r, a, b);
@@ -366,14 +362,9 @@ void SyncPlayerTarget(Player* self)
     AddColliderTorque(((LinkTargetHolder*)self->linkSystem)->target, (u8*)self + 0x22E0);
 }
 
-void GetLinkedObjectHeading(Player* self, f32* heading);
 f32 WrapAngle(f32 a);
 struct RampProfile;
-void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void SetPlayerState(Player* self, s32 a, s32 b);
-void PlacePlayerOnLinkedObject(Player* self);
-void ClearRootTries(PlacedObject* self);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
@@ -518,7 +509,6 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     ((LinkMessage_1CD0C8*)self->stateAnimPlayer)->f18 = ClampToMagnitude((((LinkBlend_1CD0C8*)self->linkBlend)->f34 * (c + 1.0f) * 0.5f - ((LinkMessage_1CD0C8*)self->stateAnimPlayer)->f14) / g_gameClock[2], g_linkAngleRateLimit);
 }
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 struct LinkedFrame { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; BaseObject* item; };
 typedef void (*LinkItemFn)(BaseObject* self, Vec02* a, f32 t, s32 b, Vec02* c, s32 d, s32 e, void* f);
@@ -551,8 +541,6 @@ void ReleaseFarPlayerLinks(Player* self)
     }
 }
 
-s32 IsObjectAttached(BaseObject* obj);
-void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr);
 
 // Walks up the parents to the first object whose class has flag bit 2.
 void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
@@ -575,8 +563,6 @@ void SetFlaggedLinkContactMask(Collider* self, BaseObject* node, s32 flag)
 }
 
 struct PooledContact;
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 // Adds the contacts of the player with the object node for the axes of flags (bits 1 2 4: always,
 // bits 8 0x10 0x20: when the offset along that axis is under 0.0001), in the frame of axis.
@@ -614,7 +600,7 @@ void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* o
     } else {
         m = g_identityMatrix;
     }
-    Vu0::Q(d) = Vu0::Sub(Vu0::Add(Vu0::Q(*offset), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(*origin));
+    Vu0::Q(d) = Vu0::Sub(Vu0::Add(Vu0::Q(*offset), Vu0::Q(self->pathPoseOffset)), Vu0::Q(*origin));
     Vu0::Q(d) = Vu0::RotateTransposed(m, Vu0::Q(d));
     if (first != 0 || ((flags & 8) != 0 && d.x < 0.0001f)) {
         CreatePooledContact(d.x, self, n, offset, &m.r[0], first != 0 ? 11 : 10, 0, 0, head);
@@ -633,7 +619,6 @@ struct HeadingVector {
     f32 y;
 };
 
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void GetLinkedObjectHeading(Player* self, f32* heading)
@@ -692,8 +677,6 @@ typedef u64 Quad128 __attribute__((mode(TI)));
 Quad128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec02* vel);
 struct Mat02;
 void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
-void ComputePlayerLinkPose(Player* self, Vec02* pos, Mat02* rotA, Mat02* rotB);
-void ApplyPoseSource(Attachment* self, s32 flag);
 extern f32 g_gameClock[];
 
 struct LinkPoseTarget {
@@ -742,8 +725,6 @@ void UpdatePlayerLinkPose(Player* self)
     ApplyPoseSource((Attachment*)(*(void**)((u8*)self + 0x2520)), 1);
 }
 
-void GetPlacedObjectRotationAt(PlacedObject* self, f32 t, Mat02* rot, Vec02* vec);
-void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec02* out, f32 limit);
 
 void GetPlayerPose(Player* self, f32 t, void* out, void* extra)
 {

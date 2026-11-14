@@ -14,6 +14,26 @@
 #include "node_query.h"
 #include "list_iter.h"
 #include "transform_object.h"
+#include "functions/active_set_solver.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/collider_span.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_state2.h"
+#include "functions/player_target.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/target_lists.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/world_contacts.h"
+#include "functions/zone_collider.h"
 struct BaseObject;
 
 struct BaseObject;
@@ -92,12 +112,7 @@ f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 List01 g_pointObjects = {0};
 
 extern f32 g_gameClock[];
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-f32 GetAnimationMarkerTime(Animation* self, s32 key);
 void AddColliderForce(void* target, Vec02* force);
-void BuildBasisFromX(Vec02* x, Mat02* out);
 
 void StepPlayerState2(Player* self)
 {
@@ -194,12 +209,6 @@ void StepPlayerState2(Player* self)
 }
 
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
-void InitContactPairFlags(World* self, Collider* obj);
-void SetPlayerState(Player* self, s32 a, s32 b);
-void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 extern f32 g_gameTime;
 
 struct LeapPart_17D5D8 {
@@ -451,9 +460,6 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdge* e, Vec02* out)
 
 
 void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
-s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
 
 s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
 {
@@ -501,8 +507,6 @@ struct EdgeGroup {
 };
 struct KeyedPointSet;
 struct KeyedEdge;
-s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out);
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s32 kind, void* arg, Vec02* out)
 {
     u8 buf[0x100] __attribute__((aligned(16)));
@@ -570,7 +574,6 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec02* point, s
 
 extern f32 g_gameTime;
 extern f32 g_contactSideSigns[];
-void NotifyContactEnds(World* world, s32 n, Contact03** list);
 s32 FindPlaneTreeNodeForPoint(Vec02* p, void* tree);
 Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
 {
@@ -653,14 +656,8 @@ s32 ChoosePlayerNextState(Player* self)
     return r;
 }
 
-s32 IsObjectAttached(BaseObject* self);
-void RecordCameraTimestamp(Camera* camera);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 // A hit CollectMeshHits gives (0x30 bytes): its point first.
 struct MeshPointHit {
     Vec02 point;
@@ -669,9 +666,6 @@ struct MeshPointHit {
 struct FaceRef;
 struct MeshHitEntry;
 struct ValueRange;
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
-s32 IsInsideRange(ValueRange* span, f32 x);
-s32 RandomIntInRange(s32 lo, s32 hi);
 extern List01 g_class75List;
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -824,7 +818,6 @@ void CollectPlayerHoldQueries(Player* self)
 }
 
 void* AllocateBackMemory(s32 size);
-void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
 // Whether the contacts hold the player down: the least-squares push of the contact normals
 // against straight down (the Gram matrix of the normals, the dots with down, the bounded solve),
 // summed from down; true when the sum still points up by more than 0.1.
@@ -842,10 +835,10 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     if (now - self->subStateStartTime < 1.0f) {
         return 0;
     }
-    if (now - *(f32*)((u8*)self + 0x2238) < 1.0f) {
+    if (now - self->f2238 < 1.0f) {
         return 0;
     }
-    *(f32*)((u8*)self + 0x2238) = now;
+    self->f2238 = now;
     if (self->groundContact != 0) {
         return 0;
     }
@@ -918,24 +911,7 @@ extern f32 D_00263E74;
 extern f32 D_00264040;
 extern f32 D_00264044;
 extern f32 D_00264048[2];
-void PlaceOnTargetCurve(TargetCurve* self, Vec02* out, f32* angleOut, f32 t);
-void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t);
-s32 AimPlayerAtTarget(Player* self);
-Contact03* FindPlayerLedgeContact(Player* self, s32* end, Vec02* at);
-s32 ShouldPlayerLaunchAtTarget(Player* self);
-void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f);
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-s32 ChoosePlayerNextState(Player* self);
-f32 GetAnimationMarkerTime(Animation* self, s32 key);
-void CollectPlayerHoldQueries(Player* self);
-void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3, f32 t);
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void SetPlayerState(Player* self, s32 a, s32 b);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime;
 extern f32 g_gameClock[];
@@ -1207,7 +1183,6 @@ void UpdatePlayerState2(Player* p)
     }
 }
 
-s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out)
 {
@@ -1290,22 +1265,18 @@ void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out)
     out->z = (z >? self->v150.z);
 }
 
-void SetListLinkOffset(List01* self, s32 offset);
 
 void SetPointObjectListLinkOffset(void)
 {
     SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
-void ClearList(List01* p);
 
 void ClearPointObjectList(void)
 {
     ClearList(&g_pointObjects);
 }
 
-void RegisterObject(BaseObject* self);
-void AppendToList(List01* self, void* item);
 
 void RegisterPointObject(C80* self)
 {
@@ -1313,8 +1284,6 @@ void RegisterPointObject(C80* self)
     AppendToList(&g_pointObjects, self);
 }
 
-void UnregisterObject(BaseObject* self);
-void RemoveFromList(List01* list, void* item);
 
 void UnregisterPointObject(C80* self)
 {

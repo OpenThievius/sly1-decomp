@@ -17,6 +17,24 @@
 #include "vu0.h"
 #include "pad_record.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/camera_controller.h"
+#include "functions/collider.h"
+#include "functions/game_progress.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/object_pool.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/text_panel.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct ObjectLink;
 struct PlacedObject;
 struct World;
@@ -28,7 +46,6 @@ struct DeferredRequest;
 extern u8* g_player;
 extern u8* g_currentWorld;
 
-void InitSwitchedCollider(SwitchedCollider* self);
 void* AllocateFrontMemory(s32 size);
 
 void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
@@ -65,10 +82,6 @@ struct OwnedAgent {
 
 extern s32 g_playerLinkedColliderLinks[10];
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void VectorToAngles(Vec3* v, f32* a1, f32* a2);
 
 void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
@@ -110,8 +123,6 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
     VectorToAngles((Vec3*)((u8*)self + 0x110), (f32*)((u8*)self + 0x648), (f32*)((u8*)self + 0x64C));
 }
 
-void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
-void ChangeAgentState(Agent* self, s32 state, void* context);
 
 void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self, f32 dt)
 {
@@ -150,9 +161,7 @@ extern u8* g_player;
 typedef void (*PlayerFrameFn)(void* self, f32 t, void* buf);
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
 void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self);
-s32 IsObjectAttached(BaseObject* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
@@ -184,15 +193,6 @@ void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 extern Camera* g_camera;
 extern u8 g_elementStack[];
 
-void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
-void PushStackElement(ElementStack* self, ScreenElement* node);
-void PopStackElement(ElementStack* g);
-void SetTextPanelState(T217D_440* self, s32 mode);
-void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
-void PushStackValue(TargetCameraController* s, s32 value);
-void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
-s32 PopStackValue(TargetCameraController* s);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 {
@@ -219,7 +219,6 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
     }
 }
 
-s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
 {
@@ -248,18 +247,11 @@ struct SpanHit {
     u8 pad10[0x60];
 };
 
-s32 HasObjectPoolChoice(ObjectPool* self);
-void GetTextPanelCenter(T217D_440* self, f32* x, f32* y);
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 u8* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 void PopBackMemoryMark(void);
 struct FrameSource;
-void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
@@ -333,10 +325,6 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
     }
 }
 
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-s32 HasObjectPoolChoice(ObjectPool* self);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 {
@@ -352,8 +340,6 @@ void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 }
 
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
-s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim);
 
 void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
@@ -378,8 +364,6 @@ void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind
     }
 }
 
-s32 TestCollidersMayContact(Collider* a, Collider* b);
-s32 IsObjectInPool(ObjectPool* list, BaseObject* query);
 
 s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
 {
@@ -397,7 +381,6 @@ s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
 
 typedef void (*PeerEffectFn)(void* self, s32 mode, PlacedObject* other);
 
-void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject* other);
 
 void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self, s32 mode, PlacedObject* other)
 {
@@ -442,8 +425,6 @@ struct ArcPointStep {
     f32 rateC;
 };
 
-void InitScreenElement(ScreenElement* self, s32 kind);
-f32 RandomFloatInRange(f32 a, f32 b);
 
 void InitArcPoints(T217D_3F0* self, s32 kind)
 {
@@ -513,19 +494,9 @@ extern f32 g_coneVolumeThirdAngle;
 typedef void (*ConeSpriteFn)(void* self);
 struct ConeSprite { ConeSpriteFn* vtbl; };
 
-void SetupScreenElementText(ScreenElement* self);
 struct ConeVolume;
 struct U64P;
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
-void SetConeVolumeMode(ConeVolume* self, s32 flag);
-void SetConeVolumeColor(ConeVolume* self, Quad16* src);
-void SetConeVolumeFirstAngle(ConeVolume* self, f32 v);
-void SetConeVolumeSecondLevel(ConeVolume* self, f32 v);
-void SetConeVolumeSecondAngle(ConeVolume* self, f32 v);
-void SetConeVolumeThirdLevel(ConeVolume* self, f32 v);
-void SetConeVolumeThirdAngle(ConeVolume* self, f32 v);
-void SetConeVolumeRange(ConeVolume* self, U64P* src);
-void SetConeVolumeValue(ConeVolume* self, s32 v);
 
 void CreateArcSprite(T217D_3F0* self)
 {
@@ -546,8 +517,6 @@ void CreateArcSprite(T217D_3F0* self)
 void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
 extern s32 D_00270458;
-void AddGifXyzfNoDrawEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 {
@@ -589,8 +558,6 @@ void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* c, s32 k)
 }
 
 extern u8 g_arcGreyColor[8];
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRgbaEntry(PacketWriter* b, u32 c);
 
 struct ColorLerp {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -672,9 +639,6 @@ extern f32 g_elapsedTime;
 extern Rgba4 g_arcTickColorFrom;
 extern Rgba4 g_arcTickColorTo;
 
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRgbaEntry(PacketWriter* b, u32 c);
-void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 
 
 struct FadeClamp {
@@ -747,9 +711,6 @@ void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf)
 
 extern u8 g_gsPacketWriter[];
 
-s32 IsArcDrawAllowed(void);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf);
 void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf);
 
@@ -775,7 +736,6 @@ void SetArcFade(T217D_3F0* a0, s32 a1)
     }
 }
 
-void SetObjectTreeRecordsValue(PlacedObject* object, void* value);
 extern s32 D_00270458;
 
 void ApplyArcTarget(T217D_3F0* self)
@@ -800,7 +760,6 @@ void ApplyArcTarget(T217D_3F0* self)
 }
 
 extern f32 g_gameClock[];
-f32 RandomFloatInRange(f32 a, f32 b);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -839,7 +798,6 @@ void SetArcPhase(T217D_3F0* self, s32 mode)
 }
 
 extern s32 D_00270458;
-void SetScreenElementSize(ScreenElement* self, f32 x, f32 y);
 
 void SetArcMode(T217D_3F0* self, s32 value)
 {
@@ -865,11 +823,7 @@ extern f32 g_gameClock[];
 extern s32 D_00270448;
 extern s32 D_00270458;
 
-void UpdateScreenElementSlide(ScreenElement* self);
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
-f32 RandomFloatInRange(f32 a, f32 b);
 
 void UpdateArc(T217D_3F0* self)
 {
@@ -998,12 +952,7 @@ void UpdateArc(T217D_3F0* self)
     SetArcPhase(self, sub);
 }
 
-s32 AreArcMenusClosed(void);
 extern PadRecord g_padRecord;
-void SnapCameraZoom(void* self, f32 x);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void QueueDeferredRequest(DeferredRequest* src);
 struct ArcDrawRequest;
 void DrawArcOutlinePacket(ArcDrawRequest* request);
 void DrawArcTickPacket(ArcDrawRequest* request);
@@ -1169,16 +1118,7 @@ struct ArcDrawRequest {
 extern PacketWriter g_vifPacketWriter;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-PacketWriter* InitGifPacket(PacketWriter* p);
-void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
-void EndGifPacket(PacketWriter* p);
-void BeginDmaTag(PacketWriter* p);
-void CloseDmaTag(PacketWriter* p);
-void WriteVifFlushE(PacketWriter* p);
-void WriteVifDirectFromWriter(PacketWriter* p, PacketWriter* src);
 
-void SnapCameraZoom(void* self, f32 x);
-void WriteCameraMatricesPacket(Camera* self);
 void WriteArcOutlineVertices(T217D_3F0* self, PacketWriter* buf, s32 a);
 
 void DrawArcOutlinePacket(ArcDrawRequest* request)

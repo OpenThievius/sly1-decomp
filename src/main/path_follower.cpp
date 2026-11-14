@@ -40,6 +40,25 @@
 #include "fpu.h"
 #include "scope_marker.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/child_group_object.h"
+#include "functions/collider.h"
+#include "functions/formatted_output.h"
+#include "functions/game_progress.h"
+#include "functions/group_marker.h"
+#include "functions/heap.h"
+#include "functions/iop_file_client.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/path_curve.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/player_request.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/zone_collider.h"
 struct ContactPair;
 struct PlacedObject;
 
@@ -52,38 +71,21 @@ extern f32 g_gameClock[];
 
 typedef void (*VFnB)(void* self, void* arg);
 
-s32 IsObjectAttached(BaseObject* self);
 
-s32 TestCollidersMayContact(Collider* a, Collider* b);
 
-void InitSwitchedCollider(SwitchedCollider* self);
-void CopyMemory(void* dst, void* src, u32 size);
-void ResetPathFollower(void* self);
 
-void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-void FreeObjectMemory(void* self);
 
-void CopyMemory(void* dst, void* src, u32 size);
-extern "C" void PrintBuffered(const char* fmt, ...);
-s32 WriteFile(s32 a, void* b, s32 n);
 
-void CopyMemory(void* dst, void* src, u32 size);
 void FlushOutputBuffer(OutputBuffer* self);
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 struct StateGraph;
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-f32 RandomFloatInRange(f32 a, f32 b);
-void ResetPathFollower(PathFollower* self);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
@@ -91,30 +93,23 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 f32 GetWrappedDifference(f32 x, f32 lim, f32 base);
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
-void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
 struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
 
 extern f32 g_gameClock[];
 
-void* GetActiveSwitchedCollider(void);
 struct RampProfile;
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-f32 RandomFloatInRange(f32 a, f32 b);
 
-void GetObjectWorldPosition(BaseObject* self, Vec02* out); // stays void: retail returns a value, but declared so func_001D66A8 and two more differs in registers
 
-void* GetActiveSwitchedCollider(void);
 
 void UpdatePathFollowerPace(PathFollower* self);
 void AdvancePathFollowerAlongPath(PathFollower* self, s32* out);
 void ComputePathFollowerHeadingTarget(PathFollower* self);
 void SteerPathFollower(PathFollower* self);
 
-s32 IsInsideAnyRange(s32 count, ValueRange* spans, f32 x);
 
 // A quadratic by its three coefficients (func_001D8578).
 struct QuadraticCurve {
@@ -141,17 +136,12 @@ void* StoreQuadword(u128* out, u128 v);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
 extern f32 g_gameClock[];
 void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
 extern f32 g_gameClock[];
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 extern f32 g_gameClock[];
 
@@ -235,12 +225,6 @@ struct RingSource {
 };
 
 typedef void (*RingDrawFn)(void* request);
-void DrawPlayerMarkerRing1(DeferredRequest* request);
-void DrawPlayerMarkerRing2(DeferredRequest* request);
-void DrawPlayerMarkerRing3(DeferredRequest* request);
-s32 MaskWorldBitsBySave(void);
-void QueueDeferredRequest(DeferredRequest* src);
-void SetObjectTreeRecordValue(PlacedObject* object, u32 value);
 extern "C" f32 Cosine(f32 x);
 extern Rgba4 D_002623E0[];
 
@@ -319,8 +303,6 @@ s32 GetPlayerRequestPhase(Player* self)
     return 2;
 }
 
-void FinishSwitchedCollider(SwitchedCollider* self);
-void SetPlayerState(Player* self, s32 a, s32 b);
 
 void FinishPlayerRequest(Player* self)
 {
@@ -354,12 +336,9 @@ struct HitMessage {
 };
 
 struct Oscillator;
-void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec02* in, Vec02* deltas, Vec02* outA, Vec02* outDeltas, Vec02* outB);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 struct TreeNode03;
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out);
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
 typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
 typedef void (*HitFn)(Collider* self, HitMessage* msg);
 
@@ -408,8 +387,8 @@ void NotifyPlayerGroundObject(Player* self)
         Collider* list[8];
         s32 count;
         if (IsObjectOfKind(obj, 0x78) != 0) {
-            CopyMemory(list, (u8*)obj + 0x94, 0x20);
-            count = *(s32*)((u8*)obj + 0x90);
+            CopyMemory(list, (u8*)&obj->save94, 0x20);
+            count = obj->save90;
         } else {
             list[0] = obj;
             count = 1;
@@ -446,7 +425,6 @@ void NotifyPlayerGroundObject(Player* self)
     }
 }
 
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
 
 s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
 {
@@ -474,9 +452,6 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec02* out)
 }
 
 struct AttachedSet;
-void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt);
-void GetAttachedSetPointMotion(AttachedSet* self, void* in, Quad16* outA, Quad16* outB);
-f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
 void AddColliderForce(void* a, void* b);
 
 void ApplyPlayerAttachedSetContact(Player* self, Collider* other, f32 t)
@@ -549,10 +524,6 @@ s32 TestStandInMayContact(StandIn* self, Collider* value)
 }
 
 Quadword ScaleQuadword(Quadword a, Quadword b);
-void StepCollider(Collider* self, f32 t);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
 extern Quad16 g_zeroQuad;
 
 // k times the vector at p, into dst (the quadword helpers' product).
@@ -816,25 +787,16 @@ extern f32 g_wheelSpinCurve[];
 extern f32 g_wheelSpinRange[];
 extern f32 g_forceLeverDrop;
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void AddColliderForce(void* a, void* b);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-f32 ClampToMagnitude(f32 a, f32 b);
 void* StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
 void* StoreQuadword(u128* out, u128 v);
-void StepCollider(Collider* self, f32 t);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
 void AddColliderTorque(Collider* self, Vec02* torque);
 Quadword ScaleQuadword(Quadword a, Quadword b);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 
 // v made unit length into out; returns its length.
 static inline f32 NormalizeInto(Vec02& out, Vec02 v)
@@ -1105,9 +1067,6 @@ s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
     return 0.0f < r;
 }
 
-f32 WrapModulo(f32 x, f32 y);
-s32 IsInsideRange(ValueRange* range, f32 x);
-void FindPathCurveNearestTime(PathCurve* self, Vec02* a1, Vec02* a2, Vec02* a3, Vec02* a4, f32* a5, f32* a6, f32 f12);
 
 void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
 {
@@ -1185,7 +1144,6 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
     self->sideTarget = best;
 }
 
-f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
 
 void ComputePathFollowerHeadingTarget(PathFollower* self)
 {
@@ -1205,7 +1163,7 @@ void ComputePathFollowerHeadingTarget(PathFollower* self)
         Vu0::Q(side) = Vu0::DivX(c, Vu0::Length(c));
         Vu0::Set(ahead, k);
         u128 p2 = Vu0::MulAddX(base, Vu0::Q(side), k);
-        Vu0::Q(w) = Vu0::Sub(p2, Vu0::Q(*(Vec02*)((u8*)self + 0x100)));
+        Vu0::Q(w) = Vu0::Sub(p2, Vu0::Q(self->pos));
         Vu0::Q(pos) = p2;
         self->targetHeading = ArctangentOfRatio(w.y, w.x);
         o = self->path->curve;

@@ -6,6 +6,8 @@
 #include "shapes.h"
 #include "vu0.h"
 #include "placed_object.h"
+#include "functions/matrix.h"
+#include "functions/warp_menu.h"
 struct HomogeneousMatrix;
 struct Mat02;
 struct Vec02;
@@ -17,20 +19,14 @@ struct Vec02;
 
 extern u8 g_unitZVector[];
 
-void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
-f32 ClampToMagnitude(f32, f32);
 extern "C" f32 Arcsine(f32 x);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void InvertRigidTransform(void* a, void* b, Quad16* out);
 Mat4A MultiplyMatrices(Quad16* m, Quad16* in);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
 void PopBackMemoryMark(void);
-s32 InvertSquareMatrix(s32 n, f32* a, f32* b);
 
 // A 4x4 matrix as func_001884C0 writes it: the last word of the first three rows, then the
 // fourth row as one quadword.
@@ -379,7 +375,6 @@ void BuildBasisFromX(Vec02* x, Mat02* out)
     BuildBasisFromXAndZHint(x, (const Vec02*)g_unitZVector, out);
 }
 
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 
 void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out)
 {
@@ -538,7 +533,6 @@ s32 InvertMatrix4x4(void* a0, void* a1)
 }
 
 extern const Vec02 g_unitXVector;
-void ComputeUnitPerpendicular(Vec02* v, Vec02* out);
 
 void BuildBasisFromXAndYHint(Vec02* x, Vec02* hint, Mat02* out)
 {
@@ -615,7 +609,6 @@ void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->m[2][3] = 1.0f;
 }
 
-void BuildScaleAboutFrame(Vec02* pos, Mat02* rot, f32* scale, Mat4A* out);
 
 void BuildUniformScaleAboutPoint(void* point, void* out, f32 s)
 {

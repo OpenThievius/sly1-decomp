@@ -10,6 +10,18 @@
 #include "flag_table.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/collider.h"
+#include "functions/flagged_object.h"
+#include "functions/on_off_object.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/state_walker.h"
+#include "functions/warp_menu.h"
 struct BaseObject;
 struct TransformObject;
 struct Vec02;
@@ -52,7 +64,6 @@ void SaveFlagTableSnapshot(FlagTable* r, s32 a, s32 b)
     r->hasFade = 1;
 }
 
-void StartScreenFade(ScreenFade* fade, FadeRequest* args, s32 count);
 
 void StartScreenFadeFromFlagTable(FlagTable* r)
 {
@@ -127,10 +138,6 @@ done:
 }
 
 struct BufferedStream;
-void ReadBufferedRotation3(BufferedStream* self, void* out);
-void ReadBufferedVector3(BufferedStream* src, void* dst);
-void ReadMeshTables(void*, void*, void*, void*, void*);
-void ReadPropertyRecords(void* a, void* b);
 
 void ReadObjectTransformAndTables(void* a0, void* a1)
 {
@@ -141,7 +148,6 @@ void ReadObjectTransformAndTables(void* a0, void* a1)
 }
 
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
-void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out);
 s32 IsPointInsideFaceTree(void* self, void* value);
 
 s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
@@ -151,8 +157,6 @@ s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
     return IsPointInsideFaceTree(self->f8C, &local);
 }
 
-void InitCollider(Collider* self);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 void InitFlaggedObject(FlaggedObject* self)
 {
@@ -183,10 +187,6 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void LoadCollider(Collider* self, BufferedStream* stream);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void ResolveAndStartObject(BaseObject* self);
 
 void CollectChildLists(FlaggedObject* self, BufferedStream* stream)
 {
@@ -220,7 +220,6 @@ skip:
     }
 }
 
-void PostLoadPlacedObject(PlacedObject* self);
 
 void ResolveListIds(FlaggedObject* self)
 {
@@ -267,10 +266,6 @@ struct ListWalkBegin {
 };
 
 struct StateGraph;
-void StartPlacedObject(PlacedObject* self);
-s32 GetAliasId(BaseObject* self);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void StartFlaggedObject(FlaggedObject* self)
 {
@@ -303,8 +298,6 @@ void StartFlaggedObject(FlaggedObject* self)
     }
 }
 
-void CopyCollider(Collider* self, Collider* src);
-void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 void CopyFlaggedObject(FlaggedObject* self, FlaggedObject* src)
 {
@@ -322,10 +315,7 @@ void CopyFlaggedObject(FlaggedObject* self, FlaggedObject* src)
 }
 
 extern s32 D_0026EC58;
-void UpdateCollider(Collider* self, f32 dt);
 PlacedObject* GetActiveSwitchedCollider();
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-void RaiseObjectFlag(FlaggedObject* self);
 
 void UpdateFlaggedObject(FlaggedObject* self, f32 dt)
 {
@@ -361,10 +351,7 @@ void UpdateFlaggedObject(FlaggedObject* self, f32 dt)
 
 extern u8 g_padRecord[];
 
-void RaiseObjectFlag(FlaggedObject* self);
 struct PadRecord;
-s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
-void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
 
 s32 HandleFlaggedObjectEvent(FlaggedObject* self, ObjectEvent* ev)
 {
@@ -383,9 +370,6 @@ extern u8 g_scatterController[];
 
 struct ScatterController;
 struct FlaggedObject;
-void RaiseScatterLevelForObject(ScatterController* obj, FlaggedObject* node);
-s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_00141870 differs in registers
 
 void RaiseObjectFlag(FlaggedObject* self)
 {

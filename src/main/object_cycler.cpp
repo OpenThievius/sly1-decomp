@@ -35,6 +35,20 @@
 #include "scope_marker.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/collider.h"
+#include "functions/curve_segment.h"
+#include "functions/effect_spawner.h"
+#include "functions/heap.h"
+#include "functions/matrix.h"
+#include "functions/object_cycler.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct Vec02;
 
 struct Mat02;
@@ -47,24 +61,16 @@ struct ScaledTransform;
 
 
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 
 
 extern f32 g_gameTime;
 
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
 
 extern f32 g_gameTime;
-f32 RandomFloatInRange(f32,f32);
 
 
 
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-f32 RandomFloatInRange(f32 a, f32 b);
-f32 RandomFloatInRange(f32 a, f32 b);
 extern PackedFloatPair g_cyclerTargetRadiusRange;
 extern PackedFloatPair g_cyclerTargetHeightRange;
 extern PackedFloatPair g_cyclerTangentRadiusRange;
@@ -75,8 +81,6 @@ extern PackedFloatPair g_cyclerAdvanceDelayRange;
 extern PackedFloatPair g_cyclerWrapDelayRange;
 extern PackedFloatPair g_cyclerMessageIntervalRange;
 
-void InitCollider(Collider* self);
-void AppendToList(List01* self, void* item);
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
@@ -84,28 +88,17 @@ struct DelayedMessageBody { Quad16 q[5]; };
 struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
 
 extern f32 g_gameClock[];
-void AppendToList(List01* self, void* item);
 
 extern f32 g_gameTime;
-f32 RandomFloatInRange(f32 a, f32 b);
 
 extern f32 g_gameTime;
-f32 RandomFloatInRange(f32 a, f32 b);
 extern s32 g_objectCyclerStartLinks[6];
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-f32 RandomFloatInRange(f32 a, f32 b);
-void SetObjectCyclerState(ObjectCycler* self, s32 x);
-void StartPlacedObject(PlacedObject* self);
-void AppendToList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
 
 extern f32 g_gameTime;
 
 
-void AppendToList(List01* self, void* item);
 
 struct CyclerEventMessage {
     u8 pad0[0x8];
@@ -123,15 +116,10 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
     u8 pad1[0x50 - 0x30];
 };
 
-void SetObjectCyclerState(ObjectCycler* self, s32 state);
-void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void CopyCollider(Collider* self, Collider* src);
-s32 IsInList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -139,45 +127,28 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void StopSoundRecord(PlayingSound* self, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 extern f32 g_gameTime;
-void RemoveFromList(List01* list, void* item);
 
 typedef int Quadword128 __attribute__((mode(TI)));
 
 extern f32 g_gameClock[];
 
-void UpdateCollider(Collider* self, f32 dt);
-void SetObjectCyclerState(ObjectCycler* self, s32 mode);
-s32 ChooseObjectCyclerNextState(ObjectCycler* self);
 s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out);
-void SendObjectCyclerMessage(ObjectCycler* self);
-s32 IsObjectCyclerUnsupported(ObjectCycler* self);
-s32 IsActiveColliderNearObjectCycler(ObjectCycler* self);
-f32 RandomFloatInRange(f32 a, f32 b);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
 extern f32 g_gameClock[];
-void RemoveFromList(List01* list, void* item);
 extern s32 g_objectCyclerLoadLinks[6];
 
 struct BufferedStream;
-void LoadCollider(Collider* self, BufferedStream* in);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void FindOrBuildMemberGroup(void** out, void* self);
-void ResolveAndStartObject(BaseObject* a);
-s32 IsInList(List01* self, void* item);
-void RemoveFromList(List01* list, void* item);
 
 struct CyclerDrawParams { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
 extern f32 g_gameTime;
 extern f32 g_cyclerShrinkCurve[4];
 extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
 struct GroundProbe {
     Vec02 q;
@@ -191,11 +162,7 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 
 struct GroundCandidate;
 struct GroundFilterContext;
-s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1);
-void PushBackMemoryMark(void* self);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-void PopBackMemoryMark(void);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
@@ -207,11 +174,7 @@ struct FrameNode {
     u8 pad18[0x1088 - 0x18];
     void* f1088;
 };
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
 typedef unsigned long u64;
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern const Vec02 D_00248D30;
 
 
@@ -313,15 +276,9 @@ extern f32 g_cyclerFallRotationSteer[4];
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, Vec02* pos, Vec02* vel, Vec02* acc);
-void ClampVectorLength(Vec02* out, Vec02* in, f32 limit);
 void AddColliderForce(Collider* self, Vec02* force);
 struct RampProfile;
 struct Mat02;
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void StepCollider(Collider* self, f32 dt);
 
 // k, the ramp's output, is read and written at its own address (*(u128*)&k): through Vu0::Q
 // its address stays in a saved register, where retail forms it again for each call.
@@ -337,7 +294,7 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         Vec02 k;
         Mat02 basis;
         f32 t = self->stateEnd + dt - g_gameClock[1];
-        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, (const Vec02*)((u8*)self + 0x600), &pos, &vel, 0);
+        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
         *(u128*)&k = Vu0::FromFloat(1.0f / dt);
         Vu0::Q(accel) = Vu0::MulX(Vu0::Q(accel), *(u128*)&k);
@@ -534,13 +491,7 @@ s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
     return 1;
 }
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void FindEarliestTimeWithinCurveLimits(s32 n, ...);
 struct ScatterController;
-void SetPlacedObjectVelocityFromFloats(ObjectCycler* self, f32 x, f32 y, f32 z);
-void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 extern u8 g_scatterController[];
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -565,7 +516,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
         self->nextMessageTime = g_gameClock[1] + RandomFloatInRange(self->p670.a, self->p670.b);
         break;
     }
-    (*(PlacedObject**)((u8*)self + 0x5D8))->visibilityMask = 14;
+    self->obj5D8->visibilityMask = 14;
     self->stateEnd = g_gameClock[1];
     switch (state) {
     case 0:
@@ -609,7 +560,7 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
     }
     case 1:
         StartSoundEffect(0x3A, 0, 0, &self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f690, *(s32*)((u8*)self + 0x694));
+        ScatterObjectsAtPoint((ScatterController*)g_scatterController, &self->v140, self->f690, self->f694);
         self->stateEnd += 2.0f;
         break;
     case 2:
@@ -637,7 +588,6 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
 
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
 
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 
 void SendObjectCyclerMessage(ObjectCycler* self)
 {
@@ -729,7 +679,6 @@ s32 ChooseObjectCyclerNextState(ObjectCycler* self)
     return next;
 }
 
-void* GetActiveSwitchedCollider(void);
 
 // The squared length of d. ToFloatMoved: the qmfc2 is the compiler's and the mtc1 the helper's
 // (one cycle each, where the compiler's mtc1 costs two), so in sched2 the difference's load has

@@ -16,6 +16,21 @@
 #include "vu0.h"
 #include "mul_rotation.h"
 #include "game_clock.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/collider.h"
+#include "functions/curve_segment.h"
+#include "functions/effect_spawner.h"
+#include "functions/matrix.h"
+#include "functions/object_host_functions.h"
+#include "functions/object_properties.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/state_walker.h"
+#include "functions/value_pools.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 
 #include "anim_curve.h"
 
@@ -31,24 +46,18 @@
 
 void* AllocateBackMemory(s32 size);
 
-void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
 
-void FillObjectPropertyTable(void);
 
 extern u8 g_objectPropertyDescriptors[];
 
-void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r);
 
 s32 ReadBufferedS16(BufferedStream* self);
 
 // The owner's slot 44 (Desc02::m28) is told what was asked.
 typedef void (*VectorCurveToldFn)(PlacedObject* self, f32* a, f32* b);
 
-void EvaluateAxisCurves(WeightCurve** axis, PlacedObject* other, s32 flags, Vec02* base, f32* outValues, f32* outSlopes, f32 key, f32 scale);
 
-void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, f32* slopes, f32 key, f32 scale);
 
-void GetVectorKeyTimes(s32 count, VectorKey* src, s32* outCount, f32** outArr);
 
 u16 ReadBufferedU16(BufferedStream* self);
 
@@ -64,15 +73,12 @@ s32 ReadBufferedU8(BufferedStream* self);
 
 void ReadBufferedVector3(BufferedStream* src, void* dst);
 
-WeightCurve* CreateWeightCurve(u32 kind);
 
 // What FindCurveSegment (func_0011EE70) gives back: the segment's length and the time into it,
 // and the segment's first key.
 struct CurveSegment { f32 diff; f32 delta; u8* ptr; };
 
-void FindCurveSegment(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 // The owner's slot 45 (Desc02::m29) is told what was asked.
 typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
@@ -81,9 +87,7 @@ typedef void (*AxisRotationToldFn)(PlacedObject* self, void* a, void* b);
 struct AngleSample { s32 a[4]; s32 b[4]; };
 
 
-void BuildEulerRotationMatrix(f32* in, f32* out);
 
-void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out);
 
 
 struct AxisCurveClosure {
@@ -96,11 +100,8 @@ struct AxisCurveClosure {
     f32 first;
 };
 
-extern void ReadAxisCurves(WeightCurve**, Vec02*, Stream83*);
 
-extern void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 
-extern void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
 extern void PushBackMemoryMark(void);
 
@@ -114,13 +115,9 @@ void EvaluateHermiteSegment(f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd, 
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
 
-void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
 
-BaseObject* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
-s32 MapKeyToSlotIndex(s32 value);
 
-void ResolveAndStartObject(BaseObject* self);
 
 // A class's property list (g_classPropertyLists) seen from its first descriptor pointer: the
 // descriptor, then the word before the next one.
@@ -132,7 +129,6 @@ void* InitBufferedStream(BufferedStream* self, s32 a, u8* b, s32 c);
 
 void OpenBufferedMemoryStream(BufferedStream* self, s32 a1, u8* a2);
 
-void ApplyPropertyRecord(void* obj, PropertyDescriptor* d, BufferedStream* r);
 
 void DestroyBufferedStream(BufferedStream* self, s32 flags);
 
@@ -142,19 +138,12 @@ extern u8 g_classDescriptorTable[];
 
 void* AllocateZeroedFrontMemory(s32 n);
 
-void InitWorldHashLists(u8* self);
 
-void* GetScriptEntryScope(s32 index, World* self);
 
-u8* GetHashedSlot(u8* base, s32 n);
 
-void AppendToList(List01* self, void* item);
 
 // EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
 
-void* AcquireVectorAPayload(void);
-void* AcquireVectorBPayload(void);
-void* AcquirePairPayload(void);
 
 typedef void (*PropertyMethodFn)(void);
 
@@ -170,32 +159,22 @@ s32 ReadBufferedU32(BufferedStream* r);
 
 f32 ReadBufferedFloat(BufferedStream* r);
 
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
 
 void CopyMemory(void* dst, void* src, u32 size);
 
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 
-s32 CompareFloats(f32* a, f32* b);
 
 // The angles and their rates EvaluateVectorKeyCurve gives a keyed rotation curve (func_00120130).
 struct KeyedAngleSample { u8 bytes[0x20]; };
 typedef void (*KeyedRotationToldFn)(PlacedObject* self, void* output, void* state);
-extern void BuildEulerRotationMatrix(f32* in, f32* out);
-extern void EvaluateVectorKeyCurve(s32, VectorKey*, s32, void*, void*);
-extern void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out);
-extern void BuildEulerRotationMatrix(void*, void*);
 
-extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-void ReadAxisCurves(WeightCurve** a, Vec02* b, Stream83* c);
 
 
-extern void ReadVectorKeys(s32*, VectorKey**, Stream83*);
 
-extern void* PopZeroedFreeSlot(Pool6C* pool);
 
 extern World* g_currentWorld;
 
@@ -215,16 +194,10 @@ typedef void (*OrientationToldFn)(PlacedObject* self, Mat02* b, Vec02* q);
 
 typedef void (*OwnerToldFn)(PlacedObject* self);
 
-void InitPoseSource(Attachment* self, PlacedObject* value);
 
-void RemoveFromList(List01* list, void* item);
-void ReleasePoseSource(Attachment* self, s32 flags);
 
 extern f32 g_gameTime[];
-void GetOwnerPosition(Attachment* self, Vec02* a1, Vec02* a2);
-s32 ApplyAnimationLoopMode(AnimationPlayer* t, f32* a, f32* b);
 
-void GetOwnerRotation(Attachment* self, Mat02* a, Vec02* b);
 
 struct KeyedCurveClosure {
     u8 a[0x30];
@@ -239,11 +212,8 @@ extern f32 g_frameStep;
 extern f32 g_frameDt;
 extern f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
-void GetOwnerValue(Attachment* self, f32* value, f32* slope);
 
-extern void GetOwnerValue(Attachment* self, f32* a1, f32* a2);
 
-extern void GetIdentityMatrix(Attachment* self, Mat02* a1);
 
 // The position curves' tables, defined at the end of this file.
 extern const PositionCurveVt g_positionCurveKind0Methods;
@@ -251,16 +221,9 @@ extern const PositionCurveVt g_positionCurveKind1Methods;
 extern const PositionCurveVt g_positionCurveKind2Methods;
 
 extern u8 D_00248D30[];
-void RemoveFromList(List01* list, void* item);
-void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
-void SetPlacedObjectVelocity(PlacedObject* self, Vec02* src);
-void SetPlacedObjectSpin(PlacedObject* self, Vec02* src);
-void PushFreeSlot(Pool6C* list, void* item);
 
 extern u8 g_identityMatrix[];
 
-s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
-f32 WrapAngle(f32 a);
 
 extern const RotationCurveVt g_rotationCurveKind0Methods;
 extern const RotationCurveVt g_rotationCurveKind1Methods;
@@ -277,16 +240,6 @@ typedef void (*PositionOutToldFn)(PlacedObject* self, Vec02* out);
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
 // shared one, each table followed by a zero word.
-void EvaluateTangentWeightCurve();
-void ReadTangentWeightCurve();
-void GetTangentWeightCurveTimes();
-void EvaluateControlPointWeightCurve();
-void ReadControlPointWeightCurve();
-void GetControlPointWeightCurveTimes();
-void EvaluateLinearWeightCurve();
-void ReadLinearWeightCurve();
-void GetLinearWeightCurveTimes();
-void GetNoWeightCurveTimes();
 extern const WeightCurveVt g_weightCurveKind0Methods;
 extern const WeightCurveVt g_weightCurveKind1Methods;
 extern const WeightCurveVt g_weightCurveKind2Methods;
@@ -1259,7 +1212,6 @@ static inline void MulRotationRowsOnce(Mat02* out, const Mat02& a, const Mat02& 
     *out = r;
 }
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 c, Mat02* out0, Vec02* out1, f32 dt, f32 scale)
 {
@@ -2324,7 +2276,6 @@ void InitAimPoseSource(T2195_600* self, PlacedObject* a1)
     self->f20 = 0.25f;
 }
 
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 
 void GetAimPoseRotation(T2195_600* self, Mat02* out, Vec02* vec)
 {

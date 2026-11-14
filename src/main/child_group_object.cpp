@@ -13,6 +13,21 @@
 #include "owner_message.h"
 #include "hit_target.h"
 #include "value_range.h"
+#include "functions/base_object.h"
+#include "functions/child_group_object.h"
+#include "functions/collider.h"
+#include "functions/collider_span.h"
+#include "functions/effect_spawner.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/sound_system.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/world_contacts.h"
+#include "functions/zone_collider.h"
 struct BufferedStream;
 struct Quad16;
 
@@ -41,7 +56,6 @@ f32 g_childGroupKnockbackLift = 800.0f;
 f32 g_childGroupApproachCurve[4] __attribute__((aligned(16))) = { 1.0f, -1.0f, 0.0f, 0.0f };
 f32 g_childGroupDistanceCurve[4] __attribute__((aligned(16))) = { 2.0f, -1.5f, 0.0f, 0.0f };
 
-void InitCollider(Collider* self);
 
 void InitChildGroupObject(ChildGroupObject* self)
 {
@@ -62,8 +76,6 @@ void InitChildGroupObject(ChildGroupObject* self)
     self->ownerMessageMode = 0;
 }
 
-void LoadCollider(Collider* self, BufferedStream* in);
-void FindOrBuildMemberGroup(void** out, void* self);
 
 void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
 {
@@ -71,7 +83,6 @@ void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
     FindOrBuildMemberGroup(&self->member5BC, self);
 }
 
-void CopyCollider(Collider* self, Collider* other);
 u32 CopyToFrontMemory(s32 size, void* src);
 
 void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
@@ -94,9 +105,6 @@ struct ScopedListFrame {
     ~ScopedListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void StartPlacedObject(PlacedObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void ResolveAndStartObject(BaseObject* self);
 void* AllocateFrontMemory(s32 size);
 
 void StartChildGroupObject(ChildGroupObject* self)
@@ -126,8 +134,6 @@ void StartChildGroupObject(ChildGroupObject* self)
     }
 }
 
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-void StartChildGroupDelay(ChildGroupObject* p, f32 delta);
 
 void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
 {
@@ -142,9 +148,6 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
 }
 
 extern f32 g_gameTime;
-void UpdateCollider(Collider* self, f32 dt);
-void RefreshChildGroupObjectContacts(ChildGroupObject* self);
-void ApplyChildGroupRepulsion(ChildGroupObject* self);
 
 void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
 {
@@ -160,10 +163,6 @@ void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
 }
 
 extern List01 g_class75List;
-void SetContactPairFlags(World* w, Contacts03* a, Contacts03* b, u8 set, u8 clr);
-s32 IsObjectAttached(BaseObject* self);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
 
 void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 {
@@ -196,7 +195,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
             continue;
         }
         GetObjectWorldPosition(n, &tmp);
-        if (CollectBoundsSpans(&tmp, (Vec02*)((u8*)self + 0x370), &self->v140, n->scale, 1, &span) == 0) {
+        if (CollectBoundsSpans(&tmp, &self->v370, &self->v140, n->scale, 1, &span) == 0) {
             continue;
         }
         SetContactPairFlags(self->world, self->contacts, ((Collider*)a->root)->contacts, 0x40, 0);
@@ -242,10 +241,7 @@ struct ContactPair {
     Vec02 v80;              // 0x80
 };
 
-Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 Collider* GetActiveSwitchedCollider(void);
-s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
-void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* dir);
 
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which)
 {
@@ -274,7 +270,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
         return;
     }
     case 0:
-        if (FindNearestSpanObject(0, (Vec02*)((u8*)self + 0x370), &self->v140, 1, &side->obj, &span) != 0) {
+        if (FindNearestSpanObject(0, &self->v370, &self->v140, 1, &side->obj, &span) != 0) {
             pos = *(Vec02*)&span.q[0];
         }
         break;
@@ -293,8 +289,6 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
     StartChildGroupDelay(self, 0.0f);
 }
 
-s32 HandleObjectEvent(Collider* self, ObjectEvent* ev);
-void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z);
 
 s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
 {
@@ -308,9 +302,6 @@ s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev)
     return handled;
 }
 
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 
 // The product of the turn a and the object's matrix b into the pose at +0x620: b's rows read by
 // index, each result stored to its vector local and to the matrix local, the last in the other
@@ -325,26 +316,26 @@ static inline void MulPoseRows(ChildGroupObject* o, const Mat02& a, const Mat02&
     Vu0::Q(m.r[0]) = Vu0::Q(x) = Vu0::RotateUntied(a, q[0]);
     Vu0::Q(m.r[1]) = Vu0::Q(y) = Vu0::RotateUntied(a, q[1]);
     Vu0::Q(z) = Vu0::Q(m.r[2]) = Vu0::RotateUntied(a, q[2]);
-    *(Mat02*)((u8*)o + 0x620) = m;
+    o->m620 = m;
 }
 
 void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z)
 {
     Mat02 a;
 
-    if ((*(s32*)((u8*)self + 0x60C)) != 0) {
+    if ((self->flag60C) != 0) {
         return;
     }
-    (*(Collider**)((u8*)self + 0x670)) = obj;
-    (*(s32*)((u8*)self + 0x60C)) = 1;
+    (self->obj670) = obj;
+    (self->flag60C) = 1;
     if (pos != 0) {
-        (*(Vec02*)((u8*)self + 0x610)) = *pos;
+        (self->v610) = *pos;
     } else {
-        (*(Vec02*)((u8*)self + 0x610)) = self->v140;
+        (self->v610) = self->v140;
     }
-    (*(Vec02*)((u8*)self + 0x650)) = self->v150;
-    (*(Vec02*)((u8*)self + 0x660)) = self->v160;
-    switch ((*(s32*)((u8*)self + 0x608))) {
+    (self->v650) = self->v150;
+    (self->v660) = self->v160;
+    switch ((self->mode608)) {
     case 0: {
         BuildShortestArcRotation(&self->m110.r[2], z ? z : (Vec02*)&g_unitZVector, &a);
         MulPoseRows(self, a, self->m110);
@@ -359,14 +350,14 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
         } else {
             frame = self->parent;
         }
-        TransformRotationBetweenFrames(0, (PlacedObject*)frame, (Mat02*)((u8*)self + 0x620), (Mat02*)((u8*)self + 0x620));
+        TransformRotationBetweenFrames(0, (PlacedObject*)frame, &self->m620, &self->m620);
         break;
     }
     case 1:
-        BuildBasisFromXAndZHint((Vec02*)((u8*)self + 0x650), (const Vec02*)&g_unitZVector, (Mat02*)((u8*)self + 0x620));
+        BuildBasisFromXAndZHint(&self->v650, (const Vec02*)&g_unitZVector, &self->m620);
         break;
     case 2:
-        (*(Mat02*)((u8*)self + 0x620)) = self->rot;
+        (self->m620) = self->rot;
         break;
     }
 }
@@ -380,8 +371,6 @@ void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
 
 extern f32 g_childGroupKnockbackLift;
 struct VectorConstraint;
-void SetPlayerState(Player* self, s32 state, s32 sub);
-void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem);
 
 // The owner-message callback of a group's knockback: pushes the object away from the group
 // (from the group to it, flat and unit length, or along X when they coincide; a kind-0x3D
@@ -412,10 +401,6 @@ void ApplyChildGroupKnockback(ChildGroupObject* self, Collider* other)
     }
 }
 
-void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec02* z);
-void StartChildGroupDelay(ChildGroupObject* self, f32 delta);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 IsObjectAttached(BaseObject* self);
 Collider* GetActiveSwitchedCollider();
 extern f32 g_childGroupApproachCurve[4];
 extern f32 g_childGroupDistanceCurve[4];
@@ -427,23 +412,12 @@ struct FaceRef;
 struct Mesh03;
 struct MeshHitEntry;
 void CopyMemory(void* dst, void* src, u32 size);
-s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr);
-void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec02* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
-f32 ClampToRange(ValueRange* span, f32 x);
-void ConstrainColliderVector(void* self, void* a, void* b, void* c, s32 d);
-f32 RandomFloatInRange(f32 lo, f32 hi);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-PlacedObject *FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void SendPointEventToWorldListener(Quad16* a0, f32 f);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 struct TimedStateObject;
-void SetTimedState(TimedStateObject* self, s32 state);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 extern const Vec02 g_unitZVector;
 extern ValueRange g_unitRange;
 
@@ -626,7 +600,6 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
     self->blastTime = 3.4028235e+38f;
 }
 
-void InitSoundParams(SoundRecord** self);
 
 s32 GetChildGroupSoundParams(ChildGroupObject* self)
 {

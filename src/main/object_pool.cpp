@@ -22,6 +22,24 @@
 #include "asm_func.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/arc_element.h"
+#include "functions/collider.h"
+#include "functions/commentary_best_time.h"
+#include "functions/game_progress.h"
+#include "functions/item_column.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/mode_walker.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/selection_menus.h"
+#include "functions/text_format.h"
+#include "functions/text_panel.h"
+#include "functions/warp_menu.h"
 struct BaseObject;
 struct Vec02;
 
@@ -58,18 +76,14 @@ void ClearObjectPoolChoice(ObjectPool* p);
 
 
 void GetObjectWorldRotation(void* a, f32* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 
-void UpdateAgent(Agent* self, f32 dt);
-void StopAnimationPlayer(AnimationPlayer* self);
 
 
 extern f32 g_gameTime;
 extern f32 g_frameDt;
 
-void StepTimer(T217D_510* self, f32 value);
 
 extern s32 g_defaultFont;
 
@@ -77,7 +91,6 @@ typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 
 
 
-void StartAgent(Agent* self);
 void SetWorldActiveFollower(World* self, void* v);
 
 
@@ -85,24 +98,16 @@ s32 IsPadSelectFlagHeld(World* self);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void UpdateAgentGoal(Agent* self, s32 flag);
-void SetAgentGoalPoint(Agent* self, Vec02* p);
 
 
-void UpdateAgentState(Agent* self);
-void FaceAgentTowardGoalPoint(Agent* self);
 
 
 extern u8 g_memoryCard[];
 
-void EnterAgentState(Agent* self, s32 evt, Animation* arg);
-void MarkLevelDone(s32 n);
-void StartMemoryCardSave(MemoryCard* self);
 
 
 extern T217D_2E0 g_gaugeBarElement;
 
-s32 AreMenusAndFadeClear(void);
 
 
 
@@ -114,7 +119,6 @@ void* AllocateZeroedFrontMemory(s32 n);
 
 
 void StartObject(BaseObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -146,19 +150,13 @@ struct FrameSource {
     Vec02 rot[3];
 };
 
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
 void GetObjectWorldRotation(BaseObject* self, Mat02* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 
 
 extern u8 g_elapsedTime[];
 
 void CopyObjectData(BaseObject* self, BaseObject* src);
 void* GetObjectPoolShare(void* self);
-void SetListLinkOffset(List01* self, s32 offset);
-void AppendToList(List01* self, void* item);
 u8* CopyToFrontMemory(s32 size, void* src);
 
 
@@ -176,7 +174,6 @@ extern u8 g_blankPadRecord[];
 extern u8 g_screenFade[];
 
 struct ScreenFade;
-void UpdateScreenFade(ScreenFade* self, PadRecord* a1);
 
 
 extern void* const g_screenElements[];
@@ -184,18 +181,6 @@ extern void* const g_screenElements[];
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
-// The screen elements' methods, in src/main/screen_element.cpp.
-void SetupScreenElementText(ScreenElement* self);
-void UpdateScreenElementSlide(ScreenElement* self);
-void InitCounterCaption(T217D_E30* self);
-void DrawCounterCaption(T217D_E30* self);
-f32 GetCaptionHoldTime(void);
-void InitTimerElement(T217D_510* self);
-void UpdateTimerElement(T217D_510* self);
-void DrawTimerElement(T217D_510* self);
-f32 GetPairCaptionHoldTime(void);
-f32 GetGaugeAmountCaptionHoldTime(void);
-f32 GetGaugeColliderCaptionHoldTime(void);
 
 extern const Fn_Table D_00217E30[];
 extern const Fn_Table D_00217E80[];
@@ -234,18 +219,13 @@ extern const Fn_Table g_gridSelectorMethods[];
 extern const Fn_Table g_timerCaptionMethods[];
 extern u8 g_screenFade[];
 
-void ResetScreenFade(ScreenFade* o);
 
 
 extern s8 g_fontEscapeKeys[];
 extern u8 g_charClassFlags[];
-s32 FormatToString(char* dst, const char* fmt, ...);
-void* CopyString(void* dst, const char* src);
 
 
 void* AllocateFrontMemory(s32 size);
-void SetListLinkOffset(List01* self, s32 offset);
-s32 CountListItems(List01* list);
 PlacedObject* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 
@@ -273,8 +253,6 @@ extern ElementPlaceTable g_elementPlaces;
 // allocator puts the count in $s1 and the pointer in $s0; retail is the other way round.
 
 extern u8 g_screenFade[];
-void DrawScreenFade(ScreenFade* self);
-void DrawCyclingGlyphElement(T217D_600* self);
 
 
 
@@ -282,7 +260,6 @@ void DrawCyclingGlyphElement(T217D_600* self);
 void* AllocateZeroedFrontMemory(s32 n);
 
 
-s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern s32 D_002751D4;
 
 // EXACT: dst built as i*4 + (u32)items
@@ -302,55 +279,10 @@ s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 
-f32 TruncateFloat(f32 x);
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void InitScreenElement();
-void DrawScreenElementText();
-f32 GetScreenElementSlideInTime();
-f32 GetScreenElementHoldTime();
-f32 GetScreenElementSlideOutTime();
-void ResetScreenElement();
-void ShowScreenElement();
-void HideScreenElement();
-void SetScreenElementClock();
-s32 AreScreenElementsTogether();
-void SetScreenElementText();
-void SetScreenElementMode();
-void UpdateCounterCaption();
-void InitGauge();
-void DrawGauge();
-void InitPointerTextCaption();
-void SetElementTextAfterSlideOut();
-void SetElementModeApplyingPendingText();
-s32 AreElementsTogetherOrPending();
-void ShowElementUnlessTextPending();
-void HideElementOrDropPendingText();
-void DrawSlidingGlyphElement();
-void InitCopiedTextCaption();
-void SetElementTextCopiedAfterSlideOut();
-void SetElementModeApplyingCopiedText();
-void ShowElementUnlessCopiedTextPending();
-void HideElementOrDropCopiedText();
-void DrawMessageElement();
-void InitHintGlyphElement();
-void UpdateHintGlyphElement();
-void DrawHintGlyphElement();
-void InitTitleElement();
-void DrawTitleElement();
-void InitPromptElement();
-void SetElementModeRebuildingText();
-void UpdatePromptElement();
-void DrawPromptElement();
-void InitLetterboxElement();
-void SetElementModeFollowingFade();
-void DrawLetterboxElement();
-void InitLetterGlyphElement();
-void DrawLetterGlyphElement();
-void InitCyclingGlyphElement();
-void SetElementModeClearingFlag();
 void InitPauseMenu();
 void SetPauseMenuOpen();
 void UpdatePauseMenu();
@@ -358,57 +290,17 @@ void SetPauseMenuMode();
 void ShowPauseMenu();
 void HidePauseMenu();
 void DrawPauseMenu();
-void InitItemColumn();
-void SetupItemColumn();
-void UpdateItemColumn();
-void UpdateItemColumnSlide();
-void DrawItemColumn();
 struct T217D_3F0;
-void InitArcPoints(T217D_3F0* self, s32 kind);
-void CreateArcSprite(T217D_3F0* self);
-void DrawArc(T217D_3F0* self);
-void SetArcMode(T217D_3F0* self, s32 value);
-void UpdateArc(T217D_3F0* self);
-void QueueArcDraw(T217D_3F0* self);
-void ResetArc(T217D_3F0* self);
-void InitTextPanel();
-void SetupTextPanel();
-void SetTextPanelMode();
-void UpdatePanelStick();
-void SetTextPanelOpen();
-void ResetTextPanel();
-void SetTextPanelText();
-f32 GetTextPanelSlideInTime();
-f32 GetTextPanelSlideOutTime();
-void DrawTextPanel();
-void ChooseTextPanelState();
-void EndTextPanelState();
-void DrawSpinningSpriteElement();
 void InitWarpMenu();
 void HandleWarpMenuInput();
 void SetWarpMenuOpen();
 void DrawWarpMenu();
-void InitSelectionCaption();
-void UpdateSelectionCaption();
-void HandleSelectionCaptionInput();
-void SetSelectionCaptionOpen();
-void DrawSelectionCaption();
-void InitGridSelector();
-void HandleGridSelectorInput();
-void SetGridSelectorOpen();
-void DrawGridSelector();
-void InitCommentaryPromptElement(T217D_1380* self);
-void UpdateBestTimeState(T217D_1380* self);
-void DrawFramedText(T217D_1380* self);
 
 
-extern "C" s32 GetStringLength(const char* s);
-void* CopyString(void* dst, const char* src);
 void MeasureText(TextReader*, f32, f32*, f32*);
 
 extern f32 g_frameDt;
 
-void FormatCounterCaption(T217D_E30* self);
 f32 SumTextWidth(TextReader* loc);
 
 
@@ -417,7 +309,6 @@ f32 SumTextWidth(TextReader* loc);
 struct PoolCandidate { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 
 s32 IsObjectAttached(BaseObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 // The list walk (list_iter.h): push a frame, step through the elements, pop it.
 struct ListWalkBegin {
@@ -979,22 +870,14 @@ struct PoolView_1A8C90 {
 struct FrameFollower;
 void GetPlacementRecordTransform(FrameSource* self, Vec02* a1, Vec02* a2, void* a3);
 void ComputeFrameFollowerPoint(FrameFollower* self, Vec02* target, Vec02* out, void* to);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 void GetPlacementRecordAngle(u8* self, f32* out, void* x);
 void GetPlacementRecordPitch(u8* self, f32* out, void* x);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
-f32 WrapAngle(f32 a);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void ForwardBallisticLaunchVelocity(f32 angle, Vec02* from, Vec02* to, Vec02* out, u8* rec);
-s32 ComputeLaunchVelocityToPoint(f32 speed, Vec02* from, Vec02* to, Vec02* out, u8* rec);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 s32 ComputeBallisticLaunchVelocity(f32 angle, Vec02* from, Vec02* to, Vec02* out, u8* rec);
-f32 RandomFloatInRange(f32 a, f32 b);
-void ChangeAgentState(Agent* self, s32 state, void* context);
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 // v made a unit vector, or the fallback when shorter than 1e-4; its length.
@@ -1052,7 +935,7 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
     if (self->mover != 0) {
         Vec02 vel;
         Vec02 spin;
-        ComputeObjectMotionInFrame((PlacedObject*)self->mover, 0, (Vec02*)((u8*)self->mover + 0x140), &vel, &spin, 0, 0);
+        ComputeObjectMotionInFrame((PlacedObject*)self->mover, 0, &((PlacedObject*)self->mover)->v140, &vel, &spin, 0, 0);
         obj->desc->m90(obj, &vel);
         obj->desc->m94(obj, &spin);
     } else {
@@ -1323,7 +1206,7 @@ void UpdateWorld4BossGoal(World4Boss* self, s32 flag)
     if (self->state == 0x10) {
         void* r = ((VFn_1A9960*)self->desc)[102](self);
         if (r != 0)
-            SetAgentGoalPoint(self, (Vec02*)((u8*)r + 0x140));
+            SetAgentGoalPoint(self, &((PlacedObject*)r)->v140);
     }
 }
 
@@ -1371,9 +1254,6 @@ void UpdateWorld4BossVisibility(void)
 typedef void (*VFn_1A9AE8)(void* self, SlotMessage* msg);
 struct AgentHit;
 struct Agent;
-void DecrementGaugeCount(T217D_2E0* self);
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
 extern Player* g_player;
 extern const Vec02 g_unitXVector;
 

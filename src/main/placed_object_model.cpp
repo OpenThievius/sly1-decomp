@@ -35,12 +35,20 @@
 #include "word_copy.h"
 #include "camera.h"
 #include "object_finder.h"
+#include "functions/camera.h"
+#include "functions/game_progress.h"
+#include "functions/link_constraint.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/pooled_object.h"
+#include "functions/range_record.h"
+#include "functions/texture_upload.h"
+#include "functions/warp_menu.h"
 struct NodeAttachment;
 struct NodeOwner;
 struct Oscillator;
 
 
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 void* AllocateFrontMemory(s32 size);
 
 
@@ -62,10 +70,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
 extern World* g_currentWorld;
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void InvertRigidTransform(void* a, void* b, Quad16* out);
 
-void BeginGifTag(void* self, s32 a, s32 b, u64 c);
 
 void PushBackMemoryMark(void);
 u8* AllocateBackMemory(s32 size);
@@ -122,19 +127,8 @@ extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
 
-void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
-void BeginGifTag(PacketWriter* f, s32 a, s32 b, u64 c);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
-void CloseGifTag(PacketWriter* f, s32 n);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void RewindPacketBuffer(PacketWriter* f);
-void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void WriteVifStrow(PacketWriter* s, u32* src);
-void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
-void WriteVifFlushE(PacketWriter* s);
 void WriteMorphTargetMscal(s32 mode, void* obj);
 
 struct QuadClear
@@ -176,14 +170,10 @@ extern u8 g_litBatchSecondProgram[];
 extern u8 g_litBatchThirdProgram[];
 extern u8 g_litBatchFinishProgram[];
 
-void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifMscalf(PacketWriter* s, void* data);
-void WriteVifFlushE(PacketWriter* s);
-void CloseDmaTag(PacketWriter* s);
 void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
-void BeginDmaTag(PacketWriter* s);
 void CopyMemory(void* dst, void* src, u32 size);
 
 struct MeshUv {
@@ -261,27 +251,14 @@ extern u8 D_000023B8[];
 extern u8 D_00003A80[];
 extern u8 D_00003A90[];
 
-void BeginDmaTag(PacketWriter* pkt);
-void CloseDmaTag(PacketWriter* pkt);
-void AddDmaReturnTag(PacketWriter* pkt);
-void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
-void WriteVifStrow(PacketWriter* s, u32* src);
-void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifMscalf(PacketWriter* s, void* data);
-void WriteVifFlushE(PacketWriter* s);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteStripMeshMscal(s32 mode, void* obj);
-void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
-void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
-void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 
-void ApplyLinkConstraint(PlacedObject* self);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
@@ -290,7 +267,6 @@ struct AttachmentNode { u8 pad0[4]; void* attachment; s32 targetId; u8 pad1[0x80
 struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* entries; u8* chainData; u8 pad1[0x4C - 0x18]; AttachmentNode* nodes; };
 
 void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
-void AttachNodeToOwner(NodeOwner* self, void* unused, NodeAttachment* ctx);
 
 // Four quadwords: a matrix as the attachment code copies it.
 struct QuadMatrix { Quad16 q[4]; };
@@ -298,8 +274,6 @@ struct TargetObject { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; };
 struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[0x90 - 0x50]; };
 struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
 
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void InvertRigidTransform(void* a, void* b, Quad16* out);
 QuadMatrix MultiplyMatrices(const QuadMatrix& a, const QuadMatrix& b);
 
 struct AnimatorStep;
@@ -320,7 +294,6 @@ struct AnimatorOwner {
 
 
 s32 ClaimAnimatorStep(CursorAnimator* a0);
-void EvaluateOscillator(Oscillator* self);
 
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
@@ -330,12 +303,7 @@ struct PartRange { u16 lo; u16 hi; };
 struct PartPacketSource { u8 pad0[0x18]; u8* mesh; PartRange* unpack; };
 struct PartPackets { void* firstQwc; void* firstBuffer; void* firstUnpackCursor; void* secondQwc; void* secondBuffer; void* secondUnpackCursor; };
 
-PacketWriter* InitPacketWriter(PacketWriter* self);
-void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
-void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
-void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 void WriteVifMscal(void* s, void* n);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 struct AttachmentLink { PlacedObject* owner; AttachmentLink* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; AttachmentLink* next; u8 pad84[0xC]; };
 struct AttachmentPartInfo { u8 pad[0x10]; u32 flags; };
@@ -346,7 +314,6 @@ void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
 void* CopyToFrontMemory(s32 size, void* src);
 void CopyAttachmentPart(AttachmentCopy* o, void* a, void* b);
-void CollectNonNullRefs(RefOwner* owner);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
 struct FramedObject;
@@ -358,8 +325,6 @@ struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMat
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
 struct ParentFrame { u8 pad[0x30]; };
 
-void InvertRigidTransform(void* a, void* b, Quad16* out);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
@@ -384,28 +349,11 @@ extern u8 D_000027C0[];
 extern u8 D_00003A80[];
 extern u8 D_00003AA0[];
 
-void BeginDmaTag(PacketWriter* self);
-void CloseDmaTag(PacketWriter* self);
-void AddDmaReturnTag(PacketWriter* self);
-void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
-void WriteVifStrow(PacketWriter* b, u32* src);
-void WriteVifStmask(PacketWriter* self, s32 value);
 void WriteVifMscal(PacketSlot* s, void* data);
-void WriteVifFlushE(PacketWriter* b);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteStripMeshMscal(s32 mode, void* obj);
-void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
-void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
-PacketWriter* InitGifPacket(PacketWriter* self);
-void CloseGifTag(PacketWriter* f, s32 n);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
-void CollectNonNullRefs(RefOwner* owner);
 void WriteStripMeshMscal(s32 mode, void* obj);
 void WriteMorphTargetMscal(s32 mode, void* obj);
 void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
@@ -564,7 +512,6 @@ struct ModelRecord {
     s32 nanimators;         // 0x50
 };
 
-PacketWriter *InitPacketWriter(PacketWriter* self);
 
 // A packet buffer of the model reader, set up where it is declared.
 struct StripPacket : ModelPacket {
@@ -603,12 +550,7 @@ void ReadBufferedVector3(BufferedStream* src, void* dst);
 void ReadBufferedVector4(BufferedStream* self, void* out);
 void AlignBufferedStreamPosition(BufferedStream* self, s32 n);
 ModelAnimator* ReadAnimator(void* stream);
-void ComputeCameraFogTerms(Camera* self, f32* out, f32 p);
 void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp);
-void CollectNonNullRefs(RefOwner* owner);
-void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
-void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give);
 void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
                    Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs, s32 n, VertexRefs* recs,
                    WeightIndices* ents, Vec3* verts, Vec3* vnrms, f32* weights, PacketWriter* pkt,
@@ -1801,16 +1743,7 @@ struct Cfg_1662A8 {
 struct Out_1662A8 { u8 pad0[4]; Row_1662A8* packets; u8 pad8[0x18 - 8]; s32 qwc[2]; s32 addr[2]; };
 struct Self_1662A8 { u8 pad[0x40]; s32 nweights; };
 
-PacketWriter* InitPacketWriter(PacketWriter* self);
-void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
-void BeginDmaTag(PacketWriter* self);
-void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
-void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(Buf_1662A8* b, s32 x, s32 y);
-void AddDmaCallTag(PacketWriter* self, s32 hi);
-void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void AddDmaReturnTag(PacketWriter* self);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
 
 void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ctx)
 {
@@ -2021,10 +1954,7 @@ extern s32 g_frameCount;
 extern Quad4* g_buildFrameData;
 extern f32 g_gameClock[];
 extern f32 g_gameTime;
-void CollectRangeRecordsInReach(World* self, void* a1, s32 max, s32* outCount, RangeRecord** out, f32 f);
-s32 RangeRecordMatchesKinds(RangeRecord* self, u32 bits);
 s32 RangeRecordReachesSphere(void* node, void* v, f32 f);
-void QueueRangeRecordPacket(RangeRecord* o);
 struct Vif_166690 {
     static u32* Open(PacketWriter* w)
     {

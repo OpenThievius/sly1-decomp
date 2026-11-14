@@ -23,6 +23,14 @@
 #include "vu0.h"
 #include "packet_writer.h"
 #include "asm_func.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/effect_spawner.h"
+#include "functions/matrix.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/value_pools.h"
 struct Mat02;
 
 
@@ -32,49 +40,35 @@ ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr*
 
 int AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 
-void CopyObjectData(void* self, void* src);
 
 
 void* TakeCallRecord(World* self);
 
-void RemoveFromList(List01* list, void* item);
 
-void NoteConeVolumeLightingChange(ConeVolume* self);
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 c);
 
 void* AllocateFrontMemory(s32 size);
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
-s32 IsObjectAttached(BaseObject* self);
 
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 
 
-void UnregisterPlacedObject(PlacedObject* self);
 
-void RemoveConeVolumeFromWorldList(void* self);
 
 struct ValueRange;
 s32 IsInsideRange(ValueRange* span, f32 x);
 
-void AddObjectKeyToOwner(BaseObject* self);
 
-s32 IsObjectAttached(BaseObject* self);
 
 struct __attribute__((packed)) Pack_183B20 { u64 v; };
 
-void* AcquirePairPayload(void);
 
-void* AcquireVectorAPayload(void);
 
-void ComputePlacedObjectWorldFrame(PlacedObject* self);
 
-void RefreshConeVolumeShape(ConeVolume* self);
 
-void UpdateConeVolumeBounds(ConeVolume* self);
 
 extern u8 g_markStacks[];
 
@@ -83,11 +77,8 @@ void AddMarkRootList(MarkStacks* self, R11B008List* list);
 
 void CopyMemory(void* dst, void* src, u32 size);
 
-u8* GetHashedSlot(u8* base, s32 n);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
 ScriptScope* NewScriptScope(void);
 
@@ -98,43 +89,26 @@ void CopyScriptScope(ScriptScope* src, ScriptScope* dst);
 struct MarkEntry;
 void AddUniqueMarkRoot(MarkStacks* self, MarkEntry* value);
 
-void AppendToList(List01* self, void* item);
 
-void RegisterPlacedObject(PlacedObject* self);
 
-void AddConeVolumeToWorldList(ConeVolume* self);
 
-void RegisterObject(void* self);
 
-void AppendToList(List01* self, void* item);
 
-s32 IsInList(List01* self, void* item);
 
-s32 IsObjectAttached(BaseObject* self);
 
-void RemoveFromList(List01* list, void* item);
 
-void UnregisterObject(void* self);
 
-void RemoveFromList(List01* list, void* item);
 
 
 struct T219CHook;
 struct World;
 void ReleaseCallRecords(World* self, T219CHook* node);
 
-s32 GetAliasId(BaseObject* self);
 
-void AppendToList(List01* self, void* item);
 
-s32 IsInList(List01* self, void* item);
 
-// The callback list's helpers (func_001831E8 adds, func_00183238 removes), as the slots call them.
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
 
-void RemoveCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
 
-void* AcquireVectorBPayload(void);
 
 void ReadPropertyRecords(void* a, void* b);
 
@@ -159,38 +133,27 @@ void* EvalScriptBody(ScriptValue* ret, R11B008Node* list, ScriptScope* scope);
 extern const s32 g_scriptEventOffsets[];
 extern s32 g_scriptEventPairs[];
 
-s32 SuppressScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
-void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list);
 
-void UpdateConeVolumeTangents(ConeVolume* self);
 
-void InitPlacedObject(PlacedObject* self);
 
-s32 IsObjectAttached(BaseObject* self);
 
-void RemoveConeVolumeFromWorldList(ConeVolume*);
 
-void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 
 extern "C" f32 Cosine(f32 x);
 
 struct LinePoints { f32 x; f32 y; };
 
-void FitLineThroughPoints(f32 a, f32 b, f32 c, f32 d, f32* out0, f32* out1);
 
 extern s32 g_frameCount;
 
 extern s32 g_lightingChangeFrame;
 
-void UpdateConeVolumeTangents(void* self);
 
 struct Quad_001B4580;
-void ConvertRgb255ToHsv255(Quad_001B4580* src, f32* dst);
 
-void SetConeVolumeColor(ConeVolume* self, Quad16* src);
 
 
 extern "C" f32 Tangent(f32 x);
@@ -750,7 +713,7 @@ void RefreshConeVolume(ConeVolume* self)
 
 void RemoveConeVolumeFromWorldList(ConeVolume* self)
 {
-    RemoveFromList((List01*)((u8*)self->world + 0x1BE8), self);
+    RemoveFromList(&self->world->list1BE8, self);
     NoteConeVolumeLightingChange(self);
 }
 
@@ -758,7 +721,7 @@ void AddConeVolumeToWorldList(ConeVolume* self)
 {
     void (*fn)(BaseObject*);
 
-    AppendToList((List01*)((u8*)self->world + 0x1BE8), self);
+    AppendToList(&self->world->list1BE8, self);
     fn = self->desc->m12;
     if (fn != 0) fn(self);
 }
@@ -839,17 +802,9 @@ void NoteConeVolumeLightingChange(ConeVolume* self)
 }
 
 void *InitPacketWriter(PacketWriter* p);
-void UsePacketBufferMemory(PacketWriter* p, s32 n, void* q);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifMscal(PacketWriter* p, void* code);
 void WriteVifFlushE(PacketWriter* p);
-void DetachPacketBuffer(PacketWriter* p, u32* outCount, u8** outBegin);
-void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void BuildFrustumSideNormals(Mat02* m, Vec02* out, f32 x, f32 y);
-void BuildProjectionMatrix(Mat4* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f);
-void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out);
 extern u8 g_coneProgramMode0[];
 extern u8 g_coneProgramMode1[];
 extern u8 g_coneProgramMode23[];

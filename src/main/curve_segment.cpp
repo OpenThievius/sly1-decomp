@@ -20,22 +20,21 @@
 #include "vu0.h"
 #include "mul_rotation.h"
 #include "globals.h"
+#include "functions/curve_segment.h"
+#include "functions/matrix.h"
+#include "functions/path_curve.h"
+#include "functions/warp_menu.h"
 struct Mat02;
 struct Vec02;
 
 
-extern void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-extern void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
 
-void SampleCurvePoints(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
-f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
 
 struct CurvePoint { u8 pad0[16]; };
 
 void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, s32 count,
                        CurvePoint* out, f32 start, f32 end);
 
-void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 t, f32 k, Vec02* pos, Vec02* vel, Vec02* acc);
 
 void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero)
 {
@@ -171,7 +170,6 @@ void EvaluateHermiteVectorSegment(f32 dur, const Vec02* p0, const Vec02* m0, con
     }
 }
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 // v made unit length where it is, or fallback when shorter than 0.0001: its length.
 static inline f32 NormalizeAxis(Vec02& v, const Vec02& fallback)
@@ -251,7 +249,6 @@ f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1,
 
 
 extern "C" f32 ConvertDoubleToFloat(u64 bits);
-s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 
 // The search's start, a statement macro: how many window ends there are, and the cursor before
 // the first. It is the original's run-once loop: its loop notes make flow count the count's

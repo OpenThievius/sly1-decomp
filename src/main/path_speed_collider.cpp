@@ -29,41 +29,35 @@
 #include "transform_object.h"
 #include "ramp_profile.h"
 #include "path_curve.h"
+#include "functions/base_object.h"
+#include "functions/effect_spawner.h"
+#include "functions/matrix.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/zone_collider.h"
 struct Mat02;
 
 
 
-void StartMaskedCollider(MaskedCollider* self);
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
 s32 CreateWeightCurve(u32 kind);
 
 void* AllocateFrontMemory(s32 size);
 
-void InitPlayerFlaggedCollider(PlayerFlaggedCollider* self);
 
 struct OwnerMessage;
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
-void TeleportStateWalker(StateWalker* self, s32 key);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin);
-void ClearRootTries(PlacedObject* self);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 // The file's .data, 0x264230 to 0x264260, in retail's order.
@@ -94,15 +88,6 @@ void StartC24Object(C24* self)
     self->curveTable->field_c = AllocateFrontMemory(0xC00);
 }
 
-void UpdateMaskedCollider(MaskedCollider* self, f32 dt);
-void* GetActiveSwitchedCollider(void);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SendEmptyMessage(MemberObject* a0);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void ClearRootTries(PlacedObject* self);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 void UpdateC24Object(C24* self, f32 dt)
 {
@@ -152,8 +137,6 @@ void UpdateC24Object(C24* self, f32 dt)
 typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
 typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec02* pos, Vec02* dir);
 typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
 void ApproachRotationWithRamp(f32 limit, Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
@@ -234,7 +217,6 @@ typedef void (*CurveSampleFn)(PathCurve* self, s32 zero, Vec02* out, f32 t);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 bytes);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 void BuildPathSpeedProfile(C24* self, PathCurveObject* path, f32 speed)
 {

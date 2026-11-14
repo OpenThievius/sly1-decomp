@@ -10,6 +10,11 @@
 #include "hit_target.h"
 #include "deferred_request.h"
 #include "vu0.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/trail_ribbon.h"
 struct Mat02;
 struct Vec02;
 
@@ -46,7 +51,6 @@ struct TrailOwner {
 };
 
 void* InitVertexBatch(VertexBatch* b);
-void BeginDmaTag(PacketWriter* g);
 void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2);
 void SetVertexBatchMode(VertexBatch* batch, u8* value);
 void SelectVertexBatchLights(VertexBatch* batch, void* center, f32 radius);
@@ -55,14 +59,11 @@ void SetVertexColor(VertexBatch* batch, void* src);
 void SetVertexPosition(VertexBatch* body, Vec3* v);
 void AddVertex(VertexBatch* b, s32 z);
 void FlushVertexBatch(VertexBatch* b);
-void CloseDmaTag(PacketWriter* g);
 void DestroyVertexBatch(VertexBatch* b, s32 f);
 
 u8 g_trailEdgeTexCoord[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
 u8 g_trailZeroTexCoord[16] = { 0 };
 
-void ResetTrailRing(TrailRing* o);
-void DrawTrailRibbon(TrailOwner* self);
 
 void ResetTrailRing(TrailRing* o)
 {
@@ -70,10 +71,6 @@ void ResetTrailRing(TrailRing* o)
     o->oldest = 0;
 }
 
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
-void MatrixToAxisAngle(Mat02* m, f32* angle, Vec02* axis);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 // A point's frame as func_001C29F8 steps it from the last placement to the new one.
 struct TrailFrame { Mat02 rot; Vec02 pos; };
@@ -195,7 +192,6 @@ done:
 }
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void QueueDeferredRequest(DeferredRequest* src);
 
 void QueueTrailRibbonDraw(TrailRing* self, u8* cam)
 {

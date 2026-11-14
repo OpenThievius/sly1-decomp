@@ -28,6 +28,12 @@
 #include "ramp_profile.h"
 #include "asm_func.h"
 #include "fpu.h"
+#include "functions/group_marker.h"
+#include "functions/memory_card.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/warp_menu.h"
 struct BaseObject;
 struct Mat02;
 
@@ -63,8 +69,6 @@ void PopFontScale(Font* font);
 void* InitTextReader(TextReader* self, char* text, Font* font);
 void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
 
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
-void TransformRotationBetweenFrames(int a, int b, void* c, f32* d);
 
 extern f32 g_gameTime;
 extern f32 g_frameDt;
@@ -80,13 +84,9 @@ typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 typedef void* (*VFn_1A9960)(void* self);
 
 extern ElementPlaceTable g_elementPlaces;
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
-void GetObjectWorldRotation(BaseObject* self, Mat02* out);
-void TransformRotationBetweenFrames(void* a0, void* a1, void* a2, void* a3);
-void SetListLinkOffset(List01* self, s32 offset);
 
 
 
@@ -99,7 +99,6 @@ extern s8 g_fontEscapeKeys[];
 extern u8 g_charClassFlags[];
 s32 FormatToString(char* dst, const char* fmt, ...);
 void* CopyString(void* dst, const char* src);
-void SetListLinkOffset(List01* self, s32 offset);
 PlacedObject* CreateObjectCopy(PlacedObject* a, World* b, BaseObject* c);
 
 void DrawCyclingGlyphElement(u8* a);
@@ -112,7 +111,6 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-f32 TruncateFloat(f32 x);
 void DrawScreenElementText();
 f32 GetScreenElementSlideInTime();
 f32 GetScreenElementHoldTime();
@@ -192,7 +190,6 @@ extern "C" s32 CompareStrings(const char* a, const char* b);
 extern u8 g_elementStack[];
 
 s32 MatchesObjectId(void* key, s32 item);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 extern TextStyle g_copiedCaptionStyle;
@@ -222,7 +219,6 @@ extern f32 D_00274470[2];
 extern TextStyle g_promptStyle;
 
 s32 MatchesObjectId(s32 value, s32 item);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 s32 MatchesObjectId(void* a, s32 b);
 
@@ -234,7 +230,6 @@ extern f32 D_0027240C;
 extern s32 D_00272420;
 extern u8 g_backgroundJob[];
 
-s32 IsBackgroundJobRunning(BackgroundJob* p);
 void* ComputeCompletionPercent(GameProgress* progress);
 
 
@@ -263,7 +258,6 @@ extern s32 AppendString(void* dst, const char* src);
 u32 GetEntryFlags(s32 id);
 char* GetEntryName(s32 id);
 
-f32 WrapAngle(f32 a);
 extern "C" f32 Cosine(f32 x);
 
 extern const char* g_promptTexts[];
@@ -362,8 +356,6 @@ struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, 
 struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
 extern RampProfile g_gaugeFillRamp;
 
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
 extern "C" f32 Sine(f32 x);
 
 struct ChannelLerp {

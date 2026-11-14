@@ -7,11 +7,13 @@
 #include "world.h"
 #include "globals.h"
 #include "transform_object.h"
+#include "functions/base_object.h"
+#include "functions/oscillator.h"
+#include "functions/pooled_object.h"
 
 u8 g_class75List[16] = {0};
 
 
-void SetListLinkOffset(List01* self, s32 offset);
 
 void InitClass75List()
 {
@@ -19,14 +21,12 @@ void InitClass75List()
 }
 
 
-void ClearList(List01* p);
 
 void ClearClass75List()
 {
     ClearList((List01*)g_class75List);
 }
 
-void InitTransformObject(TransformObject* self);
 
 void InitClass75Object(void* self)
 {
@@ -36,8 +36,6 @@ void InitClass75Object(void* self)
     o->scale = 25.0f;
 }
 
-void RegisterObject(BaseObject* self);
-void AppendToList(List01* self, void* item);
 
 void RegisterClass75Object(void* self)
 {
@@ -45,8 +43,6 @@ void RegisterClass75Object(void* self)
     AppendToList((List01*)g_class75List, self);
 }
 
-void UnregisterObject(BaseObject* self);
-void RemoveFromList(List01* list, void* item);
 
 void UnregisterClass75Object(void* self)
 {
@@ -54,7 +50,6 @@ void UnregisterClass75Object(void* self)
     RemoveFromList((List01*)g_class75List, self);
 }
 
-void CopyObjectData(BaseObject* self, BaseObject* src);
 
 void CopyClass75ObjectData(Class75Object* self, Class75Object* src)
 {

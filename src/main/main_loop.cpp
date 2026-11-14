@@ -3,6 +3,37 @@
 // IOP modules it loads and the startup initializers it runs. Its name is ours, after the loop.
 #include "common.h"
 #include "asm_func.h"
+#include "functions/camera.h"
+#include "functions/class75_list.h"
+#include "functions/disc_access.h"
+#include "functions/display.h"
+#include "functions/font.h"
+#include "functions/game_clock.h"
+#include "functions/game_progress.h"
+#include "functions/global_constructors.h"
+#include "functions/group_marker.h"
+#include "functions/heap.h"
+#include "functions/iop_file_client.h"
+#include "functions/iop_module_loader.h"
+#include "functions/iop_reset.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/movie_player.h"
+#include "functions/object_pool.h"
+#include "functions/on_off_object.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/player_state2.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/pose_source.h"
+#include "functions/remote_call.h"
+#include "functions/render_frame.h"
+#include "functions/sound_system.h"
+#include "functions/switched_collider.h"
+#include "functions/target_lists.h"
+#include "functions/text_format.h"
+#include "functions/world_listed_object.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct LoadProgress;
@@ -35,7 +66,6 @@ struct SortKeyedObject : PlacedObject {
 
 
 
-void InitPoseSource(Attachment* self, PlacedObject* value);
 
 
 
@@ -66,26 +96,12 @@ extern s32 g_worldLoadRequest;
 extern u8 g_elementStack[];
 extern s32 g_frameCount;
 
-void RunConstructorsOnce(void);
 void RunStartupInitializers(void);
-void DrainRenderFrames(s32 flag);
-void PlayQueuedMovies(MoviePlayer* self);
 struct WorldLoadRequest;
-void RunPendingWorldLoad(WorldLoadRequest* self);
-void UpdatePadConnection(PadRecord* self);
-void RunCompletedButtonCode(void);
 struct ElementStack;
-void UpdateMemoryCard(MemoryCard* self);
 void UpdateElementStack(ElementStack* obj);
-void AddElapsedTime(f32 dt);
-void UpdateCameraLocation(Camera* self);
-void BeginRenderFrame(void);
-void AdvanceGameClock(GameClock* self);
-void RunWorldFrameLists(World* o, void* a);
 void QueueScreenElementDraws(ElementStack* stack);
-void SubmitDeferredRequests(World* o, void* a);
 void DrawAllScreenElements(ElementStack* stack);
-void SubmitRenderFrame(void);
 
 
 
@@ -98,32 +114,20 @@ typedef void (*StartupFn)(void);
 typedef void (*Fn_Table)();
 
 s32 InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
-void SetScreenOwner(s32 value);
 void BeginLoadProgress(LoadProgress* p);
 void UpdateLoadProgress(LoadProgress* self, s32 value);
 void EndLoadProgress(LoadProgress* p);
-void ClearScreenOwner(s32 owner);
-
-
-
-void* GetActiveSwitchedCollider(void);
 
 
 
 
 
 
-void FormatDiscPath(void* self, const char* name, s32 flag);
-extern "C" void InitRemoteCalls(s32 mode);
+
+
+
 extern "C" s32 InitDiscLibrary(s32 mode);
-s32 RefreshDiscStatus();
-void SendDiscCommand22WhenReady();
-s32 ForgetFileClient();
-s32 ResetIop(char* arg);
-s32 IsIopResetDone();
-s32 ForgetModuleLoader();
 extern "C" s32 WaitDiscReady(s32 mode);
-s32 TestDiscReadDone(s32 a);
 struct Blob_1F9868;
 s32 LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data);
 
@@ -137,31 +141,6 @@ void SendVif0StartupPacket(void);
 void SendVif1StartupPacket();
 void RunStartupInitializers(void);
 
-void InitPlacedObjectModule();
-void InitAlphaStatePackets();
-void ResetDiscSectorCheck();
-void InitDiscAccessModule();
-void InitObjectBuiltinTable();
-void ResetGameClockTick();
-void InitCameraModule();
-void InitDmaChannels();
-void ClearDefaultFont();
-void InitRenderFrames();
-void RunResetGameSession();
-void InitDisplay();
-void SetObjectListLinkOffsets();
-void InitPadSystem();
-void RegisterButtonCodes();
-void SetPointObjectListLinkOffset();
-void InitMemoryCardSystem();
-void InitHeap();
-void CreateMovieDecodeThread();
-void SetTargetVectorListLinkOffset();
-void InitGroupMarkers();
-void InstallScreenElements();
-void InitSoundSystem();
-void InitClass75List();
-void CreateRenderThread();
 void InitGlobalElementStack();
 
 // A run of lights of one kind in g_sortedLights, as UploadLightVolumes groups them for
@@ -223,12 +202,7 @@ struct LightObject : SortKeyedObject {
 typedef s32 (*SortCompareFn)(void* a, void* b);
 void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
 void* InitPacketWriter(PacketWriter* p);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
-void BeginDmaTag(PacketWriter* p);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
-void AddDmaEndTag(PacketWriter* p);
 void SubmitPacketBuffer(PacketWriter* p, s32 dma);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
@@ -418,8 +392,6 @@ void* ResolveAimTarget(T2195_790* a0) {
     return a0->target;
 }
 
-void ClearRootTries(PlacedObject* o);
-void SortAttachments(PlacedObject* o);
 
 // The aim attachment's key from the owner's distance to the target: the far key beyond the
 // range at +0x40, else the near key, after clearing the root's tries. The owner is resorted in
@@ -460,10 +432,7 @@ struct AimAxis {
 
 typedef char check_AimAxis[sizeof(AimAxis) == 0x20 ? 1 : -1];
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void GetVectorAngles(Vec3* v, f32* a1, f32* a2);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 // The aim's rotation: the owner's own while the aim is held, its +0x1A0 matrix when the target
 // is beyond the range at +0x40, else a yaw and pitch toward the target, each through its axis's

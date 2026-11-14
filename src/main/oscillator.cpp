@@ -33,6 +33,20 @@
 #include "value_range.h"
 #include "common.h"
 #include "object_finder.h"
+#include "functions/buffered_stream.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/command_channel.h"
+#include "functions/commentary_best_time.h"
+#include "functions/on_off_object.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/screen_element.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/zone_collider.h"
 struct PlacedObject;
 struct World;
 
@@ -70,17 +84,11 @@ void* GetOscillatorEntryForVectors(void* self, s32 mode);
 void AppendVector4ToBuffer(VectorList4* buf, f32 x, f32 y, f32 z, f32 w);
 
 struct BufferedStream;
-void ReadBufferedRotation3(BufferedStream* self, void* out);
-void ReadBufferedVector3(BufferedStream* src, void* dst);
 void ReadPropertyRecords(void* a, void* b);
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 void ReparentObject(BaseObject* self, BaseObject* parent);
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
 
 void InitObject(void* self);
 
@@ -92,14 +100,10 @@ struct NodeAttachment { u8 pad0[0x54]; OwnedNode* node54; s32 count58; Attachmen
 struct NodeOwner { u8 pad0[0x3C]; s32 count3C; u8 pad1[0x6E0 - 0x40]; OwnerSlot items6E0[4]; OwnerSlot items7E0[1]; u8 pad2[0x8E0 - 0x820]; OwnedNode* head8E0; };
 
 
-void ReadBufferedRotation3(BufferedStream* self, void* out);
-void ReadBufferedVector3(BufferedStream* src, void* dst);
 void ReadPropertyRecords(void* a, void* b);
-s32 ReadBufferedS16(BufferedStream* self);
 void* AllocateFrontMemory(int size);
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 struct BufferedStream;
-void SkipBufferedBlock(BufferedStream* self);
 
 
 void StartObject(BaseObject* self);
@@ -160,49 +164,31 @@ struct Vec02;
 
 struct Rec36;
 void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
-void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
-void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 struct TimedValue { u8 pad[0x98]; s32 state; f32 value; };
 
-void InitPlacedObject(PlacedObject* self);
 
 
-void PushCameraController(Camera* self, s32 key, CameraController* ctl, void* target, void* arg);
 
-void CopyCollider(Collider* self, Collider* other);
 
 struct ZoneTargetEntry;
-s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val);
-void StartPlacedObject(PlacedObject* self);
 void FillTrackedNodes(Rec36* self);
 
 
-void ShutDownCommandChannel();
 
 HoldingMember* FindArrivalPoint(s32 id, s32 parent);
 void PlaceAtArrivalPoint(TransformSet* self);
-void* GetActiveSwitchedCollider(void);
-void* GetCurrentSwitchedCollider(void);
-void ActivateSwitchedCollider(void* value);
 
 // NEAR: only the vtbl[19] load differs: retail loads it into $v1 (lw v1,76(v1)), we use $v0 for the test and the call.
 
 
-void StartPlacedObject(PlacedObject* self);
 
 extern f32 g_gameTime;
-void AcquirePadSelectFlag(World* a0);
 
 s32 GetEntryIdByKey(KeyedEntry* key);
 s32 GetLevelEntryWord(s32 a0);
-void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
-void StartPlacedObject(PlacedObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-void InitCollider(Collider* self);
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 
 
@@ -226,9 +212,7 @@ struct LevelRecordWord78 {
 // What StartObjectFade (func_001F0428) fades: the entry LookupEntryById gives for a level.
 struct LevelFadeEntry { s32 unused; };
 LevelFadeEntry* LookupEntryById(s32 k);
-void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
 void StartObjectSubGroupFinish(ObjectSubGroup* self);
-void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
 struct TrackedTargetChoice {
     u8 pad00[0x0C];
@@ -253,12 +237,7 @@ void SetPlayerState(Player* self, s32 a, s32 b);
 void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f);
 
 struct BufferedStream;
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
-void ReadBufferedRotation3(BufferedStream* self, void* out);
-void ReadBufferedVector3(BufferedStream* src, void* dst);
-void ReadMeshTables(void* a, void* b, void* c, void* d, void* e);
 void ReadPropertyRecords(void* a, void* b);
-s32 ReadBufferedS16(BufferedStream* self);
 void* AllocateFrontMemory(s32 size);
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
@@ -286,7 +265,6 @@ struct BeginListWalk {
 void AddTrackedNode(Rec36* self, BaseObject* n);
 
 
-void UpdateCollider(Collider* self, f32 dt);
 s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
@@ -318,14 +296,8 @@ struct AddGathererContact {
 
 
 s32 GetEntryIdByKey(KeyedEntry* key);
-void FinishBestTimeRun(void* self);
 void SetObjectSubGroupState(ObjectSubGroup* self, s32 state);
-void SetBestTimeState(T217D_1380* g, s32 n);
 void BeginLevelExit(s32 flag, s32 n);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* k1, void* k2, void* k3);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-s32 HasAnimationEventKind19(Animation* node);
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void InitOscillator(Oscillator* self)
@@ -394,11 +366,10 @@ void InitIdentityMatrix(Mat4* self);
 void* InvertMatrix4x4(void* a0, void* a1);
 Mat4R MultiplyMatrices(const Mat4R& a, const Mat4R& b);
 void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 
 void RefreshOscillatorFrames(Oscillator* self)
 {
-    for (OscPart* part = *(OscPart**)((u8*)self + 0x8E0); part != 0; part = part->next) {
+    for (OscPart* part = (OscPart*)self->partList; part != 0; part = part->next) {
         PlacedObject* obj = part->obj;
         OscMesh* mesh = part->mesh;
         Mat4R m;
@@ -526,7 +497,7 @@ void RefreshOscillatorFrames(Oscillator* self)
             }
         }
     }
-    *(s32*)((u8*)self + 0x8E4) = 0;
+    self->framesDirty = 0;
 }
 
 struct OscillatorSweepEntry {
@@ -543,7 +514,6 @@ struct OscillatorSweepEntry {
     u8 pad70[0xD0 - 0x70];
 };
 
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
 
 // A weight already in a VU0 register, stored to a slot of its own as Scalar's is.
 static inline Vu0::Vec WeightOf(u128 w)
@@ -1005,13 +975,8 @@ struct ArrivalWatcher {
     const Vt* vt;
 };
 
-void PlaceCameraLookingAt(Camera* self, const Vec02* target, const Vec02* focus);
-void RequestCameraSnap(Camera* self, f32* src);
-void PlaceColliderClearOfContacts(Collider* self, Vec02* start, Vec02* step);
-void SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag); // stays void: retail returns a value, but declared so func_001F4008 differs in registers
 void SetObjectSubGroupState(ObjectSubGroup* self, s32 state);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapAngle(f32 a);
 
 void PlaceAtArrivalPoint(TransformSet* self)
 {
@@ -1039,7 +1004,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     for (s32 i = 0; i < self->count; i++) {
         CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objects[i], 0, 0, 0, 0.0f, 1.0f);
     }
-    SetGatheredWalkerTargets(self->world, *(s32*)((u8*)self + 0xB4), (ZoneTargetEntry*)((u8*)self + 0xB8), self, 1);
+    SetGatheredWalkerTargets(self->world, self->keyedCount, (ZoneTargetEntry*)self->keyed, self, 1);
     for (s32 i = 0; i < self->idCount; i++) {
         ArrivalWatcher* w = (ArrivalWatcher*)FindFirstObjectById(self->world, 0x104, self->ids[i], self);
         if (w != 0) {
@@ -1049,13 +1014,13 @@ void PlaceAtArrivalPoint(TransformSet* self)
     s32 n = GatherObjectsById(self->world, 0x205, 0x7D, 0, 0x40, found);
     n = MinOf::Of(n, 0x40);
     for (n = n - 1; n >= 0; n--) {
-        if (*(s32*)((u8*)found[n] + 0x2E4) != 2) {
+        if (((ObjectSubGroup*)found[n])->state != 2) {
             SetObjectSubGroupState((ObjectSubGroup*)found[n], 0);
         }
     }
     if (who->flags538 & (0x8000ULL << 30)) {
-        if (*(s32*)((u8*)self + 0x98) != 0) {
-            angle = WrapAngle(ArctangentOfRatio(rot.r[0].y, rot.r[0].x) + *(f32*)((u8*)self + 0x9C));
+        if (self->hasHeading != 0) {
+            angle = WrapAngle(ArctangentOfRatio(rot.r[0].y, rot.r[0].x) + self->headingOffset);
             RequestCameraSnap(g_camera, &angle);
         } else {
             RequestCameraSnap(g_camera, 0);
@@ -1064,7 +1029,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     TriggerScriptEvent(self, 2, 0, 0);
 }
 
-s32 SetTransformObjectKeyedValue(TransformObject* self, s32 flag, s32 k1, s32 k2, s32 val) { return UpsertKeyedEntry((ZoneTargetEntry*)((u8*)self + 0xB8), 4, (s32*)((u8*)self + 0xB4), flag, k1, k2, val); }
+s32 SetTransformObjectKeyedValue(TransformObject* self, s32 flag, s32 k1, s32 k2, s32 val) { return UpsertKeyedEntry((ZoneTargetEntry*)((TransformSet*)self)->keyed, 4, &((TransformSet*)self)->keyedCount, flag, k1, k2, val); }
 
 void StoreValueAndMarkSet(TimedValue* self, f32 value) { self->value = value; self->state = 1; }
 
@@ -1144,8 +1109,8 @@ larg:
 
 void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
 {
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)((u8*)self + 0x2FC));
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)((u8*)self + 0x308));
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->levelEntry);
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->f308);
     ReadBufferedRotation3((BufferedStream*)s3, &self->rot);
     ReadBufferedVector3((BufferedStream*)s3, &self->pos);
     void (*f)(BaseObject* self) = self->desc->m12;
@@ -1235,7 +1200,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
         return;
     }
     if (key == 0 || IsObjectOfKind(key, 0x16) == 0) {
-        RemoveCameraControllers(g_camera, 2, 0, (CameraController*)((u8*)g_camera + 0x460), 0, 0);
+        RemoveCameraControllers(g_camera, 2, 0, &g_camera->ctl460, 0, 0);
     }
     SetObjectSubGroupState(self, 5);
     for (i = 0; i < self->count; i++) {
@@ -1287,11 +1252,7 @@ extern s32 D_002701C4;
 extern s32 D_0026F388;
 extern T217D_3D0 g_copiedTextCaption;
 extern T217D_440 g_typedTextCaptionBox;
-void UpdatePlacedObject(PlacedObject* self, f32 dt);
-void SetScreenElementHoldTime(void* e, f32 t);
 s32 GetEntryIdByKey(KeyedEntry* key);
-void SetElementTextFromPackedEntry(ScreenElement* self, s32 value);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 struct TreeNode03;
 struct FacePoint;
 s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
@@ -1400,9 +1361,9 @@ void StartLookupObject(LookupObject* self)
     }
 }
 
-void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController(g_camera, 7, (CameraController*)((u8*)g_camera + 0x510), 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
+void PushObjectCameraController(void* self) { if (!*(s32*)((u8*)self + 0x310)) { PushCameraController(g_camera, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
 
-void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, (CameraController*)((u8*)g_camera + 0x510), 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
+void RemoveObjectCameraController(void* self) { if (*(s32*)((u8*)self + 0x310)) { RemoveCameraControllers(g_camera, 0xB, 7, &g_camera->ctl510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
 void InitTrackedNodes(Rec36* a, ContactTracker* b);
 
@@ -1441,8 +1402,8 @@ void CollectTouchingObjects(ContactTracker* self, f32 dt) {
         p = (ObjectGatherer*)s->obj;
         tmp.self = self;
         tmp.obj = p;
-        tmp.q20 = *(Vec02*)((u8*)p + 0x140);
-        tmp.q30 = *(Vec02*)((u8*)p + 0x150);
+        tmp.q20 = p->v140;
+        tmp.q30 = p->v150;
         FindNodeForQuery((NodeQuery*)&tmp, 0, 0);
     }
 }
@@ -1453,7 +1414,7 @@ void ApplyContactTrackerTransform(ContactTracker* self, Camera* cam, ScaledTrans
 
 int RequestContactTrackerLaunch(ContactTracker* self, void* source, TrackedNodeOffer* offer) { OfferTrackedNodeLaunch(&self->rec, source, offer); return 1; }
 
-void* GetContactTrackerRecord(void* self) { return (u8*)self + 0x550; }
+void* GetContactTrackerRecord(void* self) { return &((ContactTracker*)self)->rec; }
 
 void ClearTrackedNodes(ContactTracker* self) { self->rec.found = 0; }
 
@@ -1478,14 +1439,7 @@ struct Mesh03;
 struct MeshHitEntry;
 struct PooledContact;
 struct OwnerMessage;
-s32 CollectMeshHits(Vec02* center, f32 radius, s32 count, FaceRef* list, FaceRef* cursor, Mesh03* mesh, s32 cap, MeshHitEntry* out);
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
-void AddSphereSphereContact(Collider* self, Collider* other, void* a2);
-void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6);
-void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3, u8* ctx, PooledContact** list);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 void OfferTrackedNodeLaunch(Rec36* self, void* a1, TrackedNodeOffer* out);
-void FreePooledContactChain(World* world, Contact03* head);
 struct TreeNode03;
 s32 FindPlaneTreeNodeForPoint(Vec02* pos, TreeNode03* nodes);
 

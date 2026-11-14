@@ -12,6 +12,17 @@
 #include "game_clock.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/collider_contact.h"
+#include "functions/effect_spawner.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/switched_collider.h"
+#include "functions/turning_collider.h"
+#include "functions/warp_menu.h"
 struct MemberObject;
 struct PlacedObject;
 struct World;
@@ -48,51 +59,36 @@ struct ContactObject {
 
 
 void* HandleObjectEvent(Collider* a, void* event);
-void FreePooledContactChain(World* world, Contact03* head);
 
 void ExtractContactsByPartMode(Collider* self, Contact03** out);
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 struct CountedTouchMessage {
     void* self;
     void* v;
 };
 
-void SendEmptyMessage(MemberObject* a0);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 struct AnimatedObject105 { u8 pad[0x7E0]; void* obj; };
 
 
-void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
 
 
 void StepCollider(Collider* self, f32 t);
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 void SteerColliderTowardRotation(Collider* self, Mat02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
 
 
 struct PooledContact;
-void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg);
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-s32 MaskWorldBitsBySave(void);
 
 struct PlayerHeldObject;
 extern f32 g_stepScale;
 
-void SetPlayerState(Player* self, s32 a, s32 b);
-s32 IsObjectAttached(BaseObject* self);
-void FadeOutPlacedObject(Collider* self, f32 time);
 void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
 void SeekObjects105Animations(Player* self, s32 value);
-void* GetActiveSwitchedCollider(void);
 
 void ShowModeLabel(s32 mode);
 s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table);
@@ -143,11 +139,8 @@ tail:
 extern f32 g_frameStep;
 extern s32 g_padSelectFlags;
 void ShowModeLabel(s32 mode);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void TurnColliderTowardHeading(TurningCollider* self);
 
 void UpdateModeSelection(Player* self, PadRecord* pad)
 {
@@ -423,7 +416,6 @@ struct FrameSource;
 struct FrameSourceDesc { u8 pad00[0x1C]; void (*getFrame)(FrameSource* self, Mat02* out); };
 struct FrameSource { FrameSourceDesc* desc; };
 typedef u64 Qword128 __attribute__((mode(TI)));
-void ComputePlacedObjectWorldFrame(PlacedObject* self);
 void ComputeColliderWorldFrame(Collider* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
 

@@ -4,6 +4,8 @@
 #include "script_value.h"
 #include "buffered_stream.h"
 #include "shapes.h"
+#include "functions/heap.h"
+#include "functions/script_machine.h"
 
 // The five pools values are taken from (func_0011C240): func_0011BF70 sets them up, func_0011C040
 // empties them all. Built at startup: the compiler's initialiser, constructor and destructor for this
@@ -19,8 +21,6 @@ EntryPool g_propertyRefPool;
 struct PairPayload { U64P xy; };
 struct TriplePayload { U64P xy; s32 z; };
 
-void FreeObjectMemory(void* p);
-void* AllocateZeroedFrontMemory(s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 s32 CompareMemory(void* a, void* b, s32 n);
 void* TakePoolEntry(EntryPool* pool);
@@ -33,9 +33,6 @@ void InitPayloadPools(void);
 void ShutDownPayloadPools(void);
 extern u8 g_markStacks[];
 struct MarkStacks;
-void ResetMarkRoots(MarkStacks* self);
-void ShutDownMarkRoots(MarkStacks* stacks);
-void ReleaseScriptScope(void);
 
 // The pooled payloads (value_pools.cpp): each tag's allocator, reference and release.
 void* AcquireVectorAPayload(void);

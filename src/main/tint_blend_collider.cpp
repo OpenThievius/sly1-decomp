@@ -22,6 +22,25 @@
 #include "state_walker.h"
 #include "pad_record.h"
 #include "camera.h"
+#include "functions/camera.h"
+#include "functions/camera_controller.h"
+#include "functions/collider.h"
+#include "functions/collider_contact.h"
+#include "functions/game_progress.h"
+#include "functions/heap.h"
+#include "functions/matrix.h"
+#include "functions/pad_input.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/placed_object_model.h"
+#include "functions/player.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/tint_blend_collider.h"
+#include "functions/turning_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/world_contacts.h"
 struct Mat02;
 struct Vec02;
 
@@ -71,7 +90,6 @@ f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
 
 
-void InitPlacedObject(PlacedObject* self);
 
 void InitRedirectObject(RedirectObject* self)
 {
@@ -79,10 +97,6 @@ void InitRedirectObject(RedirectObject* self)
     self->q320 = D_00275730;
 }
 
-void StartPlacedObject(PlacedObject* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void* AllocateZeroedFrontMemory(s32 bytes);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void StartRedirectObject(RedirectObject* self)
 {
@@ -136,15 +150,9 @@ void StartRedirectObject(RedirectObject* self)
     step->length = step[-1].length;
 }
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern s32 g_frameCount;
 extern f32 g_gameClock[];
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void UpdateLinkConstraint(PlacedObject* self);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
 f32 SplitVectorAlongAxis(Vec02* v, const Vec02* axis, Vec02* along, Vec02* rest);
-void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m);
 void OrthonormalizeMatrix(Mat02* m);
 Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
 
@@ -320,7 +328,6 @@ void SimulateRedirectChain(RedirectObject* self)
     }
 }
 
-void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other);
 
 void MarkRedirectToSelf(RedirectObject* self, PlacedObject* other)
 {
@@ -331,9 +338,7 @@ void MarkRedirectToSelf(RedirectObject* self, PlacedObject* other)
 }
 
 
-void InitTurningCollider(TurningCollider* self);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void InitTintBlendCollider(TintBlendCollider* self)
 {
@@ -355,11 +360,6 @@ typedef void (*LinkTargetFn)(void* self, void* a1, s32 a2);
 typedef void (*AttachedEffectFn)(void* self);
 
 
-void StartTurningCollider(TurningCollider* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void SetTintBlendColliderState(TintBlendCollider* self, s32 mode);
 
 void StartTintBlendCollider(TintBlendCollider* self)
 {
@@ -394,13 +394,6 @@ typedef s32 (*ContactClaimFn)(void* self, void* a1, void* a2);
 typedef void (*OwnerMessageFn)(void* self, void* a1);
 extern f32 g_gameClock[];
 
-void UpdateTurningCollider(TurningCollider* self, f32 dt);
-s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
-void ResetTintBlendColliderOrientation(TintBlendCollider* self);
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
-void FreePooledContactChain(World* world, Contact03* head);
-void SetScaledPositionSpring(PlacedObject* self, f32 scale);
-void SetScaledRotationSpring(PlacedObject* self, f32 scale);
 
 void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
 {
@@ -466,8 +459,6 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
 }
 
 extern f32 g_frameDt;
-void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
 void ResetTintBlendColliderOrientation(TintBlendCollider* self)
 {
@@ -478,8 +469,6 @@ void ResetTintBlendColliderOrientation(TintBlendCollider* self)
     Vu0::Q(self->headingVelocity) = Vu0::FromFloats(-speed, 0.0f, 0.0f);
 }
 
-void FinishSwitchedCollider(SwitchedCollider* self);
-void SetTintBlendColliderState(TintBlendCollider* self, s32 mode);
 
 void FinishTintBlendColliderRequest(TintBlendCollider* self)
 {
@@ -487,16 +476,6 @@ void FinishTintBlendColliderRequest(TintBlendCollider* self)
     SetTintBlendColliderState(self, 1);
 }
 
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void TeleportStateWalker(StateWalker* self, s32 key);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void HandleStepSequenceSkipButtons(void* self, PadRecord* rec);
-s32 IsTopCameraController(CameraController* self);
-void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
-f32 WrapAngle(f32 a);
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
 extern s32 g_movieChecksumFailed;
 
 // The collider's effect (its frame) and a body's velocity and rotation, as this function reads
@@ -616,7 +595,6 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     }
 }
 
-void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
 
 void SetTintBlendColliderTracked(TintBlendCollider* self, void* p)
 {
@@ -637,8 +615,6 @@ struct UnitClamp {
 };
 
 extern "C" f32 Cosine(f32 x);
-void SetObjectTreeRecordValue(PlacedObject* object, u32 value);
-void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
 {
@@ -672,7 +648,6 @@ void ApplyTintBlendColliderTint(TintBlendCollider* self, void* a1, void* a2)
     }
 }
 
-void ApplyColliderPendingImpulse(Collider* self, s32 moved);
 
 // The pending impulse of a tint-blend collider: its frame vector, taken into the attached
 // effect's frame and scaled by D_00275890, comes off the effect's v150; then the collider's
@@ -690,7 +665,6 @@ void ApplyTintBlendColliderPendingImpulse(TintBlendCollider* self, s32 moved)
     ApplyColliderPendingImpulse(self, moved);
 }
 
-s32 IsPadSelectFlagHeld(World* self);
 
 s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
 {
@@ -700,9 +674,6 @@ s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
 
 extern f32 D_00275894;
 extern f32 D_00275898;
-void TurnColliderTowardHeading(TurningCollider* self);
-void SetPlayerState(Player* self, s32 state, s32 sub);
-f32 WrapAngle(f32 a);
 
 void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider* other)
 {
@@ -721,10 +692,6 @@ void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider
     SetPlayerState((Player*)other, 4, 0x2B);
 }
 
-s32 HasSpareCount();
-void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ActivateSwitchedCollider(void* value);
 
 s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
 {
@@ -787,8 +754,6 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
     return 1;
 }
 
-void ExtractContactsByPartMode(Collider* self, Contact03** out);
-void CollectTurningColliderContacts(TurningCollider* self);
 
 void CollectTintBlendColliderContacts(TintBlendCollider* self)
 {
@@ -829,9 +794,6 @@ void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
     }
 }
 
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, MessageBody* rec)
 {
@@ -870,9 +832,6 @@ extern f32 g_gameClock[];
 
 
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void TeleportStateWalker(StateWalker* self, s32 key);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
 {

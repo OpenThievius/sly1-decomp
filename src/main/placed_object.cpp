@@ -46,6 +46,37 @@
 #include "shapes.h"
 #include "anim_curve.h"
 #include "object_finder.h"
+#include "functions/agent.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/disc_access.h"
+#include "functions/effect_spawner.h"
+#include "functions/entry_queue.h"
+#include "functions/flagged_object.h"
+#include "functions/game_progress.h"
+#include "functions/group_marker.h"
+#include "functions/iop_file_client.h"
+#include "functions/item_column.h"
+#include "functions/main_loop.h"
+#include "functions/matrix.h"
+#include "functions/movie_player.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/placed_object_model.h"
+#include "functions/player.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/range_record.h"
+#include "functions/screen_element.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/text_panel.h"
+#include "functions/warp_menu.h"
+#include "functions/world_contacts.h"
+#include "functions/zone_collider.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct AnimatorOwner;
@@ -95,8 +126,6 @@ void CloseStreamReader(StreamReader* a0);
 void GatherAxisCurveTimes(WeightCurve** axis, s32* outCount, f32** outTimes);
 
 extern void EvaluateVectorKeyCurve(s32, VectorKey*, s32, void*, void*);
-extern void BuildEulerRotationMatrix(f32* in, f32* out);
-extern void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out);
 
 extern void EvaluateVectorKeyCurve(s32, VectorKey*);
 extern void GetVectorKeyTimes(s32, VectorKey*, s32*, f32**);
@@ -110,7 +139,6 @@ extern void EvaluateVectorKeyCurve(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
 extern void ReadVectorKeys(s32*, VectorKey**, Stream83*);
 
-extern void* PopZeroedFreeSlot(Pool6C* pool);
 
 extern World* g_currentWorld;
 
@@ -118,7 +146,6 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 void InitPoseSource(Attachment* self, PlacedObject* value);
 
-void RemoveFromList(List01* list, void* item);
 void ReleasePoseSource(Attachment* self, s32 flags);
 
 extern f32 g_gameTime[];
@@ -127,19 +154,13 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* t, f32* a, f32* b);
 
 void GetOwnerRotation(Attachment* self, Mat02* a, Vec02* b);
 
-extern void HandleMaskedColliderActivation(MaskedCollider* self);
 
 extern u8 g_flagTable[];
-void InitCollider(Collider* self);
-s32 TakeFlagTableIndex(FlagTable* c);
-
-extern void CopyCollider(Collider*, Collider* src);
 
 
-void UpdateCollider(Collider* self, f32 dt);
+
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
-extern s32 UpsertKeyedEntry(ZoneTargetEntry* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val);
 
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 
@@ -158,17 +179,13 @@ struct DrawPart {
     };
 };
 
-extern void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
 
 extern f32 g_valueRampProfile[4];
 extern f32 g_frameStep;
 extern f32 g_frameDt;
-extern f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartPlacedObject(void* self);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void ResolveAndStartObject(BaseObject* self);
 
 void GetOwnerValue(Attachment* self, f32* value, f32* slope);
 
@@ -177,22 +194,9 @@ extern void GetOwnerValue(Attachment* self, f32* a1, f32* a2);
 extern void GetIdentityMatrix(Attachment* self, Mat02* a1);
 
 void SetCountedObjectCounter(CountedObject* node, StateTrigger* value);
-void AddAgentStateTrigger(Agent* self, StateTrigger* value);
-s32 TestFlagTableBit(FlagTable* table, s32 index);
 
 extern u8 D_002623D8[];
 
-void StopSoundRecord(PlayingSound* self, s32 n);
-void ReleaseSoundLevel(SoundLevelEntry* self);
-void SetGatheredWalkerTargets(void* self, s32 n, ZoneTargetEntry* ent, void* arg, s32 flag); // stays void: retail returns a value, but declared so func_00123888 differs in registers
-void ReleaseCounterRef(RefCounted* self);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void TeleportStateWalker(StateWalker* self, s32 key);
-s32 TestFlagTableBit(FlagTable* table, s32 index);
-void SetFlagTableBit(FlagTable* self, s32 bit);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-SoundLevelEntry* PushSoundLevel(s32 a);
-s32 IncrementCounter(Counter* c);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
@@ -202,15 +206,10 @@ extern const PositionCurveVt g_positionCurveKind1Methods;
 extern const PositionCurveVt g_positionCurveKind2Methods;
 void* AllocateZeroedFrontMemory(s32 n);
 
-void RemoveFromList(List01* list, void* item);
-void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
 void SetPlacedObjectVelocity(void* a, void* b);
 void SetPlacedObjectSpin(void* a, void* b);
-void PushFreeSlot(Pool6C* list, void* item);
 
 
-s32 FindCyclicRangeIndex(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
-f32 WrapAngle(f32 a);
 
 extern const RotationCurveVt g_rotationCurveKind0Methods;
 extern const RotationCurveVt g_rotationCurveKind1Methods;
@@ -255,8 +254,6 @@ extern const WeightCurveVt g_weightCurveKind3Methods;
 extern const WeightCurveVt g_weightCurveKind4Methods;
 void* AllocateZeroedFrontMemory(s32 n);
 
-void SetListLinkOffset(List01* self, s32 offset);
-void InitObject(BaseObject* self);
 
 // Two stores of the set-up written as small inline helpers, the shape that matches: a value
 // passed as an int, and a matrix copied through its own pointer (as each copy's own register).
@@ -270,20 +267,11 @@ struct SetupStores {
 #include "paired_object.h"
 struct BufferedStream;
 
-void UnregisterObject(BaseObject* self);
-void ClearList(List01* p);
-void DissolveObjectLinkList(World* self, PlacedObject* owner);
-void RemoveCameraObject(Camera* list, s32 value);
 void ClearRootTries(PlacedObject* self);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-
-extern WorldObjectNode* AddObjectNodeToWorld(PlacedObject* self);
-extern s32 IsObjectAttached(BaseObject* self);
-
-extern void MatrixToEulerAngles(Mat4* self, Vec3* out);
 
 
-s32 IsObjectAttached(BaseObject* self);
+
+
 
 // What slot 29 tells the object's listeners (kind 3): the position before, and the object.
 struct MoveNotice {
@@ -307,41 +295,22 @@ void UpdateObjectTree(void* self, f32 f);
 void ResolveFollowRecordObjects(PlacedObject* self);
 void SavePlacedObjectInitialFrame(void* self);
 void SetAimTarget(PlacedObject* self, void* b);
-void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx);
 
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void RegisterObject(BaseObject* self);
-void AppendToList(List01* self, void* item);
-void MergeObjectGroupMembers(World* self, FoundList* group);
-void AddCameraObject(Camera* list, void* item);
 
 
-void StartObject(BaseObject* self);
 void StartAnimationFromContext(PlacedObject* self);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
-void StartAttachments(AttachmentBlock* self, PlacedObject* ctx);
-s32 HasRangeRecordRanges(RangeRecord* p);
-void StoreRangeRecordNear(RangeRecord* p, f32 v);
-void StoreRangeRecordFar(RangeRecord* o, f32 v);
-void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a);
-void PrepareRangeRecord(RangeRecord* p);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-s32 MatchesObjectId(BaseObject* self, s32 id);
-s32 IsObjectAttached(BaseObject* self);
 
-void CopyObjectData(BaseObject* self, BaseObject* src);
-void CopyAttachmentBlock(AttachmentCopy* self, PlacedObject* owner, void* src);
 void* CopyToFrontMemory(s32 size, void* src);
 Attachment* ClonePoseSource(Attachment* src, World* world, PlacedObject* self);
 void InsertAttachment(PlacedObject* self, Attachment* src);
-void* TakePoolSlot(Pool6C* pool);
 void CopyMemory(void* dst, void* src, u32 size);
-void ClearListLinks(ListLink* p);
-void AddCameraObject(Camera* list, void* item);
 
 // NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
 // storing them (and computes the loop end in $v0), ours interleaves load and store.
@@ -356,10 +325,7 @@ struct ScaledTransform {
 
 extern u8 D_00248D40[];
 
-void BuildScaledTransformMatrix(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4]);
 
-void ResolveAndStartObject(BaseObject* self);
-void AddObjectListener(BaseObject* self, BaseObject* src);
 
 
 struct ListWalkNext {
@@ -384,14 +350,9 @@ struct ListWalkBegin {
 
 
 
-void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
-void UpdateAnchorModeFlags(Collider* self);
 
 
-void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f);
-void UpdateRangeRecord(RangeRecord* self, f32 dt);
 void ApplyPulsingColorToObjectTree(PlacedObject* self, f32 dt);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 start, Vec02* point, f32* outT, Vec02* outPos,
                    Vec02* outDir);
@@ -433,7 +394,6 @@ struct TakeFrameLocals {
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
-BaseObject* FindCommonAncestor(BaseObject* list, BaseObject* other);
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 void ConvertVectorsBetweenObjectFrames(BaseObject* a, BaseObject* b, void* c, void* d, void* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
@@ -451,7 +411,6 @@ extern u8 g_zeroQuad[];
 
 extern u8 g_unitRange[];
 
-void StoreRangeRecordFar(RangeRecord* o, f32 v);
 
 extern RangeRecord g_sharedRangeRecord;
 void InitRangeRecord(void* p);
@@ -463,13 +422,11 @@ void SetRotationRamp(PlacedObject* self, RampProfile* src);
 
 void SetGroupActivityMode(PlacedObject* self, u32 value);
 
-void* ResolveAimTarget(T2195_790* a0);
 
 Class75Object* FindOrCreateClass75Object(PlacedObject* self);
 
 
 
-void SetSoundRecordPitch(PlayingSound* self, f32 x);
 
 extern ColorRecord g_colorPresets[4];
 
@@ -480,18 +437,14 @@ void EnsureColorRecord(void* self);
 
 void* AllocateZeroedFrontMemory(s32 n);
 
-void* PopZeroedFreeSlot(Pool6C* pool);
 void InitRangeRecord(void* a0);
-void AppendToList(List01* self, void* item);
 
 void EnsureAimAttachment(PlacedObject* self);
 
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 void* EnsureRangeRecord(PlacedObject* self);
-void LinkRangeRecord(RangeRecord* self, s32 key);
 
-void StoreRangeRecordNear(RangeRecord* p, f32 v);
 
 
 
@@ -499,17 +452,10 @@ void StoreRangeRecordNear(RangeRecord* p, f32 v);
 
 void EnsureSoundRecord(PlacedObject* self);
 
-s32 IsObjectAttached(BaseObject* self);
-void AddCameraObject(Camera* list, void* item);
-void RemoveCameraObject(Camera* list, void* item);
 
-void StoreRangeRecordInner(RangeRecord* o, f32 v);
 
-void StoreRangeRecordOuter(RangeRecord* o, f32 v);
 
-void ScaleRangeRecordByAngle(RangeRecord* o, f32 s);
 
-void StoreRangeRecordVector(RangeRecord* self, Quad16* src);
 
 // A quadword moved whole (lq/sq), and the frame of the four scaled-spring setters: the
 // default profile, the argument as a quadword and their product.
@@ -536,11 +482,9 @@ extern void SetRotationRamp(PlacedObject* self, RampProfile* src);
 void* AllocateFrontMemory(u32 size);
 
 
-void SetSoundRecordVolume(PlayingSound* self, f32 x);
 
 RangeRecord* GetRangeRecord(PlacedObject* self);
 
-s32 MatchesObjectId(BaseObject* self, s32 id);
 
 
 
@@ -551,39 +495,27 @@ void SetPositionSpring(PlacedObject* self, Quad16* value);
 
 // Newly matched US functions from the small-function wave.
 extern void SetPositionSourceMode(PlacedObject* self, s32 value);
-extern void InitSoundParams(SoundRecord** self);
-extern s32 MatchesObjectId(BaseObject* self, s32 id);
 extern void EnsureBaseAttachment(void*);
 extern void SortAttachments(void*);
 extern void EnsureAimAttachment(void*);
 extern void EnsureSoundRecord(PlacedObject* self);
-extern void StopSoundRecord(PlayingSound* self, s32 n);
 extern void EnsureColorRecord(void*);
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
-void SetScrollScale(ScrollAnimator* p, f32 a, f32 b);
 
-void SetCrossfadeRatio(CrossfadeAnimator* a0, f32 f12);
 
 extern ColorRecord g_defaultColorRecord[2];
 
-void StopSoundRecord(PlayingSound* self, s32 n);
 
-void InsertBeforeInList(List01* self, void* before, void* item);
 
-void MatrixToEulerAngles(Mat4* self, Vec3* out);
 
 struct EulerLocals { f32 tmp[4]; f32 out[4]; u8 pad[0x20]; };
 
-void BuildEulerRotationMatrix(f32* in, f32* out);
 
-void InitObject(void* self);
-void SetListLinkOffset(List01* self, s32 offset);
 
 // NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
 
-void StopSoundRecord(PlayingSound* self, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
@@ -592,7 +524,6 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 // NEAR: same bytes except the prologue order: retail loads the crc word and the table base before the n > 0 test (lw v0, addiu t1, then blez); ours tests first
 s32 g_checksumMismatch[4];
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 s32 ReadBufferedS16(BufferedStream* self);
 u16 ReadBufferedU16(BufferedStream* self);
@@ -626,7 +557,6 @@ extern u8 g_aimSwitchPoseSourceMethods[];
 
 extern const Fn_Table g_identityPoseSourceMethods[];
 
-void AssignAimTarget(T2195_790* self, void* obj, Vec02* src);
 
 extern const Fn_Table g_aimPoseSourceBases[];
 
@@ -724,8 +654,6 @@ struct ListWalkNextPlaced {
     }
 };
 
-void RemoveFromList(List01* list, void* item);
-void InsertBeforeInList(List01* self, void* before, void* item);
 
 struct NextAttachment {
     static Attachment* Of(ListFrame* it)
@@ -761,20 +689,16 @@ void InitPlacedObject(void* self);
 
 
 
-s32 MatchesObjectId(BaseObject* self, s32 id);
 
 void ApplyPoseSource(Attachment* self, s32 flag);
 
 
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
 
 s32 IsReadPending(StreamReader* self);
-s32 CloseFile(s32 h);
 extern "C" s32 SyncDiscNCommand(s32 mode);
 void CommitChunk(StreamReader* self);
 
 
-void StartObject(void* self);
 void StartLinkedObjectAnimation(Animation* self);
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4);
 
@@ -796,8 +720,6 @@ void SeekAnimationEventCursor(AnimationPlayer* self);
 
 void SettlePoseSourceModes(Attachment* self);
 
-void RemoveFromList(List01* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
 
 T2195_7C0* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner);
 
@@ -805,14 +727,9 @@ void SortAttachments(void* p);
 
 
 
-void AddCallbackNode(World* world, Callback01** head, void* fn, void* ctx);
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
-void CopyCollider(Collider* self, Collider* src);
-void InitContactPairFlags(World* self, Collider* obj);
 
-s32 ControlFile(s32 a0, s32 mode, u32* out);
 extern "C" s32 GetDiscError();
 
 void FreeObjectMemory(void* self);
@@ -825,10 +742,8 @@ void ReleasePadSelectFlag(World* self);
 void StopAnimationPlayer(AnimationPlayer* self);
 void CreateAnimationPlayerWithoutPresetTargets(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
 
-s32 MatchesObjectId(BaseObject* self, s32 id);
 
 
-s32 TestCollidersMayContact(Collider* self, Collider* key);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 void StartChunkRead(StreamReader* self);
@@ -837,8 +752,6 @@ s32 PollChunkRead(StreamReader* a0);
 
 struct AnimationPlayerTable { const void* tinfo; s32 f4; };
 extern const AnimationPlayerTable g_animationPlayerMethods;
-void* PopZeroedFreeSlot(Pool6C* pool);
-void SetListLinkOffset(List01* self, s32 offset);
 
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
@@ -848,16 +761,10 @@ struct EndEventLocals { s32 a; s32 b; };
 void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out);
 void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2);
 void ReleaseCallRecords(World* self, T219CHook* node);
-void UnregisterObjectGroup(World* self, FoundList* s);
 void SetAnimationPlayerPadSelect(AnimationPlayer* self, s32 v);
 void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32 k3);
-void RemoveFromList(List01* list, void* item);
-void AppendToList(List01* self, void* item);
-void ClearSoundRecordHandle(PlayingSound** slot);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 extern "C" f32 FloatRemainder(f32 x, f32 y);
-f32 WrapModulo(f32 a, f32 b);
 
 void* MoveMemory(Track83* dst, Track83* src, s32 bytes);
 
@@ -886,63 +793,28 @@ extern u8 g_padRecord[];
 extern u8 g_moviePlayer[];
 extern u8 g_elementStack[];
 
-s32 CheckStreamVoicePending(void);
-void OpenKeyRecord(KeyRecord* self);
-void StopStreamVoice(void);
-s32 RandomIntInRange(s32 lo, s32 hi);
-s32 IsSoundEntryAvailable(s32 id);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void StopSoundRecord(PlayingSound* self, s32 n);
-void RestoreVolumeChannel2(void);
-void SilenceVolumeChannel2(void);
-void ChooseStepSequenceState(StepSequence* self);
 void FadeInPlacedObject(Collider* t, f32 v);
 void FadeOutPlacedObject(Collider* t, f32 v);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
-void PushObjectCameraController(void* self);
-void RemoveObjectCameraController(void* self);
-void SwitchPlayerState11(void* self, s32 flag);
 void ApplyListedPoseSources(AnimationPlayer* a0, s32 flag);
 // the node keeps the inline setter of its second mode byte that retail's code calls (see NOTES.md)
 struct TrackAttachment : T2195_7C0 {
     void SetMode(s32 mode) { mode1 = mode; }
 };
 void ChoosePoseSourceModes(Attachment* obj);
-void StartScreenFade(ScreenFade* dst, FadeRequest* requests, s32 count);
-void SaveFadeRequest(ScreenFade* dst, FadeRequestBlock* src, s32 last);
-void BeginLevelExit(s32 flag, s32 n);
-void StartTimer(T217D_510* p, f32 x);
-void StartTimerCounting(T217D_510* p);
-void StopTimer(T217D_510* p);
 void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-void StartPadRecordPattern(PadRecord* self, s32 pattern, f32 duration);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2);
 void SelectValueEntryByKey(PlacedObject* self, s32 key);
-void* FindListNodeByKey(StateGraph* self, void* key);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void DestroyStateWalker(StateWalker* self);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void GetObjectWorldPosition(BaseObject* self, Vec02* out);
-s32 IsObjectAttached(BaseObject* self);
 void ShowCountedScreenElement(World* w);
 void HideCountedScreenElement(World* w);
-void QueueMovie(MoviePlayer* self, void* p);
-void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y);
-void ClearItemColumn(T217D_720* self);
-void PostItemColumnEntry(T217D_720* self, s32 index, char* text, f32 hold);
-void SetElementStackState(ElementStack* self, s32 state);
 void SetWorldValueAndTarget(World* w, f32 v);
 void SetWorldValueTarget(World* w, f32 v);
-void BindEntryQueueToObject(EntryQueue* self, Player* player);
 
 struct FalloffRange { u32 field0; f32 minimum; f32 maximum; };
 struct RangeFalloffOwner { u8 pad0[8]; FalloffRange* range; };
 
-s32 ReadFile(s32 fd, void* buf, s32 size);
-void StartLowLevelDiscReadUntilAccepted(s32 sector, s32 count, void* buffer);
 
 
 
@@ -957,20 +829,14 @@ struct TrackAttachmentBits {
     u8 pad2[0x28 - 0x20]; s32 index;
 };
 
-void AppendToList(List01* self, void* item);
-void AppendToList(List01* self, void* item);
 void PushBackMemoryMark(void);
 Attachment* CreateTrackAttachment(BaseObject* item);
-void PushFreeSlot(Pool6C* list, void* item);
 void ChoosePoseSourceModes(Attachment* obj);
 void InsertAttachment(PlacedObject* self, Attachment* src);
 void PopBackMemoryMark(void);
-void RegisterObjectGroup(World* self, FoundList* group);
 void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out);
 void ApplyListedPoseSources(AnimationPlayer* a0, s32 flag);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
-void SetTextPanelSubject(void* self, BaseObject* arg);
 
 void StartChunkRead(StreamReader* self);
 void CommitChunk(StreamReader* self);
@@ -1255,7 +1121,7 @@ void AddStateTriggerAgentId(StateTrigger* self, s32 value)
 
 void AddStateTriggerTableEntry(StateTrigger* object, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-	UpsertKeyedEntry((ZoneTargetEntry*)((u8*)object + 0x630), 8, (s32*)((u8*)object + 0x62C),
+	UpsertKeyedEntry((ZoneTargetEntry*)object->table630, 8, &object->count62C,
 			  a1, a2, a3, a4);
 }
 
@@ -1750,8 +1616,6 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
 struct Bits128;
 struct ValueListObject;
 void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
-void SetRangeRecordPosition(RangeRecord* self, Vec02* v);
-void SetRangeRecordDirection(RangeRecord* self, Vec02* v);
 
 // The product a b into the object's world matrix (m110), written through the object: b's rows
 // read by index (MulRotationRowsIndexed), each result row stored to its vector local and to the
@@ -1846,7 +1710,6 @@ void ApplyPoseSourcePosition(T2195_7C0* self);
 void ApplyPoseSourceRotation(Attachment* a);
 s32 IsAccelerationNegligible(void* a);
 s32 IsSpinAccelerationNegligible(void* a);
-void BuildRotationFromVector(Vec02* v, Mat02* mat);
 void OrthonormalizeMatrix(Mat02* m);
 
 void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
@@ -1861,7 +1724,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     if (pa != 0 && pa->mode0 != 5) {
         ApplyPoseSourcePosition((T2195_7C0*)pa);
         moved = 1;
-    } else if (IsVelocityNegligible(&self->v150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
+    } else if (IsVelocityNegligible((u8*)self + 0x150) == 0 || IsAccelerationNegligible(&self->v170) == 0) {
         moved = 1;
         GameClock* clk = &g_gameClock;
         Vu0::Q(self->pos) = Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(clk->dt), Vu0::Q(self->v170), Vu0::Scalar(clk->dt * (clk->dt * 0.5f)));
@@ -1870,7 +1733,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     if (ra != 0 && ra->mode1 != 5) {
         ApplyPoseSourceRotation(ra);
         moved = 1;
-    } else if (IsSpinNegligible(&self->v160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
+    } else if (IsSpinNegligible((u8*)self + 0x160) == 0 || IsSpinAccelerationNegligible(&self->v180) == 0) {
         GameClock* clk = &g_gameClock;
         Vec02 prev;
         Vec02 w;
@@ -2033,8 +1896,6 @@ void SubmitScaledPlacedObjectTransform(PlacedObject* self, void* a, Quad16* src)
 // recomputed), and the maintainer allowed these two dead stores for this function on
 // 2026-11-12 (AGENTS.md).
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void InvertRigidTransform(void* a, void* b, Quad16* out);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 // The parent's rotation, its scale divided out, times the transform's (MulRotationRowsX), with
@@ -2251,12 +2112,8 @@ struct __attribute__((aligned(16))) ModelPartRequest {
     ModelPartState* state;  // 0x7C
 };
 
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
 s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
-f32 ClampToRange(ValueRange* span, f32 x);
-void QueueDeferredRequest(DeferredRequest* src);
 void ApplyPoseSourceIndexedValue(Attachment* self, s32 val);
-void DrawModelPart(Frame_166690* self);
 void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos, Mat4A* m);
 
 void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
@@ -2398,14 +2255,13 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
                 if (self->indexedAttachments[j] != 0) {
                     ApplyPoseSourceIndexedValue((Attachment*)self->indexedAttachments[j], j);
                 } else {
-                    self->f270[j] = (*(f32**)((u8*)self + 0x274))[j];
+                    self->f270[j] = (self->f274)[j];
                 }
             }
         }
     }
 }
 
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 
 void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02* q, f32 sx, f32 sy)
 {
@@ -2456,7 +2312,6 @@ void SetObjectRecordValue(PlacedObject* state, u32 value)
 	*(u32*)(state->sub22C + 0x38) |= 2;
 }
 
-void ConvertHsv255ToRgb255(Quad_001B4580* src, f32* dst);
 extern "C" f32 Sine(f32 x);
 
 void ApplyPulsingColorToObjectTree(PlacedObject* self, f32 dt)
@@ -2535,7 +2390,6 @@ void FadeOutPlacedObject(Collider* self, f32 time)
     }
 }
 
-void BuildShortestArcRotation(const Vec02* from, const Vec02* to, Mat02* out);
 
 // k, the vector the second rotation starts from, is written as a quadword at its own address:
 // a store through Vu0::Q or Set leaves the address in a pseudo that CSE keeps in a saved register
@@ -2844,7 +2698,6 @@ void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* or
     }
 }
 
-void IgnoreStackLocal(Vec02* p);
 
 void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin)
 {
@@ -3122,7 +2975,6 @@ void ConvertVectorsBetweenObjectFrames(BaseObject* from, BaseObject* to, void* p
     }
 }
 
-void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist);
 
 void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32* p3, f32* out0, f32* out1, f32* out2)
 {
@@ -3221,7 +3073,6 @@ Attachment* CreateTrackAttachment(BaseObject* item)
 }
 
 void LoadFollowRecord(PlacedObject* self, void* a1);
-void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner);
 void ReadSlotObjects(World* self, void* a1, void* a2);
 struct BakedRow {
     s32 id;
@@ -3419,7 +3270,7 @@ void* EnsureRangeRecord(PlacedObject* self)
         void* o = PopZeroedFreeSlot(&self->world->pool1BF4);
         self->rangeRecord = (RangeRecord*)o;
         InitRangeRecord(o);
-        AppendToList((List01*)((u8*)self->world + 0x1C00), self->rangeRecord);
+        AppendToList(&self->world->list1C00, self->rangeRecord);
     }
     return self->rangeRecord;
 }
@@ -3433,7 +3284,7 @@ void SetRangeRecordPresent(PlacedObject* self, s32 flag)
     if (self->rangeRecord == 0) {
         return;
     }
-    RemoveFromList((List01*)((u8*)self->world + 0x1C00), self->rangeRecord);
+    RemoveFromList(&self->world->list1C00, self->rangeRecord);
     AppendToList(&g_deferredReleaseListC, self->rangeRecord);
     self->rangeRecord = 0;
 }
@@ -3957,7 +3808,7 @@ void SetAimYawCurve(PlacedObject* self, Vec02* src)
 
 void GetAimYawCurve(PlacedObject* self, Quad16* out)
 {
-    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x50) : (Quad16*)g_zeroQuad;
+    Quad16* src = self->aimAttachment != 0 ? (Quad16*)&self->aimAttachment->v50 : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
@@ -3969,7 +3820,7 @@ void SetAimYawLimits(PlacedObject* self, Pk8_2195* src)
 
 void GetAimYawLimits(PlacedObject* self, U64P* out)
 {
-    U64P* src = self->aimAttachment != 0 ? (U64P*)((u8*)self->aimAttachment + 0x60) : (U64P*)g_unitRange;
+    U64P* src = self->aimAttachment != 0 ? (U64P*)&self->aimAttachment->p60 : (U64P*)g_unitRange;
     *out = *src;
 }
 
@@ -3981,7 +3832,7 @@ void SetAimPitchCurve(PlacedObject* self, Vec02* src)
 
 void GetAimPitchCurve(PlacedObject* self, Quad16* out)
 {
-    Quad16* src = self->aimAttachment != 0 ? (Quad16*)((u8*)self->aimAttachment + 0x70) : (Quad16*)g_zeroQuad;
+    Quad16* src = self->aimAttachment != 0 ? (Quad16*)&self->aimAttachment->v70 : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
@@ -3993,7 +3844,7 @@ void SetAimPitchLimits(PlacedObject* self, Pk8_2195* src)
 
 void GetAimPitchLimits(PlacedObject* self, U64P* out)
 {
-    U64P* src = self->aimAttachment != 0 ? (U64P*)((u8*)self->aimAttachment + 0x80) : (U64P*)g_unitRange;
+    U64P* src = self->aimAttachment != 0 ? (U64P*)&self->aimAttachment->p80 : (U64P*)g_unitRange;
     *out = *src;
 }
 
@@ -4301,24 +4152,24 @@ void GetColorPreset(PlacedObject* self, s32* out) { *out = self->colorRecord ? *
 void SetColorRecordFirstColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
-    *(Quad16*)((u8*)self->colorRecord + 0x10) = *input;
+    *(Quad16*)&self->colorRecord->c10 = *input;
 }
 
 void GetColorRecordFirstColor(PlacedObject* self, Quad16* out)
 {
-    u8* src = self->colorRecord ? (u8*)self->colorRecord + 0x10 : (u8*)&D_00248D30;
+    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c10 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
 void SetColorRecordSecondColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
-    *(Quad16*)((u8*)self->colorRecord + 0x20) = *input;
+    *(Quad16*)&self->colorRecord->c20 = *input;
 }
 
 void GetColorRecordSecondColor(PlacedObject* self, Quad16* out)
 {
-    u8* src = self->colorRecord ? (u8*)self->colorRecord + 0x20 : (u8*)&D_00248D30;
+    u8* src = self->colorRecord ? (u8*)&self->colorRecord->c20 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
@@ -4511,8 +4362,8 @@ void SetFollowObjects(PlacedObject* self, void* a1, void* a2)
         } else {
             p->flags = p->flags & 8;
         }
-        TransformPointBetweenFrames(0, (PlacedObject*)a1, (Vec02*)((u8*)self + 0x140), (Vec02*)((u8*)self + 0x100));
-        TransformRotationBetweenFrames(0, (PlacedObject*)a2, (Mat02*)((u8*)self + 0x110), (Mat02*)((u8*)self + 0xD0));
+        TransformPointBetweenFrames(0, (PlacedObject*)a1, &self->v140, &self->pos);
+        TransformRotationBetweenFrames(0, (PlacedObject*)a2, &self->m110, &self->rot);
     }
 }
 
@@ -5316,7 +5167,7 @@ AnimationPlayer* NewAnimationPlayer(World* pool)
 
     o->vt = &g_animationPlayerMethods;
     SetListLinkOffset(&o->list44, 0x20);
-    o->roots = (u8*)o + 0x64;
+    o->roots = (u8*)o->pad64;
 
     return o;
 }
@@ -5606,7 +5457,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         break;
     case 27: {
         Player* g = g_player;
-        if (g != 0 && *(s32*)((u8*)g + 0x2220) == 9 && *(s32*)((u8*)g + 0x2228) == 0x1C && g_currentEntry == g_currentLevelRecord) {
+        if (g != 0 && g->state == 9 && g->subState == 0x1C && g_currentEntry == g_currentLevelRecord) {
             return;
         }
         BeginLevelExit(msg->a8.i, msg->aC.i);
@@ -6071,7 +5922,6 @@ s32 ApplyAnimationLoopMode(AnimationPlayer* o, f32* pos, f32* vel)
     return r;
 }
 
-f32 GetMatrixRotationCosine(f32* p); // stays float: the C definition is void, and the caller here uses the value it leaves in the register
 extern "C" f32 Arccosine(f32 x);
 
 // One frame of an animation player. While an attachment that follows it belongs to an object
@@ -6513,7 +6363,6 @@ tail:
 }
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 void HandleIdFilterObjectContact(IdFilterObject* self, u8* table, s32 which)
 {

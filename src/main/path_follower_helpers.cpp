@@ -28,29 +28,28 @@
 #include "game_progress.h"
 #include "value_range.h"
 #include "object_finder.h"
+#include "functions/flagged_object.h"
+#include "functions/matrix.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
 struct Mat02;
 
 
 extern f32 g_gameTime;
 
-f32 RandomFloatInRange(f32 a, f32 b);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 struct WalkerHolder { u8 pad[0x48]; void* f48; };
 
-void GetStateWalkerTargetKey(StateWalker* a0, s32* out);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void* GetActiveSwitchedCollider(void);
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 extern u8 g_scatterController[];
 
 struct ScatterController;
-void RaiseScatterLevels(ScatterController* self, f32 amount);
 
 // A quadratic by its three coefficients (func_001D8E40, func_001D9678).
 struct QuadraticCurve {
@@ -102,9 +101,6 @@ struct WheelSpawn {
 };
 
 typedef void (*EmitFn)(PathEmitter* self, WheelEmit* rec);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void BuildBasisFromX(Vec02* x, Mat02* out);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 // The wheels' particles: the lap timer's fade, then for each wheel the emitters of its two
 // spawn counts (the first with a random turn and tilt, the second plain).
@@ -246,8 +242,6 @@ void RecordPathFollowerProgress(PathFollower* self)
 }
 
 struct ObjectGatherer;
-s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value);
-void ResetScatterLevels(ScatterController* object);
 
 // For each entry marker the follower moves into or out of: kind 0 advances the current entry,
 // counts the laps and at the last one moves the state walker on; kind 1 holds the marker at +0xAFC
@@ -312,9 +306,6 @@ void AdvancePathFollowerEntry(PathFollower* self, s32 v)
 }
 
 struct PlayingSound;
-void SetSoundRecordPitch(PlayingSound* self, f32 x);
-void SetSoundRecordVolume(PlayingSound* self, f32 x);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern const Vec02 g_unitXVector;
 
 void UpdatePathFollowerSound(PathFollower* self, f32 dt)

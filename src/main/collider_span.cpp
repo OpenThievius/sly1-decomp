@@ -6,17 +6,15 @@
 #include "shapes.h"
 #include "fpu.h"
 #include "globals.h"
+#include "functions/collider_contact.h"
+#include "functions/collider_span.h"
+#include "functions/warp_menu.h"
+#include "functions/zone_collider.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct SpanQuery;
 struct SpanSet;
 
-s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderSpan* a4);
-s32 MergeOverlappingSpans(s32 count, ColliderSpan* spans);
-s32 CollectTreeNodeSpans(TreeNode03* root, Vec02* a, Vec02* b, s32* groups, s32 max, ColliderSpan* spans);
-s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
-s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius);
-s32 TestBoundsSegmentHit(void* p, void* a, void* b, s32 d, ColliderSpan* e, f32 fa, f32 fb);
 
 Collider* FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out)
 {
@@ -73,7 +71,7 @@ s32 CollectColliderSpans(Collider* self, Vec02* a1, Vec02* a2, s32 a3, ColliderS
         return CollectTreeNodeSpans((TreeNode03*)self->tree.nodes, (Vec02*)a1, (Vec02*)a2, 0, a3, (ColliderSpan*)a4);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((Vec02*)((u8*)self + 0x140), a1, a2, self->radius3CC, a3, a4);
+        return CollectBoundsSpans(&self->v140, a1, a2, self->radius3CC, a3, a4);
     }
     return 0;
 }
@@ -84,7 +82,7 @@ s32 CollectColliderSpansInTree(Collider* self, void* a1, void* a2, void* a3, s32
         return CollectTreeNodeSpans((TreeNode03*)a1, (Vec02*)a2, (Vec02*)a3, 0, a4, (ColliderSpan*)a5);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return CollectBoundsSpans((Vec02*)((u8*)self + 0x140), (Vec02*)a2, (Vec02*)a3, self->radius3CC, a4, a5);
+        return CollectBoundsSpans(&self->v140, (Vec02*)a2, (Vec02*)a3, self->radius3CC, a4, a5);
     }
     return 0;
 }
@@ -187,8 +185,6 @@ s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, Coll
     return 1;
 }
 
-void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
-void ClampVectorLength(Vec02* in, Vec02* out, f32 max);
 
 // Whether the segment a-b, moved toward p's bounds by the offset from its nearest point to p
 // (at most fb long), hits them (CollectBoundsSpans).
@@ -449,7 +445,6 @@ struct SpanQuery {
 };
 struct PlaneTreeNode;
 struct PlaneTreeOutput;
-s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 s32 TestTreeSegmentHit(SpanQuery* query, SpanSet* set, Vec02* p, Vec02* q, s32 max, ColliderSpan* out, f32 radius)

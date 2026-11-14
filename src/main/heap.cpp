@@ -2,6 +2,8 @@
 #include "common.h"
 #include "asm_func.h"
 #include "key_id.h"
+#include "functions/heap.h"
+#include "functions/text_format.h"
 struct RecursiveLock;
 
 
@@ -25,18 +27,10 @@ extern s32 g_backMarkIndex;
 extern u8 g_backMarks[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void InitRecursiveLock(RecursiveLock* self);
-void EnterRecursiveLock(RecursiveLock* self);
-void LeaveRecursiveLock(RecursiveLock* self);
 
-void CheckAllocationSize(s32 size);
-u8* AllocateFrontMemory(s32 size);
-void* AllocateZeroedFrontMemory(s32 n);
-u8* AllocateBackMemory(s32 size);
 
 typedef u64 Q18D780 __attribute__((mode(TI)));
 
-void CopyQuadwords(void* dst, void* src, s32 n);
 
 void ClearKeyId(KeyId* p)
 {
@@ -94,7 +88,6 @@ void ResetFrontMemory(void)
     g_frontCursor = g_frontResetMark;
 }
 
-void CopyMemory(void* dst, void* src, u32 size);
 
 u8* CopyToFrontMemory(s32 size, void* src)
 {

@@ -10,6 +10,19 @@
 #include "animation.h"
 #include "owner_message.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/effect_spawner.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/world.h"
 struct Vec02;
 
 struct MemberObject;
@@ -42,7 +55,6 @@ f32 D_00274AB4 = 1000.0f;
 f32 g_hitCountItemSpeedRange[2] = { 0.0f, 300.0f };
 PaddedQuadratic g_hitCountItemSpinRange = { { -1.0f, 1.0f, 0.0f } };
 
-void InitSwitchedCollider(SwitchedCollider* self);
 
 void InitHitCountCollider(HitCountCollider* self)
 {
@@ -58,11 +70,7 @@ struct __attribute__((packed)) UnalignedPointer { void* p; };
 
 
 struct StateGraph;
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void SetWorldActiveFollower(World* self, void* v);
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
 void StartHitCountCollider(HitCountCollider* self)
@@ -76,9 +84,9 @@ void StartHitCountCollider(HitCountCollider* self)
     self->aimHeading = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
     *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&g_hitCountCaptionA;
-    ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)self + 0x690;
+    ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)&self->collectedCount;
     u8* g2 = (u8*)&g_hitCountCaptionB;
-    ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)self + 0x694;
+    ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)&self->hitsLeft;
     *(void**)(g1 + 0x268) = D_00274A40;
     *(f32*)(g2 + 0x26C) = 4.0f;
     SetWorldActiveFollower(self->world, self);
@@ -94,19 +102,13 @@ extern f32 g_stepScale;
 extern f32 g_gameClock[];
 extern s32 D_0026E228[8];
 
-void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
 struct Vec02;
 struct RampProfile;
 struct Mat02;
-void SendEmptyMessage(MemberObject* a0);
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value);
-void StopAnimationPlayer(AnimationPlayer* self);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb); // stays void: retail returns a value, but declared so func_001C34C8 differs in registers
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, Mat02* outRot, Vec02* outSpin, f32 limit);
 extern "C" f32 Cosine(f32 x);
-void SetObjectTreeRecordValue(PlacedObject* object, u32 value);
 
 void UpdateHitCountCollider(HitCountCollider* self, f32 t)
 {
@@ -211,16 +213,12 @@ void ShowHitCountColliderCounters()
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
 
-void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
-void HandleStepSequenceSkipButtons(void* self, PadRecord* rec);
-void ClearRootTries(PlacedObject* self);
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
 void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
 {
-    void* obj = P(self, 0x628);
+    void* obj = self->f628;
     if (obj != 0 && F(obj, 0x18) == 0.0f) {
         switch (self->state) {
         case 2:
@@ -233,7 +231,7 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
     }
     if (self->state != 1) {
         F(self, 0x66C) = D_00274A98;
-        *(Vec02*)((u8*)self + 0x650) = D_00248D30;
+        self->f650 = D_00248D30;
     } else {
         if (0.0f < F(ev, 0x48)) {
             ComputeCameraRelativeStickHeading(g_camera, (PadRecord*)ev, 0, &self->heading);
@@ -258,9 +256,6 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
 }
 
 
-void StepCollider(Collider* self, f32 t);
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
 void AddColliderForce(void* a, void* b);
 
@@ -272,15 +267,13 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
     StepCollider(self, dt);
     BuildYawPitchMatrix(self->heading, 0.0f, &rot);
     TurnColliderTowardRotation(self, dt, &rot, g_hitCountTurnRamp);
-    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)self + 0x650)), Vu0::Q(self->v150));
+    Vu0::Q(accel) = Vu0::Sub(Vu0::Q(self->f650), Vu0::Q(self->v150));
     ClampVectorLength(&accel, &accel, D_00274A9C * F(self, 0x66C) * dt);
     Vu0::Q(t) = Vu0::FromFloat(dt);
     Vu0::Q(accel) = Vu0::DivX(Vu0::Q(accel), Vu0::Q(t));
     AddColliderForce(self, &accel);
 }
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-s32 MatchesObjectId(BaseObject* self, s32 id);
 
 void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 {
@@ -310,14 +303,12 @@ void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 en
 }
 
 extern s32 g_buttonCodeFlags;
-s32 IsPadSelectFlagHeld(World* self);
 
 s32 IsHitCountColliderRequestBlocked(HitCountCollider* self)
 { if ((g_buttonCodeFlags & 1) || IsPadSelectFlagHeld(self->world)) return 1; return 0; }
 
 // What slot 76 tells its own slot 14 (kind 0x17) when it is hit: itself and the message's owner.
 struct OwnerNotice { void* sender; void* owner; };
-s32 HasSpareCount();
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
 s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
@@ -348,7 +339,6 @@ s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
 
 s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self) { if (self->state < 5) { if (self->state >= 2) return 1; } return self->acceptedMark != 0; }
 
-void FinishSwitchedCollider(SwitchedCollider* self);
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
 void FinishHitCountCollider(HitCountCollider* self)
@@ -370,7 +360,6 @@ void PushRequesterAwayFromSender(void* c, void* receiver)
     to->desc02()->m20(to, &v);
 }
 
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
 
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value)
 {
@@ -389,9 +378,7 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 f32 WrapAngle(f32 a);
 struct ScatterController;
 f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
-void RaiseScatterLevels(ScatterController* self, f32 amount);
 void SetPauseMenuLayerPage(T217D_6D0* a, s32 b, s32 c);
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 void SetHitCountColliderState(PlacedObject* self, s32 state)
 {
@@ -442,10 +429,6 @@ void AddHitCountColliderId(HitCountCollider* self, BaseObject* value)
     self->placePointCount = n + 1;
 }
 
-s32 IsObjectAttached(BaseObject* self);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
-void FadeInPlacedObject(Collider* self, f32 time);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 f32 RandomFloatInRange(f32 a, f32 b);
 
 void PlaceHitCountColliderItem(HitCountCollider* self, PlacedObject* obj)

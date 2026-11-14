@@ -47,6 +47,22 @@
 #include "ramp_profile.h"
 #include "node_query.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/collider_span.h"
+#include "functions/effect_spawner.h"
+#include "functions/heap.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/pooled_object.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 struct BufferedStream;
 struct BaseObject;
 
@@ -56,13 +72,9 @@ struct BaseObject;
 
 
 
-void InitCollider(Collider* self);
 
-void SetListLinkOffset(List01* self, s32 offset);
 
-void AppendToList(List01* self, void* item);
 
-void RemoveFromList(List01* list, void* item);
 
 extern f32 g_gameClock[];
 
@@ -106,40 +118,26 @@ struct ListWalk : ListFrame {
 
 
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
-u32 IsListEmpty(List01* list);
 
-void ClearRootTries(PlacedObject* self);
 
-u32 IsListEmpty(List01* p);
 
-void LoadCollider(Collider* self, BufferedStream* in);
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 extern Quad219C g_unitXQuad;
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
-
-
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 
 
-void StartPlacedObject(PlacedObject* self);
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+
+
+
 
 struct StateGraph;
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
 
 
 void SetWalkerColliderState(WalkerCollider* self, s32 n);
@@ -147,7 +145,6 @@ void SetWalkerColliderState(WalkerCollider* self, s32 n);
 void SetWalkerColliderSubState(WalkerCollider* self, s32 state);
 
 
-void ComputeCameraRelativeStickHeading(Camera* self, PadRecord* p, s32 mode, f32* out);
 
 // The three floats of ApproachAngleWithRamp's ramp (D_0024C9C0), copied as a doubleword and a word.
 struct RampParams { s64 a __attribute__((packed)); s32 b; };
@@ -163,33 +160,25 @@ extern const f32 g_walkerControlRamp[4];
 
 extern f32 g_frameDt;
 
-void StopAnimationPlayer(AnimationPlayer* self);
 
 void ReadWalkerColliderInput(WalkerCollider* self, PadRecord* src);
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
-f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
 
-void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat02* out);
 
-void InitSwitchedCollider(SwitchedCollider* self);
 
 void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
-void FindOrBuildMemberGroup(void** out, void* self);
 
 // Eight bytes kept across a copy, at any alignment.
 struct Bytes8 { u8 b[8]; };
 
-void CopyCollider(Collider* self, Collider* other);
 
 
 void SetPairedState(PairedObject* self, s32 mode);
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 
@@ -198,11 +187,8 @@ void SetHitTargetState(HitTarget* self, s32 value);
 
 extern f32 g_hitTargetTurnRamp[4];
 
-void StepCollider(Collider* self, f32 dt);
 
-void RotateMatrixUpright(Mat02* self, Mat02* scratch, Mat02* out);
 
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 
 void SetObjectCreatorState(ObjectCreator* self, int flag);
@@ -236,9 +222,7 @@ struct PadPatternPlayer {
 
 int IsPadPatternEnabled(GameProgress* ctx);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
 void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 
@@ -246,24 +230,20 @@ void DetachPairedPartner(void* self, void* obj);
 
 s32 PairWithNearestWaitingObject(void* self, void* child);
 
-f32 RandomFloatInRange(f32 a, f32 b);
 
 void SetPairedState(PairedObject* self, s32 mode);
 
 s32 PairWithNearestFreeObject(void* self, void* child);
 
-void InitCollider(Collider* self);
 
 extern f32 g_walkerTurnRamp[4];
 
 
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 extern PadPattern g_padPatterns[11];
 
 extern "C" s32 SetPadActuatorBytes(s32 port, s32 slot, u8* src);
 
-s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
 
 extern s32 g_padPatternSetting;
 
@@ -273,61 +253,42 @@ void UpdatePairControllerTuning(PairController* self, f32 dt);
 
 void SetPairControllerState(void* self, void* p);
 
-s32 AreMenusAndFadeClear(void);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
 void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 
-void UpdateCollider(Collider* self, f32 dt);
 
 s32 GetSoundStateObjectState(SoundStateObject* self);
 
 void SetSoundStateObjectState(SoundStateObject* self, s32 idx);
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 s32 ChooseHitTargetState(HitTarget* self);
 
 void SetHitTargetState(HitTarget* self, s32 value);
 
-void SetEffectSpawnerInactive(EffectSpawner* self);
 
-void SetEffectSpawnerActiveForever(EffectSpawner* self);
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void SetEffectSpawnerInactive(EffectSpawner* self);
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void TeleportStateWalker(StateWalker* self, s32 key);
-
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 
-void StopAnimationPlayer(AnimationPlayer* self);
 
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
-void TeleportStateWalker(StateWalker* self, s32 key);
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
-void StopSoundRecord(PlayingSound* self, s32 n);
+
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -336,24 +297,16 @@ extern s32 g_hitTargetStateIds[10];
 
 void RemoveFinishedHitTarget(PairController* self, HitTarget* obj);
 
-void TeleportStateWalker(StateWalker* self, s32 key);
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
 struct Contact03;
 struct ContactEnd03;
 struct ImpulseRow;
-void ComputeColliderImpulseResponse(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows);
 
-s32 CountListItems(List01* list);
 
-void RemoveFromList(List01* list, void* item);
 
-s32 RandomIntInRange(s32 a, s32 b);
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 // A pair controller's pose (0xC0 bytes, twelve quadwords): the table func_001A4718 copies into
 // PairController::poseA and poseB (g_pairControllerPoseTable).
@@ -363,29 +316,18 @@ struct __attribute__((aligned(16))) PairPose {
 
 extern const PairPose g_pairControllerPoseTable;
 
-void InitPlacedObject(PlacedObject* self);
 
-void SetListLinkOffset(List01* self, s32 offset);
 
-void CopyMemory(void* dst, void* src, u32 size);
 
-void BeginLevelExit(s32 flag, s32 n);
 
-void SetEffectSpawnerActiveForever(EffectSpawner* self);
 
-void SetEffectSpawnerInactive(EffectSpawner* self);
 
-void TeleportStateWalker(StateWalker* self, s32 key);
 
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
-void StopSoundRecord(PlayingSound* self, s32 n);
 
 struct LinkedObject { u8 pad0[0x2D4]; s32 f2D4; };
 
-void UpdatePlacedObject(PlacedObject* self, f32 f);
 
 s32 ChoosePairControllerState(PairController* self);
 
@@ -413,24 +355,18 @@ extern u8 g_elementStack[];
 
 extern u8 g_scatterController[];
 
-void PushStackElement(ElementStack* self, ScreenElement* node);
 
-void SetWorldActiveFollower(World* self, void* v);
 
 void SetPairedState(PairedObject* self, s32 mode);
 
 void SetWalkerColliderState(WalkerCollider* self, s32 n);
 
 struct ScatterController;
-void RaiseScatterLevels(ScatterController* self, f32 amount);
 
-void ResetScatterLevels(ScatterController* object);
 
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 
-void StopAnimationPlayer(AnimationPlayer* self);
 
-void DestroyStateWalker(StateWalker* self);
 
 void ReleasePairedAttachment(u8* self, PairedObject* obj);
 
@@ -442,7 +378,6 @@ void RemovePairedObject(PairController* self, PairedObject* obj);
 
 void AttachPairedPartner(void* a0, void* a1);
 
-void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 
 // The coefficients of a quadratic in t (a + bt + ct^2), as the pose holds them.
@@ -523,18 +458,12 @@ PadPattern g_padPatterns[11] = {
 };
 
 s32 g_padPatternSetting = 0;
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void BuildBasisFromX(Vec02* x, Mat02* out);
 
-void BuildBasisFromX(Vec02* x, Mat02* out);
 
 f32 SplitVectorAlongAxis(Vec02* v, Vec02* axis, Vec02* along, Vec02* rest);
-void BuildBasisFromX(Vec02* x, Mat02* out);
 extern const Vec02 g_unitZVector;
 
 void InitWalkerCollider(WalkerCollider* self)
@@ -592,8 +521,6 @@ void ControlWalkerCollider(WalkerCollider* self, PadRecord* src, f32 dt)
     ((PlacedObject*)self->f64C)->desc02()->m1E(((PlacedObject*)self->f64C), &f.rot);
 }
 
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
-void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
 s32 ChooseWalkerColliderState(WalkerCollider* self);
 s32 ChooseWalkerColliderSubState(WalkerCollider* self);
 
@@ -834,7 +761,6 @@ void StepWalkerCollider(WalkerCollider* self, f32 dt)
     TurnColliderTowardRotation(self, g_frameDt, (Mat02*)buf, g_walkerTurnRamp);
 }
 
-s32 HasAnimationDrivenAttachment(SwitchedCollider *self);
 
 // What func_001A4538 moves: a walker's point (+0x630), and a contact record's normal (+0x80)
 // with its entries of 0x40 bytes, each with a point at +0x30.
@@ -1001,8 +927,6 @@ struct Controlled678 {
     void* controller;
 };
 
-void PostLoadPlacedObject(PlacedObject* self);
-void* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
 void ResolvePairControllerLinks(PairController* self)
 {
@@ -1026,7 +950,7 @@ void ResolvePairControllerLinks(PairController* self)
             if (i == 0) {
                 o = a;
             } else {
-                o = CreateObjectCopy(a, g_currentWorld, *(BaseObject**)((u8*)a + 0x18));
+                o = CreateObjectCopy(a, g_currentWorld, a->parent);
             }
             AppendToList((List01*)(s + 0x374), o);
         }
@@ -1035,7 +959,7 @@ void ResolvePairControllerLinks(PairController* self)
             if (i == 0) {
                 o = b;
             } else {
-                o = CreateObjectCopy(b, g_currentWorld, *(BaseObject**)((u8*)b + 0x18));
+                o = CreateObjectCopy(b, g_currentWorld, b->parent);
             }
             AppendToList((List01*)(s + 0x390), o);
         }
@@ -1180,16 +1104,16 @@ void SetPairControllerState(PairController* self, s32 state)
     PairController* o;
     void* v;
     ListFrame frame;
-    if (W(self, 0x650) == state) return;
-    W(self, 0x650) = state;
-    F(self, 0x654) = g_gameClock[1];
+    if (self->state == state) return;
+    self->state = state;
+    self->stateStartTime = g_gameClock[1];
     W(self, 0x658) = 0;
     switch (state) {
     case 0:
         break;
     case 1: {
-        if (W(self, 0x64C) < 3) {
-            if (W(self, 0x64C) >= 0) {
+        if (self->id64C < 3) {
+            if (self->id64C >= 0) {
                 if (g_currentEntry->f14) {
                     W(self, 0x658) = 0;
                 } else {
@@ -1238,7 +1162,7 @@ void SetPairControllerState(PairController* self, s32 state)
         SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
-        SetWalkerColliderState((WalkerCollider*)(P(self, 0x354)), 3);
+        SetWalkerColliderState((WalkerCollider*)(self->watchedObject), 3);
         g_buttonHintElement.vt->m15(&g_buttonHintElement);
         break;
     }
@@ -1248,8 +1172,6 @@ void SetPairControllerState(PairController* self, s32 state)
 #undef P
 #undef O
 
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
-void* GetActiveSwitchedCollider(void);
 extern const Vec02 g_unitZVector;
 
 // Whether the spot is within reach of n: the xy distance to its position is less than the two radii.
@@ -1283,11 +1205,11 @@ void SpawnPairedObject(PairController* self)
     o = *(PairedObject**)self->list374;
     for (i = 0; i < 8; i++) {
         f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
-        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, *(f32*)((u8*)self + 0x344));
+        f32 radius = RandomFloatInRange(*(f32*)((u8*)self + 0x340) + o->radius3D0, self->tune344);
         other = (PairedObject*)GetActiveSwitchedCollider();
         ComputePolarOffset((Vec3*)&pos, angle, radius, 0.0f);
         pos.y = pos.y * self->tune34C;
-        Vu0::Q(pos) = Vu0::Add(Vu0::Q(*(Vec02*)((u8*)self + 0x330)), Vu0::Q(pos));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(self->f330), Vu0::Q(pos));
         if (other != 0 && IsNearSpot(pos, other, o)) {
             continue;
         }
@@ -1364,9 +1286,9 @@ void StartPairedObjects(PairController* self)
             owner->desc02()->m1D(owner, (Vec02*)(node + 0x140));
             owner->desc02()->m1E(owner, (Mat02*)(node + 0x110));
             SetPairedState(owner, 1);
-            SetSoundStateObjectState((SoundStateObject*)(*(void**)((u8*)owner + 0x560)), 1);
-            *(f32*)((u8*)owner + 0x564) = self->f644;
-            *(f32*)((u8*)owner + 0x568) = self->f648;
+            SetSoundStateObjectState((SoundStateObject*)(owner->attachment), 1);
+            owner->maxSpeed = self->f644;
+            owner->maxTurn = self->f648;
             f32* fp = &self->attachDelayMin;
             self->nextAttachTime = g_gameClock[1] + RandomFloatInRange(self->attachDelayMin, fp[1]);
             StartSoundEffect(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1697,7 +1619,6 @@ void StartPairedObject(PairedObject* self)
 
 s32 ChoosePairedObjectState(PairedObject* self);
 void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 flag);
-void ConvertPositionToWorld(BaseObject* self, Vec02* out);
 
 // The distance from b to a on the ground (their x and y).
 static inline f32 GroundDistance(u128 a, u128 b)
@@ -1770,10 +1691,6 @@ static inline u128 Normalized(Vec02 v)
 // The smaller of two floats (min.s; through an inline function the result takes b's register).
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
 
-s32 CollectBoundsSpans(Vec02* p, Vec02* a, Vec02* b, f32 radius, s32 count, ColliderSpan* out);
-f32 WrapAngle(f32 a);
-void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec02* local);
-void SetPlacedObjectSpinFromFloats(PairedObject* self, f32 x, f32 y, f32 z);
 
 void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 backwards)
 {

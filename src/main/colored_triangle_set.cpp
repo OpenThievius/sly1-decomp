@@ -11,10 +11,15 @@
 #include "packet_writer.h"
 #include "switched_collider.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/buffered_stream.h"
+#include "functions/camera.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/pose_source.h"
 
 
 
-void InitObject(BaseObject* self);
 
 
 
@@ -29,20 +34,15 @@ TriangleGroupColor g_triangleGroupGrey(0xBF, 0xBF, 0xBF, 0x7F);
 TriangleGroupColor g_triangleGroupBlue(0x00, 0x87, 0xFF, 0x7F);
 ColoredTriangleSet* g_coloredTriangleSet;
 
-void CopyObjectData(BaseObject* self, BaseObject* src);
 
 
 
-void StartObject(BaseObject* self);
 
 
 
 // NEAR: only li s8,12 / ori s7 (pre-loop hoist order) swapped; the rest matches
 
 struct BufferedStream;
-void ReadPropertyRecords(void* self, void* obj);
-u16 ReadBufferedU16(BufferedStream* self);
-f32 ReadBufferedFloat(BufferedStream* r);
 TrianglePoint* AllocateZeroedFrontMemory(s32 bytes);
 TriangleIndices* AllocateFrontMemory(s32 bytes);
 TriangleColor* FindAnimRecord(s32 key);
@@ -62,11 +62,6 @@ union Quad128Floats {
     f32 f[4];
 };
 
-void BuildUniformScaleAboutPoint(void* point, void* out, f32 s);
-void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
-void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
-void AddGifRgbaEntry(PacketWriter* p, u32 c);
-void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 Quad128 TransformVector4(void* m, Quad128 v);
 
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
@@ -204,7 +199,6 @@ struct BlendColor {
 
 SwitchedCollider* GetActiveSwitchedCollider(void);
 extern Camera* g_camera;
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
 
 void DrawColoredTriangles(ColoredTriangleSet* self, f32 t)
 {

@@ -37,6 +37,25 @@
 #include "scope_marker.h"
 #include "vu0.h"
 #include "object_finder.h"
+#include "functions/active_set_solver.h"
+#include "functions/anim_record.h"
+#include "functions/collider.h"
+#include "functions/display.h"
+#include "functions/effect.h"
+#include "functions/font.h"
+#include "functions/group_marker.h"
+#include "functions/matrix.h"
+#include "functions/object_cycler.h"
+#include "functions/on_off_object.h"
+#include "functions/path_curve.h"
+#include "functions/placed_object.h"
+#include "functions/point_graph.h"
+#include "functions/render_frame.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/system_calls.h"
+#include "functions/texture_upload.h"
+#include "functions/world_listed_object.h"
 struct CappedWordList;
 struct EffectOwnerSlot;
 struct PlacedObject;
@@ -54,7 +73,6 @@ struct Vec02;
 struct ScaledTransform;
 
 
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 void SetEffectSpawnerInactive(EffectSpawner* self);
@@ -112,23 +130,18 @@ StreamWord ReadBufferedU32(BufferedStream* self);
 
 void* AllocateFrontMemory(s32 size);
 void InitSpawnRecord(void* mem);
-void LoadPlacedObject(PlacedObject* self, void* r);
 s32 ReadBufferedS8(BufferedStream* self);
-PathCurve* CreatePathCurve(s32 kind);
 void ReadSpawnMesh(void* p, void* other);
 u16 ReadBufferedU16(BufferedStream* self);
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 struct CappedWordList;
 void ReadCappedWordList(CappedWordList* self, s32 count, void* unused, void* src);
 
-void CopyPlacedObject(PlacedObject* self, PlacedObject* src);
 
 struct SpawnerLinkedObject { u8 pad00[0x18]; void* target; u8 pad1C[0x18]; s32 value; };
 
-void PostLoadPlacedObject(PlacedObject* self);
 Rec50* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void* CopyToFrontMemory(s32 size, void* owner);
@@ -141,7 +154,6 @@ void SetEffectSpawnerActiveForever(); // stays without its argument: SetEffectSp
 
 s32 IsEffectSpawnerActive(EffectSpawner* self);
 
-void InitPlacedObject(PlacedObject* self);
 void SetListLinkOffset(List01* self, s32 offset);
 
 struct RangeEmitter;
@@ -149,8 +161,6 @@ void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14
 
 struct LookSource;
 struct WorldListedObject;
-void ApplyLookSourceToListedObject(WorldListedObject* self, LookSource* src);
-void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
 f32 RandomFloatInRange(f32,f32);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -161,14 +171,8 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
-void InitActiveSetSolver(ActiveSetSolver* loc, s32 count);
-void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
 
 struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; s32 ownerArgument; };
-EffectOwner* AcquireEffectOwner(World* self, s32 flag);
-void CopyEffectOwnerMargin(EffectOwner* a, Rec50* b);
-Effect* CreateEffect(s32 kind, EffectOwner* sys);
-void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra);
 void FillLookDirectionBlock(Effect* a, Rec50* b);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(List01* p);
@@ -228,7 +232,6 @@ struct BriefEffectParams { u8 pad0[0xC]; s32 fC; };
 struct BriefEffectSource { u8 pad0[0x278]; BriefEffectParams* f278; };
 typedef void (*EffectStartFn)(Effect* self, void* a, s32 z, f32 f);
 
-Effect* CreateEffect(s32 kind, EffectOwner* sys);
 
 void StartObject(BaseObject* self);
 
@@ -249,8 +252,6 @@ struct TwoVectorMessage {
 void CopyObjectData(BaseObject* self, BaseObject* src);
 MemberObject* CreateObjectCopy(BaseObject* self, World* world, BaseObject* parent);
 
-void BindAnimatorRecord(CursorAnimator* self);
-AnimRecord* FindAnimRecord(s32 key);
 void SetCrossfadeMode(CrossfadeAnimator* self, s32 mode);
 
 s32 IsObjectAttached(BaseObject* self);
@@ -265,13 +266,11 @@ extern PackedFloatPair g_cyclerAdvanceDelayRange;
 extern PackedFloatPair g_cyclerWrapDelayRange;
 extern PackedFloatPair g_cyclerMessageIntervalRange;
 
-void InitCollider(Collider* self);
 void AppendToList(List01* self, void* item);
 
 void* CloneSharedSpawnRecord(void* x);
 
 struct MemberTargetObject;
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
@@ -281,12 +280,10 @@ struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 
 extern f32 g_gameClock[];
 
 struct ListLink;
-void* PopFreeSlot(Pool6C* pool);
 void ClearListLinks(ListLink* p);
 void AppendToList(List01* self, void* item);
 void HandleSpawnMessage(void* self, void* body);
 
-void InitSoundParams(SoundRecord** self);
 
 
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
@@ -310,47 +307,34 @@ f32 RandomFloatInRange(f32 a, f32 b);
 
 extern f32 g_gameTime;
 f32 RandomFloatInRange(f32 a, f32 b);
-void SetCursorFrame(AnimCursor* cur, s32 idx);
 
 
 void* AllocateZeroedFrontMemory(s32 size);
 void InitSpawnRecord(void* p);
-PathCurve* CreatePathCurve(s32 kind);
 extern s32 g_objectCyclerStartLinks[6];
 
-void ResolveObjectLinks(void* self, s32 n, void* p);
 f32 RandomFloatInRange(f32 a, f32 b);
-void SetObjectCyclerState(ObjectCycler* self, s32 x);
-void StartPlacedObject(PlacedObject* self);
 
 
 
-void* PopZeroedFreeSlot(Pool6C* pool);
 void AppendToList(List01* self, void* item);
 
 
 
 void RemoveFromList(List01* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
 
 extern f32 g_frameDt;
-void UpdatePlacedObject(void* self, f32 dt);
 struct RampProfile;
 f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 struct ScaledDrawFrame { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10]; Quad16 m90[4]; };
 
-void BuildUniformScaleAboutPoint(void* point, void* out, f32 s);
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void* MultiplyMatrices(Quad16* out, void* b, Quad16* in);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
-void DrawPlacedObject(PlacedObject* self, void* b, void* m);
 
 
 struct ScreenFillPacket { u8 buf[0x2C0]; s32 value; };
 
-void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
 void BeginDmaTag(PacketWriter* self);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 void CloseDmaTag(PacketWriter* self);
@@ -361,10 +345,7 @@ extern f32 g_gameTime;
 void AppendToList(List01* self, void* item);
 
 
-void LoadPlacedObject(PlacedObject* self, void* r);
-void ReadMeshTables(void*,void*,void*,void*,void*);
 
-AnimCursor* FindAnimatorCursor(CursorAnimator* self, const AnimRecord* key);
 
 void AddRangeEntry(RangeEmitter* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15, void* owner);
 
@@ -384,13 +365,10 @@ struct __attribute__((aligned(16))) GroupForwardMessage {
     u8 pad1[0x50 - 0x30];
 };
 
-void SetObjectCyclerState(ObjectCycler* self, s32 state);
-void ApplyColliderImpulseEvent(void* a0, f32 x, void* a1, void* a2);
 
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void CopyCollider(Collider* self, Collider* other);
 s32 IsInList(List01* self, void* item);
 void RemoveFromList(List01* list, void* item);
 struct PlayingSound;
@@ -400,7 +378,6 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
 // NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
 
 
-void StopSoundRecord(PlayingSound* self, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
@@ -414,7 +391,6 @@ extern s32 D_00270458;
 extern f32 g_gameTime;
 void RemoveFromList(List01* list, void* item);
 void DrawScreenFill(u8* a0);
-void QueueDeferredRequest(DeferredRequest* src);
 
 struct RangeEntry {
     s32 a;
@@ -439,7 +415,6 @@ void* AllocateZeroedFrontMemory(s32 bytes);
 // A cell of a group's list (ObjectGroup::cells): the object and the next cell.
 
 s32 ReadBufferedS16(BufferedStream* self);
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 
 struct ClassKindNode { ClassKindNode* next; s32 value; };
@@ -452,25 +427,17 @@ typedef int Quadword128 __attribute__((mode(TI)));
 
 extern f32 g_gameClock[];
 
-void UpdateCollider(Collider* self, f32 dt);
-void SetObjectCyclerState(ObjectCycler* self, s32 mode);
-s32 ChooseObjectCyclerNextState(ObjectCycler* self);
 s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out);
-void SendObjectCyclerMessage(ObjectCycler* self);
-s32 IsObjectCyclerUnsupported(ObjectCycler* self);
-s32 IsActiveColliderNearObjectCycler(ObjectCycler* self);
 f32 RandomFloatInRange(f32 a, f32 b);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void InitPlacedObject(PlacedObject* self);
 
 extern f32 g_gameClock[];
 
 
 void HandleSpawnMessage(void* a, void* b);
 void RemoveFromList(List01* list, void* item);
-void PushFreeSlot(Pool6C* list, void* item);
 
 
 // A walk of a list that RemoveFromList keeps valid: the frame is pushed on g_activeListFrames
@@ -497,8 +464,6 @@ template <class T> struct NextInList {
 extern s32 g_objectCyclerLoadLinks[6];
 
 struct BufferedStream;
-void LoadCollider(Collider* self, BufferedStream* in);
-void ResolveObjectLinks(ObjectCycler* self, s32 n, void* table);
 void FindOrBuildMemberGroup(void** out, void* self);
 s32 IsInList(List01* self, void* item);
 void RemoveFromList(List01* list, void* item);
@@ -508,15 +473,12 @@ extern f32 g_gameTime;
 extern f32 g_cyclerShrinkCurve[4];
 extern f32 g_cyclerGrowCurve[4];
 extern f32 g_unitRange[];
-void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 
-s32 IsObjectOfKind(BaseObject* list, s32 key);
 s32 IsObjectAttached(BaseObject* self);
 s32 IsClassOfKind(s32 index, s32 value);
 void CollectObjectByMode(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedObject* root, s32 max,
                    s32* countOut, PlacedObject** found, s32* minOut);
 
-void LoadAnimatorBase(CursorAnimator* self, const AnimatorParams* src);
 
 
 // An entry of a GCC 2.95 vtable as this file defines D_0024A220 (the font table).
@@ -524,15 +486,11 @@ struct VtableEntry { s32 delta; void (*fn)(); };
 struct FloatPair2 { f32 x; f32 y; };
 extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
-void CopyFont(Font*, Font*);
 
 extern s32 g_fonts[];
 extern s32 g_defaultFont;
 
-FontGlyph* FindFontGlyph(Font* a, s32 b);
 
-void RewindTextReader(TextReader* self);
-s32 ReadTextChar(TextReader* self);
 
 // The packet memory a GIF writer fills: quadwords.
 typedef u64 UQuadword128 __attribute__((mode(TI)));
@@ -547,20 +505,15 @@ void AddGifRegisterWrite(void* p, s32 a, s32 b);
 void EndGifPacket(void* p);
 void WriteVifFlush(PacketWriter* b);
 void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
-void AddDmaRefTagIfChanged(void* self, void* a, void* b);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-void CopyFontMetrics(Font* self, Font* dst);
 
-FontGlyph* FindFontGlyph(Font* table, s8 key);
 
 void CloseDmaTag(PacketWriter* self);
 void AddDmaRefTag(void* obj, s32 a, s32 b);
 void BeginDmaTag(PacketWriter* self);
 
-void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj);
-s32 AddFontImagesToFrame(Font* self, void* obj);
 void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 tag, s64 value);
 void BeginGifRegListTag(void* obj, s32 tag, s64 value);
@@ -573,14 +526,11 @@ void CopyMemory(void* dst, void* src, u32 size);
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 
-void SendGsPacketAndWait(s32 channel, void* b);
-void ActivateRenderFrame(void* a, s32 b);
 
 
 void* InitGifPacket(void* p);
 void* InitPacketWriter(PacketWriter* self);
 
-void ConstructPacketWriters(s32 flag, s32 code);
 
 struct GroundProbe {
     Vec02 q;
@@ -594,7 +544,6 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 
 struct GroundCandidate;
 struct GroundFilterContext;
-s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1);
 void PushBackMemoryMark(void* self);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
@@ -609,8 +558,6 @@ void EndGifPacket(void* obj);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
-void WriteGsFinishPacket(void* self, void* p, u8** n);
-void CloseDrawBuffer(void* obj, void* a, u8** b);
 void ClearList(List01* p);
 extern "C" s32 PostSemaphore(void* a);
 
@@ -626,58 +573,39 @@ extern s32 g_drawFrameData;
 extern s32 g_maskedImagesPacket;
 extern s32 g_gifChannel;
 
-void SwitchActiveImageMask(s32 value);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 
 
-void RewindTextReader(TextReader* self);
-s32 ReadTextChar(TextReader* self);
-
-void RewindTextReader(TextReader* self);
-s32 ReadTextChar(TextReader* self);
 
 
-void RewindTextReader(TextReader* self);
-s32 ReadTextChar(TextReader* self);
 
-s32 WrapTextLines(TextReader* self, f32 limit);
+
 
 extern s8 g_fontEscapeKeys[];
 extern s32 g_fonts[];
 
-s32 WrapFontString(Font* self, u8* s, f32 w);
 
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
 // pointer loads differ in register choice; everything else matches.
 
 struct FontUploadFrame { PacketWriter a; u8 buf[0x100]; };
 PacketWriter* InitGifPacket(PacketWriter* p);
-s32 AllocateBump(s32* self,s32 size);
-void BuildImageTexRegister(ImageRecord* self, u32 a1);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
-void BuildPaletteTexRegister(PaletteRecord* self, u32 a1);
-void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
 
 extern s32 g_fontCount;
 extern u8* g_fontRecords;
 
-void InitBumpAllocator(BumpAllocator* p, s32 value, s32 other);
-void UploadFontImages(Font* self, void* arg);
 
 
 void AddGifRegListFloat(PacketWriter* s, u32 tag, f32 value);
 void AddGifUvRegListEntry(PacketWriter* s, s32 a, s32 b);
 void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 
-FontGlyph* FindFontGlyph(Font* self, s8 key);
 
-s32 WrapTextLines(TextReader* self, f32 limit);
-f32 MeasureTextWidth(TextReader* self);
 
 
 
@@ -691,11 +619,6 @@ extern void* g_drawingFrame;
 extern s32 D_002626CC;
 
 extern "C" s32 AwaitSemaphore(void* a);
-void SendRenderFrameToDma(RenderFrame* self, s32 flag);
-void BlitFrameToDisplay(void);
-void FlipDisplayFrame(void);
-void ReleaseFrameNodes(RenderFrame* self);
-void ClearScreenOwner(s32 owner);
 
 struct FontHeader {
     u16 u0;
@@ -716,8 +639,6 @@ void* AllocateFrontMemory(s32 n);
 extern s32 g_glyphUOffset;
 extern s32 g_glyphVOffset;
 
-FontGlyph* FindFontGlyph(Font* self, s8 key);
-s32 AddFontImagesToFrame(Font* self, void* obj);
 void BeginGifTag(PacketWriter* s, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(PacketWriter* s, s32 a, u64 b);
 void BeginGifRegListTag(PacketWriter* s, s32 a, u64 b);
@@ -733,12 +654,10 @@ extern void* g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(List01* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-s32 EnableInterruptCause(s32 a0);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
 void RunThread(void* a, s32 b);
 void func_0015E678(void);
 
-void RewindTextReader(TextReader* self);
 
 struct GroundFilterContext { u8 pad[0x50]; s32 f50; };
 struct GroundCandidate { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
@@ -750,14 +669,8 @@ extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 extern s32 D_002626CC;
 
-void VerifyCodeChecksum(void);
 extern "C" s32 AwaitSemaphore(void* p);
-void ActivateRenderFrame(RenderFrame* f);
-void ApplyPendingDisplayFlip(void);
-void SendGsPacketAndWait(s32 channel, void* b);
-void BlitFrameToDisplay(void);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
-void FlipDisplayFrame(void);
 
 
 struct FrameNode {
@@ -797,15 +710,8 @@ struct StringLayout
 };
 
 
-void RewindTextReader(TextReader* self);
-s32 ReadTextChar(TextReader* self);
-void SetTextDefaultColor(TextReader* self, Rgba_137248* p);
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
-s32 FindFontByKeyChar(s32 id);
-void CopyFont(Font* font, Font* out);
-void PopFontScale(Font* font);
-void PushFontScale(Font* font, f32 a, f32 b);
 
 struct FrameGlyph {
     Font* font;
@@ -819,9 +725,6 @@ struct FrameGlyph {
 };
 struct FrameRect { f32 x, y, w, h; };
 
-FontGlyph* FindFontGlyph(Font* self, s8 key);
-void PushFontScale(Font* p, f32 a, f32 b);
-void PopFontScale(Font* p);
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
 extern void* g_drawingFrame;
@@ -832,7 +735,6 @@ extern void* g_frameDoneSemaphore;
 extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
-void SetScreenOwner(s32 v);
 extern "C" s32 AwaitSemaphore(void* a);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* self);
@@ -1227,7 +1129,6 @@ void WrapSpawnerParticlesIntoBox(EffectSpawner* self)
 }
 
 void RandomizeEffectSpawnerDelay(u8* self);
-void UpdatePlacedObject(PlacedObject* self, f32 f);
 s32 CountListItems(List01* list);
 void WrapSpawnerParticlesIntoBox(EffectSpawner* self);
 void SetEffectSpawnerActiveFor(EffectSpawner* self, f32 f);
@@ -1700,7 +1601,6 @@ struct SpawnShape {
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void BuildPerpendicularPair(Vec02* in, Vec02* out, const Vec02* a, const Vec02* b);
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 
 static inline f32 RandomInRange(const SpawnRange& r)
 {
@@ -1849,7 +1749,7 @@ void ChooseSpawnPosition(SpawnShape* shape, s32 index, s32 count, Vec02* pos, Ve
         break;
     case 4:
         if (shape->anchor != 0) {
-            Vu0::Set(*axis, Vu0::RotateTransposed(*(Mat02*)((u8*)shape->anchor + 0x110),
+            Vu0::Set(*axis, Vu0::RotateTransposed(((PlacedObject*)shape->anchor)->m110,
                                                   Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir))).q);
         } else {
             Vu0::Set(*axis, Vu0::Rotate(*(Mat02*)((u8*)g_camera + 0x80), Vu0::Vec::Of(shape->dir)).q);
@@ -1872,8 +1772,6 @@ struct AnchoredSpawn {
     s32 mode;               // 0x70: 1, 2 and 3 take less of the anchor's motion
 };
 
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
 
 void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec02* pos, Vec02* dir)
 {
@@ -2016,8 +1914,6 @@ void SpawnRecordEffects(Rec50* self, EffectOwnerSlot* h, s32 n, Quad16* pos, Qua
 
 struct WorldListedObject;
 struct OwnedRecord;
-WorldListedObject* ResetFirstListedObject(World* self);
-OwnedRecord* AcquireOwnedRecord(WorldListedObject* o);
 s32 RandomIntInRange(s32 a, s32 b);
 
 // A chunk of particles an effect owner keeps (its 0x624 word, the next at 0x1090): this frame's
@@ -2384,9 +2280,7 @@ struct SpinRecord_158480 {
     void* frame;        // 0x44
 };
 extern const Mat4A g_identityMatrix4;
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
-void AddMatrices(f32* a, f32* b, f32* out);
 
 void TurnMatrixBySpin(SpinRecord_158480* spin, f32 dt, f32* out)
 {
@@ -2751,7 +2645,6 @@ void* StoreQuadword(u128* out, u128 v);
 struct ValueRange;
 f32 ClampToRange(ValueRange* span, f32 x);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
 extern f32 g_spawnScaleRatioRange[2];
 extern const Vec02 D_00248D30;
 

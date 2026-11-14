@@ -41,7 +41,7 @@ struct ObjectCycler : Collider {
     PlacedObject* altObjects[8];        // 0x5B0: mode 1 only: found by kind 0x24D + i
     PlacedObject* obj5D0;            // 0x5D0
     MemberObject* group;             // 0x5D4: a 0x77 or 0x78 found by func_00159478 (kept by slot 10)
-    u8 pad5D8[0x5DC - 0x5D8];
+    PlacedObject* obj5D8;   // 0x5D8: an object whose visibility mask it sets
     PackedFloatPair f5DC;              // 0x5DC: kept across the copy by slot 9
     void* handle;           // 0x5E4: made by func_001BFCD8 in mode 0, given back with func_001BF788
     u8 pad5E8[0x5F0 - 0x5E8];
@@ -71,7 +71,8 @@ struct ObjectCycler : Collider {
     f32 nextCheckTime;               // 0x688: mode 1: the clock value of the next func_0015BD48 check
     s32 indexStep;               // 0x68C: 1 at set-up, then 1 or -1: how far each step moves the index
     s32 f690;               // 0x690: -1 at set-up
-    u8 pad694[0x6A0 - 0x694];
+    s32 f694;               // 0x694
+    u8 pad698[0x6A0 - 0x698];
 };
 
 typedef char check_ObjectCycler[sizeof(ObjectCycler) == 0x6A0 ? 1 : -1];

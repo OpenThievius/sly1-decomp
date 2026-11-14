@@ -28,6 +28,21 @@
 #include "word_copy.h"
 #include "camera.h"
 #include "object_finder.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/collider.h"
+#include "functions/flagged_object.h"
+#include "functions/link_constraint.h"
+#include "functions/matrix.h"
+#include "functions/movie_player.h"
+#include "functions/oscillator.h"
+#include "functions/pair_controller.h"
+#include "functions/placed_object.h"
+#include "functions/placed_object_model.h"
+#include "functions/sound_system.h"
+#include "functions/texture_upload.h"
+#include "functions/world.h"
+#include "functions/zone_collider.h"
 struct NodeAttachment;
 struct NodeOwner;
 struct Oscillator;
@@ -50,12 +65,8 @@ struct VisitNode { VisitClass* cls; u8 pad0[0x18]; VisitNode* next; u8 pad1[0x14
 
 
 void SpliceListToEnd(List01* dst, List01* src);
-void TransformByMatrixWithW(const Quad16* m, const Vec02* v, f32 w, Vec02* out);
-void SetColliderAnchors(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
-void FreeTouchNodes(World* owner, Touch03* node);
 
 
-s32 IsObjectAttached(BaseObject* self);
 void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other);
 
 
@@ -76,11 +87,9 @@ void MergeObjectGroupMembers(World* self, FoundList* group);
 extern u8 D_00248D30[];
 
 struct PlayingSound;
-void StopSoundRecord(PlayingSound* self, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void StartObject(BaseObject* self);
 void* AllocateFrontMemory(s32 size);
 void RegisterObjectGroup(World* self, FoundList* group);
 
@@ -137,8 +146,6 @@ extern u8 g_flagTable[];
 
 void ResetReserveCounts(void);
 struct FlagTable;
-void RestoreFlagTableSnapshot(FlagTable* p);
-void ResetFlagTable(FlagTable* r);
 void ResetGameSession(void);
 
 
@@ -170,8 +177,6 @@ extern World* g_currentWorld;
 void FreeObjectMemory(void* self);
 
 void FlushVertexBatch(VertexBatch* batch);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void InvertRigidTransform(void* a, void* b, Quad16* out);
 
 struct ColoredVertexBatch {
     u8 pad0[0xF8];
@@ -220,7 +225,6 @@ u8* AllocateBackMemory(s32 size);
 void PopBackMemoryMark(void);
 struct PlaneTreeNode;
 struct PlaneTreeOutput;
-s32 QueryPlaneTreePoint(PlaneTreeNode* node, Vec02* p, f32 eps, PlaneTreeOutput* out);
 
 extern u8 g_flushBatchProgram[];
 extern u8 D_000018F8[];
@@ -242,7 +246,6 @@ extern u8 D_000018F8[];
 
 void WriteVifMscal(void* obj, void* text);
 
-void ApplyPadPatternSetting(GameProgress* ctx);
 
 // the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
 struct SessionKey : IdentityKey {
@@ -298,10 +301,7 @@ extern s32 g_resumeSoundSetupDone;
 
 void ClearTwoWords(void* p);
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
-void SilenceVolumeChannel3(s32 flag);
-void ApplySoundOptionFlag(s32 flag);
 struct ElementStack;
-void StopAnimationPlayer(AnimationPlayer* self);
 void SetElementStackState(ElementStack* self, s32 state);
 
 extern u8 g_flushBatchProgram[];
@@ -314,7 +314,6 @@ extern u8 D_00000FD8[];
 
 void WriteVifMscal(void* s, s32 n);
 
-void ResetFlagTable(FlagTable* r);
 
 extern u8 g_flagTable[];
 
@@ -323,11 +322,8 @@ extern u8 g_scatterController[];
 extern u8 g_flagTable[];
 extern u8 g_pauseMenuElement[];
 
-void PopActiveSequenceElement(World* world);
-void StopLockedStreamVoice(void);
 struct ScatterController;
 void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
-void StartScreenFadeFromFlagTable(FlagTable* r);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 void RaiseScatterLevels(ScatterController* self, f32 amount);
 
@@ -337,7 +333,6 @@ void RaiseScatterLevels(ScatterController* self, f32 amount);
 extern u8 g_objectFadeIn[];
 
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
-void QueueMovieWithSuccessor(s32 slot, u32 n);
 
 
 void ResetGameSession(void);
@@ -394,7 +389,6 @@ void WriteVifStrow(PacketWriter* s, u32* src);
 void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
-void WriteMorphTargetMscal(s32 mode, void* obj);
 
 struct QuadClear
 {
@@ -420,7 +414,6 @@ struct FlushedVertexBatch { u8 pad0[0xF8]; u8* mode; u8 pad1[0x28]; s32 vertexCo
 extern PacketWriter g_vifPacketWriter;
 extern u8 g_flushBatchProgram[];
 
-void FlipVifBaseOffset(void);
 s32 WriteVifUnpackHeader(PacketWriter* s, s32 a, s32 b, s32 c);
 void ResetVertexBatch(VertexBatch* batch);
 void BuildUnlitVertexPacket(VertexBatch* batch);
@@ -612,13 +605,9 @@ void WriteVifFlushE(PacketWriter* s);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
-void WriteStripMeshMscal(s32 mode, void* obj);
-void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
-void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
 void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
 
-void ApplyLinkConstraint(PlacedObject* self);
 
 typedef void (*AttachmentHandlerFn)(void* self);
 struct AttachmentHandler { AttachmentHandlerFn* vtbl; };
@@ -626,8 +615,6 @@ struct AttachmentEntry { u8 pad0[0x38]; AttachmentHandler* f38; u8 pad1[0x70 - 0
 struct AttachmentNode { u8 pad0[4]; void* f4; s32 f8; u8 pad1[0x80 - 0xC]; AttachmentNode* next80; };
 struct AttachmentBlock { u8 pad0[0xC]; s32 count0C; AttachmentEntry* f10; u8* f14; u8 pad1[0x4C - 0x18]; AttachmentNode* f4C; };
 
-void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
-void AttachNodeToOwner(NodeOwner* self, void* unused, NodeAttachment* ctx);
 
 // Four quadwords: a matrix as the attachment code copies it.
 struct QuadMatrix { Quad16 q[4]; };
@@ -636,8 +623,6 @@ struct AttachmentTarget { TargetObject* p0; u8 pad0[0xC]; QuadMatrix m; u8 tail[
 struct AttachmentTargets { s32 count; AttachmentTarget* elems; s32* keys; };
 struct TargetFrames { Quad16 a; u8 pad0[0x30]; Quad16 b; u8 pad1[0x30]; QuadMatrix m; };
 
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
-void InvertRigidTransform(void* a, void* b, Quad16* out);
 
 struct AnimatorStep;
 typedef void (*AnimatorStepFn)(void* self, f32 f);
@@ -656,8 +641,6 @@ struct AnimatorOwner {
 };
 
 
-s32 ClaimAnimatorStep(void* p);
-void EvaluateOscillator(Oscillator* self);
 
 extern u8 g_litBatchFinishProgram[];
 extern u8 D_000000F0[];
@@ -682,7 +665,6 @@ struct AttachmentCopy { s32 n0; void* p4; u8 pad8[4]; s32 count; AttachmentPart*
 void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
 void* CopyToFrontMemory(s32 size, void* src);
-void CopyAttachmentPart(AttachmentCopy* o, void* a, void* b);
 void CollectNonNullRefs(AttachmentCopy* o);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
@@ -695,8 +677,6 @@ struct FramedAttachment { FramedObject* obj; u8 pad[0xC]; Quad16 q10[4]; QuadMat
 struct FramedAttachmentList { s32 count; FramedAttachment* items; };
 struct ParentFrame { u8 pad[0x30]; };
 
-void InvertRigidTransform(void* a, void* b, Quad16* out);
-void BuildMatrixFromRotationAndTranslation(const Vec02* pos, const Mat02* rot, Mat4A* out);
 QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
@@ -734,9 +714,6 @@ void WriteVifFlushE(PacketWriter* b);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
-void WriteStripMeshMscal(s32 mode, void* obj);
-void QueueNodeLink(s32 a, s32 b, AnimCursor* node);
-void QueueMeshStrip(StripMesh* mesh, FrameSource* strip, s32 a, s32 b, s32 n, AnimCursor* node);
 
 void QueueObjectForRegroup(World* owner, PlacedObject* obj);
 void MergeObjectLinkLists(World* ctx, PlacedObject* self, PlacedObject* other);
@@ -817,8 +794,6 @@ void SetVertexColor(VertexBatch* batch, void* src);
 void SetVertexTexCoord(VertexBatch* dst, U64P* src);
 void AddVertex(VertexBatch* batch, s32 value);
 void CollectNonNullRefs(RefOwner* owner);
-void WriteStripMeshMscal(s32 mode, void* obj);
-void WriteMorphTargetMscal(s32 mode, void* obj);
 void BuildMorphTargetPacket(MeshBuildState* self, s32 mode, MorphTargetHeader* hdr, s32 n, Vec3* vecs, s32 extra,
                    void* extraData, WeightIndices* ents, Vec3* verts, void* data, PacketWriter* pkt);
 void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, StripHeader* hdr, StripMesh* mesh,
@@ -829,14 +804,6 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
                    StripMesh* mesh, Vec3* vecs, Vec3* nrms, u8 (*tints)[4], MeshUv* uvs,
                    s32 n, VertexRefs* recs, WeightIndices* ents, Vec3* verts, Vec3* vnrms,
                    f32* weights, PacketSlot* pkt, s32** outs);
-void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets* c);
-void StartAttachments(AttachmentBlock* self, PlacedObject* ctx);
-void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx);
-void CopyAttachmentBlock(AttachmentCopy* self, s32 arg, void* src);
-void UpdateAttachments(AnimatorOwner* self, PlacedObject* sub, f32 f);
-void UpdateLinkConstraint(PlacedObject* self);
-void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par);
-void FlipVifBaseOffset(void);
 
 // The 46 names of the keyed entries (keyed_entry.h; D_00247AF0, which this file's functions
 // walk), which begin the file's .rodata, before its functions' own literals.

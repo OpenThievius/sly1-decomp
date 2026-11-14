@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the caption box's child sits at 0x5B0 (not 0x324).
+// The player's words by offset, as player.cpp wrote them before its fields were named.
+#define PS(T, o) (*(T*)((u8*)self + (o)))
 struct CaptionBox_175170_eu {
     u8 pad000[0x5B0];
     void* child;            // 0x5B0
@@ -1226,3 +1228,4 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         }
     }
 }
+#undef PS

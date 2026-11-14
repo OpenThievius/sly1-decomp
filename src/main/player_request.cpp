@@ -20,6 +20,20 @@
 #include "ring_params.h"
 #include "deferred_request.h"
 #include "object_finder.h"
+#include "functions/anim_record.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/heap.h"
+#include "functions/path_follower.h"
+#include "functions/player.h"
+#include "functions/player_request.h"
+#include "functions/player_target.h"
+#include "functions/pooled_object.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct TargetArcSource;
@@ -66,7 +80,6 @@ struct BlendSlotObject {
 struct BlendAnimation;
 struct Collider;
 BlendSourceEntry* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key);
-void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
 
 struct PlayerBlendItem {
     f32 weight;             // 0x00
@@ -81,8 +94,6 @@ struct PlayerBlendItem {
 };
 struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
 
-void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals);
-void SetBlendItemWeights(BlendAnimationView* obj, s32 a1, s32 a2, void* a3);
 
 void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAnimationView** out)
 {
@@ -166,9 +177,6 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
 }
 ASM_FUNC(func_001D3A38);
 s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider** list, ColliderSpan* out);
-void PushBackMemoryMark(void);
-void PopBackMemoryMark(void);
-void GatherCollidersInBox(World* world, Collider* skip, Vec02* a, Vec02* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
 s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio)
 {
@@ -226,7 +234,6 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
 }
 
 extern "C" u64 ConvertFloatToDouble(f32 x);
-s32 FindObjectAlongSegment(PlacedObject* self, Vec02* from, Vec02* to, f32* ratio);
 
 struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
 struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
@@ -235,8 +242,6 @@ struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 
 void InterpolateBlendEntryPosition(void* p, void* e, f32 a, f32 b, s32 i, s32 j, void* out);
-void SetBlendItemWeights(BlendAnimationView* obj, s32 a1, s32 a2, void* a3);
-void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out);
 
 void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView* g, void* a3)
 {
@@ -304,7 +309,7 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
     u64 tv = ConvertFloatToDouble(t);
     if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
         SetBlendItemWeights(g, 0x50, 6, e);
-        SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, (Vec02*)((u8*)p + 0x640));
+        SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, &p->headingVelocity);
     }
 }
 
@@ -328,8 +333,6 @@ struct TurnBlendRecords {
     s32 weight5;
 };
 
-void SetBlendItemWeights(BlendAnimationView* obj, s32 a1, s32 a2, void* a3);
-void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out);
 
 void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2)
 {
@@ -460,7 +463,6 @@ void UpdateEightEntryBlendWeights(Player* self, BlendSlot* slots, BlendAnimation
 }
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
 static inline f32 MaxF(f32 a, f32 b) { return b >? a; }
-void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 // The velocity of a heading and speed, from six axes of the basis: forward (y) by the
 // heading's length ahead, and right or left by its side (x), the set picked by the walk mode.
@@ -505,7 +507,6 @@ void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimati
 
 
 
-u8* CopyToFrontMemory(s32 size, void* src);
 
 void ResolvePlayerTableObjects(Player* self)
 {
@@ -519,8 +520,6 @@ void ResolvePlayerTableObjects(Player* self)
 
 
 void AddColliderForce(Collider* self, Vec02* force);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 void StepPlayerRequestState(Player* self)
 {
@@ -565,12 +564,7 @@ void StepPlayerRequestState(Player* self)
 struct TargetCand;
 struct Chooser;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
-void RunPlayerCallback(Player* self);
-void SetPlayerState(Player* self, s32 a, s32 b);
-s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
-void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec02* vel, Vec02* pos, Vec02* acc);
 
 void UpdatePlayerRequestSubState(Player* self) {
     switch (self->subState) {
@@ -611,8 +605,6 @@ void SetPlayerCallback(Player* self, void (*value)(Player* self))
     self->cb26B0 = value;
 }
 
-extern void EndPlayerRequestState(void* self);
-extern void SetPlayerState(Player* self, s32 mode, s32 count);
 
 void RunPlayerCallback(Player* self)
 {
@@ -634,18 +626,10 @@ void RunPlayerCallback(Player* self)
     }
 }
 
-void ContinuePlayerRequestKind0(Player* self);
-void ContinuePlayerRequestKind6(Player* self);
-void ContinuePlayerSubState2A(Player* self);
-void ContinuePlayerRequestKind1Or2(Player* self);
-void FinishPlayerRequest(Player* self);
 
 typedef void (*PlayerRequestFn)(s32 data, Player* self);
 struct PlayerRequestMessage { Player* self; s32 v; };
 
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void SetPlayerState(Player* self, s32 a, s32 b);
-s32 IsPadSelectFlagHeld(World* self);
 s32 MaskWorldBitsBySave(void);
 s32 HasSpareCount(void);
 struct PlayingSound;
@@ -780,11 +764,6 @@ s32 AcceptPlayerRequest(Player* self, Ev07* msg)
 }
 
 s32 HasSpareCount(void);
-void FinishSwitchedCollider(SwitchedCollider* self);
-void SetPlayerState(Player* o, s32 a, s32 b);
-s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep);
-void SetPlayerCallback(Player* self, void (*value)(Player* self));
-void FinishPlayerRequest(Player* self);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
@@ -856,7 +835,6 @@ void ContinuePlayerRequestKind1Or2(Player* self)
 }
 
 struct PlayerWorld;
-s32 IsPadSelectFlagHeld(World* self);
 extern u32 g_buttonCodeFlags;
 
 s32 IsPlayerRequestBlocked(Player* self, s32 n)
@@ -939,14 +917,9 @@ s32 CompareSortedTargets(RingEntry* a, RingEntry* b) { if (a->angle < b->angle) 
 
 
 extern PacketWriter g_vifPacketWriter;
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
-void UnprojectCameraPoint(Camera* camera, f32* a, Vec02* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-f32 WrapAngle(f32 a);
-f32 WrapModulo(f32 a, f32 m);
 void SortElements(void* base, u32 n, u32 size, s32 (*compare)(const void* x, const void* y));
 void* InitVertexBatch(VertexBatch* b);
-void BeginDmaTag(PacketWriter* g);
 void SetVertexBatchTransform(VertexBatch* batch, void* a1, void* a2);
 void SetVertexBatchMode(VertexBatch* batch, u8* value);
 void SetVertexTexCoord(VertexBatch* dst, U64P* src);
@@ -954,7 +927,6 @@ void SetVertexColor(VertexBatch* batch, void* src);
 void SetVertexPosition(VertexBatch* body, Vec3* v);
 void AddVertex(VertexBatch* b, s32 z);
 void FlushVertexBatch(VertexBatch* b);
-void CloseDmaTag(PacketWriter* g);
 void DestroyVertexBatch(VertexBatch* b, s32 f);
 
 // The ring around a set of anchors: the points projected into camera space, the lowest first,
@@ -1150,7 +1122,6 @@ void DrawAngleSortedRing(Vec02* at, s32 nOffsets, Point2* offsets, s32 nAnchors,
 }
 
 
-AnimRecord* FindAnimRecord(s32 key);
 
 // The three rings each keep their parameter block as a function-local static with a brace
 // initialiser (include/ring_params.h); the textures are looked up at every call. Each is a
@@ -1168,7 +1139,7 @@ void DrawPlayerMarkerRing1(DeferredRequest* request)
     };
     params.textures[0] = 0;
     params.textures[1] = FindAnimRecord(0x15C);
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
+    DrawAngleSortedRing(&player->v140, 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing2(DeferredRequest* request)
@@ -1185,7 +1156,7 @@ void DrawPlayerMarkerRing2(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
+    DrawAngleSortedRing(&player->v140, 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing3(DeferredRequest* request)
@@ -1204,5 +1175,5 @@ void DrawPlayerMarkerRing3(DeferredRequest* request)
     params.textures[1] = FindAnimRecord(0x15C);
     anchor.scale = 60.0f;
     anchor.obj = (PlacedObject*)player;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)g_ringSeventeenPoints, 1, &anchor, &params, request);
+    DrawAngleSortedRing(&player->v140, 0x11, (Point2*)g_ringSeventeenPoints, 1, &anchor, &params, request);
 }

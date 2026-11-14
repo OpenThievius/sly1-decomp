@@ -32,9 +32,11 @@
 #include "buffered_stream.h"
 #include "key_id.h"
 #include "list_iter.h"
+#include "functions/blend_animation.h"
+#include "functions/placed_object.h"
+#include "functions/warp_menu.h"
 
 
-f32 WrapModulo(f32 x, f32 y);
 void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(s32 size);
@@ -82,7 +84,6 @@ u8* CopyToFrontMemory(s32 size, void* src);
 BlendCurveView* CreatePositionCurve(s32 kind);
 BlendCurveView* CreateRotationCurve(s32 kind);
 BlendCurveView* CreateWeightCurve(u32 kind);
-void LoopOverMinCountNoOp(s32 a, s32 b, s32 c, s32 d);
 
 void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out)
 {
@@ -209,7 +210,6 @@ void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items
     PopBackMemoryMark();
 }
 
-f32 GetAnimationMarkerTime(Animation* self, s32 key);
 
 void ComputeWrappedDeltas(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals)
 {
@@ -344,8 +344,6 @@ LINKER_REMNANT(func_001399F0);
 
 
 void CopyMemory(void* dst, void* src, u32 size);
-void ComputeBlendedDuration(s32 stride, s32 count, void* items, s32 offset, s32 nKeys, BlendTimeScale* pairs, void* out);
-void SettleListedPoseSources(AnimationPlayer* self);
 
 void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
 {

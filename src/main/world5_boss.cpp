@@ -20,6 +20,23 @@
 #include "mul_rotation.h"
 #include "memory_card.h"
 #include "object_finder.h"
+#include "functions/base_object.h"
+#include "functions/blend_animation.h"
+#include "functions/camera.h"
+#include "functions/collider.h"
+#include "functions/game_progress.h"
+#include "functions/matrix.h"
+#include "functions/memory_card.h"
+#include "functions/pad_input.h"
+#include "functions/path_follower.h"
+#include "functions/placed_object.h"
+#include "functions/player.h"
+#include "functions/screen_element.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/warp_menu.h"
+#include "functions/world.h"
+#include "functions/world_contacts.h"
 
 // Types other files define, named by the parameters of their functions declared here.
 struct ScaledTransform;
@@ -120,7 +137,6 @@ s32 g_world5CountdownRequest = 0;
 extern s32 g_world5CountdownRequest;
 s32 g_timeoutFired = 0;
 
-void InitSwitchedCollider(SwitchedCollider* self);
 
 void InitWorld5ModeCollider(World5ModeCollider* self)
 {
@@ -140,12 +156,6 @@ struct StateGraph;
 struct BlendAnimation;
 struct Collider;
 struct BlendAnimationView;
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void SetFollowObjects(PlacedObject* self, void* a1, void* a2);
-StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3);
-void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
-void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 s32 FindAnimRecord(s32 key);
 
@@ -173,11 +183,7 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void StepCollider(Collider* self, f32 t);
 void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec02* a, Vec02* b);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void SteerColliderTowardPosition(Collider* self, Vec02* target, f32* pull, Vec02* aim, f32* turn, f32 limit);
-void TurnColliderTowardRotation(Collider* self, f32 dt, Mat02* target, f32* gain);
 
 void StepWorld5ModeCollider(World5ModeCollider* self, f32 f)
 {
@@ -206,10 +212,9 @@ path3:
     b = D_00248D30;
 tail:
     SteerColliderTowardPosition(self, &a, D_00263C20, &b, D_00263C30, f);
-    TurnColliderTowardRotation(self, f, (Mat02*)((u8*)self + 0x620), D_00263C40);
+    TurnColliderTowardRotation(self, f, &self->m620, D_00263C40);
 }
 
-void MoveCollider(Collider* self, f32 t, void* arg);
 
 void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
 {
@@ -221,17 +226,7 @@ void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
 extern T217D_BF0 g_spinningSpriteElement;
 extern f32 g_gameTime;
 extern s32 g_padSelectFlags;
-void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
-void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
-void SetPlayerState(Player* self, s32 state, s32 sub);
-void ActivateSwitchedCollider(void* self);
 struct OwnerMessage;
-void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner);
-void* GetActiveSwitchedCollider();
-void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum);
-void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void ClearRootObjectStateBits(void* a0, Collider* owner, u32 mask);
 
 static inline f32 ClampBetween(f32 v, f32 lo, f32 hi)
 {
@@ -278,7 +273,7 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
     } else {
         g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
     }
-    ComputeObjectMotionInFrame((PlacedObject*)self->f668, 0, (Vec02*)((u8*)self + 0x100), &a, 0, 0, 0);
+    ComputeObjectMotionInFrame((PlacedObject*)self->f668, 0, &self->pos, &a, 0, 0, 0);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v150), Vu0::Q(a));
     TransformDirectionBetweenFrames(0, (PlacedObject*)self->f668, &d, &d);
     wx = d.y * -0.0016666667f;
@@ -324,21 +319,11 @@ struct RampProfile3 {
     f32 rampTime;
 };
 
-s32 HasSpareCount(void);
 struct RampProfile;
 struct Vec02;
 struct Mat02;
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-void ProjectPointToCamera(Camera* camera, Vec02* in, f32* out);
-void BuildBasisFromXAndZHint(const Vec02* x, const Vec02* hint, Mat02* out);
-void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out);
-void BuildAxisAngleMatrix(const Vec02* v, Mat02* out, f32 angle);
 void ApproachRotationWithRamp(Mat02* from, Mat02* to, RampProfile* ramp, f32 limit, Mat02* outRot, Vec02* outSpin);
-void HandleStepSequenceSkipButtons(void* self, PadRecord* rec);
-void ClearRootTries(PlacedObject* self);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 
@@ -521,8 +506,6 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     ClearRootTries(self);
 }
 
-void FinishSwitchedCollider(SwitchedCollider* self);
-void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 
 void FinishWorld5ModeCollider(World5ModeCollider* self)
@@ -544,8 +527,6 @@ void HandleWorld5ModeColliderActivation(World5ModeCollider* self, void* active)
 extern Rgba4 D_002623E0;
 
 extern "C" f32 Cosine(f32 x);
-void SetObjectTreeRecordValue(PlacedObject* object, u32 value);
-void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
 
 void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
 {
@@ -600,7 +581,6 @@ void ApplyWorld5ModeColliderTint(World5ModeCollider* self, void* s, void* out)
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 
-s32 IsPadSelectFlagHeld(World* world);
 s32 IsWorld5ModeColliderRequestBlocked(World5ModeCollider* self, s32 a1)
 {
     if (a1 == 5) goto one;
@@ -623,9 +603,7 @@ struct SenderValueMessage {
     s32 v;
 };
 
-s32 HasSpareCount(void);
 void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 
 extern f32 g_gameTime;
@@ -663,7 +641,6 @@ s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
     return 1;
 }
 
-void HandleSwitchedColliderNotification(SwitchedCollider* self, s32 kind, void* msg);
 
 void HandleWorld5ModeColliderNotification(World5ModeCollider* self, s32 kind, MessageBody* rec)
 {
@@ -688,7 +665,6 @@ s32 HasWorld5ModeColliderAcceptedRequest(World5ModeCollider* self)
     return self->pulseActive != 0;
 }
 
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 {
@@ -728,7 +704,6 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
 }
 
 void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
 
 void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
 {
@@ -740,7 +715,6 @@ void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
     self->desc02()->m20(self, (Vec02*)bufB);
 }
 
-void InitCollider(Collider* self);
 
 void InitWorld5Boss(World5Boss* self)
 {
@@ -748,10 +722,6 @@ void InitWorld5Boss(World5Boss* self)
     self->mode = -1;
 }
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void BuildCombinedBlendAnimation(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, BlendAnimation** out);
-void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3);
 void SetWorld5BossMode(World5Boss* self, s32 a1);
 s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
@@ -777,10 +747,6 @@ void StartWorld5Boss(World5Boss* self)
     PlayWorld5BossLoop(self, 1);
 }
 
-void UpdateCollider(Collider* self, f32 dt);
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
-f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
-void StopAnimationPlayer(AnimationPlayer* self);
 
 static inline f32 MaxF(f32 a, f32 b) { return a >? b; }
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
@@ -861,7 +827,6 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt)
 extern s32 D_00270458;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
-s32 AreMenusAndFadeClear(void);
 
 void ShowWorld5BossBar(World5Boss* self)
 {
@@ -878,9 +843,7 @@ void ShowWorld5BossBar(World5Boss* self)
     else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
-void DecrementGaugeCount(T217D_2E0* self);
 void PlayWorld5BossTarget(World5Boss* self);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 s32 HandleWorld5BossEvent(World5Boss* self, ObjectEvent* msg)
 {
@@ -896,8 +859,6 @@ s32 HandleWorld5BossEvent(World5Boss* self, ObjectEvent* msg)
 
 extern f32 g_gameTime;
 
-void SetWorldActiveFollower(World* self, void* v);
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 void SetWorld5BossMode(World5Boss* self, s32 mode)
 {
@@ -934,7 +895,6 @@ done:
     return;
 }
 
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 
 s32 PlayWorld5BossLoop(World5Boss* self, s32 flag)
 {
@@ -968,8 +928,6 @@ void InitWorld5Countdown(World5Countdown* self)
     g_timeoutFired = 0;
 }
 
-void StartPlacedObject(PlacedObject* self);
-void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 void StartWorld5Countdown(World5Countdown* self)
 {
@@ -978,10 +936,7 @@ void StartWorld5Countdown(World5Countdown* self)
 }
 extern f32 g_gameTime;
 
-void UpdateCollider(Collider* self, f32 dt);
-void StopAnimationPlayer(AnimationPlayer* self);
 void SetWorld5CountdownState(World5Countdown* self, s32 state);
-void FadeOutAndQueueMovie(s32 n);
 
 void UpdateWorld5Countdown(World5Countdown* self, f32 dt)
 {
@@ -1011,7 +966,6 @@ void UpdateWorld5Countdown(World5Countdown* self, f32 dt)
 extern s32 D_00270458;
 extern s32 D_00270B54;
 extern s32 D_002717CC;
-s32 AreMenusAndFadeClear(void);
 
 void UpdateWorld5CountdownVisibility(World5Countdown* self)
 {
@@ -1027,10 +981,6 @@ void UpdateWorld5CountdownVisibility(World5Countdown* self)
 
 extern s32 g_world5CountdownRequest;
 
-void DecrementGaugeCount(T217D_2E0* self);
-void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
-void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
-s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
 
 s32 HandleWorld5CountdownObjectEvent(World5Countdown* self, ObjectEvent* msg)
 {
@@ -1069,8 +1019,6 @@ s32 HandleWorld5CountdownObjectEvent(World5Countdown* self, ObjectEvent* msg)
     return HandleObjectEvent(self, msg);
 }
 
-void MarkLevelDone(s32 n);
-void StartMemoryCardSave(MemoryCard* card);
 
 void SetWorld5CountdownState(World5Countdown* self, s32 state)
 {

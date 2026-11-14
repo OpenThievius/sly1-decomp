@@ -9,12 +9,17 @@
 #include "fpu.h"
 #include "asm_func.h"
 #include "c35.h"
+#include "functions/class75_list.h"
+#include "functions/collider.h"
+#include "functions/matrix.h"
+#include "functions/oscillator.h"
+#include "functions/placed_object.h"
+#include "functions/warp_menu.h"
 
 // Small overrides of three classes (0x76's set-up and transform read, the slot 0xA4 of 0x35 and
 // of 0x52) and ApplyLinkConstraint, a two-bone IK solver on VU0. Its .rodata is
 // func_0016C470's FLT_MAX literal at 0x24A7DC and, after it, two -FLT_MAX words no code reads.
 
-void InitClass75Object(void* self);
 
 // An object of class 0x76 (0xC0 bytes, under 0x75): the fields its set-up writes.
 struct C76 {
@@ -44,7 +49,6 @@ extern const f32 D_0024A7E0 = -3.40282347e+38f;
 extern const f32 D_0024A7E4 = -3.40282347e+38f;
 
 struct TransformObject;
-void ReadTransformObject(TransformObject* self, void* stream);
 
 void LoadC76Object(TransformObject* self, void* stream)
 {
@@ -53,32 +57,23 @@ void LoadC76Object(TransformObject* self, void* stream)
 
 LINKER_REMNANT(func_0016C4D8);
 
-void DrawCollider(Collider* self, void* arg1, void* arg2);
 
 void DrawC35Collider(C35* self, void* arg1, void* arg2)
 {
     DrawCollider(self, arg1, arg2);
 }
 
-void DrawPlacedObject(PlacedObject* self, void* arg1, void* arg2);
 
 void DrawC52Object(C52* self, void* arg1, void* arg2)
 {
     DrawPlacedObject(self, arg1, arg2);
 }
 
-void SetPlacedObjectVelocity(PlacedObject* self, Vec02* v);
-void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
-void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-void AccumulateFrameChain(PlacedObject* self, PlacedObject* top, s32 n, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin);
-f32 ComputeAngleBetweenVectors(Vec02* a, Vec02* b, Vec02* axis);
 extern "C" f32 Arccosine(f32 x);
 void BuildAxisAngleMatrix(f32 angle, const Vec02* v, Mat02* out);
-void BuildRotationBetweenVectors(Vec02* a, Vec02* b, f32* m);
 // The definition takes the angle last; the EE passes it in its own register, and retail's
 // caller evaluates it first, as this order does.
 Mat02 MultiplyByTransposedMatrix3x3(const Mat02& a, const Mat02& b);
-s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
 extern Vec02 D_00248D30;
 extern Mat02 g_identityMatrix;
 extern Vec02 g_unitXVector;

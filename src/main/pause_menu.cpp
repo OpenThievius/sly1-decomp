@@ -15,12 +15,26 @@
 #include "background_job.h"
 #include "screen_fade.h"
 #include "object_finder.h"
+#include "functions/display.h"
+#include "functions/iop_commands.h"
+#include "functions/memory_card.h"
+#include "functions/oscillator.h"
+#include "functions/pad_input.h"
+#include "functions/pair_controller.h"
+#include "functions/path_follower_helpers.h"
+#include "functions/placed_object.h"
+#include "functions/pooled_object.h"
+#include "functions/screen_element.h"
+#include "functions/sound_system.h"
+#include "functions/state_walker.h"
+#include "functions/switched_collider.h"
+#include "functions/text_format.h"
+#include "functions/warp_menu.h"
 
 struct BaseObject;
 struct PairController;
 // Types other files define, named by the parameters of their functions declared here.
 
-void SendDisplayResetPacket();
 void DrawLoadProgressBar(LoadProgress*);
 
 
@@ -43,54 +57,36 @@ extern f32 g_screenAdjustY;
 extern f32 g_screenAdjustSavedX;
 extern f32 g_screenAdjustSavedY;
 
-void StopStreamVoice(void);
 
 s32 GetEntryName(s32 v);
-s32 FormatToString(char* dst, const char* fmt, ...);
 
 // The packet DrawLoadProgressBar builds on its stack: its memory, then the writer.
 struct BarPacket { u8 bytes[0x400]; PacketWriter f; };
 
 void* InitGifPacket(PacketWriter* f);
-void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void BeginDmaTag(PacketWriter* f);
-f32 TruncateFloat(f32 x);
 // The definition takes the four floats first; the EE passes them in their own registers, and
 // retail's caller evaluates them after the integers, as this order does.
 void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, PacketWriter* p, f32 x0, f32 y0, f32 x1, f32 y1);
 void EndGifPacket(PacketWriter* f);
-void AddDmaEndTag(PacketWriter* f);
-void CloseDmaTag(PacketWriter* f);
-void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
-void SendPacketToBothBuffers(void* chain);
 
-void ShowScreenElement(void* self);
 
-void HideScreenElement(void* self);
 
 
 
 extern World* g_currentWorld;
 
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
-void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
-void SetPairControllerState(PairController* self, s32 state);
-void BeginLevelExit(s32 flag, s32 n);
 
 void BuildPauseMenuPage(T217D_6D0* self);
 void SetPauseMenuPage(void* self, s32 v);
-void SetScreenElementMode(void* self, s32 flag);
 
 extern u8 g_elementStack[];
 
 void ChangePauseMenuPage(void* self, s32 a, s32 b);
 void SetPauseMenuPage(void* self, s32 v);
-void PopStackElement(ElementStack* g);
-void PushStackElement(ElementStack* self, ScreenElement* node);
 
 extern u8 g_sessionFadeKey[];
 
-void StartScreenFade(ScreenFade* dst, FadeRequest* args, s32 count);
 
 
 extern u8 g_unitZVector[];
@@ -121,32 +117,13 @@ extern CardSlot D_002542D8[];
 void CancelPauseMenuPage(T217D_6D0* self);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 void ExitLevelFromPauseMenu(T217D_6D0* a0, s32 a1, s32 a2);
-void PushStackElement(ElementStack* self, ScreenElement* node);
-void BeginLevelExit(s32 flag, s32 n);
-void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
-void SetMemoryCardDisplayMode(MemoryCard* a, s32 b);
-void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg);
-s32 SaveGameToMemoryCardSlot(MemoryCard* self);
-s32 RunMemoryCardFormatJob(MemoryCard* self);
-s32 CreateMemoryCardSaveFiles(MemoryCard* self);
-s32 WriteSelectedMemoryCardSlot(MemoryCard* self);
-s32 ApplyMemoryCardImage(MemoryCard* self);
 void ResumeAtSavedLevel(void);
 void BuildPauseMenuPage(T217D_6D0* self);
-void* GetActiveSwitchedCollider(void);
 struct PathFollower;
 struct StateWalker;
-s32 IsObjectOfKind(BaseObject* list, s32 key);
-void GetStateWalkerCurrentKey(StateWalker* a0, s32* out);
-void RecordPathFollowerProgress(PathFollower* self);
-void TeleportStateWalker(StateWalker* self, s32 key);
-void SetStateWalkerTarget(StateWalker* self, s32 key);
 s32 ComputeCompletionMask(void);
 void FadeOutAndQueueMovie(s32 n);
 void StartPauseMenuExitFade(void);
-void TogglePadPatternSetting(GameProgress* g);
-void SilenceVolumeChannel3(s32 flag);
-void ApplySoundOptionFlag(s32 flag);
 struct PlayingSound;
 struct BaseObject;
 struct Vec02;
@@ -170,21 +147,12 @@ extern f32 g_screenAdjustX;
 extern f32 g_screenAdjustY;
 
 s32 ComputeCompletionPercent(GameProgress* progress);
-s32 CheckStreamVoicePending(void);
-s32 PollIopCommands(void);
-s32 HasStreamVoice(void);
-s32 GetPadVerticalStep(PadRecord* p);
-s32 GetPadHorizontalStep(PadRecord* p);
-void ClearPadPressedBits(PadRecord* self, u32 mask);
-f32 GetPadButtonAnalog(PadRecord* p, s32 idx);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 void SetPauseMenuLayerPage(T217D_6D0* self, s32 idx, s32 value);
 void ActivatePauseMenuSelection(T217D_6D0* self);
 void CancelPauseMenuPage(T217D_6D0* self);
 void StartPauseMenuExitFade(void);
-s32 IsBackgroundJobRunning(BackgroundJob* p);
-void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg);
 GlyphMark* FindSubstring(char* s, char* t);
 s32 GetCyclingGlyph(void);
 extern "C" s32 ConvertFloatToU32(f32 value);
@@ -209,13 +177,7 @@ enum PadSelectBits {
 extern u8 g_elementStack[];
 extern u8* g_activeStepSequence;
 
-void PauseStagedBankVoice(void);
-void ResumeStagedBankVoice(void);
-void SetElementStackState(ElementStack* self, s32 state);
 void ChangePauseMenuPage(T217D_6D0* self, s32 a, s32 b);
-s32 SetPadSelectFlags(s32 bits);
-void ClearPadSelectFlags(u32 mask);
-void ResetPadStepRepeat(PadRecord* p);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
@@ -256,7 +218,6 @@ extern u8 g_gsPacketWriter[];
 
 extern "C" f32 Sine(f32 x);
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void PushFontScale(Font* font, f32 a, f32 b);
 TextReader* InitTextReader(TextReader* self, char* text, Font* font);
 void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWriter* s);
@@ -264,7 +225,6 @@ f32 MeasureTextHeight(TextReader* buf, f32 w);
 void PopFontScale(Font* font);
 f32 SumTextWidth(TextReader* buf);
 char* GetMenuChoiceLabel(s32 index);
-void DrawLineSegment(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* color, s32 flag);
 
 struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
 {

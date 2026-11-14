@@ -32,22 +32,15 @@
 #include "mul_rotation.h"
 #include "pad_record.h"
 #include "ramp_profile.h"
+#include "functions/agent.h"
+#include "functions/pooled_object.h"
+#include "functions/warp_menu.h"
 
-void RegisterAgent(Agent* self);
-void AppendToList(List01* self, void* item);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 struct SinCosPair { f32 a; f32 b; s32 value; };
 
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
-void UnregisterAgent(Agent* self);
-void RemoveFromList(List01* list, void* item);
-void CopyAgent(Agent* self, void* src);
-void InitAgent(Agent* self);
-void StartAgent(Agent* self);
-void RemoveFromList(List01* list, void* item);
 
-void AppendToList(List01* self, void* item);
 
 
 // The file's statics (.bss from 0x27C008).
