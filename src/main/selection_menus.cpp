@@ -226,6 +226,9 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
 }
 
 void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
+// Starts the placed object as the current one: sets its flag bits, makes it the global current
+// object, sets the element stack to state 2, resolves its links and queues the setup of its
+// choices.
 void BecomeCurrentObject(CurrentPlacedObject* self)
 {
     StartPlacedObject(self);
@@ -275,6 +278,8 @@ void ShowCurrentObjectCaptions(CurrentPlacedObject* self)
 }
 
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
+// Moves the choice one step left or right with the pad's horizontal step; at an end it wraps only
+// when lastChoice is 5, otherwise it stays.
 void MoveCurrentObjectChoice(CurrentPlacedObject* self, PadRecord* a1)
 {
     s32 n = self->choice;
@@ -404,6 +409,8 @@ void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b)
 
 s32 IsFontLoaded(s32 index);
 Font* GetFontById(s32 index);
+// Sets up the screen element text with font 2 if loaded, no hold time, no node, a fixed colour and
+// the last sound time set back by the choice sound gap.
 void InitSelectionCaption(T217D_12E0* self)
 {
     SetupScreenElementText(self);
@@ -418,6 +425,7 @@ void InitSelectionCaption(T217D_12E0* self)
     self->lastAt = -g_choiceSoundGap;
 }
 
+// If the caption is open, finds the object with id 0x4FD and pushes its camera controller.
 void RestoreSelectionCaptionCamera(T217D_12E0* self)
 {
     if (self->open != 0) {
@@ -506,6 +514,9 @@ void HandleSelectionCaptionInput(T217D_12E0* self, PadRecord* arg)
 }
 
 void SetCurrentObjectChoice(CurrentPlacedObject* self, s32 a, s32 b);
+// Opens or closes the selection caption (no-op if already so). Opening selects the node's current
+// choice and sets the pad select flags; closing stops the voice stream, clears the flags and closes
+// the caption and the copied text caption.
 void SetSelectionCaptionOpen(T217D_12E0* self, s32 v)
 {
     s32 flag = (v != 0);
@@ -608,6 +619,7 @@ void InitGridSelector(T217D_1330* self)
     SetScreenElementSize(self, f21, f20);
 }
 
+// Tests bit (0 to 15) of the saved grid entry mask; 0 for a bit out of range.
 u32 TestGridEntryBit(u32 bit)
 {
     u32 mask;
@@ -671,6 +683,9 @@ void HandleGridSelectorInput(T217D_1330* ctx, PadRecord* o)
     StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
+// Opens or closes the grid selector (no-op if already so). Opening sets the pad select flags, calls
+// slot 20 and puts the cursor on the highest entry the save has unlocked; closing clears the flags
+// and calls slot 21.
 void SetGridSelectorOpen(T217D_1330* self, s32 flag)
 {
     if ((flag != 0) != (self->open == 0)) {

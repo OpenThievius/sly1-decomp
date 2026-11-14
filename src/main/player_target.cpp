@@ -412,6 +412,8 @@ struct ObjectPlacementScore { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
 void PlaceOnTargetObject(Player* self, PathTarget* node, Vec02* outA, Vec02* outB, f32 t);
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 
+// The score of landing on a target object at parameter t: places the point on the object and
+// rates it for the player (ScorePlayerTargetPlacement).
 f32 ScoreTargetObjectAt(TargetCostContext* self, f32 t)
 {
     ObjectPlacementScore f;
@@ -426,6 +428,7 @@ struct TargetPoint;
 struct TargetCurve;
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 
+// Same as ScoreTargetObjectAt for a target point at parameter t.
 f32 ScoreTargetPointAt(TargetCostContext* self, f32 t)
 {
     PointPlacementScore f;
@@ -436,6 +439,7 @@ f32 ScoreTargetPointAt(TargetCostContext* self, f32 t)
 
 void ScorePlayerTargetPlacement(Player* self, Vec02* point, BaseObject* obj, Vec02* start, Vec02* extra, f32* outTime, f32* outCost, Vec02* outPoint, Vec02* outVel);
 
+// Same as ScoreTargetObjectAt for a target curve at parameter t.
 f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t)
 {
     PointPlacementScore f;
@@ -525,6 +529,7 @@ struct PathScoreArgs { Player* self; BaseObject* obj; s32 pad[2]; s32 c[4]; };
 // evaluates its float arguments there, and only their place in the list decides that.
 void ScorePlayerLeapToPoint(f32 t, Player* self, BaseObject* obj, Vec02* point, f32* out1, Vec02* out2, Vec02* out3);
 
+// The score of a leap to the path's point at parameter t (ScorePlayerLeapToPoint).
 f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
 {
     f32 out;
@@ -548,6 +553,9 @@ struct PathScoreFrame {
 typedef f32 (*MinimumFn)(void* ctx, f32 x);
 void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY);
 
+// The best (lowest) score for a path target: searches for a local minimum of ScoreTargetPathAt
+// along the path's parameter, starting at the context's value and the path's frame, and gives
+// back the score found.
 f32 ScoreTargetPathNearest(PathScoreContext* self)
 {
     PathScoreFrame l;
@@ -628,6 +636,7 @@ s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, vo
     return t < limit;
 }
 
+// a + b, plus the repeat penalty D_00274E3C when target is the one the player has just used.
 f32 AddRepeatTargetPenalty(Player* self, void* target, f32 a, f32 b)
 {
     f32 r = a + b;
@@ -1625,6 +1634,8 @@ void PinPlayerToTarget(Player* self)
 }
 
 
+// Changes the player's on/off phase n (stamping the time): phases 1 and 2 set f268C to 2 when the
+// forced on/off object is the player's own and to 0 otherwise, phase 3 sets it to 1.
 void SetPlayerOnOffPhase(Player* self, s32 n)
 {
     if (n == self->onOffPhase) {
@@ -1653,6 +1664,8 @@ void SetPlayerOnOffPhase(Player* self, s32 n)
 }
 
 
+// Puts the player's own on/off object back to its defaults (state 5, defaults block, no object)
+// and forces its state to 0.
 void ResetPlayerOnOffObject(Player* self)
 {
     OnOffObject* o = self->ownOnOffObject;
@@ -1715,6 +1728,8 @@ void StepPlayerAlongTarget(Player* self)
     ApplyPlayerDefaultSteering(self);
 }
 
+// Whether none of the class 0x89 objects of the world (up to 64) is in state 1 or 2; true when
+// there are no such objects.
 s32 HasNoActiveObject89(Player* self)
 {
     void* arr[64];

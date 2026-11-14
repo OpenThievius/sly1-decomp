@@ -119,6 +119,7 @@ f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f,
 s32 g_screenOwner = 0;
 List_269BA8 g_targetVectors = { 0 };
 
+// Initialises the collider, sets flag bit 43 of its flags and its anchors (3, 0, 3, 0).
 void InitBoxCollider(BoxCollider* self)
 {
     InitCollider(self);
@@ -322,6 +323,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
     }
 }
 
+// Initialises the agent with fadesOut and fBD0 cleared.
 void InitSeekingAgent(SeekingAgent* self)
 {
     InitAgent(self);
@@ -329,6 +331,8 @@ void InitSeekingAgent(SeekingAgent* self)
     self->fBD0 = 0;
 }
 
+// Starts the agent, resolves its links and five clips (ids 0xEF, 0x16C, 0x16D, 0x16A and 0x16B:
+// remove, hurt and their alternates).
 void StartSeekingAgent(SeekingAgent* self)
 {
     StartAgent(self);
@@ -376,6 +380,8 @@ void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
     }
 }
 
+// After the agent's own leave handling: leaving state 0x10 calls the partner's method 0x54; leaving
+// state 8 calls the agent's method 0x4F when f600 is 1.
 void LeaveSeekingAgentState(SeekingAgent* self, s32 mode)
 {
     LeaveAgentState(self, mode);
@@ -513,6 +519,8 @@ void UpdateSeekingAgentState(SeekingAgent* self)
     }
 }
 
+// Blocked while button-code flag bit 1 is set or the pad-select flag is held, else as the agent's
+// own test decides.
 s32 IsSeekingAgentRequestBlocked(SeekingAgent* self, s32 a1)
 {
     if (g_buttonCodeFlags & 1) {
@@ -524,6 +532,8 @@ s32 IsSeekingAgentRequestBlocked(SeekingAgent* self, s32 a1)
     return 1;
 }
 
+// Refuses a request that method 0x4B blocks; otherwise records its kind and whether the requester
+// (for kind 0) is in the partner's object pool, then lets the agent accept it.
 s32 AcceptSeekingAgentRequest(SeekingAgent* self, AgentRequest* arg)
 {
     if (self->desc05()->m4B(self, arg->kind00)) {
@@ -539,6 +549,9 @@ s32 AcceptSeekingAgentRequest(SeekingAgent* self, AgentRequest* arg)
     return AcceptAgentRequest(self, arg);
 }
 
+// Sets hitsLeft to 1 when a spare is available and the request was not from the pool, else 0; runs
+// the agent's event handling and, if it took the event, notifies the agent's method 0x0E with kind
+// 0x17 and the event's id. Returns 1 when handled.
 s32 HandleSeekingAgentObjectEvent(SeekingAgent* self, AgentEvent* msg)
 {
     EventNotice args;
@@ -585,11 +598,14 @@ s32 HasAttachedSeekingTarget(SeekingAgent* self)
     return 0;
 }
 
+// Always false in this class.
 s32 IsSeekingAgentTargetInRange(void)
 {
     return 0;
 }
 
+// Appends an attached object to the agent's list of up to 4 objects unless it is a kind-8 object in
+// state 0xB; gives 1 when added.
 s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
 {
     if (item != 0 && IsObjectAttached(item) != 0) {
@@ -605,16 +621,19 @@ s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
     return 0;
 }
 
+// Stores the agent's state target.
 void SetSeekingAgentStateTarget(SeekingAgent* self, s32 value)
 {
     self->stateTarget = (void*)value;
 }
 
+// Stores the agent's walk target.
 void SetSeekingAgentTarget(SeekingAgent* self, s32 value)
 {
     self->walkTarget = (void*)value;
 }
 
+// Starts the switched collider's effect; with flag 0 also changes the agent to state 8 (clip f5F0).
 void StartSeekingAgentEffect(SeekingAgent* self, s32 flag, PlacedObject* extra)
 {
     StartSwitchedColliderEffect(self, flag, extra);
@@ -634,6 +653,8 @@ s32 GetSeekingAgentStateKind(SeekingAgent* self)
     return 0;
 }
 
+// Handles the agent's notification and, for kind 0x13 from the agent's state player with code
+// 0x53A, calls SpendReserveUnit.
 void HandleSeekingAgentNotification(SeekingAgent* self, s32 code, SourceNotice* req)
 {
     HandleAgentNotification(self, code, (AgentNotification*)req);
@@ -646,11 +667,14 @@ void HandleSeekingAgentNotification(SeekingAgent* self, s32 code, SourceNotice* 
     }
 }
 
+// An untagged plane-tree child (low bit clear) is another node: gives it; a tagged child gives 0.
 u32 GetNeighbourFace(u32 x)
 {
     return (x & 1) ? 0 : x;
 }
 
+// A tagged plane-tree child (low bit set) is a triangle: gives it with the tag cleared; an untagged
+// child gives 0.
 s32 GetNeighbourTriangle(s32 value)
 {
     if (value & 1) return value & -2;
@@ -667,6 +691,9 @@ struct PlaneNode {
     s32 above;              // 0x18
 };
 
+// Walks a plane tree from node with point p: on the side p lies (more than 1e-4 above the node's
+// plane or not), a tagged child gives its triangle (GetNeighbourTriangle) and an untagged one is
+// descended into; 0 when the walk ends without a triangle.
 s32 FindPointGraphTriangle(PlaneNode* node, Vec02* p)
 {
     while (node != 0) {
@@ -725,6 +752,7 @@ s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec02* p)
     return 0;
 }
 
+// 0 for a value above 1, 1 for below -1, 2 for within [-1, 1].
 s32 ClassifyAgainstUnitRange(f32 value)
 {
     if (value > 1.0f) return 0;
@@ -847,6 +875,8 @@ s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec02* a, Vec02* b, s32 max,
     }
 }
 
+// A straight path from b to c is free (0) only when it crosses the plane tree as one span running
+// the whole segment (times 0 to 1); any other result blocks it (1).
 s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
 {
     ColliderSpan out[2];
@@ -864,6 +894,7 @@ s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
     return 1;
 }
 
+// The index of the 32-byte graph point at address x in the graph's point array.
 s32 GetPointGraphItemIndex(PointGraph* p, s32 x) { return (x - (s32)p->points) >> 5; }
 
 s32* AllocateZeroedBackMemory(s32 bytes);
@@ -1234,16 +1265,20 @@ void LoadPointGraph(PointGraphObject* o, Stream8A* in)
 
 ASM_FUNC(func_001919F8);
 
+// Finds a path through the owner's point graph from start to goal, writing up to maxOut points to
+// out.
 s32 FindOwnerGraphPath(PointGraphObject* self, Vec02* start, Vec02* goal, s32 maxOut, Vec02* out)
 {
     return FindPointGraphPath(&self->graph, start, goal, maxOut, out);
 }
 
+// Snaps the point to the owner's point graph.
 void SnapPointToOwnerGraph(PointGraphObject* self, Vec02* p, Vec02* out)
 {
     SnapPointToPointGraph(&self->graph, p, out);
 }
 
+// Collects the spans of the segment from-to that lie in the owner graph's plane tree (up to max).
 s32 TestOwnerGraphSpan(PointGraphObject* self, Vec02* from, Vec02* to, s32 max, ColliderSpan* out)
 {
     return CollectSegmentSpansInPlaneTree((PlaneNode*)self->graph.faces, from, to, max, out);
@@ -1332,6 +1367,7 @@ void PickRandomPointOnPointGraph(PointGraphObject* self, Vec02* out)
     Vu0::Q(*out) = Vu0::MulXSum3(a, su, b, sv, c, sw).q;
 }
 
+// Sets the screen's owner and flushes the data cache when it changes.
 void SetScreenOwner(s32 value)
 {
     if (g_screenOwner != value) {
@@ -1340,21 +1376,26 @@ void SetScreenOwner(s32 value)
     }
 }
 
+// Sets the screen's owner to none.
 void ClearScreenOwner(s32 owner)
 {
     g_screenOwner = 0;
 }
 
+// Sets the list's link offset to 0x38: the list's nodes are linked through that field.
 void SetTargetVectorListLinkOffset()
 {
     SetListLinkOffset(&g_targetVectors.list, 0x38);
 }
 
+// Empties the global target-vector list.
 void ClearTargetVectorList(void)
 {
     ClearList(&g_targetVectors.list);
 }
 
+// Initialises a target vector object: the unit x vector at 0x40, f50 = 8, f54 = 9, f58 = -1, f5C
+// the largest float and no target id.
 void InitTargetVector(TargetVector* self)
 {
     InitObject(self);
@@ -1366,18 +1407,22 @@ void InitTargetVector(TargetVector* self)
     self->targetId = -1;
 }
 
+// Registers the object and appends it to the global target-vector list.
 void RegisterTargetVector(TargetVector* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetVectors.list, self);
 }
 
+// Unregisters the object and removes it from the target-vector list.
 void UnregisterTargetVector(TargetVector* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetVectors.list, self);
 }
 
+// Starts the object and, if it has a target id, finds the first object with that id (class 4) as
+// its target.
 void StartTargetVector(TargetVector* self)
 {
     StartObject(self);
@@ -1386,6 +1431,7 @@ void StartTargetVector(TargetVector* self)
     }
 }
 
+// Copies the object's data from src but keeps the kept bits of self.
 void CopyTargetVector(TargetVector* self, TargetVector* src)
 {
     PathCurveKeptBits tmp;
@@ -1394,17 +1440,20 @@ void CopyTargetVector(TargetVector* self, TargetVector* src)
     self->keep = tmp;
 }
 
+// Reads the point's position (3 floats) from the stream and then its property records.
 void LoadPointObject(PointObject* self, void* other)
 {
     ReadBufferedVector3((BufferedStream*)other, &self->pos);
     ReadPropertyRecords(self, other);
 }
 
+// Gives back the object's position (at 0x40) converted from its parent's frame to world space.
 void ConvertPositionToWorld(BaseObject* self, Vec02* out)
 {
     TransformPointBetweenFrames((PlacedObject*)self->parent, 0, (Vec02*)((u8*)self + 0x40), out);
 }
 
+// Converts the point's position from its old parent's frame into value's and then reparents it.
 void ReparentPointObject(PointObject* self, BaseObject* value)
 {
     void* sub = &self->pos;
@@ -1412,18 +1461,21 @@ void ReparentPointObject(PointObject* self, BaseObject* value)
     ReparentObject(self, value);
 }
 
+// Converts the point's position, in place, from the frame of other to world space.
 s32 ConvertPointObjectPosition(PointObject* self, void* other)
 {
     void* p = &self->pos;
     TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec02*)p, (Vec02*)p);
 }
 
+// Loads the point and then reads its text string from the stream.
 void LoadTextPointObject(TextPointObject* self, void* other)
 {
     LoadPointObject(self, other);
     ReadBufferedString((BufferedStream*)other, &self->text);
 }
 
+// Sets both of the text point's fields at 0x54 and 0x58 to 0.5.
 void ResetTextPointToHalf(TextPointObject* self)
 {
     self->f54 = 0.5f;

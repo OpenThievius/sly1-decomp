@@ -213,11 +213,13 @@ void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
 
 
+// Forgets the default font.
 void ClearDefaultFont(void)
 {
     g_defaultFont = 0;
 }
 
+// True when the id is not -1 and a font is registered under it.
 s32 IsFontLoaded(s32 a0)
 {
     if (a0 == -1) {
@@ -232,6 +234,7 @@ some:
     return 1;
 }
 
+// The font registered under an id, the default font when none is, 0 for -1.
 s32 GetFontById(s32 a)
 {
     if (a == -1) {
@@ -244,6 +247,8 @@ s32 GetFontById(s32 a)
     return g_defaultFont;
 }
 
+// Looks a character up in the table of five font escape keys and returns the font at the same
+// index, or 0; the text reader uses it for font changes inside a text.
 s32 FindFontByKeyChar(s32 a0)
 {
     s8 key = (s8)a0;
@@ -257,6 +262,7 @@ s32 FindFontByKeyChar(s32 a0)
     return 0;
 }
 
+// Copies the font's sizes, scale and the scale stack to another font.
 void CopyFontMetrics(Font* src, Font* dst)
 {
     dst->f00 = src->f00;
@@ -271,6 +277,8 @@ void CopyFontMetrics(Font* src, Font* dst)
     dst->drawZ = src->drawZ;
 }
 
+// Slot 4 of the font: sets the GS clip (scissor) register to the rectangle v (x, y, width, height),
+// y scaled by 0.4545 for the interlaced frame; does nothing for a null rectangle.
 void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj)
 {
     if (v != 0) {
@@ -284,6 +292,8 @@ void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj)
     }
 }
 
+// Slot 7 of the font: restores the clip register to the full-screen rectangle when a rectangle was
+// set.
 void ResetFontClipRect(Font* unused, Vec4U* clip, PacketWriter* obj)
 {
     if (clip != 0) {
@@ -292,6 +302,7 @@ void ResetFontClipRect(Font* unused, Vec4U* clip, PacketWriter* obj)
     }
 }
 
+// The width of a string in this font (the sum of its characters' advances); 0 for a null string.
 f32 MeasureFontString(Font* self, const char* s)
 {
     f32 acc;
@@ -308,6 +319,8 @@ f32 MeasureFontString(Font* self, const char* s)
     return acc;
 }
 
+// The height of a string wrapped to a width in this font: line height times scale times the number
+// of lines.
 f32 MeasureFontStringHeight(Font* self, u8* s, f32 width)
 {
     f32 a = (f32)self->height * self->sy;
@@ -457,8 +470,10 @@ void PushFontScale(Font* trail, f32 su, f32 sv)
     trail->sy = trail->stack[0].y * sv;
 }
 
+// Takes the last scale off the font's scale stack and makes it current.
 void PopFontScale(Font* obj) { obj->depth--; FontScale* item = &obj->stack[obj->depth]; obj->sx = item->x; obj->sy = item->y; }
 
+// Slot 1 of the font: allocates a copy of the font with its scales multiplied by x and y.
 Font* CloneFont(Font* owner, f32 x, f32 y)
 {
 	Font* out = (Font*)AllocateObjectMemory(0x88);
@@ -469,6 +484,7 @@ Font* CloneFont(Font* owner, f32 x, f32 y)
 	return out;
 }
 
+// Copies a font: its metrics plus its id, images, texture words, glyph table and mask.
 void CopyFont(Font* self, Font* dst)
 {
     CopyFontMetrics(self, dst);
@@ -485,11 +501,14 @@ void CopyFont(Font* self, Font* dst)
     dst->mask = self->mask;
 }
 
+// Slot 2 of the font: true when the font has a glyph for the key.
 s32 HasFontGlyph(Font* a, s32 b)
 {
     return FindFontGlyph(a, (s8)b) != 0;
 }
 
+// Slot 3 of the font: the advance of one character: its glyph's width plus 1 times the scale, or
+// the default advance when it has no glyph.
 f32 GetFontCharWidth(Font* self, s8 key)
 {
     FontGlyph* e = FindFontGlyph(self, key);
@@ -505,6 +524,8 @@ f32 GetFontCharWidth(Font* self, s8 key)
     return x * y;
 }
 
+// Adds the font's image and palette transfers to the packet unless this frame already has them
+// (tracked by the font's mask bit); returns whether it added them.
 s32 AddFontImagesToFrame(Font* self, void* obj)
 {
     s32 r = (g_buildFrame->flags & self->mask) == 0;
@@ -545,6 +566,8 @@ void BeginFontDraw(Font* self, Vec4U* clip, void* obj)
     BeginGifRegListTag((PacketWriter*)obj, 5, 0x43431);
 }
 
+// A slot of the font's method table: adds the font's images to the frame and opens a GIF tag
+// setting up the texture state for drawing glyphs.
 void BeginFontGlyphPacket(Font* self, void* obj)
 {
     s32 ok = AddFontImagesToFrame(self, obj);
@@ -791,6 +814,8 @@ FontGlyph* FindFontGlyph(Font* self, u8 key)
     return 0;
 }
 
+// Sets up a text reader on a string and a default font, with every colour at 0xFF808080 (opaque,
+// half intensity), and rewinds it.
 TextReader* InitTextReader(TextReader* self, char* text, Font* font)
 {
     self->inlineFont.vt = (const FontVt*)&g_fontMethods;
@@ -804,6 +829,7 @@ TextReader* InitTextReader(TextReader* self, char* text, Font* font)
     return self;
 }
 
+// Puts the reader back at the start of the text with the default font and default colour.
 void RewindTextReader(TextReader* self)
 {
     s32 t;
@@ -816,6 +842,8 @@ void RewindTextReader(TextReader* self)
     self->fontChanged = 0;
 }
 
+// Sets the reader's default colour, which colour codes in the text go back to, and the current
+// colour.
 void SetTextDefaultColor(TextReader* self, Rgba_137248* color)
 {
     u8* dst = (u8*)self;
@@ -931,6 +959,7 @@ s32 ReadTextChar(TextReader* self)
     return r;
 }
 
+// The number of characters the reader returns for the text.
 s32 CountTextChars(void* self)
 {
     s32 n = 0;
@@ -941,6 +970,7 @@ s32 CountTextChars(void* self)
     return n;
 }
 
+// Rewinds the reader and skips n characters (fewer at the end of the text).
 void SeekTextReader(TextReader* self, s32 n)
 {
     RewindTextReader(self);
@@ -956,6 +986,7 @@ void SeekTextReader(TextReader* self, s32 n)
     *self->cur = 0;
 }
 
+// The total width of the text on one line: the sum of every character's advance, newlines included.
 f32 SumTextWidth(TextReader* self)
 {
     f32 acc = 0.0f;
@@ -1014,6 +1045,8 @@ s32 WrapTextLines(TextReader* self, f32 limit)
     return lines;
 }
 
+// The height of the text wrapped to a width limit: line height of the default font times its scale
+// times the number of lines.
 f32 MeasureTextHeight(TextReader* self, f32 limit)
 {
     Font* holder = self->defaultFont;
@@ -1022,6 +1055,8 @@ f32 MeasureTextHeight(TextReader* self, f32 limit)
     return width * (f32)lines;
 }
 
+// The width of the widest line of the text (lines end at a newline): the sum of each character's
+// advance from its font, characters read through the reader so font changes in the text count.
 f32 MeasureTextWidth(TextReader* self)
 {
     f32 best = 0.0f;
@@ -1043,6 +1078,8 @@ f32 MeasureTextWidth(TextReader* self)
     return best;
 }
 
+// Wraps the text to the limit f and writes its width and its height (lines times the line height of
+// the default font, scaled) through the out pointers (each only when not null).
 void MeasureText(TextReader* self, f32 f, f32* out1, f32* out2)
 {
     s32 n = WrapTextLines(self, f);
@@ -1125,6 +1162,7 @@ void DrawAlignedText(TextReader* self, Layout_137228* p, Vec4U* clip, PacketWrit
     self->font->End(clip, s);
 }
 
+// Uploads the images of every loaded font through one bump allocator.
 void UploadAllFontImages(void)
 {
     u8 buf[16];

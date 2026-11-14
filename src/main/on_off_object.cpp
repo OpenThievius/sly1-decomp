@@ -233,6 +233,7 @@ RampProfile g_onOffCameraFadeRamp = { 4.0f, 0.0f, 0.25f, 0.0f };
 RampProfile g_onOffCameraAngleRamp = { 2.5f, 0.0f, 0.35f, 15.0f };
 Vec02 g_onOffCameraProbeOffsets[5] = { { 0, 0, 0, 0 }, { 0, -50.0f, 0, 0 }, { 0, 50.0f, 0, 0 }, { 0, 0, 75.0f, 0 }, { 0, 0, -50.0f, 0 } };
 
+// Gives the block at 0x2F0 of the object, or the default block when there is no object.
 void* GetOnOffObjectBlock(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
 struct CameraPlacement { Vec02 q[5]; };
@@ -285,6 +286,7 @@ void InitOnOffObject(OnOffObject* self)
     self->forcedState = -1;
 }
 
+// Unregisters the placed object, switches it off and drops its queued calls.
 void UnregisterOnOffObject(OnOffObject* self)
 {
     UnregisterPlacedObject(self);
@@ -328,6 +330,8 @@ void StartOnOffObject(OnOffObject* self)
     StartPlacedObject(self);
 }
 
+// Changes the state. On (1) pushes a camera controller and triggers script event 2; off (0) removes
+// the camera controllers this object pushed and triggers event 3. Stamps the change time.
 void SetOnOffObjectState(void* selfv, s32 state)
 {
     OnOffObject* self = (OnOffObject*)selfv;
@@ -350,6 +354,7 @@ tail:
     self->stateChangeTime = g_gameTime;
 }
 
+// Sets the forced state (-1 for none) and, if it changed, updates the state at once.
 void SetOnOffObjectForcedState(void* selfv, s32 value)
 {
     OnOffObject* self = (OnOffObject*)selfv;
@@ -358,6 +363,10 @@ void SetOnOffObjectForcedState(void* selfv, s32 value)
     UpdateOnOffObjectState(self, 0, 0);
 }
 
+// Decides the on/off state from the active switched collider: forced state if set, else on while
+// the collider's position is inside the object's face tree. A change of collider switches off
+// first. While the player is in state 2 with the camera not snapping, and no forced state, it
+// leaves the state as it is.
 void UpdateOnOffObjectState(OnOffObject* self, s32 unused1, s32 unused2) {
     FacePoint loc;
     void* p = GetActiveSwitchedCollider();
@@ -385,6 +394,7 @@ void UpdateOnOffObjectState(OnOffObject* self, s32 unused1, s32 unused2) {
     SetOnOffObjectState(self, st);
 }
 
+// Updates the placed object and, unless its forced state is 0, queues a state update.
 void UpdateOnOffObject(OnOffObject* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
@@ -398,6 +408,7 @@ void DrawOnOffObject(OnOffObject* self, void* arg1, void* arg2)
     DrawPlacedObject(self, arg1, arg2);
 }
 
+// Freezes or thaws the placed object; freezing also switches it off.
 void SetOnOffObjectFrozen(OnOffObject* self, s32 p)
 {
     SetPlacedObjectFrozen(self, p);
@@ -406,6 +417,7 @@ void SetOnOffObjectFrozen(OnOffObject* self, s32 p)
     }
 }
 
+// Sets the block's current and target values to value and its factor at 0x78 to 1.
 void SetOnOffObjectBlockValue(OnOffObject* self, f32 value) { self->block2F0.f74 = value; self->block2F0.f78 = 1.0f; self->block2F0.f70 = value; }
 
 typedef void (*OnOffShapeFn)(f32 angle, Arr63* obj, Vec02* out, Vec02* dir);
@@ -617,6 +629,7 @@ void ActivateOnOffCameraController(OnOffCameraController* self, OnOffObject* obj
     SetCameraAimOffsetFromScreenPoint(cam, &sum, ((Block63*)block)->f58, ((Block63*)block)->f5C);
 }
 
+// Restores the camera's zoom goal from the source it overrode (if it did) and forgets the source.
 void DeactivateOnOffCameraController(OnOffCameraController* self)
 {
     CameraFovSource* s = (CameraFovSource*)self->ptr;
@@ -629,10 +642,12 @@ void DeactivateOnOffCameraController(OnOffCameraController* self)
     self->ptr = 0;
 }
 
+// Does nothing.
 void NoteOnOffCameraControllerPushed(OnOffCameraController* self, s32 arg)
 {
 }
 
+// Does nothing.
 void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg) {}
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
@@ -1294,6 +1309,7 @@ WorldLoadRequest::WorldLoadRequest()
 
 WorldLoadRequest g_worldLoadRequest;
 
+// Records a world load request (key, two arguments and flags) unless one is already pending.
 void QueueWorldLoad(WorldLoadRequest* self, WorldKeyBlock* key, s32 a2, s32 a3, s32 flags)
 {
     if (self->state == 0) {
@@ -1377,6 +1393,8 @@ end:
     self->state = 0;
 }
 
+// Mutes IOP channel 8 and asks for a world load: mode 0, 2 and 3 queue a load with kind 0, 2 and 4;
+// mode 1 starts the screen fade instead.
 void RequestWorldLoadByMode(s32 mode)
 {
     s32 n;

@@ -80,6 +80,7 @@ void InitChildGroupObject(ChildGroupObject* self)
 }
 
 
+// Loads the collider from the stream, then finds or builds the member group.
 void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -88,6 +89,8 @@ void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
 
 u32 CopyToFrontMemory(s32 size, void* src);
 
+// Copies the collider and, if the source has a slot record (0x24 bytes), makes a copy of it in
+// front memory for this object.
 void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other)
 {
     CopyCollider(self, other);
@@ -140,6 +143,8 @@ void StartChildGroupObject(ChildGroupObject* self)
 }
 
 
+// Handles the placed-object notification, and on kind 0xA aimed at this object starts the delay
+// with no offset unless a contact mode is already set.
 void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
@@ -154,6 +159,9 @@ void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessag
 
 extern f32 g_gameTime;
 
+// Per-frame update: once the blast time has passed, or the speed has dropped under the settle
+// speed, applies the repulsion from the group; otherwise moves the collider as usual and
+// refreshes its contacts while it is active.
 void UpdateChildGroupObject(ChildGroupObject* self, f32 dt)
 {
     s32 slow;
@@ -222,6 +230,9 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 
 s32 CreatePooledContact(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
+// Looks up the entry with the given key among the object's entries and, if found and the object
+// is active, creates a pooled contact for it (kind 9) carrying that entry's data and value; this
+// is the slot the class tables share with the other colliders.
 void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
 {
     s32 i;
@@ -381,6 +392,7 @@ void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec02* pos, Vec
 
 extern f32 g_gameTime;
 
+// Sets the blast time to the game time plus delta (the group reacts once that time has passed).
 void StartChildGroupDelay(ChildGroupObject* self, f32 delta)
 {
     self->blastTime = g_gameTime + delta;
@@ -621,6 +633,7 @@ void ApplyChildGroupRepulsion(ChildGroupObject* self)
 }
 
 
+// Gives back the object's sound parameters record, creating and initialising it on first use.
 s32 GetChildGroupSoundParams(ChildGroupObject* self)
 {
     if (self->slot == 0) {

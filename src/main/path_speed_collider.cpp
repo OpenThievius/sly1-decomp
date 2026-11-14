@@ -66,6 +66,8 @@ f32 D_00264248 = 2.5f;
 f32 D_0026424C = 300.0f;
 f32 g_pathSpeedColliderRotationRamp[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 
+// Initialises a path-speed collider: the player-flagged collider's defaults, then its level limit
+// 10, level rate 1 and the fields at 0x6CC-0x6D8 (1000, 0, 0.5, 3000).
 void InitC24Object(C24* self)
 {
     InitPlayerFlaggedCollider(self);
@@ -77,6 +79,8 @@ void InitC24Object(C24* self)
     self->f6D4 = 0.5f;
 }
 
+// Starts a path-speed collider: starts it as a masked collider, resolves its links, creates its
+// state walker and allocates a 0xC00-byte curve table (an empty weight curve plus its storage).
 void StartC24Object(C24* self)
 {
     StartMaskedCollider(self);

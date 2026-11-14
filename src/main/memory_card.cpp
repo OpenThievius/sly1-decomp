@@ -79,6 +79,7 @@ s32 ReadMemoryCardFile(void* unused, s32 fd, void* buf, s32 size, s32* got);
 s32 WriteMemoryCardFile(void* unused, s32 fd, const void* data, s32 n, s32* got);
 s32 CreateMemoryCardFile(void* self, void* code, void* data, s32 version);
 
+// Starts the card client, the background job and the global memory card object (port 0, slot 0).
 void InitMemoryCardSystem(void)
 {
 	InitMemoryCardClient();
@@ -86,12 +87,15 @@ void InitMemoryCardSystem(void)
 	InitMemoryCard(&g_memoryCard, 0, 0);
 }
 
+// Creates the job's lock semaphore (count 1) and sets no thread and result 0x22.
 void InitBackgroundJob(BackgroundJob* self)
 {
     s32 r = CreateLockSemaphore(1, 1);
     self->semaphoreId = r; self->thread = -1; self->result = 0x22;
 }
 
+// The background thread's entry: waits for the job's semaphore, runs the job, stores its result,
+// clears the job and thread, posts the semaphore and ends the thread.
 void RunBackgroundJob()
 {
     AwaitSemaphore(g_backgroundJob.semaphore);
@@ -111,6 +115,8 @@ extern u8 g_globalPointer[];
 s32 MakeThread(ThreadParams* param);
 void RunThread(s32 thread, void* arg);
 
+// Waits for the previous job, then runs fn(arg) on a new thread (priority 3, 0x4000-byte stack)
+// through RunBackgroundJob; the job's result starts as 0x20 (running).
 void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg)
 {
     ThreadParams param;
@@ -129,6 +135,8 @@ void StartBackgroundJob(BackgroundJob* job, void* fn, void* arg)
     RunThread(job->thread, job);
 }
 
+// When a job is running, raises its thread's priority to 1, then waits for the job's semaphore and
+// posts it again.
 void WaitForBackgroundJob(BackgroundJob* job)
 {
     if (IsBackgroundJobRunning(&g_backgroundJob)) {
@@ -138,6 +146,7 @@ void WaitForBackgroundJob(BackgroundJob* job)
     PostSemaphore(job->semaphore);
 }
 
+// True while the job has a thread (its thread id is not -1).
 s32 IsBackgroundJobRunning(BackgroundJob* p)
 {
 	return *(s32*)((char*)p + 4) != -1;
@@ -237,6 +246,8 @@ void ConvertMemoryCardDirEntry(CardDirEntry* s, CardFileInfo* d)
     d->modifiedSecond = s->b9;
 }
 
+// Maps a card call's immediate result to a code: 0 to 29 (pending, to be waited for), positive to
+// 30, negative to 31.
 s32 ClassifyMemoryCardCallResult(s32 value)
 {
 	if (value == 0) return 29;
@@ -247,6 +258,7 @@ s32 ClassifyMemoryCardCallResult(s32 value)
 // Two words a card call gives back (SyncCardRequest's command and result, a handle and a count).
 struct CardCallResult { s32 a; s32 b; };
 
+// Maps a sync call's raw result to a code: 0 to 32, 1 to 33, -1 to 34, anything else 31.
 s32 ClassifyMemoryCardSyncResult(s32 value)
 {
     switch (value) {
@@ -408,6 +420,8 @@ s32 MapMemoryCardErrorCode(s32 a, s32 b)
     return r;
 }
 
+// Waits for (or, with noWait, polls) the card call's result; *out gets its value and an error
+// result 0x21 is mapped to a code by MapMemoryCardErrorCode for the call number.
 s32 SyncMemoryCardResult(s32 noWait, s32 call, s32* out)
 {
     CardCallResult t;
@@ -421,6 +435,8 @@ s32 SyncMemoryCardResult(s32 noWait, s32 call, s32* out)
     return r;
 }
 
+// Classifies the result of a card call and, when it is still pending (29), waits for it with
+// SyncMemoryCardResult.
 s32 FinishMemoryCardCall(s32 value, s32 call, s32* out)
 {
 	s32 result = ClassifyMemoryCardCallResult(value);
@@ -429,6 +445,8 @@ s32 FinishMemoryCardCall(s32 value, s32 call, s32* out)
 	return result;
 }
 
+// Clears a card object (0x4F50 bytes), sets state -1, target state 0, display mode 0 and its port
+// and slot.
 void InitMemoryCard(MemoryCard* self, s32 a, s32 b)
 {
     FillMemory(self, 0, 0x4F50);
@@ -471,6 +489,8 @@ void UpdateMemoryCard(MemoryCard* self)
     }
 }
 
+// Compares two directory entries by their time stamps: the u16 at 0x54, then the bytes at 0x52,
+// 0x53, 0x56, 0x57 and 0x58 in turn; the first difference is the result.
 s32 CompareMemoryCardEntryTimes(void* lhs, void* rhs)
 {
 	s32 difference = *(u16*)((char*)lhs + 0x54) - *(u16*)((char*)rhs + 0x54);
@@ -529,6 +549,7 @@ store:
     self->stateTime = g_gameClock.elapsed;
 }
 
+// Changes the display mode and notes the time; mode 2 also clears the save-wanted flag.
 void SetMemoryCardDisplayMode(MemoryCard* self, s32 value)
 {
     if (value != self->displayMode) {
@@ -538,6 +559,7 @@ void SetMemoryCardDisplayMode(MemoryCard* self, s32 value)
     }
 }
 
+// The background job that formats the card: target state 3 on success, 2 on an error.
 s32 RunMemoryCardFormatJob(MemoryCard* self)
 {
     s32 r = FormatMemoryCard(self);
@@ -552,6 +574,8 @@ s32 RunMemoryCardFormatJob(MemoryCard* self)
 // The 16 bytes func_0018C1E8 hands func_001407A0: a KeyId and two words it leaves alone.
 struct KeyIdSlot { KeyId id; s32 w8; s32 wC; };
 
+// Unmasks a key record's two words into a key id and gives back its second part when the key is
+// set, else 0.
 s32 GetKeyedDataSize(KeyRecord* self)
 {
     KeyIdSlot key;
@@ -656,6 +680,8 @@ s32 LoadMemoryCardSaveSlots(void* p) {
     return r;
 }
 
+// Copies the loaded save image into the global save data and applies its pad-pattern setting; gives
+// back 0x2C when no image was loaded, else 0.
 s32 ApplyMemoryCardImage(MemoryCard* self)
 {
     if (self->image == 0) {
@@ -689,6 +715,8 @@ s32 SaveGameToMemoryCardSlot(MemoryCard* self)
 }
 
 
+// Writes the save slot whose data i4F4C points to: builds the slot's file name from its number (its
+// index in the slot array), then writes it with WriteMemoryCardSlot; 0x2C when no slot is selected.
 s32 WriteSelectedMemoryCardSlot(MemoryCard* self)
 {
     CardFileName buf;
@@ -709,6 +737,9 @@ s32 WriteSelectedMemoryCardSlot(MemoryCard* self)
 }
 
 
+// When a save is wanted (i4F44), either opens the pause menu's page 0x14 when the save option bit
+// 0x100 is not set, or starts SaveGameToMemoryCardSlot as a background job and shows the cycling
+// glyph.
 void StartMemoryCardSave(MemoryCard* self)
 {
     if (self->i4F44 != 0) {
@@ -768,6 +799,8 @@ s32 ListMemoryCardDirectory(void* ctx, u8* b, s32 c, u8* d, s32* e)
     return 0;
 }
 
+// Lists the directory for a name: 0 when exactly one entry is found, else 14 (or the listing's
+// error).
 s32 CheckMemoryCardFileExists(void* a0, void* a1, void* a2)
 {
 	s32 temp;
@@ -905,6 +938,7 @@ s32 WriteMemoryCardSaveHeader(void* owner, void* a1, void* a2)
     return CreateMemoryCardFile(owner, &buf, &c, 0x3C4);
 }
 
+// Writes the icon file into the save directory, with the icon key and file name.
 s32 WriteMemoryCardIcon(void* self, const char* dir)
 {
     return WriteMemoryCardKeyedFile(self, dir, (void*)g_memoryCardIconKey, g_iconFileName);
@@ -1016,6 +1050,8 @@ s32 ReadMemoryCardSlotFile(void* a0, void* a1, GameProgress* out, void* i)
 // The first words of a save image (a GameProgress) as func_0018CFC0 stamps it.
 struct ProgressHeader { s32 type; s32 size; s32 handle; };
 
+// Marks the progress block as type 18, size 0x1A00, stores its checksum and creates the card file
+// from it.
 s32 WriteMemoryCardSlotFile(void* owner, void* name, void* s)
 {
     ProgressHeader* state = (ProgressHeader*)s;
@@ -1025,6 +1061,8 @@ s32 WriteMemoryCardSlotFile(void* owner, void* name, void* s)
         (state->handle = ChecksumGameProgress((GameProgress*)state), state), 0x1A00);
 }
 
+// Resets the game progress at a2, writes the slot file and then checks that it is on the card (into
+// a3, or a scratch entry when a3 is 0); gives back the first error.
 s32 WriteMemoryCardSlot(void* a0, void* a1, void* a2, void* a3)
 {
     u8 local[0x60];
@@ -1035,6 +1073,9 @@ s32 WriteMemoryCardSlot(void* a0, void* a1, void* a2, void* a3)
     return CheckMemoryCardFileExists(a0, a1, a3);
 }
 
+// Asks the card for its info and sets the target state from the answer: 1 for results 9 and 11
+// (reported as 11), 2 for 10, 12 and for a card that has no formatted flag, 3 once the card is
+// formatted. Schedules the next poll 0.3 s later.
 s32 PollMemoryCard(MemoryCard* o)
 {
     s32 r = FinishMemoryCardCall(GetCardInfo(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), 1, 0);
@@ -1063,6 +1104,8 @@ s32 PollMemoryCard(MemoryCard* o)
     return r;
 }
 
+// Reads the card info; *a1 gets the free space in bytes (free blocks times 1024), or 0 on an error.
+// Result 9 counts as success and 10 maps to 12.
 s32 GetMemoryCardFreeBytes(void* p, s32* a1)
 {
     MemoryCard* a0 = (MemoryCard*)p;
@@ -1075,23 +1118,27 @@ s32 GetMemoryCardFreeBytes(void* p, s32* a1)
     return v;
 }
 
+// Starts a format of the card and waits for it (call 0x10).
 s32 FormatMemoryCard(void* p)
 {
 	s32 result = RequestCardFormat(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8));
 	return FinishMemoryCardCall(result, 0x10, 0);
 }
 
+// Makes a directory on the card (call 0xB); an already-exists result (0x18) counts as success.
 s32 CreateMemoryCardDirectory(void* p, void* value)
 {
 	s32 result = FinishMemoryCardCall(MakeCardDirectory(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), (const char*)value), 0xB, 0);
 	return result == 0x18 ? 0 : result;
 }
 
+// Opens a file on the card's port and slot; the file handle goes to *fd. Call number 2.
 s32 OpenMemoryCardFile(void* p, const char* name, s32 mode, s32* fd)
 {
 	return FinishMemoryCardCall(OpenCardFile(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), name, mode), 2, fd);
 }
 
+// Closes an open file (call 3).
 s32 CloseMemoryCardFile(void* unused, s32 fd)
 {
 	return FinishMemoryCardCall(CloseCardFile(fd), 3, 0);
@@ -1099,17 +1146,21 @@ s32 CloseMemoryCardFile(void* unused, s32 fd)
 
 LINKER_REMNANT(func_0018D2E0);
 
+// Reads size bytes from an open file; *got is the count read. Call number 5.
 s32 ReadMemoryCardFile(void* unused, s32 fd, void* buf, s32 size, s32* got)
 {
     return FinishMemoryCardCall(ReadCardFile(fd, buf, size), 5, got);
 }
 
+// Writes n bytes to an open file; *got is the count written. Call number 6.
 s32 WriteMemoryCardFile(void* unused, s32 fd, const void* data, s32 n, s32* got)
 {
 	return FinishMemoryCardCall(WriteCardFile(fd, data, n), 6, got);
 }
 
 
+// Creates a file on the card (open with mode 514), writes version bytes of data and closes it;
+// gives back the first error, or 7 when fewer bytes than that were written.
 s32 CreateMemoryCardFile(void* self, void* code, void* data, s32 version)
 {
     CardCallResult result;

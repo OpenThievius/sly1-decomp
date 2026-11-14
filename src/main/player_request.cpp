@@ -166,6 +166,8 @@ void CreateSixEntryBlend(TurningCollider* self, PlayerBlendItem* items, BlendAni
 
 struct WeightedRow { f32 w; u8 pad0[0xC]; Vec02 v; u8 pad1[0x14]; f32 d; u8 pad2[0x18]; };
 
+// Sums n weighted rows into *out: each row's vector times its weight times its d divided by
+// scale[1].
 void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec02* out)
 {
     Vec02 k;
@@ -347,6 +349,9 @@ struct TurnBlendRecords {
 };
 
 
+// Stores the heading and sets the six blend weights: 1 and 0 for the first two when there is no
+// second blend, else 1-f13 and f13, the rest 0; applies them to the animation view and sums the
+// blended vectors into the player's field 0x640.
 void SetPlayerBlendWeights(f32 f12, f32 f13, TurningCollider* a0, TurnBlendRecords* a1, BlendAnimationView* a2)
 {
     a0->heading = f12;
@@ -528,6 +533,8 @@ void SetPlayerVelocityFromHeading(Player* self, const Vec02* basis, BlendAnimati
 
 
 
+// Copies the 7-entry player object table (0x54 bytes) to the front heap and fills each entry's
+// object by looking its id up in the world.
 void ResolvePlayerTableObjects(Player* self)
 {
     self->ringCount = 7;
@@ -627,12 +634,15 @@ void UpdatePlayerRequestSubState(Player* self) {
     }
 }
 
+// Sets the callback RunPlayerCallback runs once.
 void SetPlayerCallback(Player* self, void (*value)(Player* self))
 {
     self->cb26B0 = value;
 }
 
 
+// Clears pending-flag bit 0x10, takes and clears the stored callback and runs it; with none, ends
+// the request state when the sub-state is one of 0x2D-0x31, else enters state 2 sub-state 2.
 void RunPlayerCallback(Player* self)
 {
     s32 v = self->pendingFlags;
@@ -842,6 +852,8 @@ void ContinuePlayerRequestKind0(Player* self)
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec02* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
+// Plays sound 0xA6, puts the player into state 4 sub-state 0x2A and sets ContinuePlayerSubState2A
+// as the callback for when that ends.
 void ContinuePlayerRequestKind6(Player* self)
 {
     StartSoundEffect(0xA6, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -849,6 +861,8 @@ void ContinuePlayerRequestKind6(Player* self)
     SetPlayerCallback(self, ContinuePlayerSubState2A);
 }
 
+// The callback of sub-state 0x2A: continue-method 0x50 when HasSpareCount says there is a spare,
+// else state 4 sub-state 0x2D.
 void ContinuePlayerSubState2A(Player* self)
 {
     if (HasSpareCount()) {
@@ -858,6 +872,8 @@ void ContinuePlayerSubState2A(Player* self)
     }
 }
 
+// Calls the player's methods 0x20 and 0x21 with its saved velocity and spin, then goes to the
+// continue-method 0x50 when HasSpareCount says there is a spare, else to state 4 sub-state 0x2D.
 void ContinuePlayerRequestKind1Or2(Player* self)
 {
     self->desc02()->m20(self, &self->savedVelocity);
@@ -937,6 +953,8 @@ zero:
 void SetCrossfadeRatioDeep(PlacedObject* self, f32 value);
 void SpendReserveUnit(void);
 
+// Ends a request state: sets the object's crossfade ratio to 1 through its tree and calls
+// SpendReserveUnit.
 void EndPlayerRequestState(void* self)
 {
     SetCrossfadeRatioDeep((PlacedObject*)self, 1.0f);
@@ -951,6 +969,8 @@ struct __attribute__((aligned(16))) RingEntry {
     u8 pad14[0x20 - 0x14];
 };
 
+// The comparison for SortElements on ring entries: -1 when a's angle is lower than b's, else 1 (so
+// ascending by angle).
 s32 CompareSortedTargets(RingEntry* a, RingEntry* b) { if (a->angle < b->angle) return -1; return 1; }
 
 

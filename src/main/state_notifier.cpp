@@ -209,12 +209,14 @@ f32 g_armedProbeOffset[4] = { 0.0f, 0.0f, 200.0f, 0.0f };
 f32 g_armedPushScale = 0.75f;
 f32 D_00261BE4 = -1.0f;
 
+// Initialises the collider with a scale of 100.
 void InitScaledOffsetObject(ScaledOffsetObject* self)
 {
     InitCollider(self);
     self->scale = 100.0f;
 }
 
+// Loads the collider, then the two offset factors.
 void LoadScaledOffsetObject(ScaledOffsetObject* self, void* p)
 {
     LoadCollider(self, (BufferedStream*)p);
@@ -222,12 +224,15 @@ void LoadScaledOffsetObject(ScaledOffsetObject* self, void* p)
     self->factorY = ReadBufferedFloat((BufferedStream*)p);
 }
 
+// Starts the placed object and applies the offset.
 void StartScaledOffsetObject(ScaledOffsetObject* self)
 {
     StartPlacedObject(self);
     ApplyScaledOffset(self);
 }
 
+// Pushes one end of a contact out along the cross product of the object's second axis and the
+// contact normal by the scale, normalised; does nothing when that vector is almost zero.
 void ResolveScaledOffsetContact(ScaledOffsetObject* self, Contact03* c, s32 end)
 {
     Vec02 push;
@@ -243,6 +248,8 @@ void ResolveScaledOffsetContact(ScaledOffsetObject* self, Contact03* c, s32 end)
     }
 }
 
+// Sets the scale and, when it changed, clears the root's state bits, reapplies the offset and
+// clears the root tries.
 void SetOffsetScale(ScaledOffsetObject* self, f32 v)
 {
     if (v != self->scale) {
@@ -253,6 +260,8 @@ void SetOffsetScale(ScaledOffsetObject* self, f32 v)
     }
 }
 
+// Finds the first element of kind 6 and sets its x and y offset to the scale times the object's two
+// factors, negated.
 void ApplyScaledOffset(ScaledOffsetObject* self)
 {
     for (s32 i = 0; i < self->elemCount; i++) {
@@ -265,6 +274,8 @@ void ApplyScaledOffset(ScaledOffsetObject* self)
     }
 }
 
+// Initialises the placed object, adds the notifier to the world's list (0x1C54), takes a flag table
+// index and sets the defaults: initial mode 0, count rate 30, tint 0x10, armed.
 void InitStateNotifier(StateNotifier* self)
 {
     self->initialMode = 0;
@@ -281,6 +292,7 @@ void InitStateNotifier(StateNotifier* self)
     self->armed = 1;
 }
 
+// Marks the object, loads the placed object and resolves its links.
 void LoadStateNotifier(StateNotifier* self, void* arg)
 {
     SetClass75ObjectField90(self, 1);
@@ -288,6 +300,7 @@ void LoadStateNotifier(StateNotifier* self, void* arg)
     ResolveObjectLinks(self, 5, g_stateNotifierLinks);
 }
 
+// Copies the placed object but keeps this notifier's own flag index and 8 bytes at 0x374.
 void CopyStateNotifier(StateNotifier* self, void* arg)
 {
     s32 keep = self->flagIndex;
@@ -298,6 +311,8 @@ void CopyStateNotifier(StateNotifier* self, void* arg)
     self->flagIndex = keep;
 }
 
+// Starts the placed object, finds and starts the listener (id 0x75), and puts the notifier in mode
+// 2 if its flag table bit is already set (except at entry 0x308), else in its initial mode.
 void StartStateNotifier(StateNotifier* self)
 {
     StartPlacedObject(self);
@@ -548,6 +563,8 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
     }
 }
 
+// False for a collider with the 0x8000 << 28 flag or whose root is of kind 5, 0x27, 0x3B, 0x40 or
+// 0x2E; true otherwise.
 s32 IsEligibleNotifierTarget(void* unused, Collider* self)
 {
     u64 bit = 0x8000;
@@ -704,6 +721,7 @@ void TriggerStateNotifierNearPlayer(StateNotifier* self)
     }
 }
 
+// When armed and the contact has flag 0x10, puts the notifier in mode 1; always returns 1.
 s32 HandleStateNotifierContact(StateNotifier* self, ContactObject* b)
 {
     if (self->armed != 0) {
@@ -1009,6 +1027,8 @@ void SetStateNotifierState(Camera* self, s32 state)
 }
 
 
+// Initialises the state notifier with its radii, speeds and retention factors, and a time range of
+// 8 to 10.
 void InitTimeRangeNotifier(TimeRangeNotifier* self)
 {
     InitStateNotifier(self);
@@ -1023,11 +1043,14 @@ void InitTimeRangeNotifier(TimeRangeNotifier* self)
     self->timeMax = 10.0f;
 }
 
+// Puts the notifier in mode 2 (done).
 void CompleteTimeRangeNotifier(TimeRangeNotifier* self)
 {
     self->desc02()->m2F(self, 2);
 }
 
+// Passes the notification on. When the host's state walker reports (kind 0x14) that it reached
+// state 0x263, tells the world's listener (state 1) and queues CompleteTimeRangeNotifier.
 void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void* target)
 {
     NotifyFrame fr;
@@ -1045,6 +1068,8 @@ void HandleTimeRangeNotifierNotification(TimeRangeNotifier* self, s32 kind, void
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteTimeRangeNotifier, self, 0, 0);
 }
 
+// Updates the state notifier; while in state 0 with f338 set, counts timeLeft down by the frame
+// time (not while D_00270458 is 2) and goes to mode 6 when it runs out.
 void UpdateTimeRangeNotifier(TimeRangeNotifier* self, f32 dt)
 {
     UpdateStateNotifier(self, dt);
@@ -1089,6 +1114,7 @@ void PlaceSpareSoundNotifier(World* self)
     }
 }
 
+// Adds one to the saved reserve count, at most 99.
 void AddReserveUnit(void)
 {
     GameProgress* g = g_saveData;
@@ -1172,6 +1198,7 @@ void SetEffectNotifierState(TimeRangeNotifier* self, s32 mode)
     }
 }
 
+// Initialises the state notifier with its radii, speeds and retention factors.
 void InitSoundNotifier(SoundNotifier* self)
 {
     SoundNotifier* o = self;
@@ -1190,6 +1217,8 @@ void InitSoundNotifier(SoundNotifier* self)
     o->triggerRadius = k60;
 }
 
+// Changes the state. Mode 1 plays sound 0x74 and triggers script event 2, and the notifier goes to
+// mode 4 instead.
 void SetSoundNotifierState(SoundNotifier* self, s32 mode)
 {
     if (self->state == mode) return;
@@ -1201,6 +1230,8 @@ void SetSoundNotifierState(SoundNotifier* self, s32 mode)
     SetStateNotifierState((Camera*)self, mode);
 }
 
+// Initialises the state notifier with its radii, speeds and retention factors; starts in mode 2
+// when the current entry has flag 2.
 void InitSaveNotifier(SaveNotifier* self)
 {
     SaveNotifier* o = self;
@@ -1248,6 +1279,8 @@ void SetSaveNotifierState(SaveNotifier* self, s32 mode)
     SetStateNotifierState((Camera*)self, mode);
 }
 
+// Initialises the state notifier with its radii, speeds and retention factors; starts in mode 2
+// when the word at D_0026EC60 is 0.
 void InitDeadlineNotifier(DeadlineNotifier* self)
 {
     InitStateNotifier(self);
@@ -1263,17 +1296,21 @@ void InitDeadlineNotifier(DeadlineNotifier* self)
     }
 }
 
+// Starts the state notifier and remembers it as the deadline notifier.
 void StartDeadlineNotifier(DeadlineNotifier* self)
 {
     StartStateNotifier(self);
     g_deadlineNotifier = self;
 }
 
+// Puts the notifier in mode 2 (done).
 void CompleteDeadlineNotifier(DeadlineNotifier* self)
 {
     self->desc02()->m2F(self, 2);
 }
 
+// Same for the deadline notifier: when its host's walker reaches state 0x263, tells the world's
+// listener (state 1) and queues CompleteDeadlineNotifier.
 void HandleDeadlineNotifierNotification(DeadlineNotifier* self, s32 kind, void* msg)
 {
     NotifyFrame fr;
@@ -1291,6 +1328,8 @@ void HandleDeadlineNotifierNotification(DeadlineNotifier* self, s32 kind, void* 
     AppendQueuedCall(self->world, (void*)CompleteDeadlineNotifier, self, 0, 0);
 }
 
+// Updates the state notifier; in state 0 goes to mode 6 once the game time reaches the world's
+// deadline.
 void UpdateNotifierWorldDeadline(DeadlineNotifier* self, f32 dt)
 {
     UpdateStateNotifier(self, dt);
@@ -1298,6 +1337,8 @@ void UpdateNotifierWorldDeadline(DeadlineNotifier* self, f32 dt)
     if (self->world->f2308 <= g_gameTime) self->desc02()->m2F(self, 6);
 }
 
+// Changes the state. Mode 1 sets the timer caption's best-time state to 2, tells the listener (slot
+// 31) and goes to mode 2 instead.
 void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode)
 {
     ListenerMessage msg;
@@ -1315,6 +1356,7 @@ void SetDeadlineNotifierState(DeadlineNotifier* self, s32 mode)
     SetStateNotifierState((Camera*)self, mode);
 }
 
+// Comparison for a sort into descending order: 1 when the first is smaller, else -1.
 s32 CompareFloatsDescending(const f32* first, const f32* second)
 {
     s32 result = -1;
@@ -1423,6 +1465,8 @@ s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec02* a2, s32 n, StateNotif
     return count;
 }
 
+// Puts every notifier of kind 0x56 in the world's list into mode 2 (done), unless the save is at
+// entry 0x308 or the spare count is under its limit and D_0026EC58 is under 2.
 void CompleteSoundNotifiers(World* self)
 {
     GameProgress* g = g_saveData;
@@ -1441,6 +1485,8 @@ void CompleteSoundNotifiers(World* self)
     } while (p != 0);
 }
 
+// Initialises the state notifier with its radii, speeds and retention factors, and a time range of
+// 4 to 6.
 void InitCountdownNotifier(CountdownNotifier* self)
 {
     InitStateNotifier(self);
@@ -1455,11 +1501,14 @@ void InitCountdownNotifier(CountdownNotifier* self)
     self->timeMax = 6.0f;
 }
 
+// Puts the notifier in mode 2 (done).
 void CompleteCountdownNotifier(CountdownNotifier* self)
 {
     self->desc02()->m2F(self, 2);
 }
 
+// Same for the countdown notifier: when its host's walker reaches state 0x263, tells the world's
+// listener (state 1) and queues CompleteCountdownNotifier.
 void HandleCountdownNotifierNotification(CountdownNotifier* self, s32 kind, void* msg)
 {
     NotifyFrame fr;
@@ -1477,6 +1526,8 @@ void HandleCountdownNotifierNotification(CountdownNotifier* self, s32 kind, void
     AppendQueuedCall(self->world, (void*)(void (*)(void*))CompleteCountdownNotifier, self, 0, 0);
 }
 
+// Updates the state notifier; while in state 0 with f338 set, counts timeLeft down by the frame
+// time (not while D_00270458 is 2) and goes to mode 6 when it runs out.
 void CountDownNotifierTimer(CountdownNotifier* self, f32 dt)
 {
     UpdateStateNotifier(self, dt);
@@ -1490,6 +1541,8 @@ void CountDownNotifierTimer(CountdownNotifier* self, f32 dt)
     }
 }
 
+// Calls slot 20 of the reserve count caption, then adds one to the saved reserve count (at most 99)
+// and restarts the caption's count at rate 250.
 void AddReserveUnitNow(void* self)
 {
     T217D_E30* obj = &g_reserveCountCaption;
@@ -1552,6 +1605,7 @@ call_tail:
     SetStateNotifierState((Camera*)self, mode);
 }
 
+// Initialises the state notifier, then clears its armed flag.
 void InitArmedStateNotifier(ArmedStateNotifier* self)
 {
     InitStateNotifier(self);

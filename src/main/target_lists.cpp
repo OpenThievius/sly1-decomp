@@ -297,6 +297,8 @@ List01 g_targetCurveList = { 0 };
 List01 g_targetPointList = { 0 };
 List01 g_partList = { 0 };
 
+// Sets the link offset of the three lists (target curves 0x38, target points 0x50, parts
+// 0x558).
 void SetObjectListLinkOffsets()
 {
     SetListLinkOffset(&g_targetCurveList, 0x38);
@@ -304,6 +306,7 @@ void SetObjectListLinkOffsets()
     SetListLinkOffset(&g_partList, 0x558);
 }
 
+// Empties the three lists (target curves, target points, parts).
 void ClearObjectLists()
 {
     ClearList(&g_targetCurveList);
@@ -311,6 +314,8 @@ void ClearObjectLists()
     ClearList(&g_partList);
 }
 
+// Initialiser of the target curve (class 0x6F): no target id (-1), f4C = 1, f50 = 3 and the
+// largest float as its range.
 void InitTargetCurve(TargetCurve* self)
 {
     InitObject(self);
@@ -320,18 +325,22 @@ void InitTargetCurve(TargetCurve* self)
     self->f58 = 3.4028235e+38f;
 }
 
+// Registers a target curve as an object and adds it to the list of target curves.
 void RegisterTargetCurve(TargetCurve* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetCurveList, self);
 }
 
+// Undoes RegisterTargetCurve.
 void UnregisterTargetCurve(TargetCurve* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetCurveList, self);
 }
 
+// After loading: finds the object the curve targets by id (under its parent), keeps it and
+// clears its f398.
 void PostLoadTargetCurve(TargetCurve* self)
 {
     if (self->targetId != -1) {
@@ -341,6 +350,7 @@ void PostLoadTargetCurve(TargetCurve* self)
     }
 }
 
+// Copy of a target curve: copies the object data but keeps its own list bits.
 void CopyTargetCurve(TargetCurve* self, TargetCurve* src)
 {
     PathCurveKeptBits saved = self->keep;
@@ -418,6 +428,8 @@ void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, vo
     *out = f.x;
 }
 
+// Initialiser of the target point (class 0x7F): no target id (-1), f68 = 1 and the largest float
+// as its range.
 void InitTargetPoint(TargetPoint* self)
 {
     InitObject(self);
@@ -427,18 +439,22 @@ void InitTargetPoint(TargetPoint* self)
     self->f70 = k;
 }
 
+// Registers a target point as an object and adds it to the list of target points.
 void RegisterTargetPoint(TargetPoint* self)
 {
     RegisterObject(self);
     AppendToList(&g_targetPointList, self);
 }
 
+// Undoes RegisterTargetPoint.
 void UnregisterTargetPoint(TargetPoint* self)
 {
     UnregisterObject(self);
     RemoveFromList(&g_targetPointList, self);
 }
 
+// After loading: finds the object the point targets by id (under its parent), keeps it and
+// clears its f398.
 void PostLoadTargetPoint(TargetPoint* self)
 {
     if (self->targetId != -1) {
@@ -448,6 +464,7 @@ void PostLoadTargetPoint(TargetPoint* self)
     }
 }
 
+// Copy of a target point: copies the object data but keeps its own list bits.
 void CopyTargetPoint(TargetPoint* self, TargetPoint* src)
 {
     KeptBits saved = self->keep;
@@ -487,6 +504,8 @@ void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
     }
 }
 
+// Places a point on the target point's circle (radius at +0x5C), at the angle from the target
+// point toward the active switched collider.
 void PlaceTargetPointNearCollider(TargetPoint* self, Vec02* out, f32* angleOut)
 {
     Vec02 here;
@@ -497,6 +516,8 @@ void PlaceTargetPointNearCollider(TargetPoint* self, Vec02* out, f32* angleOut)
     PlaceOnTargetPoint(self, out, angleOut, ArctangentOfRatio(d.y, d.x) * self->radius5C);
 }
 
+// Initialiser of class 0x3A: a collider with springs and ramps set to scale 3 (2 for the
+// rotation ramp) and f568 = 300.
 void InitListedCollisionPart(ListedCollisionPart* self)
 {
     f32 k = 3.0f;
@@ -508,6 +529,8 @@ void InitListedCollisionPart(ListedCollisionPart* self)
     self->f568 = 300.0f;
 }
 
+// Loads a listed collision part: its collider data, then marks its link record (allocating it
+// when missing) and sets its first three rows to the identity.
 void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream)
 {
     Rec2195_224* b;
@@ -528,18 +551,21 @@ void LoadListedCollisionPart(ListedCollisionPart* self, BufferedStream* stream)
     dst[2] = src[2];
 }
 
+// Registers a collision part as a collider and adds it to the list of parts.
 void AddToPartList(ListedCollisionPart* self)
 {
     RegisterCollider(self);
     AppendToList(&g_partList, self);
 }
 
+// Undoes AddToPartList.
 void RemoveFromPartList(ListedCollisionPart* self)
 {
     UnregisterCollider(self);
     RemoveFromList(&g_partList, self);
 }
 
+// Copy of a listed collision part that keeps its own list link, so it stays on its own list.
 void CopyKeepingListLink(ListedCollisionPart* self, ListedCollisionPart* src)
 {
     Link02 tmp = self->listLink;
@@ -547,6 +573,8 @@ void CopyKeepingListLink(ListedCollisionPart* self, ListedCollisionPart* src)
     self->listLink = tmp;
 }
 
+// Contact filter of a listed collision part: always allowed against the player that is holding
+// it, otherwise the common test.
 s32 TestListedCollisionPartMayContact(Collider* a0, Collider* a1)
 {
     if ((void*)a1 == g_player && (void*)a0 == ((Player*)a1)->heldObject) {
@@ -555,6 +583,8 @@ s32 TestListedCollisionPartMayContact(Collider* a0, Collider* a1)
     return TestCollidersMayContact(a0, a1);
 }
 
+// Per-frame step of a listed collision part: the collider's, then, unless steering is skipped,
+// steers it toward its own rotation made upright.
 void StepListedCollisionPart(ListedCollisionPart* self, f32 t)
 {
     Mat3U buf;
@@ -598,6 +628,8 @@ void SetPooledObjectPlayerHold(PooledObject* self, s32 v)
     self->stateTime = g_gameTime[0];
 }
 
+// The number of the object's children of class 70 (a pooled object) whose state is 3 or 4, that
+// is those it is holding at the moment.
 s32 CountHeldPooledChildren(PlacedObject* self)
 {
     ChildListWalk w(&self->children);

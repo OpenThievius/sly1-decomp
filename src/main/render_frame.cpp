@@ -379,6 +379,8 @@ void BeginRenderFrame(void)
     BeginDmaTag((PacketWriter*)&g_vifPacketWriter);
 }
 
+// Adds a DMA reference tag for the data from value to end (in quadwords) unless it is the same
+// start as the last one added.
 void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
 {
     if (g_lastDmaRefStart != value) {
@@ -387,6 +389,9 @@ void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
     }
 }
 
+// Builds a small GIF packet that writes register 0x61 (FINISH), puts it in the VIF stream after
+// a flush, adds the group microprogram's DMA reference when it changed and an end tag, then
+// detaches the packet buffer.
 void WriteGsFinishPacket(void* self, void* p, u8** n)
 {
     UQuadword128 mem[8];
@@ -404,6 +409,8 @@ void WriteGsFinishPacket(void* self, void* p, u8** n)
     DetachPacketBuffer((PacketWriter*)self, (u32*)p, n);
 }
 
+// Ends a draw packet: a one-register tag writing register 0x61 (FINISH), the packet end, a DMA
+// end tag, and detaches the buffer.
 void CloseDrawBuffer(void* obj, void* a, u8** b)
 {
     BeginGifTag((PacketWriter*)obj, 0, 1, 0xE);
@@ -431,6 +438,8 @@ void SubmitRenderFrame(void)
     PostSemaphore(g_frameReadySemaphore);
 }
 
+// Makes the frame the one drawn from: takes its frame data and image mask and, if it has masked
+// images, starts their DMA chain.
 void ActivateRenderFrame(RenderFrame* self)
 {
     g_drawFrameData = self->frameDataWord;
@@ -441,6 +450,8 @@ void ActivateRenderFrame(RenderFrame* self)
     }
 }
 
+// Runs a table-driven CRC-32 over the program's code in memory from 0x100000
+// (g_codeChecksumSize bytes) and sets the failure flag if the result is not 0.
 void VerifyCodeChecksum(void)
 {
     const u8* table = (const u8*)g_packetBufferMemory;
@@ -491,6 +502,8 @@ void RunRenderThread(void)
     }
 }
 
+// Activates the frame, sends its VIF1 buffer and waits, and with flag set also sends its GIF
+// buffer.
 void SendRenderFrameToDma(RenderFrame* self, s32 flag)
 {
     ActivateRenderFrame(self);
@@ -627,6 +640,8 @@ void BlitFrameToDisplay(void)
     SendGsPacketAndWait(g_gifChannel, buf);
 }
 
+// Constructs the GS packet writer and the VIF packet writer when called with flag set and code
+// 0xFFFF.
 void ConstructPacketWriters(s32 flag, s32 code)
 {
     if (code == 0xFFFF && flag != 0) {
@@ -635,6 +650,7 @@ void ConstructPacketWriters(s32 flag, s32 code)
     }
 }
 
+// Constructs the two packet writers again.
 void ResetPacketWriters(void)
 {
     ConstructPacketWriters(1, 0xFFFF);

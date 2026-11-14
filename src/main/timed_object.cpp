@@ -72,6 +72,7 @@ void SetEffectSpawnerActiveForever(EffectSpawner* self);
 struct AnimCursor;
 
 
+// Initialiser of the timed object: a collider that does not repeat, with no state yet (-1).
 void InitTimedObject(TimedObject* a0) {
     InitCollider(a0);
     a0->repeating = 0;
@@ -83,6 +84,8 @@ void SetTimedObjectTarget(TimedObject* self, s32 value)
     self->trigger = (StateTrigger*)value;
 }
 
+// Sets a timed object's state and time; moving from 1 to 2 first resets the trigger (which may
+// keep the state at 1) and sends the object script event 2.
 void EnterTimedObjectState(TimedObject* self, s32 state)
 {
     if (self->state == state) return;
@@ -97,6 +100,8 @@ void EnterTimedObjectState(TimedObject* self, s32 state)
     self->stateStartTime = g_gameTime[0];
 }
 
+// Whether a timed object takes value: always when it accepts everything, otherwise when value is
+// not excluded and matches one of the accepted ids or accepted classes.
 s32 IsObjectInAcceptLists(TimedObject* self, void* value)
 {
 
@@ -119,6 +124,7 @@ s32 IsObjectInAcceptLists(TimedObject* self, void* value)
     return 0;
 }
 
+// Whether key matches one of the timed object's excluded ids or excluded classes.
 s32 IsObjectExcluded(TimedObject* self, void* key)
 {
     for (s32 i = 0; i < self->ids578.count; i++) {
@@ -134,6 +140,8 @@ s32 IsObjectExcluded(TimedObject* self, void* key)
     return 0;
 }
 
+// Whether p is the only thing the timed object accepts: exactly one accepted id, no accepted
+// classes, no accept-all, and p matches it.
 s32 IsSoleAcceptedObject(TimedObject* o, void* p)
 {
     if (p == 0) return 0;
@@ -141,6 +149,8 @@ s32 IsSoleAcceptedObject(TimedObject* o, void* p)
     return 0;
 }
 
+// Takes the object's track player node (if it has one), holding its f18 value and zeroing the
+// node's; UpdateTimedObject gives the value back.
 void StopTrackPlayer(TimedObject* self)
 {
     TrackPlayer* node = FindTrackPlayer(self);
@@ -152,6 +162,8 @@ void StopTrackPlayer(TimedObject* self)
     }
 }
 
+// Per-frame update of a timed object: the collider's, and once the player leaves state 4 it gives
+// back the track value it was holding.
 void UpdateTimedObject(TimedObject* self, f32 dt)
 {
     UpdateCollider(self, dt);
@@ -168,6 +180,7 @@ void UpdateTimedObject(TimedObject* self, f32 dt)
     }
 }
 
+// Adds an id to the list of four accepted object ids (ignored when full).
 void AddTimedObjectAcceptedObjectId(TimedObject* self, s32 value)
 {
     u32 n = self->ids564.count;
@@ -177,6 +190,7 @@ void AddTimedObjectAcceptedObjectId(TimedObject* self, s32 value)
     }
 }
 
+// Adds an id to the list of four excluded object ids (ignored when full).
 void AddTimedObjectExcludedObjectId(TimedObject* self, s32 item)
 {
     s32 n = self->ids578.count;
@@ -186,6 +200,7 @@ void AddTimedObjectExcludedObjectId(TimedObject* self, s32 item)
     }
 }
 
+// Adds a class to the list of four accepted classes (ignored when full).
 void AddTimedObjectAcceptedClassId(TimedObject* self, s32 item)
 {
     s32 n = self->ids58C.count;
@@ -195,6 +210,7 @@ void AddTimedObjectAcceptedClassId(TimedObject* self, s32 item)
     }
 }
 
+// Adds a class to the list of four excluded classes (ignored when full).
 void AddTimedObjectExcludedClassId(TimedObject* q, u32 value)
 {
     u32 n = q->ids5A0.count;
@@ -204,12 +220,14 @@ void AddTimedObjectExcludedClassId(TimedObject* q, u32 value)
     }
 }
 
+// Initialiser of the timed group: the timed object's, at fade 1.
 void InitTimedGroup(TimedGroup* self)
 {
     InitTimedObject(self);
     self->fade = 1.0f;
 }
 
+// Loads a timed group's collider from the stream and resolves its two links.
 void LoadTimedGroup(TimedGroup* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
@@ -350,6 +368,8 @@ void CloneTimedGroupEntries(TimedGroup* self)
     self->desc30()->m4D(self, self->initialState);
 }
 
+// Spreads the next-step times of the world's timed groups (those not in state 8) evenly over one
+// 1/30 s step, so they do not all update in the same frame; clears the dirty flag.
 void StaggerGroupOffsets()
 {
     ListFrame frame;
@@ -449,6 +469,8 @@ void UpdateTimedGroup(TimedGroup* self, f32 amount)
     self->desc30()->m4D(self, cmd);
 }
 
+// Freezes or unfreezes a timed group's collider and keeps it on the world's list of staggered
+// groups (off the list while frozen); the stagger is recomputed next time.
 void SetStaggeredColliderFrozen(TimedGroup* self, s32 p)
 {
     SetColliderFrozen(self, p);
@@ -549,6 +571,9 @@ void DrawTimedGroup(TimedGroup* self, void* a1, void* a2)
     PopBackMemoryMark();
 }
 
+// Whether a collider may be taken by a timed group: not one with bit 43 set, the group's own
+// root or an excluded object, and not the player while it is in state 6 and target mode 3 with
+// certain save world bits set (0x12000); the last test is the collider's own flag being clear.
 s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 {
     u64 m = 0x8000;
@@ -688,6 +713,7 @@ void ChooseTimedGroupState(TimedGroup* self, s32* state)
     PopBackMemoryMark();
 }
 
+// Sets whether the group repeats and enters state 5 (repeating) or 1.
 void SetTimedGroupMode(TimedGroup* self, s32 flag)
 {
     s32 m = 5;
@@ -698,6 +724,7 @@ void SetTimedGroupMode(TimedGroup* self, s32 flag)
     self->desc30()->m4D(self, m);
 }
 
+// Asks a timed group to end: state 3 (7 when it repeats) unless it is in state 8.
 void RequestTimedGroupEnd(TimedGroup* self)
 {
     if (self->state == 8) {
@@ -710,6 +737,7 @@ void RequestTimedGroupEnd(TimedGroup* self)
     self->desc30()->m4D(self, m);
 }
 
+// Marks a timed group as repeating and sends it to state 3 if it is still in a state below 3.
 void FinishTimedGroup(TimedGroup* self)
 {
     if (self->state < 3) {
@@ -810,19 +838,24 @@ f32 ComputeTimedGroupRamp(TimedGroup* o, TimedGroupChild* c)
     return s * r;
 }
 
+// Sets the fade rate so that the group fades out in x seconds.
 void SetTimedGroupFadeOutTime(TimedGroup* self, f32 x)
 {
     self->fadeRate = -1.0f / x;
 }
 
+// Sets the fade rate so that the group fades in in x seconds.
 void SetTimedGroupFadeInTime(TimedGroup* p, f32 x) { p->fadeRate = 1.0f / x; }
 
+// Initialiser of the sequenced object: the timed object's, with its second state unset (-1).
 void InitSequencedObject(SequencedObject* o)
 {
     InitTimedObject(o);
     o->state5D8 = -1;
 }
 
+// Start of a sequenced object: resolves its links, defaults its phase object to itself and its
+// beam object to the world's, sets bit 43 and collider anchors and enters its initial state.
 void SetupSequencedObject(SequencedObject* self)
 {
     StartPlacedObject(self);
@@ -1041,6 +1074,8 @@ void DrawSequencedObject(SequencedObject* self, void* a1, Quad16* a2)
 
 s32 TestSequencedObjectMayContact() { return 1; }
 
+// Whether a collider may be taken by a sequenced object: not one with bit 43 set, the active
+// switched collider, the object's own root or an excluded object (and its own flag clear).
 s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
 {
     if ((other->flags538 & (1UL << 43)) != 0 || (void*)other->root == GetActiveSwitchedCollider() || other->root == self->root || IsObjectExcluded(self, other) != 0) {
@@ -1105,6 +1140,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
     PopBackMemoryMark();
 }
 
+// Sets whether the object repeats and enters state 5 (repeating) or 1.
 void SetSequencedObjectMode(SequencedObject* self, s32 value)
 {
     s32 m = 5;
@@ -1115,6 +1151,8 @@ void SetSequencedObjectMode(SequencedObject* self, s32 value)
     self->desc30()->m4D(self, m);
 }
 
+// Asks a sequenced object to end: goes to state 3 (or 7 when it repeats) unless it is in state 8,
+// and remembers a trigger that fired less than 0.2 s ago as held.
 void RequestSequencedObjectEnd(SequencedObject* self)
 {
     if (self->state != 8) {
@@ -1130,6 +1168,7 @@ void RequestSequencedObjectEnd(SequencedObject* self)
     }
 }
 
+// Marks a sequenced object as repeating and sends it to state 3, unless it is in state 8.
 void FinishSequencedObject(SequencedObject* o)
 {
     if (o->repeating == 0) {
@@ -1140,6 +1179,8 @@ void FinishSequencedObject(SequencedObject* o)
     }
 }
 
+// State change of a sequenced object: leaving state 6 ends its substate, leaving 8 drops the held
+// trigger, entering 6 starts substate 0; then the common EnterTimedObjectState.
 void EnterSequencedObjectState(SequencedObject* self, s32 s)
 {
     if (self->state != s) {
@@ -1202,6 +1243,8 @@ void EnterSequencedSubstate(SequencedObject* self, s32 arg)
     self->substateStartTime = g_gameTime[0];
 }
 
+// Initialiser of the blink object: the timed object's, with its animation ranges and frame
+// unset (-1).
 void InitBlinkObject(BlinkObject* self)
 {
     InitTimedObject(self);
@@ -1214,6 +1257,8 @@ void InitBlinkObject(BlinkObject* self)
     self->blinkFrame = -1;
 }
 
+// Start of a blink object: finds its blink element (the first of kind 1 with f14 set) and enters
+// its initial state.
 void SetupBlinkObject(BlinkObject* self)
 {
     StartPlacedObject(self);
@@ -1366,12 +1411,14 @@ void ChooseBlinkObjectState(BlinkObject* self, s32* out)
     }
 }
 
+// Sets whether the object repeats and enters state 5 (repeating) or 1.
 void SetBlinkObjectMode(BlinkObject* self, s32 mode)
 {
     self->repeating = mode;
     self->desc30()->m4D(self, mode == 0 ? 1 : 5);
 }
 
+// Same as RequestSequencedObjectEnd, for a blink object.
 void RequestBlinkObjectEnd(BlinkObject* self)
 {
     if (self->state != 8) {
@@ -1387,6 +1434,8 @@ void RequestBlinkObjectEnd(BlinkObject* self)
     }
 }
 
+// Marks a blink object as repeating; with a negative blink duration it also leaves state 1 for 3
+// or state 5 for 7.
 void FinishBlinkObject(BlinkObject* self)
 {
     self->repeating = 1;

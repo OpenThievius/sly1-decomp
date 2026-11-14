@@ -299,6 +299,9 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
     }
 }
 
+// Steps an index through the table (backward when pad flag bit 0 is set, forward otherwise,
+// wrapping) to the next entry that shares a bit with the current world mask; returns start when the
+// pad flags ask for no step or nothing matches.
 s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table)
 {
     s32 step;
@@ -326,6 +329,8 @@ s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* t
     return idx;
 }
 
+// Seeks the animation of every object with id 0x105 in the player's world to its start (value
+// nonzero) or end (value 0) once per change of value, and records the value and the time.
 void SeekObjects105Animations(Player* self, s32 value)
 {
     void* buf[0x100];
@@ -343,6 +348,8 @@ void SeekObjects105Animations(Player* self, s32 value)
     self->animSeekTime = g_gameClock.time;
 }
 
+// Slot 16 of the counted collider: starts the placed object, resolves its link and calls its slot
+// 3.
 void StartCountedCollider(CountedCollider* self)
 {
     StartPlacedObject(self);
@@ -350,6 +357,9 @@ void StartCountedCollider(CountedCollider* self)
     self->desc->m03(self);
 }
 
+// Counts a touch: unless forced (flag set) it sends message 0x17 and counts one off, returning
+// while touches are left; otherwise it notifies its target, plays sound 0x67, raises script event 2
+// and calls its slot 3.
 void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag)
 {
     if (flag == 0) {
@@ -389,6 +399,8 @@ void UpdateCountedCollider(CountedCollider* self, f32 dt)
     self->contacts = 0;
 }
 
+// Slot 28 of the counted collider: steps the collider and, without a parent, steers it toward its
+// upright rotation.
 void StepCountedCollider(CountedCollider* self, f32 t)
 {
     u8 buf[0x30];
@@ -405,6 +417,8 @@ void CollectCountedColliderContacts(CountedCollider* self)
     ExtractContactsByPartMode(self, (Contact03**)&self->contacts);
 }
 
+// Slot 45 of the counted collider: handles the object event and, for a contact (flag 0x20), takes a
+// touch from the other object (forced when that is the player) and frees its contact chain.
 void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
 {
     void* r = HandleObjectEvent(a0, a1);
@@ -430,6 +444,8 @@ typedef u64 Qword128 __attribute__((mode(TI)));
 void ComputeColliderWorldFrame(Collider* self);
 void TransformMeshToWorld(Mesh03* a, Mesh03* b, Qword128 q, Mat02* c);
 
+// Slot 19 of the counted collider: with a matrix attachment, rotates the attached frame by its own
+// and transforms its mesh into world space; without one, the plain collider frame.
 void ComputeCountedColliderWorldFrame(CountedCollider* self)
 {
     if (self->matrixAttachment != 0) {
@@ -458,6 +474,8 @@ void ComputeCountedColliderWorldFrame(CountedCollider* self)
     }
 }
 
+// Slot 13 of the counted collider: placed object handling, and on kind 10 it records a contact with
+// the message's object in its contact chain.
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);

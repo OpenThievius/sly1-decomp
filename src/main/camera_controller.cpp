@@ -129,6 +129,7 @@ void SetCameraControllerOwner(CameraController* self, Camera* owner)
     self->owner = owner;
 }
 
+// True when this controller is the top of the camera's controller stack.
 s32 IsTopCameraController(CameraController* self)
 {
     return self->owner->stack[0].ctl == self;
@@ -139,11 +140,14 @@ void SetCameraControllerValue(CameraController* self, s32 value)
     self->value = value;
 }
 
+// Does nothing: a controller with no per-frame update.
 void UpdateIdleCameraController(CameraController* self, u8* eye, u8* tail, f32 dt)
 {
 }
 
 
+// Gives the point the camera looks at: the anchor object's position if there is one, else the
+// active switched collider's position raised by a fixed height, else the camera's own point.
 Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
 {
     Quad16 r;
@@ -160,6 +164,8 @@ Quad16 GetCameraControllerTargetPoint(TargetCameraController* self)
     return r;
 }
 
+// Gives the eye point: the target point plus a fixed offset (a different one while the player's
+// sub-state is 0x22) turned by the controller's yaw and pitch.
 Quad16 GetTargetCameraControllerEyePoint(TargetCameraController* self)
 {
     Quad16 r;
@@ -188,6 +194,7 @@ void StartCameraSounds(CameraSoundOwner* self)
     self->soundPaused = 1;
 }
 
+// Pushes a value on the controller's stack of four; ignored when full.
 void PushStackValue(TargetCameraController* s, s32 value)
 {
     s32 n = s->count;
@@ -197,6 +204,7 @@ void PushStackValue(TargetCameraController* s, s32 value)
     }
 }
 
+// Pops the top value of the controller's stack; -1 when empty.
 s32 PopStackValue(TargetCameraController* s)
 {
     s32 n = s->count;
@@ -208,6 +216,7 @@ s32 PopStackValue(TargetCameraController* s)
     return s->items[n];
 }
 
+// Gives the top value of the controller's stack without removing it; -1 when empty.
 s32 PeekStackValue(TargetCameraController* s)
 {
     s32 n = s->count;
@@ -217,6 +226,8 @@ s32 PeekStackValue(TargetCameraController* s)
     return s->items[n - 1];
 }
 
+// Sets the owner and defaults (f20 = 10, f54 = 0.5, no size override) and pushes 0 on its value
+// stack.
 void InitTargetCameraController(TargetCameraController* self, Camera* owner)
 {
     SetCameraControllerOwner(self, owner);
@@ -228,6 +239,9 @@ void InitTargetCameraController(TargetCameraController* self, Camera* owner)
     self->f50 = 0;
 }
 
+// Starts the controller: takes the camera's current direction as yaw and pitch, resets its fields,
+// sets the zoom range (current zoom down to zoom over f20), anchors the look at the target point
+// and sets the near distance to 49 (the old one is kept).
 void ActivateTargetCameraController(TargetCameraController* self)
 {
     Quad4 tmp;
@@ -621,6 +635,8 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
 }
 
 
+// Ends the controller: stops its two sounds (the second fades over 500), puts the camera at the eye
+// point looking at the target point, restores the zoom and the near distance, and drops the anchor.
 void DeactivateTargetCameraController(TargetCameraController* self)
 {
     Quad16 a = GetCameraControllerTargetPoint(self);
@@ -639,6 +655,7 @@ void DeactivateTargetCameraController(TargetCameraController* self)
     }
 }
 
+// Sets the owner and puts the identity matrix in the frame block.
 void InitFrameCameraController(FrameCameraController* self, Camera* a1)
 {
     SetCameraControllerOwner(self, a1);
@@ -646,6 +663,7 @@ void InitFrameCameraController(FrameCameraController* self, Camera* a1)
     *dst = *(CameraFrameBlock*)g_identityMatrix;
 }
 
+// Anchors the camera's look at the point 0x370 into the object on top of its stack.
 void ActivateFrameCameraController(FrameCameraController* self)
 {
     Camera* parent = self->owner;

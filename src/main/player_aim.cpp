@@ -416,6 +416,9 @@ void SetPlayerAimMode(Player* self, s32 state)
 }
 
 
+// Drops the aim target when it is no longer attached (leaving aim mode with it when the mode was
+// 0), then, in mode 0, keeps tracking the target object, or else the aim curve's point, through
+// the aim grid.
 void UpdatePlayerAimTarget(Player* s)
 {
     if (s->aimTarget != 0 && IsObjectAttached((BaseObject*)s->aimTarget) == 0) {
@@ -618,6 +621,7 @@ void SetPlayerClass75AheadBlend(Player* s, TwoBlendWeights* out, void* ctx)
     }
 }
 
+// The same turn with search mask 8, offset 250 and a last limit argument of 1.0 (3.15 for mask 4).
 void TurnPlayerToClass75AheadMask8(Player* self)
 {
     NearestAhead t;
@@ -631,6 +635,9 @@ void TurnPlayerToClass75AheadMask8(Player* self)
     }
 }
 
+// Looks for the nearest class 0x75 object ahead (search mask 4, offset 125) and, if one is found,
+// turns the player's heading toward it; it also records the object as the aim target and clears
+// the aim curve.
 void TurnPlayerToClass75AheadMask4(Player* self)
 {
     NearestAhead t;

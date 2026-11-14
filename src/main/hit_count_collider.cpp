@@ -56,6 +56,7 @@ f32 g_hitCountItemSpeedRange[2] = { 0.0f, 300.0f };
 PaddedQuadratic g_hitCountItemSpinRange = { { -1.0f, 1.0f, 0.0f } };
 
 
+// Initialises a hit-count collider: the switched collider's defaults, state -1 and 5 hits left.
 void InitHitCountCollider(HitCountCollider* self)
 {
     InitSwitchedCollider(self);
@@ -204,6 +205,8 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
 
 bool AreMenusAndFadeClear();
 
+// Shows the two counter captions (method 0x14) while the menus and fade are clear and hides them
+// (method 0x15) otherwise.
 void ShowHitCountColliderCounters()
 {
     if (AreMenusAndFadeClear()) {
@@ -268,6 +271,9 @@ void ControlHitCountCollider(HitCountCollider* self, void* ev, f32 dt)
 void ClampVectorLength(Vec02* v, Vec02* out, f32 max);
 void AddColliderForce(void* a, void* b);
 
+// Per-frame step: steps the collider, turns it toward its heading (yaw only) with the turn ramp,
+// and applies a force that pulls its velocity toward the target velocity at 0x650, limited to a
+// maximum acceleration, divided by dt.
 void StepHitCountCollider(HitCountCollider* self, f32 dt)
 {
     Mat02 rot;
@@ -284,6 +290,9 @@ void StepHitCountCollider(HitCountCollider* self, f32 dt)
 }
 
 
+// Contact method: notes what touched the collider (the other end of the contact): a kind-0x21 body
+// sets hitPending while hits are left, else is kept as touchedObject unless hitPlayer is set; a
+// body with id 0x52F is kept as collectedObject.
 void NoteHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 end)
 {
     ContactEnd03* e = &c->end[1 - end];
@@ -313,6 +322,7 @@ void ResolveHitCountColliderContact(HitCountCollider* self, Contact03* c, s32 en
 
 extern s32 g_buttonCodeFlags;
 
+// A request is blocked while button-code flag bit 1 is set or the pad-select flag is held.
 s32 IsHitCountColliderRequestBlocked(HitCountCollider* self)
 { if ((g_buttonCodeFlags & 1) || IsPadSelectFlagHeld(self->world)) return 1; return 0; }
 
@@ -349,16 +359,21 @@ s32 AcceptHitCountColliderRequest(HitCountCollider* self, OwnerMessage* arg)
     return 1;
 }
 
+// True while in states 2 to 4 or once the accepted mark is set.
 s32 HasHitCountColliderAcceptedRequest(HitCountCollider* self) { if (self->state < 5) { if (self->state >= 2) return 1; } return self->acceptedMark != 0; }
 
 void SetHitCountColliderState(PlacedObject* self, s32 state);
 
+// Finishes the switched collider and enters state 1.
 void FinishHitCountCollider(HitCountCollider* self)
 {
     FinishSwitchedCollider(self);
     SetHitCountColliderState(self, 1);
 }
 
+// The reply of a hit-count collider's request: pushes the receiver away from the sender,
+// horizontally (z dropped), with a fixed speed, by calling the receiver's method 0x20; with no
+// distance it pushes along the x axis.
 void PushRequesterAwayFromSender(void* c, void* receiver)
 {
     PlacedObject* from = (PlacedObject*)c;
@@ -373,6 +388,8 @@ void PushRequesterAwayFromSender(void* c, void* receiver)
 }
 
 
+// Sends the collider a request message from value, with PushRequesterAwayFromSender as its reply,
+// through the collider's method 0x4C.
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value)
 {
     OwnerMessage local;
@@ -437,6 +454,7 @@ void SetHitCountColliderState(PlacedObject* self, s32 state)
     F(self, 0x614) = g_gameClock[1];
 }
 
+// Appends value to the collider's list of place points.
 void AddHitCountColliderId(HitCountCollider* self, BaseObject* value)
 {
     s32 n = self->placePointCount;

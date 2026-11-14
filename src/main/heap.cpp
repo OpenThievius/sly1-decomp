@@ -32,11 +32,15 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 typedef u64 Q18D780 __attribute__((mode(TI)));
 
 
+// Zeroes an 8-byte key id.
 void ClearKeyId(KeyId* p)
 {
     FillMemory(p, 0, 8);
 }
 
+// Sets up the main heap: the front, permanent and back cursors all start at the end of the loaded
+// image (16-aligned) or at the 32 MB top, the back-mark stack is emptied and the heap lock is
+// initialised.
 void InitHeap(void)
 {
     g_heapStart = (s32)g_imageEnd & -16;
@@ -48,6 +52,8 @@ void InitHeap(void)
     InitRecursiveLock((RecursiveLock*)g_heapLock);
 }
 
+// Takes size bytes (rounded up to 16) at the permanent cursor and moves the front cursor and its
+// reset mark past them, so ResetFrontMemory no longer frees them.
 u8* ReservePermanentMemory(s32 size)
 {
     u8* result;
@@ -65,11 +71,14 @@ u8* ReservePermanentMemory(s32 size)
 
 LINKER_REMNANT(func_0018D4F0);
 
+// Empty: the size check of the original allocator is compiled out of retail.
 void CheckAllocationSize(s32 size)
 {
     (void)size;
 }
 
+// Bump-allocates size bytes (rounded up to 16) at the heap's front cursor; gives back 0 for a size
+// of 0. Never freed one by one: ResetFrontMemory drops all of them.
 u8* AllocateFrontMemory(s32 size)
 {
     u8* result;
@@ -83,12 +92,16 @@ u8* AllocateFrontMemory(s32 size)
     return result;
 }
 
+// Frees every front allocation made since the permanent reservations, by putting the front cursor
+// back to its reset mark.
 void ResetFrontMemory(void)
 {
     g_frontCursor = g_frontResetMark;
 }
 
 
+// Allocates size bytes from the front of the heap and copies src into them; gives back the new
+// block, or 0 for a zero size.
 u8* CopyToFrontMemory(s32 size, void* src)
 {
     u8* result = AllocateFrontMemory(size);
@@ -99,6 +112,7 @@ u8* CopyToFrontMemory(s32 size, void* src)
     return result;
 }
 
+// AllocateFrontMemory, then clears the n bytes; 0 if nothing was allocated.
 void* AllocateZeroedFrontMemory(s32 n)
 {
     void* p = AllocateFrontMemory(n);
@@ -108,6 +122,8 @@ void* AllocateZeroedFrontMemory(s32 n)
     return p;
 }
 
+// Takes the heap lock and records the back cursor on the mark stack, so PopBackMemoryMark can free
+// what is allocated from the back after this.
 void PushBackMemoryMark(void)
 {
     EnterRecursiveLock((RecursiveLock*)g_heapLock);
@@ -115,6 +131,8 @@ void PushBackMemoryMark(void)
     ((u8**)g_backMarks)[g_backMarkIndex] = g_backCursor;
 }
 
+// Bump-allocates size bytes (rounded up to 16) downward from the heap's top end; gives back 0 for a
+// size of 0. PopBackMemoryMark releases everything allocated since the matching mark.
 u8* AllocateBackMemory(s32 size)
 {
     u8* result;
@@ -129,6 +147,7 @@ u8* AllocateBackMemory(s32 size)
     return result;
 }
 
+// AllocateBackMemory, then clears the size bytes; 0 if nothing was allocated.
 void* AllocateZeroedBackMemory(s32 size)
 {
     u8* p = AllocateBackMemory(size);
@@ -138,6 +157,8 @@ void* AllocateZeroedBackMemory(s32 size)
     return p;
 }
 
+// Restores the back cursor to the last mark pushed (freeing every back allocation made since) and
+// releases the heap lock PushBackMemoryMark took.
 void PopBackMemoryMark(void)
 {
     s32 n = g_backMarkIndex;
@@ -161,15 +182,19 @@ extern "C" void* AllocateSignalTable(LibcState* state, s32 size) { return 0; }
 
 extern "C" void LeaveRuntimeLock(void* p) {}
 
+// The allocator for game objects: zeroed memory from the front of the heap.
 void* AllocateObjectMemory(u32 n)
 {
     return AllocateZeroedFrontMemory(n);
 }
 
+// Does nothing: front-heap memory is never freed one block at a time.
 void FreeObjectMemory(void* self)
 {
 }
 
+// Copies n quadwords (16 bytes each) from src to dst: the n % 4 leftovers first, one at a time,
+// then the rest four quadwords per pass.
 void CopyQuadwords(void* dst, void* src, s32 n)
 {
     Q18D780* d = (Q18D780*)dst;

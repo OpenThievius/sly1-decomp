@@ -28,6 +28,7 @@ void ClearClass75List()
 }
 
 
+// Slot 0 of class 0x75: transform object init, a count of 30 and a scale of 25.0.
 void InitClass75Object(void* self)
 {
     Class75Object* o = (Class75Object*)self;
@@ -37,6 +38,7 @@ void InitClass75Object(void* self)
 }
 
 
+// Slot 6 of class 0x75: registers the object and appends it to the class's list.
 void RegisterClass75Object(void* self)
 {
     RegisterObject((BaseObject*)self);
@@ -44,6 +46,7 @@ void RegisterClass75Object(void* self)
 }
 
 
+// Slot 7 of class 0x75: unregisters the object and removes it from the class's list.
 void UnregisterClass75Object(void* self)
 {
     UnregisterObject((BaseObject*)self);
@@ -51,6 +54,7 @@ void UnregisterClass75Object(void* self)
 }
 
 
+// Slot 9 of class 0x75: copies the object data but keeps its own list link.
 void CopyClass75ObjectData(Class75Object* self, Class75Object* src)
 {
     Class75Link tmp;

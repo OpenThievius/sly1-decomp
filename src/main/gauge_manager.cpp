@@ -353,6 +353,8 @@ s32 IsNumberedAgentFree(NumberedAgent* self)
     return self->targetNear;
 }
 
+// Event handler of a numbered agent: ignored in states 0xB and 0x10; otherwise the agent's own
+// handler, which then clears its targetNear flag.
 s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
 {
     if (self->state == 0x10) {
@@ -368,6 +370,8 @@ s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
     return 1;
 }
 
+// State change of a numbered agent: state 0xB adds it to the gauge amount and frees its slot;
+// state 0xC frees its slot and sets its animation speed from the manager.
 void EnterNumberedAgentState(NumberedAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
@@ -405,6 +409,8 @@ s32 ChooseAgentStateByContact(ContactAgent* self)
     return result;
 }
 
+// Whether the contact agent can be used: not while the pad select flag is held, and not in
+// states 0xB or 0x10.
 s32 IsContactAgentFree(ContactAgent* self)
 {
     if (IsPadSelectFlagHeld(self->world) != 0) return 0;
@@ -412,6 +418,9 @@ s32 IsContactAgentFree(ContactAgent* self)
     return 1;
 }
 
+// Event handler of a contact agent: ignored in states 0xB and 0x10; otherwise the agent's own
+// handler, and when the active switched collider is the one hit it sends it an owner message (slot
+// 0x50).
 s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
 {
     if (self->state == 0x10 || self->state == 0xB) return 1;
@@ -426,6 +435,8 @@ s32 HandleContactAgentObjectEvent(ContactAgent* self, ListedAgentView** slot)
     return 1;
 }
 
+// State change of a contact agent: state 0xB counts one contact down on the manager and frees its
+// slot; state 0xC frees its slot and sets its animation speed from its own clip speed.
 void EnterContactAgentState(ContactAgent* self, s32 evt, Animation* arg)
 {
     EnterAgentState(self, evt, arg);
@@ -545,6 +556,8 @@ void ComputeGaugeOutputs(GaugeManager* o)
     }
 }
 
+// Sets the scatter effect's levels from the gauge: 1 - 0.8 * (amount / maximum), the ratio
+// clamped to 0..1.
 void ApplyGaugeRatioToEffect(GaugeManager* self)
 {
     f32 one = 1.0f;
@@ -560,6 +573,8 @@ void ApplyGaugeRatioToEffect(GaugeManager* self)
     RaiseScatterLevels(&g_scatterController, 1.0f - c * 0.8f);
 }
 
+// Timer callback: when the timer ends (mode 1) and the manager's state walker is not heading to or
+// in state 0x3FE, sends it to state 0x3FF and applies the gauge ratio to the effect.
 void FinishGaugeOnTimeout(T217D_510* timer, s32 mode)
 {
     if (mode == 1) {
@@ -573,6 +588,9 @@ void FinishGaugeOnTimeout(T217D_510* timer, s32 mode)
     }
 }
 
+// Per-frame update of the gauge manager: while its state walker is in state 0x3FD (the game is
+// on), runs the timed contact event and activates a random gauge slot when their times have come,
+// and calls slot 81 of the active switched collider.
 void UpdateGaugeManager(GaugeManager* self, f32 dt)
 {
     s32 tag;
@@ -591,6 +609,8 @@ void UpdateGaugeManager(GaugeManager* self, f32 dt)
     }
 }
 
+// Shows the gauge's amount caption and the timer while the manager is in state 0x3FD and nothing
+// else (menus, a fade) covers the screen; hides them otherwise.
 void ShowGaugeManagerDisplays(GaugeManager* self)
 {
     s32 tag;
@@ -608,11 +628,13 @@ void ShowGaugeManagerDisplays(GaugeManager* self)
     }
 }
 
+// The manager's parameter block for the set in use (0xB0 bytes each from +0x480).
 void* GetGaugeParams(GaugeManager* self)
 {
     return (u8*)self + (self->setIndex * 0xB0 + 0x480);
 }
 
+// Adds an entry with the given id to the manager's list of slots.
 void AppendGaugeSlot(GaugeManager* self, s32 value)
 {
     s32 i = self->slotCount;
@@ -753,6 +775,8 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     s->taken = 1;
 }
 
+// One contact agent less on the manager; when it was at its maximum, picks the time of the next
+// contact event at random between waitMin and waitMax.
 void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent)
 {
     if (self->contactAgents == self->maxContactAgents) {

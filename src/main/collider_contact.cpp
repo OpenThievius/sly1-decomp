@@ -61,6 +61,8 @@ struct SurfacePair { s32 a; s32 b; };
 
 extern s32 g_buttonCodeFlags;
 
+// The friction of two surface types together: the sum of their b values over the sum of their a
+// values, at least 0, and a fifth of that when bit 3 of g_buttonCodeFlags is set.
 f32 GetSurfacePairFriction(SurfacePair* p)
 {
     f32 num = g_surfaceFriction[p->a].b + g_surfaceFriction[p->b].b;
@@ -73,6 +75,8 @@ f32 GetSurfacePairFriction(SurfacePair* p)
 
 
 
+// The bounce of two surface types together: the sum of their b values over the sum of their a
+// values, clamped to 0..1.
 f32 GetSurfacePairBounce(SurfacePair* p)
 {
     f32 one = 1.0f;
@@ -239,6 +243,7 @@ void NotifyContactEnds(World* world, s32 n, Contact03** list)
 }
 
 
+// Returns each contact of a chain to the world's contact pool.
 void FreePooledContactChain(World* world, Contact03* head)
 {
     if (head != 0) {
@@ -1016,6 +1021,8 @@ done:
 }
 
 
+// Collects the mesh hits of a2 near a1 (up to 64) and creates a pooled contact for each, deepest
+// last.
 void AddMeshContacts(Collider* a0, f32 radius, Vec02* a1, Collider* a2, s32 a3, FaceRef* a4, FaceRef* a5, PooledContact** a6)
 {
     MeshHitEntry ents[64];
@@ -1058,6 +1065,9 @@ void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
     CreatePooledContact(dist - sum, self, other, &point, &n, 7, 0, 0, a2);
 }
 
+// The point of a collision part that lies furthest against direction a1: the vertex of its mesh
+// copy with the smallest dot product (or the sphere's point opposite the direction). Gives it in
+// a2 and, in a3, that dot product less the radius and f.
 void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
 {
     Collider* part = (Collider*)a0;
@@ -1161,6 +1171,8 @@ s32 IntersectSegmentWithSphere(Vec02* a, Vec02* b, Vec02* c, f32* tOut, Vec02* h
 struct SphereHitFrame { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 
 
+// Contact of a part against a sphere: intersects the segment of the part's motion with the
+// sphere and, on a hit, makes a pooled contact (kind 9) at its support point. Gives 1 on a hit.
 s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
 {
     SphereHitFrame loc;

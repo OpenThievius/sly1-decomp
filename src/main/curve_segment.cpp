@@ -254,6 +254,8 @@ void SampleCurvePoints(f32 dur, const Vec02* p0, const Vec02* m0, const Vec02* p
     }
 }
 
+// The length of one Hermite segment (points p0 and p1 with tangents m0 and m1) from its start to
+// time end, by summing the lengths of 20 sampled chords.
 f32 MeasureCurveSegmentLength(const Vec02* p0, const Vec02* m0, const Vec02* p1, const Vec02* m1, f32 dur, f32 end)
 {
     CurvePoint buf[20];

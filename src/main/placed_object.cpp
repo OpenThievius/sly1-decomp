@@ -844,6 +844,8 @@ void CommitChunk(StreamReader* self);
 extern u8 g_markStacks[];
 void AddMarkRootList(MarkStacks* self, R11B008List* list);
 
+// When the object does not hold its count, tells its counter that one more is done; then runs the
+// masked collider's activation handling.
 void ReleaseCountedObject(CountedObject* object)
 {
 	if (!object->hold)
@@ -856,6 +858,7 @@ void SetCountedObjectCounter(CountedObject* state, StateTrigger* value)
     state->counter = value;
 }
 
+// Initialises the collider with state -1 and takes an index from the flag table.
 void InitStateTrigger(StateTrigger* self)
 {
     InitCollider(self);
@@ -901,6 +904,7 @@ void StartStateTrigger(StateTrigger* self)
     g_activeListFrames = (ListFrame*)fr.prev;
 }
 
+// Copies the collider but keeps the trigger's own flag-table index.
 void CopyStateTrigger(StateTrigger* object, StateTrigger* src)
 {
 	s32 value = object->id6B0;
@@ -1053,6 +1057,8 @@ arm2:
     IncrementCounter((Counter*)D_002623D8);
 }
 
+// Maps a message's mode (0, 1, 2) to the trigger state 2, 0 or 1 and sets it; other modes do
+// nothing.
 void SetStateTriggerStateFromMessage(StateTrigger* object, s32 mode)
 {
     s32 mapped;
@@ -1070,6 +1076,7 @@ void CountStateTriggerDone(StateTrigger* counter)
 	counter->done++;
 }
 
+// For each output item with no initial state (-1) that has method 0x49, calls it with 0.
 void ResetStateTriggerOutputModes(StateTrigger* self)
 {
     for (s32 i = 0; i < self->outCount; i++) {
@@ -1080,6 +1087,7 @@ void ResetStateTriggerOutputModes(StateTrigger* self)
     }
 }
 
+// Calls method 0x4A (when it has one) of each of the trigger's output items.
 void EndStateTriggerOutputs(StateTrigger* self)
 {
     s32 i;
@@ -1092,6 +1100,7 @@ void EndStateTriggerOutputs(StateTrigger* self)
     }
 }
 
+// Calls method 0x4B (when it has one) of each of the trigger's output items.
 void FinishStateTriggerOutputs(StateTrigger* self)
 {
     s32 i;
@@ -1104,6 +1113,7 @@ void FinishStateTriggerOutputs(StateTrigger* self)
     }
 }
 
+// Appends an id to the trigger's first id list (4 at most).
 void AddStateTriggerCountedId(StateTrigger* self, s32 value)
 {
     u32 n = self->count1;
@@ -1113,6 +1123,7 @@ void AddStateTriggerCountedId(StateTrigger* self, s32 value)
     }
 }
 
+// Appends an id to the trigger's second id list (16 at most).
 void AddStateTriggerItemId(StateTrigger* self, s32 value)
 {
     u32 n = self->count2;
@@ -1122,6 +1133,7 @@ void AddStateTriggerItemId(StateTrigger* self, s32 value)
     }
 }
 
+// Appends an id to the trigger's third id list (6 at most).
 void AddStateTriggerAgentId(StateTrigger* self, s32 value)
 {
     u32 n = self->count3;
@@ -1131,12 +1143,14 @@ void AddStateTriggerAgentId(StateTrigger* self, s32 value)
     }
 }
 
+// Adds or updates an entry (key a1 and values a2 to a4) in the trigger's table of up to 8 entries.
 void AddStateTriggerTableEntry(StateTrigger* object, s32 a1, s32 a2, s32 a3, s32 a4)
 {
 	UpsertKeyedEntry((ZoneTargetEntry*)object->table630, 8, &object->count62C,
 			  a1, a2, a3, a4);
 }
 
+// Appends each output item to the script list being built; false as soon as one is refused.
 s32 TestStateTriggerItemsAccepted(StateTrigger* self, void* arg)
 {
     s32 i;
@@ -1189,6 +1203,8 @@ void InitPlacedObject(PlacedObject* self)
     SetListLinkOffset(&self->list1E0, 8);
 }
 
+// Attach method: runs the object's own attach (method 6), attaches each child (method 4) and sends
+// notification 1.
 void AttachPlacedObject(PlacedObject* self)
 {
     ListFrame it;
@@ -1251,6 +1267,7 @@ void RegisterPlacedObject(PlacedObject* self)
     ClearRootTries(self);
 }
 
+// Detach method: the object's own detach (method 7), each child's (method 5) and notification 2.
 void DetachPlacedObject(PlacedObject* self)
 {
     ListFrame it;
@@ -1305,6 +1322,8 @@ void UnregisterPlacedObject(PlacedObject* self)
     TriggerScriptEvent(self, 5, 0, 0);
 }
 
+// Saves the object's current position, rotation matrix and the Euler angles of the rotation as its
+// initial frame (0x190, 0x1A0, 0x1D0).
 void SavePlacedObjectInitialFrame(PlacedObject* object)
 {
 	object->v190 = object->pos;
@@ -1414,6 +1433,8 @@ void ReframePlacedObject(PlacedObject* self, BaseObject* frame)
     self->m1A0.r[2] = self->rot.r[2];
 }
 
+// After loading: resolves the follow record, saves the initial frame, finds the aim target by its
+// id (if set), binds the attachment targets and runs each child's post-load method (0xF).
 void PostLoadPlacedObject(PlacedObject* self)
 {
     ListFrame frame;
@@ -1575,6 +1596,9 @@ void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item)
     } while (n != 0);
 }
 
+// Per-frame update of an object and its children: runs the object's pre-update method (slot 0x11)
+// with the frame time and, if the object is still attached, updates each child whose descriptor has
+// flag 1 (a placed-object kind) the same way.
 void UpdateObjectTree(void* self, f32 f)
 {
     PlacedObject* obj = (PlacedObject*)self;
@@ -1634,6 +1658,7 @@ void UpdatePlacedObject(PlacedObject* self, f32 f)
     TriggerScriptEvent(self, 1, 1, args);
 }
 
+// Sets the value of each of the object's draw part states (0x28 bytes each) to -1.
 void ClearObjectRecordValues(PlacedObject* records)
 {
     for (s32 i = 0; i < records->drawPartCount; i++) {
@@ -1642,6 +1667,7 @@ void ClearObjectRecordValues(PlacedObject* records)
     }
 }
 
+// Calls the object's method 0x13 when it has one.
 void RecomputePlacedObjectFrame(PlacedObject* self)
 {
     void (*fn)(BaseObject* self) = self->desc->m13;
@@ -1741,6 +1767,7 @@ void ComputePlacedObjectWorldFrame(PlacedObject* self)
     }
 }
 
+// Empty: the move method has nothing to do for a plain placed object.
 void BeginPlacedObjectMove(PlacedObject* self)
 {
     (void)self;
@@ -1899,6 +1926,8 @@ void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat
     }
 }
 
+// Gives the transform to draw: the one passed in (copied unless it is dst itself) or the object's
+// own position and rotation with fades of 1.
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst)
 {
     if (src != 0) {
@@ -1912,6 +1941,8 @@ void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform
     }
 }
 
+// Builds the object's transform with its x/y and z scales and passes it to the world's hook object
+// (slot 17) through its method 0x26, when there is one.
 void SubmitScaledPlacedObjectTransform(PlacedObject* self, void* a, Quad16* src)
 {
     Quad16 scale;
@@ -2087,6 +2118,8 @@ void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform
     }
 }
 
+// Draw method: runs method 0x2C, notes the draw matrix in the link record when its flag 0x80 is set
+// (and marks it unused when there is none), then calls the draw method 0x26 with the matrix.
 void DrawPlacedObject(PlacedObject* self, void* b, void* m)
 {
     Quad16* src = (Quad16*)m;
@@ -2351,6 +2384,8 @@ void DrawBeamBetweenPoints(PlacedObject* self, PlacedObject* b, Vec02* p, Vec02*
     }
 }
 
+// Stores value in the object's record at 0x22C (offset 0x3C, with bit 2 set in its flags at 0x38),
+// and in those of its placed-object children.
 void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
 {
     ListFrame frame;
@@ -2364,6 +2399,7 @@ void SetObjectTreeRecordValue(PlacedObject* object, u32 value)
     }
 }
 
+// Stores value in the object's record at 0x22C (offset 0x3C) and sets bit 2 of that record's flags.
 void SetObjectRecordValue(PlacedObject* state, u32 value)
 {
 	*(u32*)(state->sub22C + 0x3C) = value;
@@ -2391,6 +2427,7 @@ void ApplyPulsingColorToObjectTree(PlacedObject* self, f32 dt)
     SetObjectTreeRecordValue(self, *(u32*)color);
 }
 
+// Sets every draw part of the object and its placed-object children to type 2 with the given value.
 void SetObjectTreeRecordsValue(PlacedObject* object, void* value)
 {
     ListFrame frame;
@@ -2407,6 +2444,8 @@ void SetObjectTreeRecordsValue(PlacedObject* object, void* value)
     }
 }
 
+// Gives the object a node in the world (the ramp node) if it has none, at level 1 when the object
+// is attached and 0 otherwise.
 void EnsureObjectWorldNode(PlacedObject* self)
 {
     if (self->rampNode == 0) {
@@ -2436,6 +2475,8 @@ void FadeInPlacedObject(Collider* self, f32 time)
     }
 }
 
+// Starts fading the object out: its ramp node's rate becomes -1/time (a rate that clears it within
+// a frame when time is 0).
 void FadeOutPlacedObject(Collider* self, f32 time)
 {
     if (IsObjectAttached(self)) {
@@ -2483,6 +2524,9 @@ void BuildCameraFacingMatrix(void* unused0, Camera* cam, void* unused2, f32* pos
     *m = r;
 }
 
+// Copy method: lets the object copy from its owner (method 9), creates a copy of each of the
+// owner's children under it, and, for a collider-flagged root (flag 2, no parent), updates its
+// anchor-mode flags.
 void ClonePlacedObject(PlacedObject* self, PlacedObject* owner)
 {
     ListFrame it;
@@ -2564,6 +2608,8 @@ void CopyPlacedObject(PlacedObject* self, PlacedObject* src)
     if (self->p218 != (u8*)D_00260EA0) self->p218 = (u8*)CopyToFrontMemory(0x10, self->p218);
 }
 
+// On notification 1 (attached), starts the object's sound if it has a record, is not yet playing
+// and the game time is not 0.
 void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg)
 {
     if (mode == 1) {
@@ -2578,6 +2624,8 @@ void HandlePlacedObjectNotification(PlacedObject* self, s32 mode, void* arg)
     }
 }
 
+// Stores the position, runs the moved method (0x12), settles the position attachment's modes and
+// sends notification 3 with the old position.
 void SetPlacedObjectPosition(PlacedObject* self, Vec02* src)
 {
     MoveNotice f;
@@ -2595,6 +2643,8 @@ void SetPlacedObjectPosition(PlacedObject* self, Vec02* src)
 
 LINKER_REMNANT(func_00127468);
 
+// Stores the rotation, runs the moved method (0x12), settles the orientation attachment's modes and
+// sends notification 4.
 void SetPlacedObjectRotation(PlacedObject* self, Mat02* src)
 {
     self->rot = *src;
@@ -2605,6 +2655,8 @@ void SetPlacedObjectRotation(PlacedObject* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
+// Stores the velocity, settles the position attachment's modes and, when the velocity is not
+// negligible, clears the root tries.
 void SetPlacedObjectVelocity(PlacedObject* self, Vec02* src)
 {
     self->v150 = *src;
@@ -2616,6 +2668,7 @@ void SetPlacedObjectVelocity(PlacedObject* self, Vec02* src)
     }
 }
 
+// Sets the velocity from three floats through method 0x20.
 void SetPlacedObjectVelocityFromFloats(ObjectCycler* self, f32 x, f32 y, f32 z)
 {
     Vec3 v;
@@ -2625,6 +2678,8 @@ void SetPlacedObjectVelocityFromFloats(ObjectCycler* self, f32 x, f32 y, f32 z)
     self->desc02()->m20(self, (Vec02*)&v);
 }
 
+// Stores the spin, settles the orientation attachment's modes and, when the spin is not negligible,
+// clears the root tries.
 void SetPlacedObjectSpin(PlacedObject* self, Vec02* src)
 {
     self->v160 = *src;
@@ -2636,6 +2691,7 @@ void SetPlacedObjectSpin(PlacedObject* self, Vec02* src)
     }
 }
 
+// Sets the spin from three floats through method 0x21.
 void SetPlacedObjectSpinFromFloats(PairedObject* self, f32 x, f32 y, f32 z)
 {
     f32 v[3];
@@ -2645,6 +2701,8 @@ void SetPlacedObjectSpinFromFloats(PairedObject* self, f32 x, f32 y, f32 z)
     self->desc02()->m21(self, (Vec02*)v);
 }
 
+// Sets the velocity from a vector in the object's own frame, rotated into world space, through
+// method 0x20.
 void SetPlacedObjectLocalVelocity(PlacedObject* self, const Vec02* local)
 {
     Vec02 v;
@@ -2958,6 +3016,8 @@ void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02*
     *out = *in;
 }
 
+// True when the position attachment is in mode 5 or the orientation attachment is
+// (animation-driven).
 s32 HasAnimationDrivenAttachment(SwitchedCollider *self) {
     Attachment *p = self->positionAttachment;
     if (p != 0 && p->mode0 == 5) {
@@ -2972,6 +3032,8 @@ s32 HasAnimationDrivenAttachment(SwitchedCollider *self) {
     return 0;
 }
 
+// Releases every position and orientation attachment of the player that is in mode 5 (driven by an
+// animation), one at a time from the front of each list.
 void ReleaseAnimationDrivenAttachments(Player* self)
 {
     Attachment* a = self->positionAttachment;
@@ -3134,6 +3196,7 @@ void ComputeObjectSteeringHeading(f32 a, f32 b, PlacedObject* self, f32* p1, f32
     }
 }
 
+// Appends each child to the script list being built; false as soon as one is refused, else true.
 s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
 {
     ListFrame it;
@@ -3149,6 +3212,7 @@ s32 TestChildrenAccepted(PlacedObject* self, ScriptListBuilder* context)
     return 1;
 }
 
+// Creates a track pose source (an attachment driven by an animation track) for the object.
 Attachment* CreateTrackAttachment(BaseObject* item)
 {
     return CreatePoseSource(item->world, (PlacedObject*)item, (const T2195_Vt*)g_trackPoseSourceMethods);
@@ -3249,6 +3313,9 @@ void LoadFollowRecord(PlacedObject* self, void* a1)
     }
 }
 
+// After loading, turns the object ids stored in its link record into objects, by the record's
+// flags: 0x10 one followed object, 0x20 a target whose parent and common ancestor with this object
+// are also stored, 0x40 two objects; sets flag 0x8000.
 void ResolveFollowRecordObjects(PlacedObject* self)
 {
     Rec2195_224* p = self->linkRecord;
@@ -3323,6 +3390,8 @@ ASM_FUNC(func_001290B8);
 
 ASM_FUNC(func_001290E0);
 
+// Gives the object its 0x14-byte animation start record (no key, mode 0, speed scale 1) if it has
+// none, and gives it back.
 AnimationStart* EnsureTimerRecord(PlacedObject* self)
 {
     if (self->animationStart == 0) {
@@ -3336,26 +3405,32 @@ AnimationStart* EnsureTimerRecord(PlacedObject* self)
     return self->animationStart;
 }
 
+// Sets the x/y scale from a percentage (stored as a fraction, x / 100).
 void SetPlacedObjectScaleXY(PlacedObject* self, f32 x)
 {
     self->xyScale = x * 0.01f;
 }
 
+// Gives the x/y scale as a percentage.
 void GetPlacedObjectScaleXY(PlacedObject* self, f32* out)
 {
     *out = self->xyScale * 100.0f;
 }
 
+// Sets the z scale from a percentage (stored as a fraction).
 void SetPlacedObjectScaleZ(PlacedObject* self, f32 x)
 {
     self->zScale = x * 0.01f;
 }
 
+// Gives the z scale as a percentage.
 void GetPlacedObjectScaleZ(PlacedObject* self, f32* out)
 {
     *out = self->zScale * 100.0f;
 }
 
+// Gives the object a range record from the world's pool, initialised and on the world's list at
+// 0x1C00, if it has none; gives it back.
 void* EnsureRangeRecord(PlacedObject* self)
 {
     if (self->rangeRecord == 0) {
@@ -3367,6 +3442,8 @@ void* EnsureRangeRecord(PlacedObject* self)
     return self->rangeRecord;
 }
 
+// With flag, makes sure the object has a range record; without, takes it out of the world's list
+// and queues it on the deferred-release list.
 void SetRangeRecordPresent(PlacedObject* self, s32 flag)
 {
     if (flag != 0) {
@@ -3381,46 +3458,56 @@ void SetRangeRecordPresent(PlacedObject* self, s32 flag)
     self->rangeRecord = 0;
 }
 
+// Links the object's range record (made if needed) to the record for key.
 void SetRangeRecordKey(void* self, s32 value)
 {
     LinkRangeRecord((RangeRecord*)EnsureRangeRecord((PlacedObject*)self), value);
 }
 
+// Sets the range record's near range (made if needed).
 void SetRangeRecordNear(void* self, f32 x)
 {
     StoreRangeRecordNear((RangeRecord*)EnsureRangeRecord((PlacedObject*)self), x);
 }
 
+// Sets the range record's far range (made if needed).
 void SetRangeRecordFar(PlacedObject* self, f32 x)
 {
     StoreRangeRecordFar((RangeRecord*)EnsureRangeRecord(self), x);
 }
 
+// Sets the range record's inner distance (made if needed).
 void SetRangeRecordInner(PlacedObject* self, f32 x)
 {
     StoreRangeRecordInner((RangeRecord*)EnsureRangeRecord(self), x);
 }
 
+// Sets the range record's outer distance (made if needed).
 void SetRangeRecordOuter(PlacedObject* self, f32 x)
 {
     StoreRangeRecordOuter((RangeRecord*)EnsureRangeRecord(self), x);
 }
 
+// Sets the near and far ranges of the range record from an angle in degrees
+// (ScaleRangeRecordByAngle).
 void SetRangeRecordInnerAndOuter(PlacedObject* self, f32 x)
 {
     ScaleRangeRecordByAngle((RangeRecord*)EnsureRangeRecord(self), x);
 }
 
+// Stores the range record's vector (made if needed).
 void SetRangeRecordVector(void* self, void* src)
 {
     StoreRangeRecordVector((RangeRecord*)EnsureRangeRecord((PlacedObject*)self), (Quad16*)src);
 }
 
+// Stores a code at 0xB0 of the range record (made if needed).
 void SetRangeRecordCode(void* self, s32 value)
 {
     ((RangeRecord*)EnsureRangeRecord((PlacedObject*)self))->fB0 = value;
 }
 
+// The object's range record or, when it has none, a shared default one (re-initialised each time).
 RangeRecord* GetRangeRecord(PlacedObject* self)
 {
     if (self->rangeRecord != 0) return self->rangeRecord;
@@ -3433,6 +3520,7 @@ void GetRangeRecordPresent(PlacedObject* self, s32* out)
     *out = self->rangeRecord != 0;
 }
 
+// Gives the key of the range record's link, or -1 when it has no record or link.
 void GetRangeRecordKeyValue(PlacedObject* self, s32* out)
 {
     RangeRecord* p = self->rangeRecord;
@@ -3451,27 +3539,33 @@ fail:
     *out = -1;
 }
 
+// Gives the range record's near range (the default record's when the object has none).
 void GetRangeRecordNear(void* self, f32* out)
 {
     RangeRecord* s = GetRangeRecord((PlacedObject*)self);
     *out = s->nearRange;
 }
 
+// Gives the range record's far range (default record when none).
 void GetRangeRecordFar(void* self, f32* out)
 {
     *out = GetRangeRecord((PlacedObject*)self)->farRange;
 }
 
+// Gives the range record's inner distance (default record when none).
 void GetRangeRecordInner(void* self, f32* out)
 {
     *out = GetRangeRecord((PlacedObject*)self)->innerDistance;
 }
 
+// Gives the range record's outer distance (default record when none).
 void GetRangeRecordOuter(PlacedObject* self, f32* out)
 {
     *out = GetRangeRecord(self)->outerDistance;
 }
 
+// Gives the angle in degrees the range record's near range and inner distance make: twice atan(near
+// / inner), in *out.
 void GetRangeRecordAngle(void* self, f32* out)
 {
     RangeRecord* sub = GetRangeRecord((PlacedObject*)self);
@@ -3479,11 +3573,13 @@ void GetRangeRecordAngle(void* self, f32* out)
     *out = value + value;
 }
 
+// Gives the range record's vector (default record when none).
 void GetRangeRecordVector(void* self, Vec02* out)
 {
     *out = GetRangeRecord((PlacedObject*)self)->v30;
 }
 
+// Gives the object's rotation as three Euler angles in degrees.
 void GetRotationDegrees(PlacedObject* self, f32* out)
 {
     Vec02 a[3];
@@ -3501,6 +3597,8 @@ void GetRotationDegrees(PlacedObject* self, f32* out)
     } while (n >= 0);
 }
 
+// Sets the object's rotation from three Euler angles in degrees (converted to radians) through the
+// rotation set methods.
 void SetRotationDegrees(PlacedObject* self, f32* src)
 {
     EulerLocals l;
@@ -3519,6 +3617,7 @@ void SetRotationDegrees(PlacedObject* self, f32* src)
     self->desc02()->m1E(self, (Mat02*)out);
 }
 
+// Creates the object's base attachment (an owner pose source) and inserts it, if it has none.
 void EnsureBaseAttachment(PlacedObject* self)
 {
     if (self->baseAttachment == 0) {
@@ -3528,6 +3627,7 @@ void EnsureBaseAttachment(PlacedObject* self)
     }
 }
 
+// Creates the object's aim attachment (an aim-switch pose source) and inserts it, if it has none.
 void EnsureAimAttachment(PlacedObject* self)
 {
     if (self->aimAttachment == 0) {
@@ -3590,6 +3690,8 @@ void ChooseActiveAttachments(PlacedObject* self)
     }
 }
 
+// Inserts the attachment into the object's list, which is ordered by key (highest first), and
+// notifies method 0x2B.
 void InsertAttachment(PlacedObject* self, Attachment* src)
 {
     ListFrame frame;
@@ -3628,6 +3730,8 @@ void SortAttachments(PlacedObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
+// The world's animation player for the object, any when key is -1 or the one whose animation
+// matches the id; 0 when none.
 AnimationPlayer* FindObjectAnimationPlayer(PlacedObject* self, s32 key)
 {
     ListFrame frame;
@@ -3642,6 +3746,8 @@ AnimationPlayer* FindObjectAnimationPlayer(PlacedObject* self, s32 key)
     return 0;
 }
 
+// The state walker in the world's list 0x1B94 for the object, any when key is -1 or the one whose
+// owner matches the id; 0 when none.
 StateWalker* FindObjectHandle(PlacedObject* self, s32 key)
 {
     ListFrame frame;
@@ -3657,6 +3763,8 @@ StateWalker* FindObjectHandle(PlacedObject* self, s32 key)
     return 0;
 }
 
+// Walks up from the object through its parents to the first one with a track pose source on its
+// position or orientation, and gives back that source's animation player; 0 if none.
 void* FindTrackPlayer(PlacedObject* node)
 {
     while (node != 0) {
@@ -3673,6 +3781,8 @@ void* FindTrackPlayer(PlacedObject* node)
     return 0;
 }
 
+// Creates an identity-matrix pose source for the object with the given sort key, inserts it into
+// the object's attachments and gives it back in *out.
 void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out)
 {
     Attachment* n;
@@ -3685,6 +3795,8 @@ void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out)
     }
 }
 
+// True when the object's velocity and spin are negligible and so are those of all its placed-object
+// children.
 s32 IsObjectTreeAtRest(Actor6C* self)
 {
     Actor6C* n;
@@ -3702,11 +3814,14 @@ body:
     return 1;
 }
 
+// Resets the try count of the object's root, if it has one.
 void ClearRootTries(PlacedObject* self)
 {
     if (self->root != 0) self->root->tries = 0;
 }
 
+// Sets the position spring to the default one (D_00260E70) with every component multiplied by
+// scale.
 void SetScaledPositionSpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
@@ -3718,6 +3833,7 @@ void SetScaledPositionSpring(PlacedObject* self, f32 scale)
     SetPositionSpring(self, (Quad16*)&f.r);
 }
 
+// Stores the position spring; its own 16-byte copy on first use, as SetPositionRamp.
 void SetPositionSpring(PlacedObject* self, Quad16* value)
 {
     if (self->p20C == (u8*)D_00260E70)
@@ -3725,6 +3841,8 @@ void SetPositionSpring(PlacedObject* self, Quad16* value)
     *(Quad16*)self->p20C = *value;
 }
 
+// Sets the velocity spring to the default one (D_00260E80) with every component multiplied by
+// scale.
 void SetScaledVelocitySpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
@@ -3736,12 +3854,15 @@ void SetScaledVelocitySpring(PlacedObject* self, f32 scale)
     SetVelocitySpring(self, (Quad16*)&f.r);
 }
 
+// Stores the velocity spring (own copy on first use).
 void SetVelocitySpring(PlacedObject* self, Quad16* src)
 {
     if (self->p210 == (u8*)D_00260E80) self->p210 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p210 = *src;
 }
 
+// Sets the rotation spring to the default one (D_00260E90) with every component multiplied by
+// scale.
 void SetScaledRotationSpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
@@ -3753,12 +3874,14 @@ void SetScaledRotationSpring(PlacedObject* self, f32 scale)
     SetRotationSpring(self, (Quad16*)&f.r);
 }
 
+// Stores the rotation spring (own copy on first use).
 void SetRotationSpring(PlacedObject* self, Quad16* src)
 {
     if (self->p214 == (u8*)D_00260E90) self->p214 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p214 = *src;
 }
 
+// Sets the spin spring to the default one (D_00260EA0) with every component multiplied by scale.
 void SetScaledSpinSpring(PlacedObject* self, f32 scale)
 {
     ScaledSpringFrame f;
@@ -3770,12 +3893,15 @@ void SetScaledSpinSpring(PlacedObject* self, f32 scale)
     SetSpinSpring(self, (Quad16*)&f.r);
 }
 
+// Stores the spin spring (own copy on first use).
 void SetSpinSpring(PlacedObject* self, Quad16* src)
 {
     if (self->p218 == (u8*)D_00260EA0) self->p218 = (u8*)AllocateFrontMemory(16);
     *(Quad16*)self->p218 = *src;
 }
 
+// Sets the position ramp to the default one (D_00260EB0) with its first, second and fourth values
+// multiplied by scale.
 void SetScaledPositionRamp(PlacedObject* self, f32 scale)
 {
     Vec4U tmp;
@@ -3786,6 +3912,7 @@ void SetScaledPositionRamp(PlacedObject* self, f32 scale)
     SetPositionRamp(self, (RampProfile*)&tmp);
 }
 
+// Recomputes the position ramp's fourth value as scale * (x - y) / z of the ramp and stores it.
 void SetPositionRampAccelScale(PlacedObject* self, f32 scale)
 {
     RampProfile tmp = *(RampProfile*)self->p21C;
@@ -3793,6 +3920,8 @@ void SetPositionRampAccelScale(PlacedObject* self, f32 scale)
     SetPositionRamp(self, &tmp);
 }
 
+// Stores the ramp profile used for the object's position; the object gets its own 16-byte copy the
+// first time (it points to a shared default until then).
 void SetPositionRamp(PlacedObject* self, RampProfile* src)
 {
     if (self->p21C == (u8*)D_00260EB0) {
@@ -3801,6 +3930,8 @@ void SetPositionRamp(PlacedObject* self, RampProfile* src)
     *(RampProfile*)self->p21C = *src;
 }
 
+// Sets the rotation ramp to the default one (D_00260EC0) with its first, second and fourth values
+// multiplied by scale.
 void SetScaledRotationRamp(void* self, f32 s)
 {
     f32 v[4];
@@ -3812,6 +3943,7 @@ void SetScaledRotationRamp(void* self, f32 s)
     SetRotationRamp((PlacedObject*)self, (RampProfile*)v);
 }
 
+// Recomputes the rotation ramp's fourth value as scale * (x - y) / z of the ramp and stores it.
 void SetRotationRampAccelScale(PlacedObject* self, f32 scale)
 {
     RampProfile tmp;
@@ -3820,6 +3952,8 @@ void SetRotationRampAccelScale(PlacedObject* self, f32 scale)
     SetRotationRamp(self, &tmp);
 }
 
+// Stores the ramp profile used for the object's rotation; own 16-byte copy on first use, as
+// SetPositionRamp.
 void SetRotationRamp(PlacedObject* self, RampProfile* src)
 {
     if (self->p220 == (u8*)D_00260EC0) {
@@ -3828,22 +3962,28 @@ void SetRotationRamp(PlacedObject* self, RampProfile* src)
     *(RampProfile*)self->p220 = *src;
 }
 
+// Stores the default position mode (byte at 0x2C9).
 void SetDefaultPositionMode(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; }
 
+// Stores the default orientation mode (byte at 0x2CA).
 void SetDefaultOrientationMode(void* self, s8 value) { *((s8*)((u8*)self + 0x2CA)) = value; }
 
+// Sets the base attachment's position mode to 1 when value is non-zero and to -1 otherwise.
 void SetPositionSourceEnabled(void* self, s32 value) { SetPositionSourceMode((PlacedObject*)self, value ? 1 : -1); }
 
+// Sets the group activity mode to 1 when a1 is non-zero and to 0 otherwise.
 void SetGroupActivityModeEnabled(void* self, s32 a1)
 {
     SetGroupActivityMode((PlacedObject*)self, a1 != 0);
 }
 
+// Stores the low two bits of value in flag bits 40 and 41 of the object.
 void SetGroupActivityMode(PlacedObject* self, u32 value)
 {
     self->flags = (self->flags & ~(3ull << 40)) | ((u64)(value & 3) << 40);
 }
 
+// Gives the two-bit group activity mode from flag bits 40 and 41.
 void GetGroupActivityMode(PlacedObject* self, u32* out)
 {
     u32 value = (u32)(self->flags >> 40);
@@ -3851,6 +3991,7 @@ void GetGroupActivityMode(PlacedObject* self, u32* out)
     *out = value;
 }
 
+// Sets the base attachment's position mode (creating it if needed) and notifies method 0x2B.
 void SetPositionSourceMode(PlacedObject* self, s32 value)
 {
     EnsureBaseAttachment(self);
@@ -3858,11 +3999,13 @@ void SetPositionSourceMode(PlacedObject* self, s32 value)
     self->desc02()->m2B(self);
 }
 
+// Sets the base attachment's orientation mode to 1 when a1 is non-zero and to -1 otherwise.
 void SetOrientationSourceEnabled(void* self, s32 a1)
 {
     SetOrientationSourceMode((PlacedObject*)self, a1 != 0 ? 1 : -1);
 }
 
+// Sets the base attachment's orientation mode (creating it if needed) and notifies method 0x2B.
 void SetOrientationSourceMode(PlacedObject* self, s32 value)
 {
     EnsureBaseAttachment(self);
@@ -3870,6 +4013,7 @@ void SetOrientationSourceMode(PlacedObject* self, s32 value)
     self->desc02()->m2B(self);
 }
 
+// Sets the base attachment's key (creating it if needed) and sorts the object's attachments again.
 void SetBaseAttachmentSortKey(PlacedObject* self, s32 value)
 {
     EnsureBaseAttachment(self);
@@ -3877,6 +4021,7 @@ void SetBaseAttachmentSortKey(PlacedObject* self, s32 value)
     SortAttachments(self);
 }
 
+// Sets the aim attachment's orientation mode (3 is stored as 9) and notifies method 0x2B.
 void SetAimOrientationMode(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
@@ -3885,12 +4030,14 @@ void SetAimOrientationMode(PlacedObject* self, s32 value)
     self->desc02()->m2B(self);
 }
 
+// Stores the aim attachment's range (creating the attachment if needed).
 void SetAimRange(PlacedObject* self, f32 f)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->aimRange = f;
 }
 
+// Gives the aim attachment's range, 0 when the object has none.
 void GetAimRange(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
@@ -3898,60 +4045,70 @@ void GetAimRange(PlacedObject* self, f32* out)
     *out = r;
 }
 
+// Stores the aim attachment's yaw curve vector (creating the attachment if needed).
 void SetAimYawCurve(PlacedObject* self, Vec02* src)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->v50 = *src;
 }
 
+// Gives the aim attachment's yaw curve vector, or zero when the object has none.
 void GetAimYawCurve(PlacedObject* self, Quad16* out)
 {
     Quad16* src = self->aimAttachment != 0 ? (Quad16*)&self->aimAttachment->v50 : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
+// Stores the aim attachment's yaw limits (creating the attachment if needed).
 void SetAimYawLimits(PlacedObject* self, Pk8_2195* src)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->p60 = *src;
 }
 
+// Gives the aim attachment's yaw limits, or the default unit range when the object has none.
 void GetAimYawLimits(PlacedObject* self, U64P* out)
 {
     U64P* src = self->aimAttachment != 0 ? (U64P*)&self->aimAttachment->p60 : (U64P*)g_unitRange;
     *out = *src;
 }
 
+// Stores the aim attachment's pitch curve vector (creating the attachment if needed).
 void SetAimPitchCurve(PlacedObject* self, Vec02* src)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->v70 = *src;
 }
 
+// Gives the aim attachment's pitch curve vector, or zero when the object has none.
 void GetAimPitchCurve(PlacedObject* self, Quad16* out)
 {
     Quad16* src = self->aimAttachment != 0 ? (Quad16*)&self->aimAttachment->v70 : (Quad16*)g_zeroQuad;
     *out = *src;
 }
 
+// Stores the aim attachment's pitch limits (creating the attachment if needed).
 void SetAimPitchLimits(PlacedObject* self, Pk8_2195* src)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->p80 = *src;
 }
 
+// Gives the aim attachment's pitch limits, or the default unit range when the object has none.
 void GetAimPitchLimits(PlacedObject* self, U64P* out)
 {
     U64P* src = self->aimAttachment != 0 ? (U64P*)&self->aimAttachment->p80 : (U64P*)g_unitRange;
     *out = *src;
 }
 
+// Stores the aim attachment's near key.
 void SetAimNearKey(PlacedObject* self, s32 v)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->nearKey = v;
 }
 
+// Gives the aim attachment's near key, 0 when the object has none.
 void GetAimNearKey(PlacedObject* self, s32* out)
 {
     s32 r = 0;
@@ -3959,12 +4116,14 @@ void GetAimNearKey(PlacedObject* self, s32* out)
     *out = r;
 }
 
+// Stores the aim attachment's far key.
 void SetAimFarKey(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->farKey = value;
 }
 
+// Gives the aim attachment's far key, 0 when the object has none.
 void GetAimFarKey(PlacedObject* self, s32* out)
 {
     s32 v = 0;
@@ -3974,12 +4133,14 @@ void GetAimFarKey(PlacedObject* self, s32* out)
     *out = v;
 }
 
+// Stores the id of the aim attachment's target (which PostLoadPlacedObject resolves).
 void SetAimTargetId(PlacedObject* self, s32 value)
 {
     EnsureAimAttachment(self);
     self->aimAttachment->f20 = value;
 }
 
+// Gives the id of the aim attachment's target, -1 when the object has none.
 void GetAimTargetId(PlacedObject* self, s32* out)
 {
     s32 v = -1;
@@ -3989,26 +4150,32 @@ void GetAimTargetId(PlacedObject* self, s32* out)
     *out = v;
 }
 
+// Makes b the aim attachment's target, with the default offset.
 void SetAimTarget(PlacedObject* self, void* b)
 {
     AssignAimTarget(self->aimAttachment, b, (Vec02*)&D_00248D30);
 }
 
+// Gives the object the aim attachment currently targets (resolved from its id), in *out.
 void GetAimTarget(PlacedObject* self, void** out)
 {
     *out = ResolveAimTarget(self->aimAttachment);
 }
 
+// Clears the aim attachment's hold flag.
 void ClearAimHold(PlacedObject* self)
 {
     self->aimAttachment->hold = 0;
 }
 
+// Sets the aim attachment's hold flag.
 void SetAimHold(PlacedObject* self)
 {
     self->aimAttachment->hold = 1;
 }
 
+// Creates the object's own value attachment on first use (and inserts it in the attachment list),
+// then sets its mode and two values and notifies method 0x2B.
 void SetValueAttachment(PlacedObject* self, s32 a1, f32 x, f32 y)
 {
     if (self->ownValueAttachment == 0) {
@@ -4022,6 +4189,8 @@ void SetValueAttachment(PlacedObject* self, s32 a1, f32 x, f32 y)
     self->desc02()->m2B(self);
 }
 
+// The first object of id 0x22A in class 0x102 of the world, or a new class 0x75 object with that
+// id.
 Class75Object* FindOrCreateClass75Object(PlacedObject* self)
 {
     void* r = FindFirstObjectById(self->world, 0x102, 0x22A, self);
@@ -4031,6 +4200,7 @@ Class75Object* FindOrCreateClass75Object(PlacedObject* self)
     return (Class75Object*)CreateTypedRecord(0x75, self->world, self, 0x22A, -1);
 }
 
+// Sets the count of the object's class 0x75 record (made if needed), unless value is -1.
 void SetClass75ObjectCount(PlacedObject* self, s32 value)
 {
     Class75Object* o = FindOrCreateClass75Object(self);
@@ -4039,17 +4209,20 @@ void SetClass75ObjectCount(PlacedObject* self, s32 value)
     }
 }
 
+// Sets the scale of the object's class 0x75 record (made if needed).
 void SetClass75ObjectScale(void* self, f32 value)
 {
     FindOrCreateClass75Object((PlacedObject*)self)->scale = value;
 }
 
+// Sets the field at 0x90 of the object's class 0x75 record (made if needed).
 void SetClass75ObjectField90(void* self, s32 value)
 {
     Class75Object* ctx = FindOrCreateClass75Object((PlacedObject*)self);
     ctx->f90 = value;
 }
 
+// Sets the scroll scale (a, b) of every scroll animator (element kind 6) of the object.
 void SetElementsScrollScale(PlacedObject* self, f32 a, f32 b)
 {
     for (s32 i = 0; i < self->elemCount; i++) {
@@ -4058,6 +4231,8 @@ void SetElementsScrollScale(PlacedObject* self, f32 a, f32 b)
     }
 }
 
+// Sets the crossfade ratio of every crossfade animator (element kind 5) of the object and,
+// recursively, of its placed-object children.
 void SetCrossfadeRatioDeep(PlacedObject* self, f32 value)
 {
     ListFrame frame;
@@ -4070,17 +4245,21 @@ void SetCrossfadeRatioDeep(PlacedObject* self, f32 value)
     }
 }
 
+// Gives the object a sound record with default parameters if it has none.
 void EnsureSoundRecord(PlacedObject* self)
 {
     if (self->soundRecord == 0) InitSoundParams(&self->soundRecord);
 }
 
+// Stores the sound id of the object's sound record (made if needed) without restarting the sound.
 void SetSoundRecordId(PlacedObject* self, s32 value)
 {
     EnsureSoundRecord(self);
     self->soundRecord->soundId = value;
 }
 
+// Stops the object's sound, changes the sound record's id to value and starts the sound again with
+// the record's ranges, volume and pitch.
 void RestartSoundWithId(PlacedObject* self, s32 value)
 {
     EnsureSoundRecord(self);
@@ -4090,6 +4269,7 @@ void RestartSoundWithId(PlacedObject* self, s32 value)
     StartSoundEffect(p->soundId, (PlayingSound**)&p->sound, self, 0, p->outerRange, p->innerRange, p->baseVolume, p->pitch, p->startParam, (f32*)&p->b14, 0);
 }
 
+// Gives the sound's id, -1 when the object has no sound record.
 void GetSoundRecordId(PlacedObject* self, s32* out)
 {
     s32 v = -1;
@@ -4097,12 +4277,14 @@ void GetSoundRecordId(PlacedObject* self, s32* out)
     *out = v;
 }
 
+// Stores the sound's outer range.
 void SetSoundOuterRange(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
     self->soundRecord->outerRange = value;
 }
 
+// Gives the sound's outer range, 3000 when the object has no sound record.
 void GetSoundOuterRange(PlacedObject* self, f32* out)
 {
     SoundRecord* s = self->soundRecord;
@@ -4111,18 +4293,21 @@ void GetSoundOuterRange(PlacedObject* self, f32* out)
     *out = v;
 }
 
+// Stores the sound's inner range.
 void SetSoundInnerRange(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
     self->soundRecord->innerRange = value;
 }
 
+// Stores the pair of values at 0x14 of the object's sound record (made if needed).
 void SetSoundRecordPair(PlacedObject* self, U64P* src)
 {
     EnsureSoundRecord(self);
     self->soundRecord->b14 = *src;
 }
 
+// Gives the sound's inner range, 300 when the object has no sound record.
 void GetSoundInnerRange(PlacedObject* self, f32* out)
 {
     SoundRecord* s = self->soundRecord;
@@ -4131,18 +4316,21 @@ void GetSoundInnerRange(PlacedObject* self, f32* out)
     *out = v;
 }
 
+// Stores the sound's base volume.
 void SetSoundRecordScale(PlacedObject* self, f32 f)
 {
     EnsureSoundRecord(self);
     self->soundRecord->baseVolume = f;
 }
 
+// Stores the sound's start parameter.
 void SetSoundStartParam(PlacedObject* self, f32 value)
 {
     EnsureSoundRecord(self);
     self->soundRecord->startParam = value;
 }
 
+// Gives the sound's start parameter, 0 when the object has no sound record.
 void GetSoundStartParam(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
@@ -4152,6 +4340,7 @@ void GetSoundStartParam(PlacedObject* self, f32* out)
     *out = r;
 }
 
+// Changes the volume of the object's sound while it is playing.
 void SetPlayingSoundVolume(PlacedObject* self, f32 volume)
 {
     SoundRecord* part = self->soundRecord;
@@ -4163,6 +4352,7 @@ void SetPlayingSoundVolume(PlacedObject* self, f32 volume)
     }
 }
 
+// Gives the sound's base volume, 1 when the object has no sound record.
 void GetSoundRecordScale(PlacedObject* self, f32* out)
 {
     f32 v = 1.0f;
@@ -4172,12 +4362,14 @@ void GetSoundRecordScale(PlacedObject* self, f32* out)
     *out = v;
 }
 
+// Stores the sound's start pitch.
 void SetSoundStartPitch(PlacedObject* self, f32 f)
 {
     EnsureSoundRecord(self);
     self->soundRecord->pitch = f;
 }
 
+// Changes the pitch of the object's sound while it is playing.
 void SetPlayingSoundPitch(PlacedObject* self, f32 pitch)
 {
     SoundRecord* in = self->soundRecord;
@@ -4186,6 +4378,7 @@ void SetPlayingSoundPitch(PlacedObject* self, f32 pitch)
     }
 }
 
+// Gives the sound's start pitch, 0 when the object has no sound record.
 void GetSoundStartPitch(PlacedObject* self, f32* out)
 {
     f32 r = 0.0f;
@@ -4195,6 +4388,7 @@ void GetSoundStartPitch(PlacedObject* self, f32* out)
     *out = r;
 }
 
+// Gives the pair at 0x14 of the sound record, or (-1, -1) when the object has none.
 void GetSoundRecordPair(PlacedObject* self, U64P* out)
 {
     SoundRecord* s = self->soundRecord;
@@ -4222,12 +4416,15 @@ void StartSoundWithParams(PlacedObject* self, s32 value, U64P* src, f32 x, f32 y
     StartSoundEffect(p->soundId, (PlayingSound**)&p->sound, self, 0, p->outerRange, p->innerRange, p->baseVolume, p->pitch, p->startParam, (f32*)&p->b14, 0);
 }
 
+// Stops the object's sound if it has a sound record.
 void StopPlayingSound(PlacedObject* self)
 {
     SoundRecord* inner = self->soundRecord;
     if (inner != 0) StopSoundRecord((PlayingSound*)inner->sound, 0);
 }
 
+// Gives the object a 64-byte colour record, copied from the default record with no preset, if it
+// has none.
 void EnsureColorRecord(void* ptr)
 {
     PlacedObject* self = (PlacedObject*)ptr;
@@ -4238,6 +4435,7 @@ void EnsureColorRecord(void* ptr)
     }
 }
 
+// Sets the colour record's preset and, unless it is -1, loads the record from that preset.
 void SetColorPreset(PlacedObject* self, s32 a1)
 {
     EnsureColorRecord(self);
@@ -4247,38 +4445,45 @@ void SetColorPreset(PlacedObject* self, s32 a1)
     if (k != -1) *e = g_colorPresets[k];
 }
 
+// Gives the colour record's preset, -1 when the object has no record.
 void GetColorPreset(PlacedObject* self, s32* out) { *out = self->colorRecord ? *(s32*)self->colorRecord : -1; }
 
+// Stores the colour record's first colour (made if needed).
 void SetColorRecordFirstColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
     *(Quad16*)&self->colorRecord->c10 = *input;
 }
 
+// Gives the colour record's first colour (a default vector when none).
 void GetColorRecordFirstColor(PlacedObject* self, Quad16* out)
 {
     u8* src = self->colorRecord ? (u8*)&self->colorRecord->c10 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
+// Stores the colour record's second colour (made if needed).
 void SetColorRecordSecondColor(PlacedObject* self, Quad16* input)
 {
     EnsureColorRecord(self);
     *(Quad16*)&self->colorRecord->c20 = *input;
 }
 
+// Gives the colour record's second colour (a default vector when none).
 void GetColorRecordSecondColor(PlacedObject* self, Quad16* out)
 {
     u8* src = self->colorRecord ? (u8*)&self->colorRecord->c20 : (u8*)&D_00248D30;
     *out = *(Quad16*)src;
 }
 
+// Stores the colour record's factor (made if needed).
 void SetColorRecordFactor(PlacedObject* self, f32 value)
 {
     EnsureColorRecord(self);
     self->colorRecord->factor = value;
 }
 
+// Gives the colour record's factor, 0 when the object has no record.
 void GetColorRecordFactor(PlacedObject* self, f32* out)
 {
     f32 v = 0.0f;
@@ -4287,6 +4492,7 @@ void GetColorRecordFactor(PlacedObject* self, f32* out)
     *out = v;
 }
 
+// Sets the first three tint bytes to v.
 void SetTintRgb(PlacedObject* self, s32 v)
 {
     self->tint[2] = v;
@@ -4385,6 +4591,9 @@ void SelectValueEntryByKey(PlacedObject* self, s32 key)
     }
 }
 
+// Sets or clears flag bit 36 (tracked by the camera) and, if the object is attached, adds it to or
+// removes it from the camera's object list. Does nothing when the flag already has the requested
+// value.
 void SetObjectCameraTracked(PlacedObject* self, s32 flag)
 {
     u64 want = flag != 0;
@@ -4403,6 +4612,8 @@ void SetObjectCameraTracked(PlacedObject* self, s32 flag)
     }
 }
 
+// Sets the frame-step clock flag; on an attached root object it is taken off the tree and put back
+// on around the change (methods 3 and 2).
 void SetPlacedObjectFrameStepClock(PlacedObject* self, s32 flag)
 {
     if ((0 < (u32)flag) != (self->frameStepClock == 0)) {
@@ -4424,6 +4635,7 @@ done:
     return;
 }
 
+// Sets or clears flag bit 32 of the object.
 void SetPlacedObjectSpecialFlag(PlacedObject* ctx, s32 on)
 {
     if (on != 0) {
@@ -4433,6 +4645,7 @@ void SetPlacedObjectSpecialFlag(PlacedObject* ctx, s32 on)
     }
 }
 
+// Gives flag bit 32 of the object as 0 or 1.
 void GetPlacedObjectSpecialFlag(PlacedObject* ctx, s32* out)
 {
     if ((ctx->flags & ((u64)1 << 32)) != 0) {
@@ -4474,6 +4687,8 @@ void SetFollowObjects(PlacedObject* self, void* a1, void* a2)
 
 LINKER_REMNANT(func_0012B6A0);
 
+// Initialises an object that checksums the game's code: the range from 0x100018 to the end, an
+// initial CRC of 0xFFFFFFFF and the 256-entry CRC-32 table for the polynomial 0xEDB88320.
 void InitCodeChecksum(CodeChecksum* self)
 {
     u32 c;
@@ -4528,8 +4743,11 @@ void UpdateCodeChecksum(CodeChecksum* self, f32 dt)
     }
 }
 
+// Empty: the module has no set-up of its own.
 void InitPlacedObjectModule(void) {}
 
+// Initialises an animation: the link offset of its property list (0x3C) and its kinematic value at
+// 1 (velocity and acceleration 0), limits 0 and 1 and output 1.
 void InitAnimation(Animation* self)
 {
     InitObject(self);
@@ -4781,6 +4999,9 @@ void CopyAnimation(Animation* self, Animation* src)
     CopyObjectData(self, src);
 }
 
+// Starts the object, then computes its output as position + t*(velocity + t*acceleration) at the
+// entry's dt, clamped to its low and high limits; when enabled, queues StartLinkedObjectAnimation
+// for it.
 void StartClampedKinematicValue(Animation* self)
 {
     StartObject(self);
@@ -4800,6 +5021,8 @@ void StartClampedKinematicValue(Animation* self)
     }
 }
 
+// Finds the object the animation names (an object with its id in class 4 or, failing that, 0x104)
+// and starts a player of the animation for it, without preset targets.
 void StartLinkedObjectAnimation(Animation* self)
 {
     s32 scratch[4];
@@ -4924,11 +5147,14 @@ void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetB
     TriggerScriptEvent(self, 9, 1, &pobj);
 }
 
+// CreateAnimationPlayer with no preset target lists (0, 0).
 void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
 {
     CreateAnimationPlayer(self, alt, 0, 0, flags, out, fa, fb);
 }
 
+// CreateAnimationPlayer with no preset targets, giving the new player back instead of through a
+// pointer.
 AnimationPlayer* CreateAnimationPlayerReturned(Animation* self, BaseObject* owner, f32 fa, f32 fb, s32 flags)
 {
     AnimationPlayer* out;
@@ -4936,6 +5162,7 @@ AnimationPlayer* CreateAnimationPlayerReturned(Animation* self, BaseObject* owne
     return out;
 }
 
+// The player of the animation's list whose object is key; 0 when none.
 AnimationPlayer* FindAnimationPlayerByScope(Animation* self, BaseObject* key)
 {
     ListFrame frame;
@@ -4951,6 +5178,8 @@ AnimationPlayer* FindAnimationPlayerByScope(Animation* self, BaseObject* key)
     return 0;
 }
 
+// Finds the animation's player for key (or makes one, without preset targets) and seeks it to the
+// given positions; the player goes to *out when out is set.
 void FindOrCreateAnimationPlayerAndSeek(void* self, BaseObject* key, s32 a2, s32 a3, void** out, f32 fa, f32 fb)
 {
     void* hit;
@@ -4964,6 +5193,7 @@ void FindOrCreateAnimationPlayerAndSeek(void* self, BaseObject* key, s32 a2, s32
     SeekAnimationPlayer((AnimationPlayer*)*dst, a2, fa, fb);
 }
 
+// FindOrCreateAnimationPlayerAndSeek giving the player back.
 void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32 a3, f32 fa, f32 fb)
 {
     void* out;
@@ -4975,6 +5205,8 @@ void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32
 // which retail's call sets up after them.
 void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out);
 
+// Stops and clears *out's player and, if anim is non-null, creates a new player for it without
+// preset targets.
 void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
 {
     if (*out != 0) {
@@ -4986,6 +5218,7 @@ void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, Anima
     }
 }
 
+// True when any of the animation's timed events is of kind 0x19.
 s32 HasAnimationEventKind19(Animation* a0)
 {
     s32 n = a0->timedCount;
@@ -5048,6 +5281,8 @@ void FindNearestAnimationPathTime(Animation* self, PlacedObject* owner, f32 star
     RefineNearestAnimationPathTime(self->length, 3.40282347e+38f, track, owner, point, bestT, outT, outPos, outDir);
 }
 
+// Searches an animation's start, timed and end event lists, in that order, for the first marker
+// event (kind 0x27) with the given key; 0 when there is none.
 AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key) {
     s32 i;
     AnimEvent* p;
@@ -5072,6 +5307,7 @@ AnimEvent* FindAnimationMarkerEvent(Animation* self, s32 key) {
     return 0;
 }
 
+// The time of the animation's marker event for key, or 0 when there is none.
 f32 GetAnimationMarkerTime(Animation* self, s32 key)
 {
     f32* p = (f32*)FindAnimationMarkerEvent(self, key);
@@ -5082,6 +5318,7 @@ f32 GetAnimationMarkerTime(Animation* self, s32 key)
     return r;
 }
 
+// The entry of the blend view's list (0x1C bytes each) whose key matches the object id, or 0.
 void* FindEntryByObjectId(BlendAnimationView* self, BaseObject* key)
 {
     for (s32 i = 0; i < self->f38; i++) {
@@ -5271,6 +5508,7 @@ void MoveAnimationTrackToEnd(Animation* self, Track83* p)
     self->movedTrack = p;
 }
 
+// Moves the owner's track to the end of the animation's list, unless a track was already moved.
 void MoveObjectAnimationTrackToEnd(Animation* a0, BaseObject* owner)
 {
     if (a0->movedTrack == 0) {
@@ -5279,12 +5517,17 @@ void MoveObjectAnimationTrackToEnd(Animation* a0, BaseObject* owner)
     }
 }
 
+// Empty load method: an animation player is not read from a stream.
 void SkipAnimationPlayerLoad(AnimationPlayer* self, BufferedStream* stream) {}
 
+// Empty start method.
 void SkipAnimationPlayerStart() {}
 
+// Empty copy method.
 void SkipAnimationPlayerCopy(AnimationPlayer* self, AnimationPlayer* src) {}
 
+// Takes a cleared animation player from the world's pool and sets its methods, the link offset of
+// its list (0x20) and its roots pointer.
 AnimationPlayer* NewAnimationPlayer(World* pool)
 {
     AnimationPlayer* o = (AnimationPlayer*)PopZeroedFreeSlot(&pool->pool1B58);
@@ -5296,6 +5539,8 @@ AnimationPlayer* NewAnimationPlayer(World* pool)
     return o;
 }
 
+// Sets the player's pad-select state; the world's pad-select flag is acquired when it turns on and
+// released when it turns off.
 void SetAnimationPlayerPadSelect(AnimationPlayer* self, s32 v)
 {
     if (v == self->state24) {
@@ -5309,6 +5554,8 @@ void SetAnimationPlayerPadSelect(AnimationPlayer* self, s32 v)
     self->state24 = (s8)v;
 }
 
+// Puts the player's timed-event cursor (f20) at the first event not before the current time (or,
+// when playing backwards, just after the last one not after it).
 void SeekAnimationEventCursor(AnimationPlayer* self)
 {
     Animation* track = self->anim;
@@ -5339,6 +5586,7 @@ void SeekAnimationEventCursor(AnimationPlayer* self)
     }
 }
 
+// The attachment in the player's list whose owner matches the id; 0 when none.
 T2195_7C0* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner)
 {
     ListFrame frame;
@@ -5912,6 +6160,7 @@ void RunAnimationEventsToTime(AnimationPlayer* self, Animation* list, s32* out)
     }
 }
 
+// Removes the entry from the current world's list at 0x1B7C and returns it to the pool at 0x1B58.
 void ReleaseWorldListEntry(void* a0)
 {
     RemoveFromList((List01*)&g_currentWorld->list1B7C, a0);
@@ -5973,12 +6222,15 @@ void StopAnimationPlayer(AnimationPlayer* self)
     g_activeListFrames = (ListFrame*)fr.prev;
 }
 
+// Releases the player's attachment of the given owner (with the given mode), if it has one.
 void ReleasePlayerAttachment(void* a0, s32 owner, s32 how)
 {
     Attachment* n = FindPlayerAttachmentByOwner((AnimationPlayer*)a0, owner);
     if (n) n->vt->release(n, how);
 }
 
+// A scale from 1 down to 0.15 for a distance: 1 below the range's minimum, 0.15 from its maximum
+// on, linear in between.
 f32 GetRangeFalloffScale(RangeFalloffOwner* self, f32 value)
 {
     FalloffRange* range = self->range;
@@ -6230,6 +6482,7 @@ call:
     }
 }
 
+// Applies each pose source of the player's list with the given flag.
 void ApplyListedPoseSources(AnimationPlayer* a0, s32 flag)
 {
     ListFrame frame;
@@ -6240,6 +6493,7 @@ void ApplyListedPoseSources(AnimationPlayer* a0, s32 flag)
     }
 }
 
+// Settles the modes of each pose source of the player's list.
 void SettleListedPoseSources(AnimationPlayer* self)
 {
     ListFrame frame;
@@ -6357,11 +6611,14 @@ done:
     }
 }
 
+// Sets the playing speed to x times the player's speed scale times the animation's output.
 void SetAnimationPlayerSpeed(AnimationPlayer* self, f32 x)
 {
     self->speed = x * self->speedScale * self->anim->out;
 }
 
+// Changes the speed scale while keeping the playing speed in step: the speed is divided by the old
+// scale times the animation's output and set again through SetAnimationPlayerSpeed.
 void SetAnimationPlayerSpeedScale(AnimationPlayer* self, f32 x)
 {
     f32 denom = self->speedScale * self->anim->out;
@@ -6374,6 +6631,8 @@ void SetAnimationPlayerSpeedScale(AnimationPlayer* self, f32 x)
     SetAnimationPlayerSpeed(self, r);
 }
 
+// Gives every attachment of the player's list the sort key and sorts the attachments of its owner
+// again.
 void SetAttachmentSortKeys(AnimationPlayer* owner, s32 value)
 {
     ListFrame frame;
@@ -6385,6 +6644,8 @@ void SetAttachmentSortKeys(AnimationPlayer* owner, s32 value)
     }
 }
 
+// Sends the notification to the player's object and then calls every callback registered on the
+// player.
 void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2)
 {
     BaseObject* obj = (BaseObject*)self->object;
@@ -6399,16 +6660,19 @@ void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2)
     }
 }
 
+// Registers a callback (a1 and its argument a2) on the player.
 void AddAnimationPlayerCallback(AnimationPlayer* a0, void* a1, void* a2)
 {
     AddCallbackNode(a0->anim->world, (Callback01**)&a0->fE4, a1, a2);
 }
 
+// Registers on the player the callback taken from the object a1 points to, with a1 as argument.
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1)
 {
     AddCallbackNode(a0->anim->world, (Callback01**)&a0->fE4, (void*)(*a1)->link40.prev, a1);
 }
 
+// Initialises the collider with anchors (3, 0, 3, 0) and no id.
 void InitIdFilterObject(IdFilterObject* self)
 {
     InitCollider(self);
@@ -6416,6 +6680,7 @@ void InitIdFilterObject(IdFilterObject* self)
     self->id = -1;
 }
 
+// Copies the collider and, for a root object, sets its contact-pair flags.
 void CopyIdFilterObject(IdFilterObject* self, IdFilterObject* src)
 {
     CopyCollider(self, src);
@@ -6451,6 +6716,9 @@ void StartIdFilterObject(IdFilterObject* self)
     g_activeListFrames = (ListFrame*)it.prev;
 }
 
+// Updates the collider and then, once a pending target exists, zeroes its velocity and spin and
+// puts it at the filter's position (mode 1) or at the found object's position in world space (mode
+// 2); the target then becomes the placed target.
 void UpdateIdFilterObject(IdFilterObject* self, f32 dt)
 {
     Quad4 loc;
@@ -6546,13 +6814,16 @@ void HandleIdFilterObjectContact(IdFilterObject* self, u8* table, s32 which)
     }
 }
 
+// Appends an object id to the filter's list of object ids.
 void AddIdFilterObjectId(IdFilterObject* a0, s32 a1)
 {
     a0->objectIds.items[a0->objectIds.count++] = a1;
 }
 
+// Appends a class id to the filter's list of class ids.
 void AddIdFilterClassId(IdFilterObject* obj, s32 value) { obj->classIds.items[obj->classIds.count++] = value; }
 
+// Clears the reader and sets its buffer to value rounded up to 64 bytes, with no file handle (-1).
 StreamReader* InitStreamReader(StreamReader* obj, u8* value)
 {
     obj->sector = 0;
@@ -6568,12 +6839,14 @@ StreamReader* InitStreamReader(StreamReader* obj, u8* value)
     return obj;
 }
 
+// Closes the reader and, when bit 0 of flags is set, frees it.
 void DestroyStreamReader(StreamReader* self, s32 flags)
 {
     CloseStreamReader(self);
     if (flags & 1) FreeObjectMemory(self);
 }
 
+// Opens the sector stream from a pair of (first sector, byte count).
 s32 OpenSectorStreamRange(StreamReader* self, KeyId* pair)
 {
     return OpenSectorStream(self, pair->first, pair->second);
@@ -6581,6 +6854,8 @@ s32 OpenSectorStreamRange(StreamReader* self, KeyId* pair)
 
 LINKER_REMNANT(func_0012FD98);
 
+// Starts a stream of a bytes' worth of disc data beginning at sector a1 (total a2) and starts
+// reading its first chunk; always returns 1.
 s32 OpenSectorStream(StreamReader *self, s32 a1, s32 a2) {
     self->sector = a1;
     sptr t = self->buffer;
@@ -6594,6 +6869,8 @@ s32 OpenSectorStream(StreamReader *self, s32 a1, s32 a2) {
     return 1;
 }
 
+// Closes the stream's source: the file for kind 0, or the pending disc read (cancelled and
+// committed) for kind 1; the kind becomes -1.
 void CloseStreamReader(StreamReader* a0)
 {
     switch (a0->sourceKind) {
@@ -6612,6 +6889,9 @@ void CloseStreamReader(StreamReader* a0)
     a0->sourceKind = -1;
 }
 
+// Starts reading the next chunk (at most 0x4000 bytes) of the stream into the half of its buffer
+// that is not in use, from a file or from a disc sector by source kind; does nothing while a read
+// is pending or nothing remains.
 void StartChunkRead(StreamReader* self)
 {
     if (IsReadPending(self) != 0) {
@@ -6646,6 +6926,8 @@ s32 IsReadPending(StreamReader* a0)
     return a0->pendingLength != 0;
 }
 
+// Checks whether the stream reader's pending chunk read has finished (file control or disc sync, by
+// source kind) and returns true when it has; an error from the disc cancels the pending read.
 s32 PollChunkRead(StreamReader* a0)
 {
     s32 r = 0;
@@ -6672,6 +6954,8 @@ s32 PollChunkRead(StreamReader* a0)
     return r;
 }
 
+// When the pending read has finished, makes its data the ready chunk: advances the sector, lowers
+// the remaining count and resets the used length.
 void CommitChunk(StreamReader* self)
 {
     if (PollChunkRead(self) == 0) {
@@ -6689,6 +6973,8 @@ void CommitChunk(StreamReader* self)
     self->usedLength = 0;
 }
 
+// Keeps a stream reader going: for a file source starts the next chunk and then commits the
+// finished one, for a disc source commits first and then starts.
 void PumpStreamReader(StreamReaderWindow* self)
 {
     switch (self->sourceKind) {
@@ -6708,6 +6994,7 @@ void ConsumeStreamBytes(StreamReaderWindow* a0, s32 a1)
     a0->usedLength += a1;
 }
 
+// True when key is the id of the object's class or of any of its parent classes.
 s32 IsObjectOfKind(BaseObject* list, s32 key)
 {
     const Desc01* node = list->desc;
@@ -6720,6 +7007,7 @@ s32 IsObjectOfKind(BaseObject* list, s32 key)
     return 0;
 }
 
+// Gives the object a keyed list if it has none and registers it as a root of the mark stacks.
 void EnsureKeyedList(BaseObject* self)
 {
     if (self->keyedList == 0) {

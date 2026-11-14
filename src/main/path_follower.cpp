@@ -295,6 +295,8 @@ void QueuePlayerMarkerRingDraw(Player* self, RingSource* a, void* b)
     }
 }
 
+// The phase of the player's request: in state 4 it is 1 before sub-state 45 and 2 from then on;
+// in other states it is whether the pulse is active (0 or 1).
 s32 GetPlayerRequestPhase(Player* self)
 {
     if (self->state != 4) {
@@ -307,6 +309,9 @@ s32 GetPlayerRequestPhase(Player* self)
 }
 
 
+// Ends the player's current request: finishes the switched collider if one was active, then
+// either calls the pending message callback or, if there is none, launches the player with its
+// own velocity (z at least a minimum) into state 2 with argument 6; clears the jump speed.
 void FinishPlayerRequest(Player* self)
 {
     if (self->f2730 != 0) {
@@ -530,6 +535,7 @@ void SwapInPlayerStandIn(Player* self)
     }
 }
 
+// A stand-in always may contact the player; for anything else asks the ordinary collider test.
 s32 TestStandInMayContact(StandIn* self, Collider* value)
 {
     if (value == g_player) {
@@ -583,12 +589,15 @@ void StepStandIn(StandIn* self, f32 t)
     SteerColliderTowardPosition(self, 0, 0, &push, (f32*)&q60, t);
 }
 
+// Handles the contact as the child group object does and then clears the stand-in's running flag.
 void StopStandIn(StandIn* self, ContactPair* pair, s32 kind)
 {
     HandleChildGroupObjectContact(self, pair, kind);
     self->running = 0;
 }
 
+// Handles the child group notification and, for kind 10 aimed at this stand-in, clears its
+// running flag.
 void HandleStandInNotification(StandIn* self, s32 kind, ObjectMessage* ref)
 {
     HandleChildGroupNotification(self, kind, ref);
@@ -597,10 +606,14 @@ void HandleStandInNotification(StandIn* self, s32 kind, ObjectMessage* ref)
     }
 }
 
+// Clears the 16 bytes of the message and fills in its mode and owner (the owner goes in two
+// fields).
 void InitOwnerMessage(OwnerMessage* self, s32 mode, void* owner) { FillMemory(self, 0, 0x10); self->owner = owner; self->mode = mode; self->c = owner; }
 
 LINKER_REMNANT(func_001D70E8);
 
+// Sets the buffer up to write through the given handle, with no target memory; gives the buffer
+// back.
 OutputBuffer* InitOutputBuffer(OutputBuffer* self, s32 handle)
 {
     self->handle = handle;
@@ -612,8 +625,12 @@ OutputBuffer* InitOutputBuffer(OutputBuffer* self, s32 handle)
     return self;
 }
 
+// Sets the buffer up to write into a memory target of the given capacity (no file handle, handle
+// -1); gives the buffer back.
 OutputBuffer* InitStringOutputBuffer(OutputBuffer* self, u8* target, s32 capacity) { self->target = target; self->capacity = capacity; self->used = 0; self->handle = -1; self->count = 0; self->pending = 0; return self; }
 
+// Flushes the buffer, and frees its memory when bit 0 of the flags is set (the delete form of the
+// destructor).
 void DestroyOutputBuffer(OutputBuffer* a0, s32 a1)
 {
     FlushOutputBuffer(a0);
@@ -695,6 +712,8 @@ void FlushOutputBuffer(OutputBuffer* self)
     self->pending = 0;
 }
 
+// Initialises the switched collider and sets the follower's defaults (wheel radius 50, max speed
+// 3000, side limit 1300, grip 2, three laps, its pace curve and blend ends), then resets it.
 void InitPathFollower(PathFollower* self)
 {
     InitSwitchedCollider(self);
@@ -1080,6 +1099,8 @@ void UpdatePathFollowerPace(PathFollower* self)
     }
 }
 
+// The signed difference lim minus base on a loop of length x, wrapped to within half the loop
+// either way.
 f32 GetWrappedDifference(f32 x, f32 lim, f32 base)
 {
     f32 d = lim - base;
@@ -1090,6 +1111,8 @@ f32 GetWrappedDifference(f32 x, f32 lim, f32 base)
     return d;
 }
 
+// Whether self is ahead of other along the path: compares laps first, then the current marker
+// index, then the distance along the path (wrapped over the path length).
 s32 IsPathFollowerAhead(PathFollower* self, PathFollower* other)
 {
     s32 d = self->lap - other->lap;
@@ -1228,6 +1251,9 @@ void ComputePathFollowerHeadingTarget(PathFollower* self)
     }
 }
 
+// Steers the follower toward its target heading: eases the steering angle toward a clamped
+// fraction of the heading error (using the frame time), then sets each wheel's turn rate to the
+// target speed over its wheel radius (front two, rear two).
 void SteerPathFollower(PathFollower* self)
 {
     f32 a = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);

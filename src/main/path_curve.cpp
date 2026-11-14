@@ -64,6 +64,8 @@ void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, 
 
 void func_0014DB70(void);
 
+// The length of the polyline through n points, giving the total and, when other is not null,
+// the running length at each point.
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other)
 {
     Vec02* pts = (Vec02*)buf;
@@ -83,6 +85,8 @@ f32 AccumulateSegmentLengths(s32 n, void* buf, void* other)
     return total;
 }
 
+// When wrap is set, brings x back into the table's first..last range by adding or subtracting
+// the span; otherwise gives x unchanged.
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x)
 {
     if (wrap == 0) {
@@ -278,6 +282,8 @@ void WalkToNearestPathCurveSegment(Vec02* pos, void* anchor, s32 n, Vec02* pts, 
     }
 }
 
+// Transforms count points in place by the matrix of an object (TransformMatrixByObject), as
+// positions (w = 1).
 void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self)
 {
     Quad16 mat[4];
@@ -294,6 +300,8 @@ void TransformPointArray(s32 count, Quad16* dst, void* arg, void* self)
     }
 }
 
+// Allocates a path curve of kind 0 (a polyline, 0x1C bytes) or kind 1 (a spline, 0x1D0 bytes)
+// with its method table; any other kind gives null.
 PathCurve* CreatePathCurve(s32 kind)
 {
     PathCurve* p;
@@ -316,21 +324,26 @@ PathCurve* CreatePathCurve(s32 kind)
     return p;
 }
 
+// The base curve method for the length at a time: 0 (the kinds override it).
 f32 GetBaseCurveLengthAtTime(void)
 {
     return 0.0f;
 }
 
+// The base curve method for the time at a length: 0 (the kinds override it).
 f32 GetBaseCurveTimeAtLength(void)
 {
     return 0.0f;
 }
 
+// The segment that time t falls in and the fraction of it, by the time table (wrapping when the
+// curve wraps).
 s32 FindPathCurveSegmentByTime(PathCurve* self, f32 t, f32* a, f32* b)
 {
     return FindPathCurveSegment(t, self->count, self->times, self->wrap, a, b);
 }
 
+// The segment that arc length t falls in and the fraction of it, by the length table.
 s32 FindPathCurveSegmentByLength(PathCurve* self, f32 t, f32* a1, f32* a2)
 {
     return FindPathCurveSegment(t, self->count, self->lengths, self->wrap, a1, a2);
@@ -355,12 +368,16 @@ f32 MeasureSplinePathDistance(NearestTimeQuery* self)
     return Vu0::ToFloatMoved(Vu0::Dot(e, e));
 }
 
+// The curve's last key time.
 f32 GetPathCurveEndTime(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->times; return *(f32*)(address - 4); }
 
+// The curve's total length (the last entry of the length table).
 f32 GetPathCurveEndLength(PathCurve* obj) { u32 address = obj->count * 4 + (u32)obj->lengths; return *(f32*)(address - 4); }
 
 LINKER_REMNANT(func_0014DB70);
 
+// The distance from the query's point to its segment a..b, measured from the curve's sample
+// (slot 1 of its table); used when searching for the nearest time.
 f32 MeasurePathCurveDistance(NearestTimeQuery* self)
 {
     Vec02 p;
@@ -406,6 +423,7 @@ void FindPathCurveNearestTime(PathCurve* self, Vec02* a1, Vec02* a2, Vec02* a3, 
 
 LINKER_REMNANT(func_0014DCF8);
 
+// The step for searches along the curve: a tenth of the first key interval.
 f32 GetPathCurveSearchStep(PathCurve* self)
 {
     f32* p = self->times;
@@ -430,11 +448,13 @@ void ReadPathCurve(PathCurve* self, void* src)
     if (fn) fn(self);
 }
 
+// The position and tangent of the curve at time t (interpolated between the keys).
 void SamplePathCurveAtTime(PathCurve* self, f32 t, Vec02* pos, Vec02* tan)
 {
     InterpolatePathCurvePoint(t, self->count, (Vec02*)self->points, self->times, self->wrap, pos, tan);
 }
 
+// The position and tangent of the curve at arc length t.
 void SamplePathCurveAtLength(PathCurve* self, f32 t, Vec02* pos, Vec02* tan)
 {
     InterpolatePathCurvePoint(t, self->count, (Vec02*)self->points, self->lengths, self->wrap, pos, tan);
@@ -464,8 +484,10 @@ void DrawPathCurveSegment(PathCurve* self, s32 idx, void* a2, u8* a3, void* a4, 
     DrawProjectedLine((ClipPoint*)&A, (ClipPoint*)&B, (PackedColor*)&C, a3, a5);
 }
 
+// Transforms all the curve's points by an object's matrix (TransformPointArray).
 void TransformPathCurvePoints(PathCurve* self,void* a,void* b) { TransformPointArray(self->count,(Quad16*)self->points,a,b); }
 
+// The arc length at time t0, interpolating the length table linearly between keys.
 f32 GetPathCurveLengthAtTime(PathCurve* self, f32 t0)
 {
     f32 a, b;
@@ -474,6 +496,7 @@ f32 GetPathCurveLengthAtTime(PathCurve* self, f32 t0)
     return (1.0f - t) * self->lengths[i] + t * self->lengths[i + 1];
 }
 
+// The time at which the curve has run arc length t0, interpolating the time table linearly.
 f32 GetPathCurveTimeAtLength(PathCurve* self, f32 t0)
 {
     f32 lo, hi;
@@ -482,6 +505,7 @@ f32 GetPathCurveTimeAtLength(PathCurve* self, f32 t0)
     return (1.0f - t) * self->times[idx] + t * self->times[idx + 1];
 }
 
+// Fills the curve's length table from its points and gives back the total length.
 f32 FillPathCurveLengths(PathCurve* self)
 {
     return AccumulateSegmentLengths(self->count, self->points, self->lengths);
@@ -551,8 +575,11 @@ void ReadSplinePathCurve(SplinePathCurve* self, void* src)
     ResetSplineSegmentCache(self);
 }
 
+// Forgets which segment the spline has sampled, so the next SampleSplineSegment samples again.
 void ResetSplineSegmentCache(SplinePathCurve* obj) { obj->idx1C0 = -1; }
 
+// Samples segment i of the spline at 20 points into its cache and totals their lengths, unless
+// segment i is already the cached one.
 void SampleSplineSegment(SplinePathCurve* self, s32 i)
 {
     if (i != self->idx1C0) {
@@ -583,6 +610,8 @@ void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec02* a2)
     }
 }
 
+// Samples the spline at the arc length given: converts it to a time (slot 6) and calls the
+// sampling slot 1 with it.
 void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
 {
     f32 t = ((CurveTimeFn)self->vt->m06)(self);
@@ -629,6 +658,8 @@ void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b)
     ResetSplineSegmentCache(self);
 }
 
+// The arc length of the spline up to time t0: the table's value at the segment start plus the
+// part of the segment before t0.
 f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0)
 {
     f32 a, b;
@@ -639,6 +670,8 @@ f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0)
     return r + self->lengths[i];
 }
 
+// The curve time at which the spline has run the given arc length: finds the segment, samples it
+// at 20 points and interpolates inside the sampled lengths.
 f32 GetSplineTimeAtLength(SplinePathCurve* self, f32 t0)
 {
     f32 lo, a, b;
@@ -650,6 +683,8 @@ f32 GetSplineTimeAtLength(SplinePathCurve* self, f32 t0)
     return (1.0f - u) * self->times[idx] + u * self->times[idx + 1];
 }
 
+// Fills the spline's cumulative length table: the length of each Hermite segment (between
+// consecutive points, with their tangents, over the segment's time span) added to the last.
 void FillSplinePathLengths(SplinePathCurve* self)
 {
     *(s32*)self->lengths = 0;
@@ -722,6 +757,8 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
     }
 }
 
+// Calls slot 11 of the curve's table (if it has one) with the curve's current time (slot 6) and
+// the six arguments passed on unchanged.
 void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6)
 {
     s32 q4 = p4;

@@ -48,6 +48,8 @@ extern u8* g_currentWorld;
 
 void* AllocateFrontMemory(s32 size);
 
+// Initialises the collider: the switched collider's defaults, f644 = 1, two 0x40-byte front-heap
+// tables (linkedObjects, linkedIds) and the ranges -1.5 to 1.5 and -0.7 to 0.7 at 0x650-0x65C.
 void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
 {
     InitSwitchedCollider(self);
@@ -60,6 +62,7 @@ void InitPlayerLinkedCollider(PlayerLinkedCollider* self)
     self->f654 = 0.7f;
 }
 
+// Appends value to the collider's linked ids, up to 0x11 of them.
 void AddPlayerLinkedColliderId(PlayerLinkedCollider* self, void* value)
 {
     s32 n = self->linkedCount;
@@ -127,6 +130,9 @@ void StartPlayerLinkedCollider(PlayerLinkedCollider* self)
 }
 
 
+// Per-frame update: updates the switched collider and, when it has a target, checks the target's
+// method 0x4D: if true, every other object of id class 5 (up to 8) that is not in state 0xB is sent
+// to state 0xA and f580 is cleared; otherwise f580 is set to 1.
 void UpdatePlayerLinkedCollider(PlayerLinkedCollider* self, f32 dt)
 {
     void* arr[8];
@@ -167,6 +173,9 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self);
 void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
+// Control step: chooses the target; when the pad's bits 0xC0 are pressed it clears them and
+// advances the state walker; then, if the player has something at 0x2740 and is attached, calls the
+// player's method 0x134 with t and a cleared 0xC4-byte buffer.
 void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 {
     u8 buf[0xC4];
@@ -226,6 +235,9 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
 }
 
 
+// Collider filter: rejects a collider with flag bit 43, one whose root is the collider itself, one
+// already in the pool, and one that either it or the pool's chosen item refuses (method 0x38);
+// accepts the rest.
 s32 IsPlayerLinkedColliderCandidate(PlayerLinkedCollider* self, Collider* node)
 {
     Collider* a;
@@ -335,6 +347,8 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
 }
 
 
+// When the state walker's current and target keys are both 0x359 and the pool has a chosen object,
+// sets the walker's target to 0x35A.
 void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 {
     s32 a;
@@ -350,6 +364,9 @@ void AdvancePlayerLinkedColliderWalker(PlayerLinkedCollider* self)
 
 
 
+// Passes the notification to the switched collider and, for kind 0x13, reacts to the message code:
+// 0x35B from the state walker's player launches an object of the pool; from the agent's player code
+// 0x15E sets f628 and 0x15F clears it.
 void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
     HandleSwitchedColliderNotification(self, kind, rec);
@@ -374,6 +391,8 @@ void HandlePlayerLinkedColliderNotification(PlayerLinkedCollider* self, s32 kind
 }
 
 
+// A collider may contact arg when the ordinary collider test allows it or arg is in the collider's
+// pool.
 s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
 {
     if (TestCollidersMayContact(self, (Collider*)arg)) {
@@ -391,6 +410,8 @@ s32 TestPlayerLinkedColliderMayContact(PlayerLinkedCollider* self, void* arg)
 typedef void (*PeerEffectFn)(void* self, s32 mode, PlacedObject* other);
 
 
+// Starts an effect: through the linked agent's method 0x148 when there is an agent, else as a
+// switched collider's.
 void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self, s32 mode, PlacedObject* other)
 {
     if (self->agent != 0) {
@@ -403,12 +424,14 @@ void StartPlayerLinkedColliderEffect(PlayerLinkedCollider* self, s32 mode, Place
 
 struct ZeroPair { s32 lo; s32 hi; };
 
+// Gives back zero interact flags: this collider never interacts.
 void GetPlayerLinkedColliderInteractFlags(PlayerLinkedCollider* a0, void* a1, ZeroPair* out)
 {
     out->lo = 0;
     out->hi = 0;
 }
 
+// The collider's target, or the collider itself when it has none.
 void* GetPlayerLinkedColliderTarget(PlayerLinkedCollider* self) { return self->target ? self->target : self; }
 
 // A view of the vertices that starts one vertex before the first (0x254): through it, the fields
@@ -528,6 +551,8 @@ void CreateArcSprite(T217D_3F0* self)
     ((ConeSprite*)self->sprite)->vtbl[7](self->sprite);
 }
 
+// Gives back the first and one-past-last of the arc's 57 points that are visible: size (0 to 1) of
+// the 57 points, centred.
 void GetArcVisibleRange(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
 extern s32 D_00270458;
@@ -734,6 +759,8 @@ extern u8 g_gsPacketWriter[];
 void WriteArcPointVertices(T217D_3F0* self, PacketWriter* buf);
 void WriteArcTickVertices(T217D_3F0* self, PacketWriter* buf);
 
+// When drawing the arc is allowed, writes a GIF tag with two register writes (0x47, 0x42) and then
+// the arc's point and tick vertices to the GS packet.
 void DrawArc(T217D_3F0* self)
 {
     u8* s = g_gsPacketWriter;
@@ -748,6 +775,7 @@ void DrawArc(T217D_3F0* self)
 
 extern f32 g_elapsedTime;
 
+// Sets the arc's fade state and notes the elapsed time it changed at.
 void SetArcFade(T217D_3F0* a0, s32 a1)
 {
     if (a1 != a0->fade) {
@@ -758,6 +786,9 @@ void SetArcFade(T217D_3F0* a0, s32 a1)
 
 extern s32 D_00270458;
 
+// Makes the arc's target its current object: the old one gets its method 3 (unless it is the
+// special object in display mode 4), the new one its method 2, the tree-records value (not in mode
+// 4) and flag bit 32 of its flags.
 void ApplyArcTarget(T217D_3F0* self)
 {
     PlacedObject* cur = (PlacedObject*)self->current;
@@ -1289,6 +1320,8 @@ void SetArcTarget(T217D_3F0* self, void* value)
     }
 }
 
+// Replaces the arc's special object, clearing flag bit 32 on the old one and setting it on the new
+// one.
 void SetArcSpecialObject(T217D_3F0* self, void* a1)
 {
     PlacedObject* old = (PlacedObject*)self->special;
@@ -1301,6 +1334,7 @@ void SetArcSpecialObject(T217D_3F0* self, void* a1)
     }
 }
 
+// Resets the arc element: size, current and target object cleared and phase 3.
 void ResetArc(T217D_3F0* self)
 {
     ResetScreenElement(self);
@@ -1311,10 +1345,13 @@ void ResetArc(T217D_3F0* self)
 }
 
 extern u8 g_arcGreyColor[8];
+// Sets the arc's 8-byte grey colour to 0x80 in its first four bytes when called with enabled set
+// and value 0xFFFF (the form a compiler-made static constructor calls).
 void ConstructGreyColor(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { g_arcGreyColor[0] = 0x80; g_arcGreyColor[1] = 0x80; g_arcGreyColor[2] = 0x80; g_arcGreyColor[3] = 0x80; } }
 
 void ConstructGreyColor(s32 enabled, u32 value);
 
+// Startup constructor: sets the arc's grey colour.
 void ConstructGreyColorAtStartup(void)
 {
     ConstructGreyColor(1, 0xFFFF);

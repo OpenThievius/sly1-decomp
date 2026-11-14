@@ -459,12 +459,15 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void CopyMemory(void* dst, void* src, s32 size);
 void AppendToList(List01* self, void* item);
+// Initialises the collider and puts the state at -1 (none).
 void InitPooledObject(PooledObject* self)
 {
     InitCollider(self);
     SetPooledObjectState(self, -1);
 }
 
+// Takes the object out of the world's queue (list at 0x1C78), registers it as a collider, and sets
+// a flag in its flags, in a different bit when its parent is of kind 0x3A.
 void RemoveFromWorldQueue(PooledObject* self)
 {
     RegisterCollider(self);
@@ -476,6 +479,8 @@ void RemoveFromWorldQueue(PooledObject* self)
     }
 }
 
+// Removes the object from its parent list, appends it to the world's queue (0x1C78) and sets state
+// 0.
 void AddToWorldQueue(PooledObject* self)
 {
     RemoveObjectFromParentList(self);
@@ -483,6 +488,7 @@ void AddToWorldQueue(PooledObject* self)
     SetPooledObjectState(self, 0);
 }
 
+// Copies the collider part from other but keeps this object's own record at 0x56C.
 void CopyPooledObject(PooledObject* self, Collider* other)
 {
     Keep46 save = self->keep56C;
@@ -490,12 +496,15 @@ void CopyPooledObject(PooledObject* self, Collider* other)
     self->keep56C = save;
 }
 
+// Loads the collider, then finds or builds the member group at 0x58C.
 void LoadPooledObject(PooledObject* self, BufferedStream* stream)
 {
     LoadCollider(self, stream);
     FindOrBuildMemberGroup(&self->member58C, self);
 }
 
+// Passes the notification on; when kind 6 is about the object it watches, forgets it and goes to
+// state 4.
 void HandlePooledObjectNotification(PooledObject* self, s32 kind, void* msg)
 {
     HandlePlacedObjectNotification(self, kind, msg);
@@ -507,12 +516,15 @@ void HandlePooledObjectNotification(PooledObject* self, s32 kind, void* msg)
     }
 }
 
+// Starts the placed object and resolves its links through the pooled object's link table.
 void StartPooledObject(PooledObject* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 1, g_pooledObjectLinks);
 }
 
+// Per-frame update: collider update, then by state. State 2 (held) updates as a held object; state
+// 4 moves to 5 after the delay once the player no longer holds its parent.
 void UpdatePooledObject(PooledObject* self, f32 f)
 {
     UpdateCollider(self, f);
@@ -534,6 +546,8 @@ void UpdatePooledObject(PooledObject* self, f32 f)
     }
 }
 
+// Changes the state (no-op when equal), stamps stateTime with the game time and, on leaving state
+// 2, clears the held-object fields. State 5 starts the fade-out.
 void SetPooledObjectState(PooledObject* self, s32 state)
 {
     if (self->state != state) {
@@ -707,6 +721,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
     ((ObjPtrFn)((void**)self->desc)[0x88 / 4])(self, &basis);
 }
 
+// Initialises the player-flagged collider and puts the template id at -1.
 void InitPooledHolder(PooledHolder* self)
 {
     InitPlayerFlaggedCollider(self);
@@ -740,6 +755,8 @@ void HandlePooledHolderNotification(PooledHolder* self, s32 kind, void* msg)
     }
 }
 
+// After loading, resolves each stored id in items748 to an object and adds those of kind 0x41 to
+// the holder's list of items (items76C).
 void PostLoadPooledHolder(PooledHolder* self)
 {
     s32 i = 0;
@@ -759,6 +776,7 @@ void PostLoadPooledHolder(PooledHolder* self)
     }
 }
 
+// Copies the player's rig object into the holder's throw target, if there is a player.
 void SyncPooledHolderWithPlayer(PooledHolder* self)
 {
     if (g_player != 0) {
@@ -842,6 +860,7 @@ void UpdatePooledHolder(PooledHolder* self, f32 dt)
     }
 }
 
+// A kind 0x46 object the holder has taken always may contact; anything else uses the collider test.
 s32 TestPooledHolderMayContact(PooledHolder* self, Collider* obj)
 {
     if (IsObjectOfKind(obj, 0x46) != 0) {
@@ -852,6 +871,8 @@ s32 TestPooledHolderMayContact(PooledHolder* self, Collider* obj)
     return TestCollidersMayContact(self, obj);
 }
 
+// Lets go of the held object (two of its methods are called), sends the state walker to 0x2B7 and
+// destroys it once it gets there, and calls slot 2 of the aim attachment with 7.
 void ReleasePooledHolder(PooledHolder* self)
 {
     s32 status;
@@ -875,6 +896,9 @@ void ReleasePooledHolder(PooledHolder* self)
     HandleMaskedColliderActivation(self);
 }
 
+// Asks the holder's state walker to move to state code unless it is already there (or heading
+// there). Leaving 0x2B7 clears a field of the aim attachment; codes 0x2B8 and 0x2B9 set its aim
+// flag.
 void SetPooledHolderWalkerState(PooledHolder* self, s32 code)
 {
     s32 r;
@@ -1027,6 +1051,8 @@ void ThrowHeldPooledObject(PooledHolder* self)
     TriggerScriptEvent(self, 0xD, 1, args);
 }
 
+// Unless an object is already reserved, picks the pooled child in the part list with the earliest
+// stateTime, puts it in state 5 and keeps it as the holder's reservedObject.
 void SelectEarliestPooledObject(PooledHolder* self)
 {
 	ListFrame frame;
@@ -1043,6 +1069,7 @@ void SelectEarliestPooledObject(PooledHolder* self)
 	if (best != 0) { SetPooledObjectState(best, 5); self->reservedObject = best; }
 }
 
+// Gives the first collected pooled object that is attached and not in state 3 or 4, or null.
 PooledObject* FindFirstAttachedPooledObject(PooledHolder* state)
 {
 	for (s32 i = 0; i < state->collectedCount; ++i) {
@@ -1055,6 +1082,7 @@ PooledObject* FindFirstAttachedPooledObject(PooledHolder* state)
 	return 0;
 }
 
+// Appends an item id to the holder's list (at most 8).
 void AddPooledHolderItem(PooledHolder* self, s32 item)
 {
     u32 n = (u32)self->count744;
@@ -1064,12 +1092,15 @@ void AddPooledHolderItem(PooledHolder* self, s32 item)
     }
 }
 
+// Empties the collected array and clears the flag at 0x7B0.
 void ResetCollectedItems(PooledHolder* self)
 {
     self->collectedCount = 0;
     self->f7B0 = 0;
 }
 
+// Called with an item the holder touched: kind 7 sets the holder's flag at 0x7B0, and a kind 0x41
+// item that is one of its own listed items is added to the collected array (at most 8).
 void RecordCollectedItem(PooledHolder* self, void* event)
 {
     if (IsObjectOfKind((BaseObject*)event, 7)) {
@@ -1095,6 +1126,7 @@ void RecordCollectedItem(PooledHolder* self, void* event)
     }
 }
 
+// Initialises the placed object, sets a flag and puts both target ids at -1 (unset).
 void InitStepSequence(StepSequence* state)
 {
 	InitPlacedObject(state);
@@ -1103,6 +1135,7 @@ void InitStepSequence(StepSequence* state)
 	state->first30C = -1;
 }
 
+// Loads the placed object, then the step records into count and steps.
 void LoadStepSequence(StepSequence* self, BufferedStream* arg)
 {
     LoadPlacedObject(self, arg);
@@ -1147,6 +1180,8 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
     }
 }
 
+// Starts the placed object; resolves the sequence's target slot (its own id if none was set) from
+// the current entry, falling back to the stored default.
 void StartStepSequence(StepSequence* self)
 {
     StartPlacedObject(self);
@@ -1170,11 +1205,13 @@ void SetStepSequenceCameraMode(StepSequence* self)
     self->mode2D0 = 2;
 }
 
+// Reads the word the sequence's target points at.
 void ReadSequenceTarget(StepSequence* self, s32* out)
 {
     *out = *(s32*)self->target304;
 }
 
+// Writes a word through the sequence's target pointer.
 void WriteSequenceTarget(StepSequence* self, s32 value)
 {
     *(s32*)self->target304 = value;
@@ -1522,6 +1559,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
 }
 
 
+// Passes the notification on and forgets the animation player when kind 6 reports it gone.
 void HandleStepSequenceNotification(StepSequence* state, s32 mode, void* value)
 {
 	HandlePlacedObjectNotification(state, mode, value);
@@ -1639,6 +1677,8 @@ void SkipRemainingSteps(StepSequence* self)
     }
 }
 
+// Runs the sequence's steps in order: while the current step's wait condition is over, stops its
+// animation player, advances and starts the next; past the last step the rest are skipped.
 void RunStepSequence(StepSequence* self)
 {
     s32 index;
@@ -1663,6 +1703,8 @@ void RunStepSequence(StepSequence* self)
     }
 }
 
+// Shows the text step: through the given object's method if there is one, else by pushing the
+// typed-text caption box on the element stack.
 void ShowStepSequenceText(StepSequence* value, Ent65* object)
 {
     if (object != 0) {
@@ -1705,6 +1747,7 @@ void ChooseStepSequenceState(StepSequence* self)
     SetStepSequenceState(self, mode);
 }
 
+// Sets the sequence's state to 0 unless it is in state 1 or 3.
 void ResetStepSequence(StepSequence* self)
 {
     if (self->state2D4 != 1 && self->state2D4 != 3) {
@@ -1712,6 +1755,8 @@ void ResetStepSequence(StepSequence* self)
     }
 }
 
+// Looks up the level entry for key and its indexed target slot of kind, and appends it to the
+// sequence's list of extra targets (at most 4).
 void AddSequenceExtraTarget(StepSequence* collection, s32 key, u32 kind)
 {
 	if ((u32)collection->extraTargetCount >= 4) return;
@@ -1729,6 +1774,7 @@ void* GetScatterController(void)
     return &g_scatterController;
 }
 
+// Zeroes the controller's 0x24 bytes.
 void ClearScatterController(void* state)
 {
 	FillMemory(state, 0, 0x24);
@@ -1804,6 +1850,9 @@ void NotifyScatterControllerLoaded(void* self)
 {
 }
 
+// Raises the scatter level by amount scaled by the controller table's rate, and the second level of
+// the current entry by amount times a rate that depends on the save's reserve count, clamped to
+// 0..1.
 void RaiseScatterLevels(ScatterController* self, f32 amount)
 {
     f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
@@ -1849,6 +1898,8 @@ have:
     }
 }
 
+// Sets the scatter level to 0 and clears the current entry's second level, its count and its bit at
+// 0x74.
 void ResetScatterLevels(ScatterController* object)
 {
 	SetScatterLevel(object, 0.0f);
@@ -1918,6 +1969,7 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
     }
 }
 
+// Stores the clamped level in the current entry's first level.
 void SetScatterLevel(ScatterController* object, f32 unused)
 {
 	f32 value = ((f32 (*)(void*))ClampToRange)(object->table);
@@ -1929,12 +1981,14 @@ void SetListLinkOffset(List01* self, s32 offset)
     self->offset = offset;
 }
 
+// Empties the list (head and tail cleared).
 void ClearList(List01* p)
 {
 	p->tail = 0;
 	p->head = 0;
 }
 
+// Clears an item's next and previous links.
 void ClearListLinks(ListLink* p)
 {
 	p->prev = 0;
@@ -1946,6 +2000,7 @@ ListLink* GetListLinks(List01* p, void* item)
 	return (ListLink*)((u8*)item + p->offset);
 }
 
+// Puts item at the tail of the list.
 void AppendToList(List01* self, void* item)
 {
     ListLink* slot = GetListLinks(self, item);
@@ -1959,6 +2014,7 @@ void AppendToList(List01* self, void* item)
     self->tail = item;
 }
 
+// Puts item at the head of the list.
 void PrependToList(List01* self, void* item)
 {
     ListLink* slot = GetListLinks(self, item);
@@ -1975,6 +2031,7 @@ void PrependToList(List01* self, void* item)
     }
 }
 
+// Inserts item into the list just before the item before; a null before appends, the head prepends.
 void InsertBeforeInList(List01* self, void* before, void* item)
 {
     if (before == 0) {
@@ -1997,6 +2054,8 @@ void InsertBeforeInList(List01* self, void* before, void* item)
 
 LINKER_REMNANT(func_001525F8);
 
+// Unlinks item from the intrusive list. Any live list walk (ListFrame) that stands on it is first
+// stepped back to the previous item, so the walk can go on safely; the item's links are cleared.
 void RemoveFromList(List01* list, void* item)
 {
     ListLink* link = GetListLinks(list, item);
@@ -2024,6 +2083,7 @@ void RemoveFromList(List01* list, void* item)
     link->prev = 0;
 }
 
+// True when item is linked in the list: it has a next link or is the tail.
 s32 IsInList(List01* self, void* item)
 {
     ListLink* slot = GetListLinks(self, item);
@@ -2045,6 +2105,7 @@ u32 IsListEmpty(List01* p)
 	return p->head == 0;
 }
 
+// Moves every item of src onto the end of dst and empties src.
 void SpliceListToEnd(List01* dst, List01* src)
 {
     if (src->head != 0) {
@@ -2062,6 +2123,7 @@ void SpliceListToEnd(List01* dst, List01* src)
     }
 }
 
+// Counts the items by walking the list's next links.
 s32 CountListItems(List01* list)
 {
     s32 count = 0;
@@ -2076,6 +2138,8 @@ s32 CountListItems(List01* list)
     return count;
 }
 
+// Resets the DMA controller and GS paths and keeps the channel records of VIF0, VIF1, GIF, from-SPR
+// and to-SPR (channels 0, 1, 2, 8 and 9).
 void InitDmaChannels()
 {
 	ResetDmaController(1);
@@ -2089,6 +2153,7 @@ void InitDmaChannels()
 
 extern const VtableEntry g_packetWriterVtable[4] = {{0, 0}, {0, SkipDisplayListWriterSlot}, {0, 0}, {0, 0}};
 
+// Clears the buffer and installs the packet writer's method table.
 PacketWriter* InitPacketBuffer(PacketWriter* self)
 {
     self->f10 = 0;
@@ -2098,6 +2163,7 @@ PacketWriter* InitPacketBuffer(PacketWriter* self)
     return self;
 }
 
+// Forgets the buffer's memory: begin, cursor, end and open tag are zeroed.
 void ClearPacketBuffer(PacketWriter* p)
 {
 	p->end = 0;
@@ -2106,6 +2172,7 @@ void ClearPacketBuffer(PacketWriter* p)
 	p->cur = 0;
 }
 
+// Moves the cursor back to the start and forgets the open tag.
 void RewindPacketBuffer(PacketWriter* p)
 {
 	u8* b = p->begin;
@@ -2113,6 +2180,7 @@ void RewindPacketBuffer(PacketWriter* p)
 	p->cur = b;
 }
 
+// Reserves count quadwords of permanent memory for the buffer.
 void AllocatePacketBuffer(PacketWriter* self, s32 count)
 {
     s32 size = count << 4;
@@ -2122,6 +2190,7 @@ void AllocatePacketBuffer(PacketWriter* self, s32 count)
     self->begin = base;
 }
 
+// Takes count quadwords from front memory for the buffer.
 void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind)
 {
 	u32 bytes = count << 4;
@@ -2131,6 +2200,7 @@ void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind)
 	buffer->begin = memory;
 }
 
+// Takes count quadwords from back (temporary) memory for the buffer.
 void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count)
 {
 	u32 bytes = count << 4;
@@ -2140,6 +2210,7 @@ void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count)
 	buffer->begin = memory;
 }
 
+// Points the buffer at count quadwords of caller-provided memory.
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory)
 {
     u8* base = (u8*)memory;
@@ -2148,6 +2219,8 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory)
     self->end = base + count * 16;
 }
 
+// Closes the buffer's tag, gives its quadword count and start address, and clears the buffer
+// without freeing it.
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin)
 {
     CloseDmaTag(self);
@@ -2160,6 +2233,8 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin)
     ClearPacketBuffer(self);
 }
 
+// Closes the buffer's tag and gives its quadword count and start; with out non-null a copy of the
+// data in front memory. The buffer is then cleared.
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags)
 {
     CloseDmaTag(self);
@@ -2176,6 +2251,8 @@ void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out
     ClearPacketBuffer(self);
 }
 
+// Closes the buffer's tag, flushes the data cache, starts the DMA chain from the buffer's start on
+// the given channel and rewinds the cursor.
 void SubmitPacketBuffer(PacketWriter* self, void* dma)
 {
     CloseDmaTag(self);
@@ -2186,6 +2263,8 @@ void SubmitPacketBuffer(PacketWriter* self, void* dma)
 
 LINKER_REMNANT(func_00152B30);
 
+// Closes any open tag and opens a new count tag at the cursor; CloseDmaTag fills in its size
+// later.
 void BeginDmaTag(PacketWriter* self)
 {
     CloseDmaTag(self);
@@ -2196,6 +2275,8 @@ void BeginDmaTag(PacketWriter* self)
     *(u64*)((u8*)self->f08 + 8) = 0;
 }
 
+// Appends a DMA ref tag (id 4) with the given address and size halves. If a tag was open it is
+// closed first and a fresh count tag is opened after it.
 void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
 {
     s32 flag = 0;
@@ -2216,6 +2297,8 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
     }
 }
 
+// Appends a DMA call tag (id 5) with the given address; an open tag is closed first and reopened
+// after it.
 void AddDmaCallTag(PacketWriter* self, s32 hi)
 {
     s32 flag = 0;
@@ -2236,6 +2319,7 @@ void AddDmaCallTag(PacketWriter* self, s32 hi)
     }
 }
 
+// Closes the open tag and appends a DMA return tag (id 6).
 void AddDmaReturnTag(PacketWriter* self)
 {
     CloseDmaTag(self);
@@ -2245,12 +2329,14 @@ void AddDmaReturnTag(PacketWriter* self)
     p[1] = 0;
 }
 
+// Copies n quadwords from src at the write cursor and advances it.
 void AppendPacketQuadwords(PacketWriter* self, s32 n, void* src)
 {
     CopyQuadwords(self->cur, src, n);
     self->cur += n * 16;
 }
 
+// Closes the open tag and appends a DMA end tag (id 7).
 void AddDmaEndTag(PacketWriter* self)
 {
     CloseDmaTag(self);
@@ -2260,6 +2346,8 @@ void AddDmaEndTag(PacketWriter* self)
     *(u64*)(cursor + 8) = 0;
 }
 
+// Ends the open DMA tag: pads the write cursor to 16 bytes, then stores the tag's quadword count in
+// its low bits and clears it. A writer with a close method of its own calls that instead.
 void CloseDmaTag(PacketWriter* self)
 {
     if (self->f10 != 0) {
@@ -2384,6 +2472,8 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     PopBackMemoryMark();
 }
 
+// If the object has a draw range, runs its slot-27 method and queues a deferred request that draws
+// its parts with a transform built from the given matrix.
 void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
 {
     (void)unused;

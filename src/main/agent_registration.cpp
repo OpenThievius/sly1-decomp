@@ -46,20 +46,28 @@ struct SinCosPair { f32 a; f32 b; s32 value; };
 // The file's statics (.bss from 0x27C008).
 static s32 g_numberedAgentCounter;  // a running count, reset by func_0014B608
 
+// Registers the agent and appends it to the world's list at 0x1CCC; UnregisterWorldListedAgent
+// undoes it.
 void RegisterWorldListedAgent(WorldListedAgent* self)
 {
     RegisterAgent(self);
     AppendToList(&self->world->list1CCC, self);
 }
 
+// Unregisters the agent and removes it from the world's list at 0x1CCC.
 void UnregisterWorldListedAgent(WorldListedAgent* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
 
+// Copies an agent from other but keeps its own link in the world's list (list1CCC) rather than
+// taking the other's.
 void CopyWorldListedAgent(WorldListedAgent* self, void* other) { Pack10 save=self->listLink; CopyAgent(self,other); self->listLink=save; }
 
+// Initialises the agent, sets its field C24 to 1 and resets the shared running count to 0.
 void InitNumberedAgent(NumberedAgent* self) { InitAgent(self); self->fC24=1; g_numberedAgentCounter=0; }
 
+// Starts the agent and gives it the next number from a running count shared by all of them.
 void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->number=g_numberedAgentCounter++; }
 
+// Stores the sine and cosine of value in the pair's first two floats and clears its third word.
 void SetSinCosPair(f32 value, SinCosPair* self)
 {
     ComputeSinCos(&self->b, (f32*)self, value);

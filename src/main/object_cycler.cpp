@@ -238,6 +238,9 @@ void LoadObjectCycler(ObjectCycler* self, void* arg)
     }
 }
 
+// The copy method: copies the collider, keeps the cycler's own pair at 0x5DC, and then restarts its
+// looping sound (effect 0x41) in mode 0 or, in other modes, takes the object out of the world's
+// list at 0x1C48.
 void CopyObjectCycler(ObjectCycler* self, ObjectCycler* src)
 {
     PackedFloatPair tmp;
@@ -253,6 +256,8 @@ void CopyObjectCycler(ObjectCycler* self, ObjectCycler* src)
     }
 }
 
+// In mode 0, stops the cycler's playing sound when flag is set and starts it (effect 0x41)
+// otherwise.
 void SetObjectCyclerHandle(ObjectCycler* self, s32 flag)
 {
     if (self->mode == 0) {
@@ -264,6 +269,9 @@ void SetObjectCyclerHandle(ObjectCycler* self, s32 flag)
     }
 }
 
+// Resolves the cycler's links; in mode 1 draws its first check and message times from their random
+// ranges; enters its start state, starts it as a placed object and sets searchRadius to twice its
+// radius.
 void StartObjectCycler(ObjectCycler* self)
 {
     ResolveObjectLinks(self, 2, (ObjectLink*)g_objectCyclerStartLinks);
@@ -489,6 +497,9 @@ void DrawObjectCycler(ObjectCycler* self, void* a1, void* a2)
     }
 }
 
+// On an object event, if the cycler is not already in state 1, enters it, applies the event's
+// impulse when flag 8 is set, and forwards a type-6 message with the event's origin and target to
+// the cycler's group. Always returns 1.
 s32 HandleObjectCyclerObjectEvent(ObjectCycler* self, CyclerEventMessage* r)
 {
     if (self->state != 1) {
@@ -609,6 +620,9 @@ void SetObjectCyclerState(ObjectCycler* self, s32 state)
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
 
 
+// When the cycler has a receiver and its next-message time has come, sends it a type-6 message
+// holding the cycler's world position and its direction (the 0x150 vector negated in x, z zeroed),
+// then schedules the next one a random interval (p670's range) later.
 void SendObjectCyclerMessage(ObjectCycler* self)
 {
     GroupForwardMessage loc;
@@ -677,6 +691,9 @@ s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out)
     return 0;
 }
 
+// Picks the cycler's next state: 6 when it is within searchRadius of its anchor point (v5F0), else
+// 0 (and a new check time is drawn) when some contact row has a member, else -1 is set and 5 is
+// returned.
 s32 ChooseObjectCyclerNextState(ObjectCycler* self)
 {
     s32 touching = 0;
@@ -727,6 +744,8 @@ s32 IsActiveColliderNearObjectCycler(ObjectCycler* self)
     return 0;
 }
 
+// Filter for GatherCollidersInSphere: rejects a collider with flag bit 43 set or the same root as
+// the cycler's, and otherwise accepts it when the low bit of its high flags is clear.
 s32 IsCyclerGroundCandidate(GroundFilterContext* a0, GroundCandidate* a1)
 {
     if ((a1->flags & 0x80000000000ULL) || a1->root == a0->root) return 0;

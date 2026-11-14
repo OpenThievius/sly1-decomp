@@ -36,6 +36,8 @@ extern f32 g_timeScale;
 extern T217D_Vt D_00218330;
 
 
+// Initialiser of the item column: a screen element that owns four items of the item's method
+// table (D_00218330), each initialised.
 void InitItemColumn(T217D_720* self)
 {
     u32 n;
@@ -49,6 +51,8 @@ void InitItemColumn(T217D_720* self)
     }
 }
 
+// Sets the column up: its text, then each of its four items (font scale 0.8, one second to slide
+// in and out, no hold time).
 void SetupItemColumn(T217D_720* self)
 {
     T217D_330* e;
@@ -69,6 +73,7 @@ void SetupItemColumn(T217D_720* self)
     }
 }
 
+// Gives the column and each of its four items the new clock.
 void UpdateItemColumn(T217D_720* self, f32* clock)
 {
     SetScreenElementClock(self, clock);
@@ -79,6 +84,7 @@ void UpdateItemColumn(T217D_720* self, f32* clock)
     }
 }
 
+// Updates the column's slide and then that of each item shown.
 void UpdateItemColumnSlide(T217D_720* self)
 {
     UpdateScreenElementSlide(self);
@@ -88,6 +94,8 @@ void UpdateItemColumnSlide(T217D_720* self)
     }
 }
 
+// Draws the column's items stacked downward from its position, each scaled in blend by
+// g_timeScale for the draw, while D_00275BEC is 1.
 void DrawItemColumn(T217D_720* self)
 {
     if (D_00275BEC == 1) {
@@ -108,6 +116,8 @@ void DrawItemColumn(T217D_720* self)
     }
 }
 
+// Sets the column to show n items, with the place offset (x, y), and resizes it to n lines of the
+// font's height.
 void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y)
 {
     self->place->dx = x;
@@ -118,6 +128,7 @@ void ResizeItemColumn(T217D_720* self, s32 n, f32 x, f32 y)
     self->vt->m16(self, 2);
 }
 
+// Calls slot 16 of the column with 0, which clears it.
 void ClearItemColumn(T217D_720* self)
 {
     self->vt->m16(self, 0);

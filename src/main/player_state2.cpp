@@ -666,6 +666,8 @@ Contact03* FindPlayerLedgeContact(Player* self, s32* outEnd, Vec02* outPos)
     return best;
 }
 
+// Gives state 0 normally; with the stick pushed, 1 when the six-way blend is set and 5 when only
+// the eight-way blend is.
 s32 ChoosePlayerNextState(Player* self)
 {
     s32 r;
@@ -1207,6 +1209,8 @@ void UpdatePlayerState2(Player* p)
 }
 
 
+// Solves for the time at which a ballistic path (start a with velocity b, the player's gravity)
+// reaches the height of c. Gives 1 and the larger root when it is positive, else 0.
 s32 SolveArrivalTimeAtHeight(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out)
 {
     f32 roots[2];
@@ -1273,6 +1277,8 @@ static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
     return v;
 }
 
+// Gives the object's velocity with its z replaced by a clamped quadratic of it, but never below the
+// original z.
 void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out)
 {
     *out = self->v150;
@@ -1280,6 +1286,7 @@ void ComputeUpwardBoostVelocity(PlacedObject* self, Vec02* out)
     out->z = z;
     out->z = (z >? self->v150.z);
 }
+// The same with a second pair of constants.
 void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out)
 {
     *out = self->v150;
@@ -1289,18 +1296,21 @@ void ComputeUpwardBoostVelocityUnitSlope(PlacedObject* self, Vec02* out)
 }
 
 
+// Sets the link offset (0x50) of the global point object list.
 void SetPointObjectListLinkOffset(void)
 {
     SetListLinkOffset(&g_pointObjects, 0x50);
 }
 
 
+// Empties the global point object list.
 void ClearPointObjectList(void)
 {
     ClearList(&g_pointObjects);
 }
 
 
+// Registers the object and adds it to the global list of point objects.
 void RegisterPointObject(C80* self)
 {
     RegisterObject(self);
@@ -1308,6 +1318,7 @@ void RegisterPointObject(C80* self)
 }
 
 
+// Unregisters the object and removes it from the global list of point objects.
 void UnregisterPointObject(C80* self)
 {
     UnregisterObject(self);

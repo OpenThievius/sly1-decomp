@@ -91,6 +91,7 @@ f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
 
 
+// Initialises the placed object and sets its quad at +0x320 from a constant.
 void InitRedirectObject(RedirectObject* self)
 {
     InitPlacedObject(self);
@@ -337,6 +338,8 @@ void SimulateRedirectChain(RedirectObject* self)
 }
 
 
+// Marks the object as redirecting to itself when its target is itself, and copies the other
+// object's frame.
 void MarkRedirectToSelf(RedirectObject* self, PlacedObject* other)
 {
     if (self->target == self) {
@@ -348,6 +351,8 @@ void MarkRedirectToSelf(RedirectObject* self, PlacedObject* other)
 
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
+// Initialises the turning collider, takes its heading from its rotation, builds the heading
+// matrix, sets state -1 and a tint start time far in the past (-10).
 void InitTintBlendCollider(TintBlendCollider* self)
 {
     f32 f;
@@ -475,6 +480,8 @@ void UpdateTintBlendCollider(TintBlendCollider* self, f32 dt)
 
 extern f32 g_frameDt;
 
+// Recomputes the steering heading and pitch for this frame, stores the heading, rebuilds the
+// yaw-pitch matrix and sets the heading velocity to (-speed, 0, 0).
 void ResetTintBlendColliderOrientation(TintBlendCollider* self)
 {
     f32 heading, pitch, speed;
@@ -485,6 +492,7 @@ void ResetTintBlendColliderOrientation(TintBlendCollider* self)
 }
 
 
+// Finishes the switched collider and returns it to state 1.
 void FinishTintBlendColliderRequest(TintBlendCollider* self)
 {
     FinishSwitchedCollider(self);
@@ -611,6 +619,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
 }
 
 
+// Applies the base activation and clears the tinted flag when the collider is deactivated.
 void SetTintBlendColliderTracked(TintBlendCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self, p);
@@ -685,6 +694,8 @@ void ApplyTintBlendColliderPendingImpulse(TintBlendCollider* self, s32 moved)
 }
 
 
+// Whether a request is refused: mode 5, states 0, 2 or 3, an object already tinted or a held
+// pad-select flag.
 s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode)
 {
     if (mode == 5 || self->state == 2 || self->state == 0 || self->state == 3 || self->tinted != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
@@ -781,6 +792,8 @@ s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req)
 }
 
 
+// Extracts the contacts by part mode into its list at +0x740, then collects the turning
+// collider's contacts.
 void CollectTintBlendColliderContacts(TintBlendCollider* self)
 {
     ExtractContactsByPartMode(self, (Contact03**)((u8*)self + 0x740));
@@ -793,6 +806,8 @@ typedef s32 (*TintBlendTestFn)(void* self, void* out);
 
 extern f32 g_gameTime;
 
+// Sets the contact's value: when the class's method 56 says so, a quadratic ramp in the time
+// since the tint started, clamped to the unit range and scaled by a constant; otherwise 0.
 void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
 {
     TintBlendCollider* obj = self;
@@ -821,6 +836,8 @@ void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
 }
 
 
+// Tracks the walker: notification 0x13 from its player sets f738 to 1 for message 0x15E and 0
+// for 0x15F (0x14 only reads the walker's keys), then the base handling runs.
 void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, MessageBody* rec)
 {
     s32 loc[2];
