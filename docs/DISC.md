@@ -58,7 +58,7 @@ The records are grouped in tables (US addresses):
 | --- | ---: | --- | --- |
 | 0x247AF0 | 46 × 0x2C | levels: record, level code (world × 0x100 + level), name, goal flags | LZ-compressed |
 | 0x248490 | 17 × 0x20 | videos | MPEG program streams |
-| 0x244F40 | 7 × 0x20 | sound banks, loaded by the IOP sound driver | |
+| 0x244F40 | 7 × 0x20 | sound banks, loaded by the IOP sound driver | see Sound banks |
 | 0x248748 | 33 × 0x2C | music, by level code | VAG |
 | 0x2482D8, 0x2628B0 | 7, 6 × 0x20 | sounds | VAG |
 | 0x248470 | 1 | a file copied to the memory card | |
@@ -285,6 +285,47 @@ video at 593,237. A standalone parser written from this reads every animation, g
 step list of the 46 US levels (14,753 blocks, 34.9 MB) exactly as retail's loaders do,
 read for read.
 
+## Sound banks
+
+The game never reads a sound bank itself: it sends the bank's start sector to the IOP's
+sound driver and refers to its sounds by number. What follows is measured from the US disc's
+bytes and the executable's calls, not from the driver; a parser written from it walks all 52
+banks (7 global, 45 level), 3,155,522 checks with none failing. All values are little-endian.
+
+**Container.** A u32 kind (3 global, 1 level), a u32 chunk count (2, 3), then an
+{u32 offset, u32 size} per chunk; the chunks follow each other and the last ends at the
+record's size. Chunk 0 is the sound block, chunk 1 the samples, and a level bank's chunk 2
+its sequences.
+
+| Block | Header | Records | Tones |
+| --- | --- | --- | --- |
+| global, `SBlk` | 0x34 bytes: tag, u32 1, u32 4; u16 record, tone and sample counts at +0x16; offsets of the records (0x34) and tones; the samples' size at +0x28 and +0x2C | 12 bytes: u8 volume-like, u8, u16 0, u16 tone count, u16, s32 offset of the first tone from the tone table (-0x28 when empty) | 0x28 bytes: u32 type (1 plays a sample; 13 other types point at none; a type 25 counts the tones after it); for type 1, the SPU's ADSR1 and ADSR2 words at +0x12 and +0x14 and the sample's offset in chunk 1 at +0x18 |
+| level, `SBv2` | 0x34 bytes: tag, u32 2, u32 4, a four-letter bank tag; the same counts at +0x16; then a 28-byte block of constants and the tag | 8 bytes: u8 tone count, u8 volume-like, two u8, u32 offset of the first tone in the block | 24 bytes: ADSR words at +0xA and +0xC, the sample's offset at +0x10 and its number at +0x14 |
+
+The fields not named here are not shown by the bytes or the game. Every tone points at the
+start of a sample (4,290 of 4,290); 109 global and 241 level records have no tones.
+
+**Samples** are the SPU's ADPCM: 16-byte frames of a shift and filter byte (shift at most
+12, filter at most 4), a flags byte and 28 four-bit samples. Each sample starts with a flags
+0 frame and ends at the first frame with bit 0 set: a one-shot (flags 1) is followed by a
+flags 7 filler frame, a loop (flags 3) has one flags 6 frame inside. The samples tile the
+chunk exactly: 3,382 samples, 24,783,936 bytes. The level banks share their samples: 25
+distinct sample chunks among the 45.
+
+**Sequences** (level chunk 2): a 0x10-byte header, then `MMID`, a u8 count and the bank tag,
+an offset per sequence, and the sequences, each a 0xDC-byte header starting `MID ` (its own
+index at +0x2A, 480 at +0x24) and a MIDI-form event stream: 369 sequences in all.
+
+**What the game sends.** A sound is a row of `g_soundEntries` (0x245020, 771 rows of
+{bank, record}), which names every record of the seven global banks once. Bank 0 is loaded at
+start (0x1BF130), the level's global bank (the level's s16, see Levels) on demand
+(0x1BE268); a load sends the start sector (0x11D140) and keeps the handle the driver
+returns, and the game then asks the driver about each of the bank's sounds (0x11D760). A
+sound starts with the bank handle and record number, a volume word (1.0 is 0x400) and a pitch
+word (0x11D598, from 0x1BFCD8), and the driver returns a voice to adjust and stop. The level
+bank (0x1BEB10, 0x1BEC58) is started once, record 0 at volume 0x400; the game sends nothing
+else about it.
+
 ## PAL
 
 PAL holds every level five times, once per language, and moves the localized sound into
@@ -325,9 +366,10 @@ sound banks, 70 voices and 2,625 event and step sounds (525 per language). What 
 
 ## Next
 
-1. **The sound banks' own format,** which the IOP's sound driver reads, not the executable;
-   then the extractor, written in OpenThievius from these readers. Every level field the
-   executable reads has its role above where the code shows one (2026-11-14); the rest are
-   marked never read or by their shape.
+1. **The extractor,** written in OpenThievius from these readers and the sound banks'
+   layout. Every level field the executable reads has its role above where the code shows
+   one, and the sound banks are measured (2026-11-14); the rest are marked never read, not
+   shown, or by their shape. The roles of the sound banks' other fields, and how the driver
+   plays a tone and a sequence, would need the driver's code and stay open.
 2. **What the data is in the game.** The event kinds and object classes, which so far
    have only a shape; PAL's language-specific music and its voice index 5.

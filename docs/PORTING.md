@@ -63,6 +63,17 @@ of plain C++; their bodies are one `__asm__` statement of VU0 instructions each.
   say so. These float rules come from public descriptions of the hardware and are not proved by
   the decompilation, which checks bytes, not arithmetic: test them before relying on them.
 
+## Sound
+
+The game's sound runs on the IOP, in Sony's sound driver, which is not part of the
+executable and is not decompiled. The game's side is: it loads a bank by its start sector,
+starts a sound by bank handle and record number with a volume and pitch word, and adjusts and
+stops the voice the driver returns (docs/DISC.md, "Sound banks", lists the calls and the
+banks' layout). A port does as OpenRAC's port does: it answers those calls with its own sound
+engine, which reads the banks and decodes their SPU ADPCM samples itself, and it must answer
+every call the game waits on: src/main/iop_commands.cpp loops until a call is no longer
+pending or its reply word is no longer -1, and hangs on a call no one answers.
+
 ## A warning for anyone editing include/vu0.h
 Adding or removing lines in include/vu0.h can change the compiled code of a function that
 includes it: inserting three comment lines near the top made func_001D7778 (StepPathFollower)
