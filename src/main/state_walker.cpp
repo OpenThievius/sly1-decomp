@@ -440,7 +440,7 @@ StateWalker* CreateStateWalker(StateGraph* self, void* a1, s32 a2, s32 a3)
     obj->nextEntry = -1;
     AppendToList(&self->world->list1B94, obj);
 
-    AppendToList((List01*)((u8*)self + 0x48), obj);
+    AppendToList(&self->walkers, obj);
     if (a2 != -1) {
         s32 v = FindStateEntryIndexOrZero(self, a2);
         obj->currentEntry = v;
@@ -996,8 +996,8 @@ s32 FindNearestSpanObject(s32 flags, Vec02* a1, Vec02* a2, s32 count, Collider**
 // both loops, which share one index (docs/toolchain/loops.md, "A count set in each arm").
 s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
 {
-    if (IsPadSelectFlagHeld(self->world) != 0 || F(s32, 0xCCC) != 0) return 0;
-    if (F(s32, 0xCC8) != 0) return 1;
+    if (IsPadSelectFlagHeld(self->world) != 0 || self->fCCC != 0) return 0;
+    if (self->fCC8 != 0) return 1;
     PlacedObject* target = (PlacedObject*)self->desc08()->m62(self);
     if (target != 0) {
         if (self->companion == 0 || self->state == 0xB || self->state == 0x10) return 0;
@@ -1035,12 +1035,12 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
             if (self->reachHeight < __builtin_fabsf(delta.z)) return 0;
         }
         s32 v = GetAgentRosterState(self);
-        if ((F(s32, 0xCD0) & 1) == 0) {
+        if ((self->fCD0 & 1) == 0) {
             if (v != 2) {
                 if (IsPlayerUntargetableByAgent(self) != 0) return 0;
             }
         }
-        if (F(s32, 0xCD0) & 2) return 1;
+        if (self->fCD0 & 2) return 1;
         f32* table;
         s32 n;
         switch (v) {
@@ -1054,7 +1054,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
             n = 4;
             break;
         }
-        Vec02* pos = F(PlacedObject*, 0x734) != 0 ? &F(PlacedObject*, 0x734)->v140 : &self->v140;
+        Vec02* pos = self->f734 != 0 ? &self->f734->v140 : &self->v140;
         PushBackMemoryMark();
         Vec02 lo = *pos;
         Vec02 hi = *pos;

@@ -33,7 +33,8 @@ struct PairController : PlacedObject {
     s32 id2DC;  // 0x2DC
     s32 idCount;  // 0x2E0
     s32 ids[1];  // 0x2E4
-    u8 pad2E8[0x340 - 0x2E8];
+    u8 pad2E8[0x330 - 0x2E8];
+    Vec02 f330; // 0x330
     s32 mode340;  // 0x340
     f32 tune344;  // 0x344
     f32 tune348;  // 0x348

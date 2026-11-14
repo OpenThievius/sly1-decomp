@@ -835,10 +835,10 @@ s32 ShouldPlayerLaunchAtTarget(Player* self)
     if (now - self->subStateStartTime < 1.0f) {
         return 0;
     }
-    if (now - *(f32*)((u8*)self + 0x2238) < 1.0f) {
+    if (now - self->f2238 < 1.0f) {
         return 0;
     }
-    *(f32*)((u8*)self + 0x2238) = now;
+    self->f2238 = now;
     if (self->groundContact != 0) {
         return 0;
     }

@@ -309,7 +309,7 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
     u64 tv = ConvertFloatToDouble(t);
     if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
         SetBlendItemWeights(g, 0x50, 6, e);
-        SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, (Vec02*)((u8*)p + 0x640));
+        SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, &p->headingVelocity);
     }
 }
 
@@ -1139,7 +1139,7 @@ void DrawPlayerMarkerRing1(DeferredRequest* request)
     };
     params.textures[0] = 0;
     params.textures[1] = FindAnimRecord(0x15C);
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
+    DrawAngleSortedRing(&player->v140, 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing2(DeferredRequest* request)
@@ -1156,7 +1156,7 @@ void DrawPlayerMarkerRing2(DeferredRequest* request)
     AnimRecord* texture = FindAnimRecord(0x15D);
     params.textures[1] = texture;
     params.textures[0] = texture;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
+    DrawAngleSortedRing(&player->v140, 7, (Point2*)g_ringSevenPoints, player->ringCount, (RingAnchor*)player->ringAnchors, &params, request);
 }
 
 void DrawPlayerMarkerRing3(DeferredRequest* request)
@@ -1175,5 +1175,5 @@ void DrawPlayerMarkerRing3(DeferredRequest* request)
     params.textures[1] = FindAnimRecord(0x15C);
     anchor.scale = 60.0f;
     anchor.obj = (PlacedObject*)player;
-    DrawAngleSortedRing((Vec02*)((u8*)player + 0x140), 0x11, (Point2*)g_ringSeventeenPoints, 1, &anchor, &params, request);
+    DrawAngleSortedRing(&player->v140, 0x11, (Point2*)g_ringSeventeenPoints, 1, &anchor, &params, request);
 }

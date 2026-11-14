@@ -208,7 +208,7 @@ void StartModeWalkerObject(ModeWalker* self)
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
     ((PlacedObject*)self->fBCC)->desc02()->m2B((PlacedObject*)self->fBCC);
-    TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, (Vec02*)((u8*)self->fBCC + 0x140), (Vec02*)((u8*)self + 0xBE0));
+    TransformPointBetweenFrames(0, (PlacedObject*)self->fBC0, (Vec02*)((u8*)self->fBCC + 0x140), &self->vBE0);
     SetModeWalkerMode(self, 1);
     self->paceChangeTime = 3.4028234663852886e+38f;
     T217D_BF0* base = &g_spinningSpriteElement;

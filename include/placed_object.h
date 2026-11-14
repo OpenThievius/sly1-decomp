@@ -175,7 +175,7 @@ struct PlacedObject : BaseObject {
     };
     s32 valueCount;         // 0x26C: the number of f1F8 entries
     f32* f270;              // 0x270
-    u8 pad274[0x278 - 0x274];
+    f32* f274; // 0x274
     s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them

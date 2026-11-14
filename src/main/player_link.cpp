@@ -345,7 +345,7 @@ void TurnPlayerTowardLinkedObject(Player* self)
     Mat02 r;
     AddColliderForce(self, (u8*)self + 0x22B0);
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
-    Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(*(Vec02*)((u8*)self + 0x140)));
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
     BuildShortestArcRotation(&g_unitZVector, &d, &a);
     BuildAxisAngleMatrix(&g_unitZVector, &b, self->heading);
     MulRotation(&r, a, b);
@@ -600,7 +600,7 @@ void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec02* o
     } else {
         m = g_identityMatrix;
     }
-    Vu0::Q(d) = Vu0::Sub(Vu0::Add(Vu0::Q(*offset), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(*origin));
+    Vu0::Q(d) = Vu0::Sub(Vu0::Add(Vu0::Q(*offset), Vu0::Q(self->pathPoseOffset)), Vu0::Q(*origin));
     Vu0::Q(d) = Vu0::RotateTransposed(m, Vu0::Q(d));
     if (first != 0 || ((flags & 8) != 0 && d.x < 0.0001f)) {
         CreatePooledContact(d.x, self, n, offset, &m.r[0], first != 0 ? 11 : 10, 0, 0, head);

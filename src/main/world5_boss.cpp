@@ -212,7 +212,7 @@ path3:
     b = D_00248D30;
 tail:
     SteerColliderTowardPosition(self, &a, D_00263C20, &b, D_00263C30, f);
-    TurnColliderTowardRotation(self, f, (Mat02*)((u8*)self + 0x620), D_00263C40);
+    TurnColliderTowardRotation(self, f, &self->m620, D_00263C40);
 }
 
 
@@ -273,7 +273,7 @@ void UpdateWorld5ModeCollider(World5ModeCollider* self, f32 dt)
     } else {
         g_spinningSpriteElement.vt->m16(&g_spinningSpriteElement, 0);
     }
-    ComputeObjectMotionInFrame((PlacedObject*)self->f668, 0, (Vec02*)((u8*)self + 0x100), &a, 0, 0, 0);
+    ComputeObjectMotionInFrame((PlacedObject*)self->f668, 0, &self->pos, &a, 0, 0, 0);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(self->v150), Vu0::Q(a));
     TransformDirectionBetweenFrames(0, (PlacedObject*)self->f668, &d, &d);
     wx = d.y * -0.0016666667f;

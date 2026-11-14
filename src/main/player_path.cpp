@@ -497,7 +497,7 @@ void PinPlayerToPath(Player* self)
     Vu0::Set(dir, Vu0::NormalizeOrMoved(Vu0::Q(dir), *(const u128*)&g_unitZVector));
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
     TransformPointBetweenFrames(self, 0, (Vec02*)&self->f23E0, &local);
-    Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x2400))), Vu0::Q(pos));
+    Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(self->pathPoseOffset)), Vu0::Q(pos));
     CreatePooledContact(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
     CreatePooledContact(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
     CreatePooledContact(self, path->frame, &local, &dir, 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))));
@@ -539,13 +539,13 @@ void SetPlayerPath(Player* self, PathObject* path)
         self->aimTarget = 0;
         TransformPointBetweenFrames(0, path->frame, &self->v140, &pos);
         if (path->holder->desc->m10 != 0) {
-            path->holder->desc->m10(path->holder, &pos, 0, 0, 0, 0, (f32*)((u8*)self + 0x220C));
+            path->holder->desc->m10(path->holder, &pos, 0, 0, 0, 0, &self->aimCurvePos);
         }
     }
-    PlaceOnPathAt(self, path, &rot, *(f32*)((u8*)self + 0x220C));
+    PlaceOnPathAt(self, path, &rot, self->aimCurvePos);
     self->desc02()->m1E(self, &rot);
     if (path->holder->desc->m2 != 0) {
-        path->holder->desc->m2(path->holder, &pos, *(f32*)((u8*)self + 0x220C), 0);
+        path->holder->desc->m2(path->holder, &pos, self->aimCurvePos, 0);
     }
     TransformPointBetweenFrames(path->frame, self, &pos, &local);
     Vu0::Q(local) = Vu0::Sub(Vu0::Q(local), Vu0::Q(*(Vec02*)((u8*)self + 0x23E0)));

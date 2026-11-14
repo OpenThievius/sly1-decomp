@@ -228,7 +228,7 @@ void StartSwitchedColliderEffect(SwitchedCollider* self, s32 mode, PlacedObject*
             self->effectCount = 1;
             if (n != 0) {
                 void (*init)(Effect* self, void* pos, f32 scale, s32 flags) = n->vt->m00;
-                init(n, (u8*)other + 0x140, 1.0f, 0);
+                init(n, (u8*)&other->v140, 1.0f, 0);
                 AddEffectListener(n, self);
                 f32 r = GetAnimationMarkerTime((Animation*)self->f5F0, 0x13F);
                 n->life = r;
@@ -488,15 +488,15 @@ void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
         if (target != 0) {
             count = 1;
             s32 still = 0;
-            if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(*(Vec02*)((u8*)self + 0x5E0)))) < 0.0001f
-                && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(*(Vec02*)((u8*)self + 0x5E0)))) < 0.0001f
-                && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(*(Vec02*)((u8*)self + 0x5E0)))) < 0.0001f) {
+            if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->f5E0))) < 0.0001f
+                && __builtin_fabsf(Vu0::ToFloatY(Vu0::Q(self->f5E0))) < 0.0001f
+                && __builtin_fabsf(Vu0::ToFloatZ(Vu0::Q(self->f5E0))) < 0.0001f) {
                 still = 1;
             }
             if (still) {
                 from[0] = target->v140;
             } else {
-                from[0] = (*(Vec02*)((u8*)self + 0x5E0));
+                from[0] = (self->f5E0);
             }
             to[0] = target->v140;
         } else {
@@ -527,7 +527,7 @@ void EmitSwitchedColliderTrailPoints(SwitchedCollider* self)
             }
             *(Vu0::Vec*)&msg.vb = Vu0::Vec::Of(b);
             sink->desc->m1B(sink, &msg);
-            (*(Vec02*)((u8*)self + 0x5E0)) = b;
+            (self->f5E0) = b;
         }
     }
 }
