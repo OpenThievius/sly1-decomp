@@ -30,7 +30,6 @@
 
 
 #include "gathered_event_object.h"
-struct GatheredObjects { s32 count; GatheredEventObject** items; };
 
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 struct StateResetObject;

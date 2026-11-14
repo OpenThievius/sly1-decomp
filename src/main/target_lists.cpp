@@ -56,7 +56,6 @@ struct Vec02;
 
 
 #include "gathered_event_object.h"
-struct GatheredObjects { s32 count; GatheredEventObject** items; };
 
 void GatherAnimationEventObjects(Animation* self, BaseObject* ctx, s32* outCount, BaseObject*** outArr);
 void* CreateRecord2505C0(void);
@@ -252,7 +251,6 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 
 
-struct DisplayRegs { GsPmode pmode; u64 pad; GsDispFb dispfb; GsDisplay display; u64 pad2; };
 
 
 extern s32 g_imageRecordCountB;

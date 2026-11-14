@@ -85,7 +85,6 @@ extern PackedFloatPair g_cyclerMessageIntervalRange;
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
 // list at +0x1BDC, linked at +0x64): the receiver, the 0x50-byte message, the time it is due.
 #include "delayed_message_body.h"
-struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
 
 extern f32 g_gameClock[];
 

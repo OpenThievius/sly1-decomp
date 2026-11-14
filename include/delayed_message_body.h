@@ -6,5 +6,6 @@
 #include "common.h"
 
 struct DelayedMessageBody { Quad16 q[5]; };
+struct DelayedMessage { void* owner; u8 pad0[0xC]; DelayedMessageBody body; f32 due; };
 
 #endif

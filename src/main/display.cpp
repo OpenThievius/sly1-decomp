@@ -130,7 +130,6 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
 
 
-struct DisplayRegs { GsPmode pmode; u64 pad; GsDispFb dispfb; GsDisplay display; u64 pad2; };
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
