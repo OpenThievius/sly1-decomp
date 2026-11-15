@@ -503,7 +503,6 @@ void WriteVifStrow(PacketWriter* s, u32* src);
 void WriteVifStmask(PacketWriter* s, s32 value);
 void WriteVifFlushE(PacketWriter* s);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 
 void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b);
@@ -570,7 +569,6 @@ void WriteVifStrow(PacketWriter* b, u32* src);
 void WriteVifStmask(PacketWriter* self, s32 value);
 void WriteVifFlushE(PacketWriter* b);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 
 void QueueObjectForRegroup(World* owner, PlacedObject* obj);

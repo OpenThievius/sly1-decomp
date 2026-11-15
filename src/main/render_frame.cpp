@@ -130,7 +130,6 @@ extern u8 g_groupMicroprogramEnd[];
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void WriteVifFlush(PacketWriter* b);
 void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
-void AddDmaRefTagIfChanged(void* self, void* a, void* b);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
@@ -148,7 +147,7 @@ void ActivateRenderFrame(void* a, s32 b);
 
 void ConstructPacketWriters(s32 flag, s32 code);
 
-extern s32 g_lastDmaRefStart;
+extern void* g_lastDmaRefStart;
 
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
@@ -371,11 +370,13 @@ void BeginRenderFrame(void)
 
 // Adds a DMA reference tag for the data from value to end (in quadwords) unless it is the same
 // start as the last one added.
-void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
+void AddDmaRefTagIfChanged(void* list, void* value, void* end)
 {
     if (g_lastDmaRefStart != value) {
         g_lastDmaRefStart = value;
-        AddDmaRefTag((PacketWriter*)list, ((u32)(end - value) + 15) >> 4, value);
+        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
+        // as a word (a physical address among them), so this call views it with a pointer.
+        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)list, ((u32)((u8*)end - (u8*)value) + 15) >> 4, value);
     }
 }
 
@@ -663,7 +664,7 @@ ObjectList g_deferredReleaseListA = {};
 ObjectList g_deferredReleaseListB = {};
 // size: 12-byte record copied into Slot r38 by func_0015EC68
 ObjectList g_deferredReleaseListC = {};
-s32 g_lastDmaRefStart = 0;
+void* g_lastDmaRefStart = 0;
 // size: s32 (sw), 4-byte label
 s32 g_codeChecksumFailed = 0;
 u32 g_renderFrameIndex = 0;

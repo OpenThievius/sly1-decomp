@@ -517,7 +517,6 @@ s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** l
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
-extern s32 g_lastDmaRefStart;
 
 void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 a, s32 b);

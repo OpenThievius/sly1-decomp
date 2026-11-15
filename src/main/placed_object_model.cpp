@@ -153,7 +153,6 @@ extern u8 g_extraStreamFirstProgram[];
 extern u8 g_unlitExtraStreamSecondProgram[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteStripMeshMscal(s32 mode, void* obj);
 

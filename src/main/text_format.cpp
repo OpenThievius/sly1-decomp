@@ -224,11 +224,8 @@ struct RegDouble { u8 pad; };
 
 
 extern "C" f32 Power(f32 x, f32 y);
-RegDouble* MultiplyDoubles(RegDouble* self, u64 v);
-RegDouble* MultiplyDoubles(RegDouble* self, double v); // soft-float double in a1
-RegDouble* TruncateDouble(RegDouble* self);
-RegDouble* SubtractDoubles(RegDouble* self, RegDouble* v);
-s32 ConvertDoubleToS32(RegDouble* self);
+double TruncateDouble(double x);
+extern "C" double SubtractDoubles(double a, double b);
 
 
 
@@ -731,11 +728,13 @@ s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
         idx = 0;
     } else {
         f32 t = Power(10.0f, (f32)(-b));
-        RegDouble* p = MultiplyDoubles(self, ConvertFloatToDouble(t));
-        self = TruncateDouble(p);
-        p = TruncateDouble(MultiplyDoubles(self, 0.1));
-        p = MultiplyDoubles(p, (u64)0x4024000000000000ULL);
-        idx = ConvertDoubleToS32(SubtractDoubles(self, p));
+        // The value is held in the register view its callers give it (written on double, the code
+        // changes), so each soft-float call goes through the real function cast to that view.
+        RegDouble* p = ((RegDouble* (*)(RegDouble*, double))MultiplyDoubles)(self, ConvertFloatToDouble(t));
+        self = ((RegDouble* (*)(RegDouble*))TruncateDouble)(p);
+        p = ((RegDouble* (*)(RegDouble*))TruncateDouble)(((RegDouble* (*)(RegDouble*, double))MultiplyDoubles)(self, 0.1));
+        p = ((RegDouble* (*)(RegDouble*, u64))MultiplyDoubles)(p, (u64)0x4024000000000000ULL);
+        idx = ((s32 (*)(RegDouble*))ConvertDoubleToS32)(((RegDouble* (*)(RegDouble*, RegDouble*))SubtractDoubles)(self, p));
     }
     return ((s8*)&g_hexDigits)[idx];
 }

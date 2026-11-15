@@ -3625,7 +3625,7 @@ void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4)
 // Writes a VIF unpack header for b items, pads to quad slot 3, adds the data as a DMA reference tag
 // of its length in quadwords and optionally returns the offset of the header; nothing is written
 // for a count of zero.
-void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
+void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, void* c, s32 d, s32* out)
 {
     if (b != 0) {
         PadPacketToQuadSlot(self, 3);
@@ -3633,7 +3633,9 @@ void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, s32 c, s32 d, s32* out)
         s32 t = r + 0xF;
         s32 u = r + 0x1E;
         s32 n = (t >= 0) ? t : u;
-        AddDmaRefTag(self, n >> 4, c);
+        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
+        // as a word (a physical address among them), so this call views it with a pointer.
+        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)(self, n >> 4, c);
         if (out != 0) {
             *out = (s32)self->openHeader - 0xC;
         }
