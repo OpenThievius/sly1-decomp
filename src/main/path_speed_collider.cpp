@@ -56,10 +56,6 @@ struct OwnerMessage;
 
 
 
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void ApproachRotationWithRamp(f32 limit, Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin);
-
 
 // The file's .data, 0x264230 to 0x264260, in retail's order.
 ObjectLink g_pathSpeedColliderLinks[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
@@ -148,9 +144,6 @@ void UpdateC24Object(PathSpeedCollider* self, f32 dt)
 typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
 typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec4* pos, Vec4* dir);
 typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
-void ApproachRotationWithRamp(f32 limit, Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
 
 
 // Moves the path-speed object to the point and velocity its curve table gives for the current
@@ -181,7 +174,9 @@ void MoveC24Object(PathSpeedCollider* self, s32 a1, f32 dt)
         BuildBasisFromXAndZHint(&vel, &t, &basis);
         self->pos = pos;
         self->v150 = vel;
-        ApproachRotationWithRamp(dt, &self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, &self->rot, &self->v160);
+        // Retail's caller evaluates the limit first: the call names its float argument first.
+        ((void (*)(f32, Mat3*, Mat3*, RampProfile*, Mat3*, Vec4*))ApproachRotationWithRamp)(
+            dt, &self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, &self->rot, &self->v160);
     }
     ScopedListFrame frame(&self->children);
     void* head = *(void**)&self->children;
@@ -245,7 +240,7 @@ void BuildPathSpeedProfile(PathSpeedCollider* self, PathCurveObject* path, f32 s
         }
         f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(p0), Vu0::Q(p1))));
         lens[i] = Fpu::Sqrt(self->f6D8 / len);
-        ApproachValueWithRamp((RampProfile*)&self->f6CC, &out, curve->lengths[i], total + 100.0f, 0.0f);
+        ApproachValueWithRamp(curve->lengths[i], total + 100.0f, 0.0f, (RampProfile*)&self->f6CC, &out);
         lens[i] = out <? lens[i];
     }
     CurveEntry* e;

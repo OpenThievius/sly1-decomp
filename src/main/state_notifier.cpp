@@ -137,7 +137,6 @@ void PushBackMemoryMark(void);
 StateNotifier** AllocateBackMemory(s32 size);
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out);
 struct ValueListObject;
-struct Bits128;
 void PopBackMemoryMark(void);
 
 
@@ -151,7 +150,6 @@ extern u8 g_identityMatrix[];
 extern u8 g_zeroVector[];
 extern NotifierQuad g_spareNotifierVelocity;
 s32 GatherObjectsOfKind(World* self, s32 kind, s32 max, StateNotifier** out);
-void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
 extern void* g_effectNotifierParams[28];
 void CountPickupTowardHundred(void* self);
@@ -1112,7 +1110,7 @@ void PlaceSpareSoundNotifier(World* self)
         obj->desc02()->m21(obj, (Vec4*)g_zeroVector);
         obj->desc02()->m2F(obj, 4);
         *(NotifierQuad*)&obj->motionVel = g_spareNotifierVelocity;
-        QueryValueListMask((ValueListObject*)self->valueListObject, obj->boundRadius, (Bits128*)&obj->v140, &obj->visibilityMask);
+        QueryValueListMask((ValueListObject*)self->valueListObject, obj->boundRadius, (u128*)&obj->v140, &obj->visibilityMask);
     }
 }
 
@@ -1460,7 +1458,7 @@ s32 ScatterObjectsAroundCircle(World* self, s32 a1, Vec4* a2, s32 n, StateNotifi
             b = RandomFloatInRange(g_scatterLiftRange[0], g_scatterLiftRange[1]);
             ComputePolarOffset((Vec3*)q, ang, a, b);
             ang += step;
-            QueryValueListMask((ValueListObject*)self->valueListObject, o->boundRadius, (Bits128*)&o->v140, &o->visibilityMask);
+            QueryValueListMask((ValueListObject*)self->valueListObject, o->boundRadius, (u128*)&o->v140, &o->visibilityMask);
         }
     }
     PopBackMemoryMark();

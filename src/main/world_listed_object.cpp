@@ -712,7 +712,6 @@ s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x
 void BeginDmaTag(PacketWriter* w);
 void CloseDmaTag(PacketWriter* w);
 void WriteVifUnpack(PacketWriter* w, s32 tag, s32 size, void* src, s32 addr, s32 flag);
-void WriteVifMscal(PacketWriter* w, void* addr);
 extern const f32 g_identityMatrix4[28];
 extern u8 g_listedParticleProgram0[];
 extern u8 g_listedParticleProgram1[];

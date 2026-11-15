@@ -26,6 +26,5 @@ struct QueuedGifTags {
     u8 pad0[0xC];
     s32 f10;
 };
-struct TransferBase { s32 v; };
 
 #endif

@@ -322,8 +322,8 @@ void RemoveFromList(ObjectList* list, void* item);
 
 extern f32 g_frameDt;
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
+f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 struct ScaledDrawFrame { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10]; Quad16 m90[4]; };
 
 void* MultiplyMatrices(Quad16* out, void* b, Quad16* in);
@@ -3520,7 +3520,7 @@ void LoadScalingVolume(ScalingVolume* self,void* other)
 void UpdateScalingVolume(ScalingVolume* self, f32 dt)
 {
     UpdatePlacedObject(self, dt);
-    self->currentScale = ApproachValueWithRamp((RampProfile*)self->v, 0, self->currentScale, self->targetScale, g_frameDt);
+    self->currentScale = ApproachValueWithRamp(self->currentScale, self->targetScale, g_frameDt, (RampProfile*)self->v, 0);
 }
 
 // Draws the placed object with its transform scaled uniformly by its current scale (at 0x2EC).

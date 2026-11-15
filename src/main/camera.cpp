@@ -1600,7 +1600,7 @@ extern f32 g_frameStep;
 f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
 {
     f32 out;
-    ApproachValueWithRamp(&g_cameraClearanceRamp, &out, h->dist, self->nearClearance - g_cameraProbeRadius, g_frameStep);
+    ApproachValueWithRamp(h->dist, self->nearClearance - g_cameraProbeRadius, g_frameStep, &g_cameraClearanceRamp, &out);
     return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
 }
 

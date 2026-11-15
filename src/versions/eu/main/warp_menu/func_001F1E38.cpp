@@ -14,7 +14,8 @@ void DrawColoredCircle(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s3
                   (u32)(s32)((cy * 0.546296298f + 1920.0f) * 16.0f), 0, 0);
     loc.k = 0;
     for (i = 0; i < n + 1; i++) {
-        ComputeSinCos(WrapAngle(angle), &loc.x, &loc.y);
+        // Retail's caller evaluates the angle before the outputs' addresses: the call names it first.
+        ((void (*)(f32, f32*, f32*))ComputeSinCos)(WrapAngle(angle), &loc.x, &loc.y);
         loc.x = loc.x * radius + cx;
         loc.y = loc.y * radius + cy;
         if ((i & 1) && (flags & 2)) {

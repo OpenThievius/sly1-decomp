@@ -940,7 +940,7 @@ void UpdateArc(HeldItemSparkle* self)
         }
         if (g_displayMode != 4)
         {
-            self->pulse = ApproachValueWithRamp((RampProfile*)&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
+            self->pulse = ApproachValueWithRamp(self->pulse, self->pulseTarget, g_gameClock[5], (RampProfile*)&self->pulseA, 0);
             if (AreFloatsNearlyEqual(self->pulse, self->pulseTarget, 1e-4f) != 0)
             {
                 self->pulse = 1.0f;
@@ -999,7 +999,7 @@ void UpdateArc(HeldItemSparkle* self)
                 }
                 else
                 {
-                    e->level = ApproachValueWithRamp((RampProfile*)q, 0, e->level, e->target, g_gameClock[5]);
+                    e->level = ApproachValueWithRamp(e->level, e->target, g_gameClock[5], (RampProfile*)q, 0);
                 }
             }
         }

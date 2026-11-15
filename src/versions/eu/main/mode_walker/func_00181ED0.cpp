@@ -40,15 +40,15 @@ void SteerWalkerAimAtNearestTarget(AimReticle* element, PadStick* pad)
             chosen = o;
         }
     }
-    self->rateX = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateX, pad->x, g_gameClock[2]);
+    self->rateX = ApproachValueWithRamp(self->rateX, pad->x, g_gameClock[2], (RampProfile*)g_walkerAimRateRamp, 0);
     f32 y = pad->y;
     if (g_saveData->optionFlags & 0x400) {
         y = -y;
     }
-    self->rateY = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateY, y, g_gameClock[2]);
+    self->rateY = ApproachValueWithRamp(self->rateY, y, g_gameClock[2], (RampProfile*)g_walkerAimRateRamp, 0);
     self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * g_walkerAimRateScale, -1.0f, 1.0f);
     self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * g_walkerAimRateScale, -1.0f, 1.0f);
     f32 far = 1000.0f;
-    self->aim[2] = ApproachValueWithRamp((RampProfile*)g_walkerAimDistanceRamp, 0, self->aim[2], far >? best.z, g_gameClock[2]);
+    self->aim[2] = ApproachValueWithRamp(self->aim[2], far >? best.z, g_gameClock[2], (RampProfile*)g_walkerAimDistanceRamp, 0);
     self->target = chosen;
 }

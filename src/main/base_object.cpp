@@ -869,7 +869,7 @@ void NoteConeVolumeLightingChange(ConeVolume* self)
 
 void *InitPacketWriter(PacketWriter* p);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
-void WriteVifMscal(PacketWriter* p, void* code);
+void WriteVifMscal(PacketWriter* s, void* program);
 void WriteVifFlushE(PacketWriter* p);
 extern u8 g_coneProgramMode0[];
 extern u8 g_coneProgramMode1[];
@@ -1105,8 +1105,7 @@ void UpdateConeVolumeTangents(ConeVolume* self)
 }
 
 struct ValueListObject;
-struct Bits128;
-void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
+void QueryValueListMask(ValueListObject* self, f32 radius, u128* vec, s32* out);
 
 // Updates the mask of which value leaves the cone volume touches: all of them in mode 0, those
 // within rangeMax of the volume in mode 1, and in modes 2 and 3 those within the sphere that
@@ -1121,7 +1120,7 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         self->mask = 0x0FFFFFFF;
         break;
     case 1:
-        QueryValueListMask((ValueListObject*)self->world->valueListObject, self->rangeMax, (Bits128*)&self->v140, &self->mask);
+        QueryValueListMask((ValueListObject*)self->world->valueListObject, self->rangeMax, (u128*)&self->v140, &self->mask);
         break;
     case 2:
     case 3: {
@@ -1136,7 +1135,7 @@ void UpdateConeVolumeBounds(ConeVolume* self)
         f32 r = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(v)));
         Vu0::Q(v) = Vu0::MulX(Vu0::Q(self->axis), Vu0::Scalar(self->rangeMax * 0.5f));
         Vu0::Q(center) = Vu0::Add(Vu0::Q(self->v140), Vu0::Q(v));
-        QueryValueListMask((ValueListObject*)self->world->valueListObject, r, (Bits128*)&center, &self->mask);
+        QueryValueListMask((ValueListObject*)self->world->valueListObject, r, (u128*)&center, &self->mask);
         break;
     }
     }

@@ -125,8 +125,6 @@ extern s32 g_world3BossPendingVoice;
 void InitAgent(Agent* self);
 void* AllocateFrontMemory(s32 size);
 void PopStackElement(ElementStack* g);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 f32 WrapAngle(f32 a);
 f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
@@ -137,7 +135,6 @@ void* CopyToFrontMemory(s32 size, void* name);
 // An object the tempo agent finds by id at its start (func_001EBFB0 copies D_00275D48 to
 // 0xC9C and fills each obj).
 struct TempoObjectRef { s32 id; f32 f04; BaseObject* obj; };
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 s32 ChooseAgentState(Agent* self);
 extern s32 g_previousSoundLevel;
 extern f32 g_elapsedTime[];
@@ -294,7 +291,6 @@ void UnregisterSwitchedCollider(SwitchedCollider* self);
 void EndWorld3Timeline(void* p);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 typedef u64 Bits128 __attribute__((mode(TI)));
 s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
@@ -413,7 +409,6 @@ IdentityKey* LookupEntryById(s32 k);
 void StartObjectFade(IdentityKey* v, s32 m, s32 n);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 s32 IsWarpEntryAvailable(WarpPage* self, s32 kind, s32* outA, s32* outB);
 void SetWarpCursor(WarpPage* self, s32 a1, s32 a2);
 void BeginWarpPageClose(void* self);
@@ -507,7 +502,6 @@ void InitElementStack(ElementStack* self);
 void PushStackElement(ElementStack* self, ScreenElement* node);
 void SetElementStackState(ElementStack* self, s32 state);
 void ApplyStackTimeScale(ElementStack* stack, f32 x);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void AddWorld3BossEntry(World3Boss* self, AnimationPlayer* a, s32 b);
 void RestartWorld3Timeline(World3Timeline* self);
 void EndWorld3Timeline(World3Timeline* self);
@@ -1355,9 +1349,9 @@ void StepWorldValueTowardTarget(World* self, f32 x)
     f32 a = o->value;
     f32 b = o->valueTarget;
     if (b < a) {
-        o->value = ApproachValueWithRamp((RampProfile*)g_worldValueFallRamp, 0, a, b, x);
+        o->value = ApproachValueWithRamp(a, b, x, (RampProfile*)g_worldValueFallRamp, 0);
     } else if (a < b) {
-        o->value = ApproachValueWithRamp((RampProfile*)g_worldValueRiseRamp, 0, a, b, x);
+        o->value = ApproachValueWithRamp(a, b, x, (RampProfile*)g_worldValueRiseRamp, 0);
     }
 }
 
@@ -1445,7 +1439,7 @@ f32 ClampToMagnitude(f32 a, f32 b)
 // Moves a value x toward the target y for z seconds under a ramp profile: it runs at maxSpeed and
 // slows to endSpeed over rampTime near the target. Gives the new value, and the speed it ends with
 // (signed toward the target) in out if given.
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z)
+f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out)
 {
     f32 roots[4];
     s32 flip = 0;
@@ -3138,8 +3132,8 @@ void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z)
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale)
 {
     f32 t[4];
-    ComputeSinCos(first, &t[0], &t[1]);
-    ComputeSinCos(second, &t[2], &t[3]);
+    ComputeSinCos(&t[0], &t[1], first);
+    ComputeSinCos(&t[2], &t[3], second);
     out->x = t[3] * t[1] * scale;
     out->y = t[3] * t[0] * scale;
     out->z = t[2] * scale;
@@ -3310,8 +3304,8 @@ void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
 void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out)
 {
     f32 t[4];
-    ComputeSinCos(in->y, &t[0], &t[1]);
-    ComputeSinCos(in->z, &t[2], &t[3]);
+    ComputeSinCos(&t[0], &t[1], in->y);
+    ComputeSinCos(&t[2], &t[3], in->z);
     out->x = t[1] * t[3] * b->x - t[2] * b->y;
     out->y = t[1] * t[2] * b->x + t[3] * b->y;
     out->z = -t[0] * b->x + b->z;
@@ -3484,21 +3478,21 @@ void WriteVifBaseOffset(PacketWriter* s, u32 a, u32 b)
     *q = b | 0x2000000;
 }
 
-// Appends a VIF MSCAL code starting the microprogram at byte address n (stored in units of 8
-// bytes).
-void WriteVifMscal(PacketWriter* s, s32 n)
+// Appends a VIF MSCAL code starting the microprogram at its byte address in VU micro memory
+// (stored in units of 8 bytes).
+void WriteVifMscal(PacketWriter* s, void* program)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
-    *p = (u32)((n / 8) | 0x14000000);
+    *p = (u32)(((s32)program / 8) | 0x14000000);
 }
 
 // Appends a VIF MSCALF code, as WriteVifMscal.
-void WriteVifMscalf(PacketWriter* s, s32 n)
+void WriteVifMscalf(PacketWriter* s, void* program)
 {
     u32* p = (u32*)s->cur;
     s->cur = (u8*)(p + 1);
-    *p = (u32)((n / 8) | 0x15000000);
+    *p = (u32)(((s32)program / 8) | 0x15000000);
 }
 
 // Appends a VIF FLUSH code (0x11000000).
@@ -3755,10 +3749,10 @@ s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radi
 
 // Looks up the mask for a point and radius in the world's value tree into *out; 0x0FFFFFFF when
 // there is no list or tree.
-void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out)
+void QueryValueListMask(ValueListObject* self, f32 radius, u128* vec, s32* out)
 {
     if (self != 0 && self->data38 != 0) {
-        Bits128 q = *vec;
+        u128 q = *vec;
         *out = 0;
         QueryValueTreeMask(self, (sptr)self->data38, q, radius, out);
     } else {
@@ -5266,7 +5260,7 @@ void HandleWarpMenuInput(WarpPageList* self, PadRecord* t)
     } else {
         self->scaleTarget = g_scaleTargetSmall;
     }
-    self->scale = ApproachValueWithRamp((RampProfile*)g_warpLevelRampKind2, 0, self->scale, self->scaleTarget, g_gameClock.step);
+    self->scale = ApproachValueWithRamp(self->scale, self->scaleTarget, g_gameClock.step, (RampProfile*)g_warpLevelRampKind2, 0);
 }
 
 void SetWarpMenuOpen(WarpPageList* self, s32 a1)
@@ -5326,7 +5320,8 @@ void DrawColoredCircle(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s3
                   (u32)(s32)((cy * 0.454545468f + 1936.0f) * 16.0f), 0, 0);
     loc.k = 0;
     for (i = 0; i < n + 1; i++) {
-        ComputeSinCos(WrapAngle(angle), &loc.x, &loc.y);
+        // Retail's caller evaluates the angle before the outputs' addresses: the call names it first.
+        ((void (*)(f32, f32*, f32*))ComputeSinCos)(WrapAngle(angle), &loc.x, &loc.y);
         loc.x = loc.x * radius + cx;
         loc.y = loc.y * radius + cy;
         if ((i & 1) && (flags & 2)) {

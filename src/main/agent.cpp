@@ -154,7 +154,6 @@ void LoadAgent(Agent* self, void* a1)
     ResolveAgentSecondaryClips(self);
 }
 
-void CopySwitchedCollider(Agent* self, void* src);
 
 // Slot 9 of the agent: copies as a switched collider but keeps its own keeper record and roster,
 // and remembers the object it was copied from.
@@ -162,7 +161,7 @@ void CopyAgent(Agent* self, void* src)
 {
     s32 b = self->flagIndex;
     s32 a = (s32)self->roster;
-    CopySwitchedCollider(self, src);
+    CopySwitchedCollider(self, (SwitchedCollider*)src);
     self->flagIndex = b;
     self->roster = (void*)a;
     self->copySource = src;

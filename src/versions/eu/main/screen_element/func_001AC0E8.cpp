@@ -20,7 +20,6 @@ struct Col_eu_1ACEE0 { s32 v[4]; };
 
 extern Q3_eu_1ACEE0 D_eu_0027DB10;
 
-f32 ApproachValueWithRamp(Q3_eu_1ACEE0* p, s32 a1, f32 f12, f32 f13, f32 f14);
 void SetTextLayoutVerticalPlacement(Rect_eu_1ACEE0* out, s32 flag);
 void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
 void PushFontScale(Text_eu_1ACEE0* handle, f32 a, f32 b);
@@ -61,7 +60,7 @@ void DrawGauge(Self_eu_1ACEE0* self)
         flag = d < 0.75f;
     }
     u32 grey = 0xFF808080;
-    self->f584 = ApproachValueWithRamp(&D_eu_0027DB10, 0, self->f584, self->f588, ((Clock_eu_1ACEE0*)&g_gameClock)->f8);
+    self->f584 = ApproachValueWithRamp(self->f584, self->f588, ((Clock_eu_1ACEE0*)&g_gameClock)->f8, (RampProfile*)&D_eu_0027DB10, 0);
     f32 y = self->f59C;
     f32 h = self->f584 * y;
     y -= h;

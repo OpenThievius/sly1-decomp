@@ -91,7 +91,6 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev);
 
 void CountDownGaugeContacts(GaugeManager* self, ContactAgent* agent);
 
-s32 HandleAgentObjectEvent(NumberedAgent* self, void* event);
 extern u8 g_camera[];
 extern u8 g_zeroVector[];
 extern u8 g_zeroVector[];
@@ -364,7 +363,7 @@ s32 HandleNumberedAgentObjectEvent(NumberedAgent* self, void* event)
     if (self->state == 0xB) {
         return 1;
     }
-    if (HandleAgentObjectEvent(self, event) == 0) {
+    if (HandleAgentObjectEvent(self, (AgentHit*)event) == 0) {
         return 0;
     }
     self->targetNear = 0;

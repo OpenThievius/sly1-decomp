@@ -20,7 +20,7 @@ void DrawSpinningSpriteElement(SpinningSprite_eu* self)
     if (g_camera->snapping != 0) {
         self->f288 = target;
     } else {
-        self->f288 = ApproachValueWithRamp((RampProfile*)g_walkerAlphaRamp, 0, self->f288, target, g_frameStep);
+        self->f288 = ApproachValueWithRamp(self->f288, target, g_frameStep, (RampProfile*)g_walkerAlphaRamp, 0);
     }
     if (self->f288 == 0.0f) {
         return;

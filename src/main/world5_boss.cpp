@@ -336,9 +336,6 @@ struct RampProfile;
 struct Vec4;
 struct Mat3;
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
 
 // The product a b of two rotations into out: a's rows loaded once, b's rows each rotated by
 // them, each result row stored to its vector local and then to out's row.
@@ -507,12 +504,14 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     }
     Mat3 rot;
     for (i = 0; i < 2; i++) {
-        ApproachRotationWithRamp(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
+        // Retail's caller evaluates the limit before the output rotation: the call names it there.
+        ((void (*)(Mat3*, Mat3*, RampProfile*, f32, Mat3*, Vec4*))ApproachRotationWithRamp)(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
         self->turnedParts[i]->desc02()->m1E(self->turnedParts[i], &rot);
     }
     if (self->thirdTurnedPart->orientationAttachment == 0) {
         MulRotationRowsIndexed(&aim, aim, self->thirdTurnedPart->m1A0);
-        ApproachRotationWithRamp(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
+        // Retail's caller evaluates the limit before the output rotation: the call names it there.
+        ((void (*)(Mat3*, Mat3*, RampProfile*, f32, Mat3*, Vec4*))ApproachRotationWithRamp)(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
         self->thirdTurnedPart->desc02()->m1E(self->thirdTurnedPart, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);

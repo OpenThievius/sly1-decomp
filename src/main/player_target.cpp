@@ -284,9 +284,7 @@ s32 ChooseNearbyPlayerTarget(PlayerTargetState* self, void* target, s32* out)
     return r;
 }
 
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc);
 
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
 // Scores landing on a moving target: when the player can reach the point's height, it builds a
@@ -325,9 +323,11 @@ void ScorePlayerTargetPlacement(Player* self, Vec4* point, BaseObject* obj, Vec4
         *outTime = t;
     }
     if (outCost != 0) {
-        EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, 0.0f, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
         f32 a = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg1), Vu0::Q(seg1))));
-        EvaluateHermiteVectorSegment(t, t, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, t, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
         f32 b = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg2), Vu0::Q(seg2))));
         *outCost = ((a + b) * (t * 0.5f)) <? 1000000.0f;
     }
@@ -583,7 +583,6 @@ struct TargetSpanHit {
 };
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
@@ -611,7 +610,8 @@ s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, vo
     GatherCollidersInBox(self->world, (Collider*)self, &lo, &hi, (s32 (*)(void*, Collider*))a1, a2, &n0, &n1);
     f32 t = 0.0f;
     for (;;) {
-        EvaluateHermiteVectorSegment(limit, t, 1.0f, (const Vec4*)pa, (const Vec4*)pb, pc, (const Vec4*)pd, &q, 0, 0);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(limit, t, 1.0f, (const Vec4*)pa, (const Vec4*)pb, pc, (const Vec4*)pd, &q, 0, 0);
         if (t != 0.0f) {
             if (FindNearestSpanObject(0, &p, &q, n0, n1, (ColliderSpan*)&hit) != 0) {
                 if (100.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pc))))) {

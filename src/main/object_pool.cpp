@@ -78,7 +78,6 @@ void UnregisterObject(BaseObject* self);
 void ClearObjectPoolChoice(ObjectPool* p);
 
 
-void GetObjectWorldRotation(void* a, f32* out);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 
@@ -153,7 +152,6 @@ struct PlacementRecord {
     Vec4 rot[3];
 };
 
-void GetObjectWorldRotation(BaseObject* self, Mat3* out);
 
 
 extern u8 g_elapsedTime[];
@@ -886,12 +884,6 @@ void GetPlacementRecordTransform(PlacementRecord* self, Vec4* a1, Vec4* a2, void
 void ComputeFrameFollowerPoint(FrameFollower* self, Vec4* target, Vec4* out, void* to);
 void GetPlacementRecordAngle(u8* self, f32* out, void* x);
 void GetPlacementRecordPitch(u8* self, f32* out, void* x);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void ForwardBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-s32 ComputeBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
 void TriggerScriptEvent(BaseObject* self, s32 idx, s32 flag, void* out);
 
 // v made a unit vector, or the fallback when shorter than 1e-4; its length.
@@ -999,11 +991,13 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
                 if (self->heading.flags & 1) {
                     f32 t;
                     GetPlacementRecordPitch((u8*)h, &t, self->frame);
-                    ForwardBallisticLaunchVelocity(t, &pos, &to, &self->velocity, (u8*)obj);
+                    // Retail's caller evaluates the angle before the vectors' addresses: the call names it first.
+                    ((void (*)(f32, Vec4*, Vec4*, Vec4*, u8*))ForwardBallisticLaunchVelocity)(t, &pos, &to, &self->velocity, (u8*)obj);
                 } else if (self->heading.flags & 4) {
                     ComputeLaunchVelocityToPoint(h->speed, &pos, &to, &self->velocity, (u8*)obj);
                 } else {
-                    ComputeBallisticLaunchVelocity(0.5f, &pos, &to, &self->velocity, (u8*)obj);
+                    // Retail's caller evaluates the angle before the vectors' addresses: the call names it first.
+                    ((s32 (*)(f32, Vec4*, Vec4*, Vec4*, u8*))ComputeBallisticLaunchVelocity)(0.5f, &pos, &to, &self->velocity, (u8*)obj);
                 }
             }
         }
@@ -1195,7 +1189,7 @@ void GetPlacementRecordAngle(u8* self, f32* out, void* x)
 {
     f32 v[12];
     if (*(void**)(self + 0x10) != 0) {
-        GetObjectWorldRotation(*(void**)(self + 0x10), v);
+        GetObjectWorldRotation(*(BaseObject**)(self + 0x10), (Mat3*)v);
         TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat3*)v, (Mat3*)v);
         *out = ArctangentOfRatio(v[1], v[0]);
     } else if (*(u8**)(self + 0x14) != 0) {
@@ -1212,7 +1206,7 @@ void GetPlacementRecordPitch(u8* self, f32* out, void* x)
 {
     f32 v[12] __attribute__((aligned(16)));
     if (*(void**)(self + 0x10) != 0) {
-        GetObjectWorldRotation(*(void**)(self + 0x10), v);
+        GetObjectWorldRotation(*(BaseObject**)(self + 0x10), (Mat3*)v);
         TransformRotationBetweenFrames(0, (PlacedObject*)x, (Mat3*)v, (Mat3*)v);
         u128 r = Vu0::Q(*(u128*)v);
         *out = ArctangentOfRatio(v[2], Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(r, r))));

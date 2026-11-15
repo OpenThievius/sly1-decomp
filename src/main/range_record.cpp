@@ -325,7 +325,7 @@ struct RangeUniforms {
 };
 void* InitPacketWriter(PacketWriter* p);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
-void WriteVifMscal(PacketWriter* s, void* data);
+void WriteVifMscal(PacketWriter* s, void* program);
 void WriteVifFlushE(PacketWriter* s);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 extern u8 g_rangeRecordProgram[];

@@ -2250,9 +2250,6 @@ void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-// Left with pointers: RunActiveSetSolver takes the contact list, the counts and the lists as s32.
-void RunActiveSetSolver(ActiveSetSolver* self, s32 flags, s32 n, GroupSolveContact** contacts, s32* counts, void** lists);
-void AddFrictionItemsAndSolve(f32 dt, ActiveSetSolver* loc, s32 flags, s32 n, GroupSolveContact** contacts, s32* counts, void** lists);
 
 // Solves a group of contacts for a set of parts with the active-set solver (InitActiveSetSolver,
 // RunActiveSetSolver). flags: 4 is a position-correction pass (depths), 1 a solve for the half-step
@@ -2356,7 +2353,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
                 }
             }
         }
-        RunActiveSetSolver(&loc, 4, n, contacts, counts, lists);
+        RunActiveSetSolver(&loc, 4, n, (BodyContact**)contacts, counts, lists);
         ApplySolvedImpulsesToParts(&loc, nParts, counts, (Collider***)lists, 100.0f, 1.0f);
         for (s32 j = 0; j < nParts; j++) {
             parts[j]->desc03()->m2F(parts[j], 0);
@@ -2395,7 +2392,7 @@ void SolveColliderGroupContacts(World* world, s32 nParts, Collider** parts, s32 
             }
         }
     }
-    AddFrictionItemsAndSolve(dt, &loc, flags & ~4, n, contacts, counts, lists);
+    AddFrictionItemsAndSolve(&loc, flags & ~4, n, (BodyContact**)contacts, counts, lists, dt);
     if (flags & 1) {
         ApplySolvedImpulsesToParts(&loc, nParts, counts, (Collider***)lists, 5000.0f, 50.0f);
     } else {

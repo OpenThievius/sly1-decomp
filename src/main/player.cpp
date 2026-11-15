@@ -1709,7 +1709,6 @@ extern void* g_currentWarpPage;
 extern f32 D_00263894;
 extern f32 D_00263898;
 extern f32 g_scaleApproachRamp[3];
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void OrientPlayerSpinPart(Player* self, Mat3* out, f32 t);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
@@ -1740,10 +1739,10 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         self->outerFadeScale = k * D_00263894 + (1.0f - k) * ramp;
     } else {
         f32 one = 1.0f;
-        self->outerFadeScale = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->outerFadeScale, one, g_gameClock[2]);
+        self->outerFadeScale = ApproachValueWithRamp(self->outerFadeScale, one, g_gameClock[2], (RampProfile*)g_scaleApproachRamp, 0);
         target = one;
     }
-    f32 spin = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->innerFadeScale, target, g_gameClock[2]);
+    f32 spin = ApproachValueWithRamp(self->innerFadeScale, target, g_gameClock[2], (RampProfile*)g_scaleApproachRamp, 0);
     self->innerFadeScale = spin;
     if (self->outerFadeScale < 1.0f || spin < 1.0f) {
         BuildPlacedObjectTransform(self, (Quad16*)b, &out);
@@ -1864,10 +1863,6 @@ void DrawPlayer(Player* self, void* a, void* b)
 
 
 extern "C" f32 FloatRemainder(f32 x, f32 y);
-// The floats where retail's caller passes them; the definition has them last.
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-f32 ApproachValueWithRamp(RampProfile* k, f32 x, f32 y, f32* out, f32 z);
 
 // Advances the player's spin angle (radians): at the target rate while one is set, wrapped at 2 pi;
 // with no target it ramps the angle back to a full turn (spinRate follows the ramp) and zeroes it
@@ -1886,7 +1881,7 @@ void UpdatePlayerSpin(Player* self)
         if (self->spinAngle == 0.0f) {
             return;
         }
-        f32 r = ApproachValueWithRamp((RampProfile*)&g_spinRampParams, self->spinAngle, 6.2831855f, &self->spinRate, g_frameDt[0]);
+        f32 r = ApproachValueWithRamp(self->spinAngle, 6.2831855f, g_frameDt[0], (RampProfile*)&g_spinRampParams, &self->spinRate);
         self->spinAngle = r;
         if (r == 6.2831855f) {
             self->spinAngle = 0.0f;
@@ -2145,7 +2140,6 @@ extern f32 g_pivotApproachRamp[4];
 extern f32 g_heightApproachRamp[4];
 
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 struct PushRecord;
 void FillPlayerPushRecord(Player* self, PushRecord* out);
 #include "value_range.h"
@@ -2205,7 +2199,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             if (g_camera->snapping != 0) {
                 pose->position.z = z;
             } else {
-                f32 v = ApproachValueWithRamp((RampProfile*)g_heightApproachRamp, 0, last.z, z, g_gameClock[2]);
+                f32 v = ApproachValueWithRamp(last.z, z, g_gameClock[2], (RampProfile*)g_heightApproachRamp, 0);
                 pose->position.z = v;
                 f32 zlo = self->pos.z + g_cameraPoseMinOffset;
                 f32 zhi = self->pos.z + g_cameraPoseMaxOffset;
@@ -2327,7 +2321,6 @@ struct PushHolderDesc {
 };
 struct PushObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PushHolder* holder; u8 pad38[0x50 - 0x38]; u32 flags; };
 struct PushRecord { u8 pad00[0x30]; f32 heading; s32 f34; };
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 // Fills the record the pose takes while the player is pushed along an object (state 6, mode 0): the
 // heading from the heading matrix's x axis and, by the on/off phase, the point v2690 the player is
@@ -2422,7 +2415,7 @@ void FillPlayerPushRecord(Player* self, PushRecord* out)
     }
     OnOffObject* target = self->ownOnOffObject;
     f32* slot = &target->block2F0.f10[0];
-    self->ownOnOffObject->block2F0.f10[0] = ApproachValueWithRamp((RampProfile*)g_forceApproachRamp, 0, *slot, force, g_frameDt[0]);
+    self->ownOnOffObject->block2F0.f10[0] = ApproachValueWithRamp(*slot, force, g_frameDt[0], (RampProfile*)g_forceApproachRamp, 0);
 }
 
 

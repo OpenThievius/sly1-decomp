@@ -87,7 +87,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
     if (page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->f284 = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, self->f284, fade, g_gameClock[5]);
+    self->f284 = ApproachValueWithRamp(self->f284, fade, g_gameClock[5], (RampProfile*)g_fadeRampProfile, 0);
     alpha = (u8)(s32)(self->f284 * 255.0f);
     if (self->f210 != 0) {
         Out_eu_194F80 out;
