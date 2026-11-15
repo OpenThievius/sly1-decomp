@@ -8,6 +8,7 @@
 // of the file's .data in definition order. Its name is ours, after its first and largest family,
 // the object pool.
 #include "common.h"
+#include "asm_functions.h"
 #include "attachment.h"
 #include "list_walk.h"
 
@@ -270,7 +271,6 @@ extern s32 D_002751D4;
 void AdvanceObjectPoolEntry(ObjectPool* self);
 struct PoolCandidate;
 s32 IsObjectPoolItemFree(ObjectPool* self, PoolCandidate* key);
-void* MoveMemory(s32* dst, s32* src, s32 size);
 
 
 
@@ -1137,8 +1137,6 @@ struct FrameFollower {
     f32 hi;                         // 0x64
 };
 
-// Left in this order: retail's call here evaluates the time before the pointers.
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 // Gives in *out the point a frame follower aims at, in the frame `to` (or the world): the point's
 // local position in its frame object (or its anchor's), in mode 0 as it is now, in modes 1 and 2
@@ -1178,10 +1176,11 @@ void ComputeFrameFollowerPoint(FrameFollower* self, Vec4* target, Vec4* out, voi
         } else {
             t = v;
         }
-        ComputeObjectFrameAtTime((PlacedObject*)frame, 0, t, &here, &rot, 0, 0);
+        // retail's caller evaluates the time before the pointers, as the third argument
+        ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))ComputeObjectFrameAtTime)((PlacedObject*)frame, 0, t, &here, &rot, 0, 0);
         Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*local)), Vu0::Q(here));
         if (to != 0) {
-            ComputeObjectFrameAtTime((PlacedObject*)to, 0, t, &pos2, &rot2, 0, 0);
+            ComputeObjectFrameAtTime((PlacedObject*)to, 0, &pos2, &rot2, 0, 0, t);
             Vu0::Q(*out) = Vu0::RotateTransposed(rot2, Vu0::Sub(Vu0::Q(*out), Vu0::Q(pos2)));
         }
         break;

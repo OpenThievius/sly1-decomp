@@ -15,6 +15,7 @@
 // the vertex batch before it (0x1619C0 to 0x162890) could belong to either file or to a third.
 // The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "cone_volume.h"
 #include "attachment.h"
 #include "id_lookup_object.h"
@@ -143,7 +144,6 @@ extern u8 g_litBatchFinishProgram[];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifMscalf(PacketWriter* s, void* data);
-void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
 void CopyMemory(void* dst, void* src, u32 size);
 
 
@@ -179,7 +179,6 @@ void BuildAttachmentDmaChain(void* self, void* entry, void* sub, void* ctx);
 
 
 
-QuadMatrix MultiplyMatrices(const QuadMatrix& a, const QuadMatrix& b);
 
 
 
@@ -196,10 +195,9 @@ void CopyMemory(void* dst, void* src, u32 size);
 void* AllocateZeroedFrontMemory(s32 n);
 void* CopyToFrontMemory(s32 size, void* src);
 void CopyAttachmentPart(AttachmentCopy* o, void* a, void* b);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
-
-QuadMatrix MultiplyMatrices(QuadMatrix a, void* q);
 
 // The lit strip builder's packets: 0x24-byte slots, written two apart.
 
@@ -1399,7 +1397,7 @@ void BindAttachmentTargets(AttachmentTargets* self, PlacedObject* ctx)
         if (r != 0) {
             BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, (Mat4A*)&a);
             InvertRigidTransform(&e->p0->sub140, &e->p0->sub110, (Quad16*)&b);
-            e->m = MultiplyMatrices(b, a);
+            *(Mat4A*)&e->m = MultiplyMatrices(*(Mat4A*)&b, *(Mat4A*)&a);
         }
     }
 }
@@ -1644,12 +1642,12 @@ void UpdateAttachmentFrames(PlacedObject* self, ParentFrame* par)
                 FrameLinkConstraint* t = el->obj->link;
                 if (t != 0 && (t->flags & 0x80) && t->a4 != 0) {
                     c = t->m60;
-                    e = MultiplyMatrices(b, &c);
+                    *(Mat4A*)&e = MultiplyMatrices(*(Mat4A*)&b, *(Mat4A*)&c);
                 } else {
                     BuildMatrixFromRotationAndTranslation((const Vec4*)el->obj->sub140, (const Mat3*)el->obj->sub110, (Mat4A*)&c);
-                    e = MultiplyMatrices(a, &c);
+                    *(Mat4A*)&e = MultiplyMatrices(*(Mat4A*)&a, *(Mat4A*)&c);
                 }
-                el->m50 = MultiplyMatrices(e, &el->q10);
+                *(Mat4A*)&el->m50 = MultiplyMatrices(*(Mat4A*)&e, *(Mat4A*)&el->q10);
             }
         }
     }
@@ -1668,8 +1666,6 @@ struct AttachmentModelPart {
 };
 struct AttachmentDmaResult { u8 pad0[4]; DmaPacketRow* packets; u8 pad8[0x18 - 8]; s32 qwc[2]; s32 addr[2]; };
 struct WeightedModelPart { u8 pad[0x40]; s32 nweights; };
-
-void AddDmaRefTag(LocalPacketWriter* b, s32 x, s32 y);
 
 // Builds, for an attachment entry that is not skinned, the DMA chain the model draws from: the VIF
 // packets of each pass copied into a buffer and chained with the entry's own tags (the result is
@@ -1722,21 +1718,21 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             }
             switch (*c->f18) {
             case 0:
-                AddDmaRefTag(&buf, c->qwc0, c->addr0);
+                AddDmaRefTag((PacketWriter*)&buf, c->qwc0, c->addr0);
                 if (cfg->link) {
                     AddDmaCallTag((PacketWriter*)&buf, c->addr2);
                 } else {
-                    AddDmaRefTag(&buf, c->qwc2, c->addr2);
+                    AddDmaRefTag((PacketWriter*)&buf, c->qwc2, c->addr2);
                 }
-                AddDmaRefTag(&buf, r->f0, r->f4);
-                AddDmaRefTag(&buf, r->fC, r->secondBuffer);
+                AddDmaRefTag((PacketWriter*)&buf, r->f0, r->f4);
+                AddDmaRefTag((PacketWriter*)&buf, r->fC, r->secondBuffer);
                 break;
             case 1:
             case 4: case 5: case 6: case 7: case 8: case 9: case 10:
                 if (cfg->link) {
                     AddDmaCallTag((PacketWriter*)&buf, c->addr0);
                 } else {
-                    AddDmaRefTag(&buf, c->qwc0, c->addr0);
+                    AddDmaRefTag((PacketWriter*)&buf, c->qwc0, c->addr0);
                 }
                 break;
             }
@@ -1752,7 +1748,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             q.a = (u64)g_defaultModelColor.r | ((u64)g_defaultModelColor.g << 8) | ((u64)g_defaultModelColor.b << 16) | ((u64)g_defaultModelColor.a << 24) | ((u64)1 << 32);
             CopyWordsToWriter((PacketWriter*)&buf, 0xC, 1, (u32*)&q, 0x1A);
             CloseDmaTag((PacketWriter*)&buf);
-            AddDmaRefTag(&buf, s->f18, s->addr);
+            AddDmaRefTag((PacketWriter*)&buf, s->f18, s->addr);
         }
         AddDmaReturnTag((PacketWriter*)&buf);
         DetachPacketBufferCopy((PacketWriter*)&buf, &out->qwc[pass], 0, &out->addr[pass], 0x19);
@@ -1886,7 +1882,6 @@ extern s32 g_frameCount;
 extern Quad4* g_buildFrameData;
 extern f32 g_gameClock[];
 extern f32 g_gameTime;
-s32 RangeRecordReachesSphere(void* node, void* v, f32 f);
 struct VifPacketWriter {
     static u32* Open(PacketWriter* w)
     {
@@ -2291,7 +2286,7 @@ slow:
                     continue;
                 }
             }
-            if (RangeRecordReachesSphere(node, &q, r) != 0) {
+            if (RangeRecordReachesSphere((RangeRecord*)node, &q, r) != 0) {
                 QueueRangeRecordPacket((RangeRecord*)node);
             }
         }

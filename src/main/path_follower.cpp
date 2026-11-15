@@ -7,6 +7,7 @@
 // Its name is ours, after its largest family, the path follower's start and steps (class 0x19),
 // whose other functions follow in path_follower_helpers.cpp and world.cpp.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "mul_rotation.h"
@@ -340,7 +341,6 @@ struct HitMessage {
 
 struct Oscillator;
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out);
 typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
 typedef void (*HitFn)(Collider* self, HitMessage* msg);
@@ -465,7 +465,6 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out)
 }
 
 struct AttachedSet;
-void AddColliderForce(void* a, void* b);
 
 // The player's reaction to touching an attached set: in sub states 6 and 0x2B (while falling) the
 // collider's own reaction, in 0x27 and 0x2F a damped force that follows the set's motion at the
@@ -543,7 +542,6 @@ s32 TestStandInMayContact(StandIn* self, Collider* value)
     return TestCollidersMayContact(self, value);
 }
 
-Quadword ScaleQuadword(Quadword a, Quadword b);
 extern Quad16 g_zeroQuad;
 
 // k times the vector at p, into dst (the quadword helpers' product).
@@ -832,13 +830,9 @@ extern f32 g_wheelSpinCurve[];
 extern f32 g_wheelSpinRange[];
 extern f32 g_forceLeverDrop;
 
-void AddColliderForce(void* a, void* b);
 void* StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
 void* StoreQuadword(u128* out, u128 v);
-void ApplyColliderInverseInertia(Collider* self, Vec4* in, Vec4* out);
-void AddColliderTorque(Collider* self, Vec4* torque);
-Quadword ScaleQuadword(Quadword a, Quadword b);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);

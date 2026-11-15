@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "globals.h"
@@ -89,8 +90,6 @@ struct __attribute__((aligned(16))) LinkVector {
 };
 
 struct VectorConstraint;
-void ApplyColliderInverseInertia(void* self, Vec4* in, Vec4* out);
-void ComputeColliderPointVelocity(void* self, void* data, LinkRow* row, Vec4* out);
 
 // Works out the impulse at point that gives objects a and b the relative velocity target: for each
 // axis it measures how the point's velocity on each object changes per unit impulse (mass, inverse
@@ -133,9 +132,9 @@ void SolvePlayerLinkSystem(PlacedObject* a, PlacedObject* b, Vec4* point, const 
             Vu0::Vec mass = Vu0::Vec::ScalarAtValue(((Collider*)o)->mass);
             Vu0::Set(scaled, Vu0::DivX(Vu0::Vec::Of(axis), mass).q);
             ConstrainVectorByParentAnchor((Collider*)o, (VectorConstraint*)&((Collider*)o)->v440, &scaled, &rows[i][j].a, 0);
-            ApplyColliderInverseInertia(o, &cross, &torque);
+            ApplyColliderInverseInertia((Collider*)o, &cross, &torque);
             ConstrainVectorByParentAnchor((Collider*)o, (VectorConstraint*)&((Collider*)o)->v460, &torque, &rows[i][j].b, 0);
-            ComputeColliderPointVelocity(o, point, &rows[i][j], &vel[i]);
+            ComputeColliderPointVelocity((Collider*)o, point, (ImpulseRow*)&rows[i][j], &vel[i]);
         }
         Vu0::Vec v0 = Vu0::Vec::Of(vel[0]);
         Vu0::Vec v1 = Vu0::Vec::Of(vel[1]);
@@ -189,7 +188,6 @@ static inline f32 ClockTime(const LinkClock* c) { return c->time; }
 struct LinkAnchor { u8 pad0[0x18]; void* parent; u8 pad1C[0xB0 - 0x1C]; f32 fB0; };
 struct LinkSystem { u8 pad0[4]; PlacedObject* object; };
 
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* across);
 f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* out);
 
 // The player swinging on the link (states 0x32 and 0x34 pump it): the anchor's frame and
@@ -343,7 +341,6 @@ static inline void MulRotation(Mat3* out, const Mat3& a, const Mat3& b)
 }
 
 extern f32 g_frameDt[];
-void AddColliderForce(void* target, void* slot);
 
 // Turns the player toward its bound object: adds the collider force, builds the rotation from the z
 // axis to the direction of the object and spins it by the player's heading, and turns the collider
@@ -365,14 +362,12 @@ void TurnPlayerTowardLinkedObject(Player* self)
 }
 
 struct LinkTargetHolder { s32 pad0; void* target; };
-void AddColliderForce(void* target, void* slot);
-void AddColliderTorque(void* target, void* slot);
 
 // Passes the player's force and torque (at 0x22D0 and 0x22E0) on to its link target collider.
 void SyncPlayerTarget(Player* self)
 {
-    AddColliderForce(((LinkTargetHolder*)self->linkSystem)->target, &self->linkForce);
-    AddColliderTorque(((LinkTargetHolder*)self->linkSystem)->target, &self->linkTorque);
+    AddColliderForce((Collider*)((LinkTargetHolder*)self->linkSystem)->target, &self->linkForce);
+    AddColliderTorque((Collider*)((LinkTargetHolder*)self->linkSystem)->target, &self->linkTorque);
 }
 
 f32 WrapAngle(f32 a);

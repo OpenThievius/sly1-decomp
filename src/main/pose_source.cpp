@@ -5,6 +5,7 @@
 // to D_00219600 and D_002197C0), with the object methods func_00122550 and func_001225D0 that
 // read them. The state trigger code at 0x1233C0 starts the next file.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "property_descriptor.h"
 #include "list_iter.h"
@@ -1849,7 +1850,6 @@ void ComputePositionSpringAcceleration(PlacedObject* self, f32 dt, Vec4* a, Vec4
     *out = force;
 }
 
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 // The ramp with its floats first (the value, the target, the step), as retail sets $f12 to
 // $f14 before the profile and the rate's address.
 // The definition's parameters in the order the call below writes them: retail's caller

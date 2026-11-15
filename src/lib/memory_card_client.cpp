@@ -11,6 +11,7 @@
 // last words (func_002095A8, ...) are linker remnants. Written for
 // this project from retail's code.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "system.h"
 #include "remote_call_client.h"
@@ -105,7 +106,6 @@ struct CardReply {
 static CardReply g_cardReplyBuffer __attribute__((aligned(64)));
 
 extern "C" s32 NewSemaphore(SemaphoreParams* r);
-void* CopyStringBounded(char* dst, const char* src, s32 max);
 s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2);
 extern "C" s32 AwaitSemaphore(s32 sema);
 extern "C" s32 TrySemaphore(s32 sema);

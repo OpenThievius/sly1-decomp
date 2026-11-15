@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "collider.h"
@@ -223,7 +224,6 @@ s32 TestBoundsSegmentHit(void* p, void* a, void* b, s32 d, ColliderSpan* e, f32 
     return CollectBoundsSpans((Vec4*)p, &a2, &b2, fa, d, e);
 }
 
-f32 SplitVectorAlongAxis(const Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
 
 static inline u128 NormalizeOfCopy(u128 v, u128 vc, u128 fallback)
 {

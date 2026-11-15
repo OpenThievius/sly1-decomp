@@ -542,7 +542,7 @@ void SetupTextPanel(CaptionBox* self)
     }
     AddGifXyzfEntry(&gs, 0x9400, 0x8700, 0x0FFFFFF0, 0);
     AddGifXyzfEntry(&gs, 0x9400, 0x80FA, 0x0FFFFFF0, 0);
-    DetachPacketBufferCopy(&gs, (s32*)&self->bands, 0, &self->bandsSize, 0x15);
+    DetachPacketBufferCopy(&gs, &self->bandsQwc, 0, &self->bandsPacket, 0x15);
     PopBackMemoryMark();
 }
 
@@ -1708,7 +1708,6 @@ extern PacketWriter g_gsPacketWriter;
 s32 AreMenusClosed(void);
 void DrawCompassStrip(CaptionBox* self, PacketWriter* gs);
 void DrawTextPanelControlLabels(CaptionBox* self, PacketWriter* gs);
-void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
 void SeekTextReader(TextReader* self, s32 n);
 void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 
@@ -1757,7 +1756,7 @@ void DrawTextPanel(CaptionBox* self)
     case 1:
     case 2:
         DrawTextPanelCenterFrame(self, &g_gsPacketWriter);
-        AddDmaRefTag(&g_gsPacketWriter, self->bands, self->bandsSize);
+        AddDmaRefTag(&g_gsPacketWriter, self->bandsQwc, self->bandsPacket);
         DrawCompassStrip(self, &g_gsPacketWriter);
         DrawTextPanelControlLabels(self, &g_gsPacketWriter);
         DrawTextPanelBorders(self, &g_gsPacketWriter);

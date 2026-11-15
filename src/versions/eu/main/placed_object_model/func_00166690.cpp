@@ -300,7 +300,7 @@ slow:
                     continue;
                 }
             }
-            if (RangeRecordReachesSphere(node, &q, r) != 0) {
+            if (RangeRecordReachesSphere((RangeRecord*)node, &q, r) != 0) {
                 QueueRangeRecordPacket((RangeRecord*)node);
             }
         }

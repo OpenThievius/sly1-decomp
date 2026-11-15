@@ -8,6 +8,7 @@
 // alignment its own objects ask for, so the cut before could lie from 0x15AA50 to 0x15AAE0 and
 // the one after from 0x15C0A0 to 0x15C178. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "effect_spawner.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -285,7 +286,6 @@ extern f32 g_cyclerFallRotationSteer[4];
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
-void AddColliderForce(Collider* self, Vec4* force);
 struct RampProfile;
 struct Mat3;
 

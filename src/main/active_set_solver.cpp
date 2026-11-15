@@ -17,6 +17,7 @@
 // start the data allows (its caller QueuePlacedObjectDraw stays in pooled_object.cpp); the
 // solver's own functions begin at InitActiveSetSolver. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "gauge_manager.h"
 #include "asm_func.h"
 #include "pooled_object.h"
@@ -88,7 +89,7 @@ struct PartDrawFrame {
 
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void* MultiplyMatrices(Quad16* out, void* b, void* in);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 struct PartDrawRequest;
 
 // The file's .data: the view matrix DrawPlacedObjectParts multiplies the object's transform by.
@@ -111,7 +112,9 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     f.object = s1;
     f.record = s1->sub22C;
     i = 0;
-    MultiplyMatrices(f.qC0, &g_unitSquareToClipMatrix, &((DrawRangeRecord*)s1->drawRange)->m70);
+    // retail's call passes the frame's own rows as the result's place, which an assignment of the
+    // returned matrix does not
+    ((void (*)(Quad16*, Mat4A*, void*))MultiplyMatrices)(f.qC0, &g_unitSquareToClipMatrix, &((DrawRangeRecord*)s1->drawRange)->m70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];
@@ -199,7 +202,6 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
 
 typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, ActiveSetItem* item, f32* rows);
 typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);
-void ComputeColliderPointVelocity(Collider* body, Vec4* point, void* motion, Vec4* out);
 
 // Fills in what the solver needs of a constraint item the first time it is used: for each body of
 // its contact the rows of that body's response to a unit impulse (the bodies' slots 58 and 59),
@@ -231,11 +233,11 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
             } else if (body == contact->end[0].body) {
                 Collider* part = e[j].part;
                 // address arithmetic over a variable index
-                ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
+                ComputeColliderPointVelocity(part, &e[j].point, (ImpulseRow*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
             } else if (body == contact->end[1].body) {
                 Collider* part = e[j].part;
                 // address arithmetic over a variable index
-                ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
+                ComputeColliderPointVelocity(part, &e[j].point, (ImpulseRow*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
             } else {
                 Vu0::Q(out[j]) = Vu0::Zero();
             }
@@ -595,7 +597,7 @@ void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Colli
                 Vec4 ang;
                 Vec4 linLocal;
                 Vec4 angLocal;
-                ComputeColliderPointVelocity(parent, &body->v140, up, &lin);
+                ComputeColliderPointVelocity(parent, &body->v140, (ImpulseRow*)up, &lin);
                 Vu0::Q(lin) = Vu0::Sub(Vu0::Vec::Of(own->lin), Vu0::Vec::Of(lin)).q;
                 Vu0::Q(ang) = Vu0::Sub(Vu0::Vec::Of(own->ang), Vu0::Vec::Of(up->ang)).q;
                 Vu0::Q(linLocal) = Vu0::RotateTransposed(parent->m110, Vu0::Vec::Of(lin)).q;

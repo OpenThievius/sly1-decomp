@@ -128,14 +128,14 @@ void EndLoadProgress(LoadProgress* p);
 
 extern "C" s32 InitDiscLibrary(s32 mode);
 extern "C" s32 WaitDiscReady(s32 mode);
-struct Blob_1F9868;
-s32 LoadIopModuleFile(Blob_1F9868* src, s32 size, Blob_1F9868* data);
+struct ModuleBlob;
+s32 LoadIopModuleFile(ModuleBlob* src, s32 size, ModuleBlob* data);
 
 s32 CompareObjectsForSort(SortKeyedObject** a, SortKeyedObject** b);
 void InitAim(AimAttachment* self, PlacedObject* owner);
 void AssignAimTarget(AimAttachment* self, void* obj, Vec4* src);
 void* ResolveAimTarget(AimAttachment* a0);
-void RunMainLoop(s32 a, s32 b);
+extern "C" void RunMainLoop(s32 a, s32 b);
 void LoadIopModules();
 void SendVif0StartupPacket(void);
 void SendVif1StartupPacket();
@@ -204,7 +204,7 @@ typedef s32 (*SortCompareFn)(void* a, void* b);
 void HeapSortRecords(void* records, s32 n, s32 size, SortCompareFn cmp);
 void* InitPacketWriter(PacketWriter* p);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
-void SubmitPacketBuffer(PacketWriter* p, s32 dma);
+void SubmitPacketBuffer(PacketWriter* self, DmaChannel* dma);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 // Sorts the world's lights, groups the runs of one kind and flags (at most 16 to a group) and
@@ -293,7 +293,7 @@ void UploadLightVolumes(World* world)
         }
     }
     AddDmaEndTag(&pw);
-    SubmitPacketBuffer(&pw, g_vif0Channel);
+    SubmitPacketBuffer(&pw, (DmaChannel*)g_vif0Channel);
     WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
     PopBackMemoryMark();
 }
@@ -476,7 +476,7 @@ void GetAimRotation(AimAttachment* self, f32 dt, Mat3* rot, Vec4* vec)
 // frame it plays queued movies, runs a pending world load, updates pad, memory card and element
 // stack and, while a world exists, advances the clock, updates the camera, runs the world's frame
 // lists and deferred requests, draws the screen elements and submits the frame.
-void RunMainLoop(s32 a, s32 b)
+extern "C" void RunMainLoop(s32 a, s32 b)
 {
     RunConstructorsOnce();
     D_00264834 = a;
@@ -549,7 +549,7 @@ void LoadIopModules()
     TestDiscReadDone(1);
     for (u32 i = 0; i < 6; i++) {
         FormatDiscPath(buf, g_iopModuleNames[i], 1);
-        while (LoadIopModuleFile((Blob_1F9868*)buf, 0, 0) < 0) {
+        while (LoadIopModuleFile((ModuleBlob*)buf, 0, 0) < 0) {
         }
     }
 }

@@ -80,7 +80,6 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 extern u8 g_screenClearPacketC[];
 void* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
@@ -170,7 +169,6 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 extern s32 g_imageRecordCountA;
 extern s32 g_imageRecordCountB;
-void AddDmaRefTag(void* self, s32 lo, s32 hi);
 
 
 void* IsObjectOfKind(BaseObject* list, s32 key);

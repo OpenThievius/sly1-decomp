@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "fpu.h"
 #include "vu0.h"
@@ -413,7 +414,6 @@ s32 CollectMeshEdgeHitsFromFaces(Collider* self, Collider* other, s32 n, FaceRef
     return total;
 }
 
-void* MoveMemory(void* dst, void* src, s32 size);
 
 // Sorts mesh hits (edge-versus-face hits of two meshes) into groups sharing a vertex key (groups,
 // keys, with the group count in *outCount) and a head list of the hits that cross from one face

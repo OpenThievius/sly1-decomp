@@ -9,6 +9,7 @@
 // helpers, the tempo agent with its beat presses and timelines, the VIF writer, the attached set
 // and the screen fade.
 #include "common.h"
+#include "asm_functions.h"
 #include "scaled_transform.h"
 #include "switched_collider.h"
 #include "list_iter.h"
@@ -332,7 +333,6 @@ void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8*
 struct ColoredTriangleSet;
 extern ColoredTriangleSet* g_coloredTriangleSet;
 // retail's caller evaluates them after the integers, as this order does.
-void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, PacketWriter* p, f32 x0, f32 y0, f32 x1, f32 y1);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 g_packetWriterVtable[];
 s32 InitPacketBuffer(PacketWriter* self);
@@ -368,7 +368,6 @@ extern u8 g_scatterController[];
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void CopyMemory(void* dst, void* src, u32 size);
 void RunWorld3TimelineEntry(World3Timeline* self, TimelineEntry* e);
-void* MoveMemory(void* dst, void* src, s32 size);
 // An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
 // Moves n bytes of the item list down over a removed item.
 struct MoveItemsDown {
@@ -2284,7 +2283,6 @@ s32 IsWorld3BossFree(void)
 typedef int Quadword128 __attribute__((mode(TI)));
 void* StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
-Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
 extern f32 g_ringSevenPoints[14];
 
@@ -4366,7 +4364,8 @@ void DrawScreenFade(ScreenFade* self)
         }
         draw:
     f32 v = self->opacity * 255.0f;
-    WriteColoredSpritePacket(0, 0, 0, (s32)v, &g_gsPacketWriter, 0.0f, 0.0f, 640.0f, 492.80002f);
+    // retail's caller evaluates the colour and the packet before the corners
+    ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(0, 0, 0, (s32)v, &g_gsPacketWriter, 0.0f, 0.0f, 640.0f, 492.80002f);
     }
 }
 

@@ -8,6 +8,7 @@
 // ours, after its largest family, the game progress (the level entries, the completion and the
 // saved counts); the object groups, the GIF packet writer and the vertex batch share it.
 #include "common.h"
+#include "asm_functions.h"
 #include "id_lookup_object.h"
 #include "placed_object.h"
 #include "model_build.h"
@@ -82,7 +83,6 @@ struct CountedArray
 
 void RemoveValueFromArray(CountedArray* list, void** arr, void* value);
 
-void* MoveMemory(void* dst, void* src, s32 bytes);
 
 
 void MergeObjectGroupMembers(World* self, FoundList* group);
@@ -481,7 +481,7 @@ void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifMscalf(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
 void CloseDmaTag(PacketWriter* s);
-void AddDmaRefTag(PacketWriter* s, s32 n, void* data);
+void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 void BeginDmaTag(PacketWriter* s);
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -2116,7 +2116,8 @@ void BuildLitVertexPacket(VertexBatch* batch)
     }
     CloseDmaTag(&g_vifPacketWriter);
     for (s32 t = 0; t < self->texCount; t++)
-        AddDmaRefTag(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
+        // the tag's address is the texture's data, which AddDmaRefTag takes as its integer bits
+        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
     BeginDmaTag(&g_vifPacketWriter);
     WriteVifMscal(&g_vifPacketWriter, g_litBatchSecondProgram);
     WriteVifFlushE(&g_vifPacketWriter);

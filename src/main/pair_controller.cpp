@@ -10,6 +10,7 @@
 // .data is the globals below. Its name is ours, after its largest family, the pair controller and
 // the paired objects (classes 0x5F and 0x42); none of its families names the whole.
 #include "common.h"
+#include "asm_functions.h"
 #include "vu0.h"
 #include "list_iter.h"
 #include "aim_blend_grid.h"
@@ -416,7 +417,6 @@ s32 g_padPatternSetting = 0;
 
 
 
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 extern const Vec4 g_unitZVector;
 
 // Slot 0 of the walker collider: switched-collider init, both states -1 and a speed scale of

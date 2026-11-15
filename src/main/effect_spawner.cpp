@@ -8,6 +8,7 @@
 // smaller groups after them could be files of their own. Its name is ours, after its largest
 // family, the effect spawner, whose spawn record the member objects share.
 #include "common.h"
+#include "asm_functions.h"
 #include "effect_spawner.h"
 #include "attached_set.h"
 #include "switched_collider.h"
@@ -84,7 +85,9 @@ void SetEffectSpawnerInactive(EffectSpawner* self);
 EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void SetSpawnRecordKind(EffectSpawnerRecord* self,s32 kind);
 
-void* GetOwnedSpawnRecord(void* a0, s32 a1);
+struct RecordMember;
+struct TransformRecord;
+TransformRecord* GetOwnedSpawnRecord(RecordMember* self, s32 own);
 void SetSpawnRecordKind(EffectSpawnerRecord* self,s32 kind);
 
 // The message SendPointEventToWorldListener sends (kind 12): a point and a float.
@@ -112,9 +115,6 @@ struct SpawnSetup {
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GenerateSpawnArrays(s32 n, void* b, sptr* out);
-void SpawnRecordEffects(void* b, void* c, s32 n, sptr o0, sptr o1, sptr o2, sptr o3);
-void GenerateSpawnSetupPair(s32 n, void* b, sptr* out, sptr* pair);
-void EmitParticleChunk(void* b, void* c, s32 n, sptr o0, sptr o1, sptr o2, sptr o3, sptr p0, sptr p1);
 
 struct StreamWord {
     s32 value;
@@ -147,7 +147,6 @@ void* CopyToFrontMemory(s32 size, void* owner);
 extern f32 g_gameTime;
 
 
-void SetEffectSpawnerActiveForever(); // stays without its argument: SetEffectSpawnerLimit leaves self in a0 and retail does not set it again
 
 
 s32 IsEffectSpawnerActive(EffectSpawner* self);
@@ -171,7 +170,6 @@ void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
 
 struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; s32 ownerArgument; };
-void FillLookDirectionBlock(Effect* a, EffectSpawnerRecord* b);
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(ObjectList* p);
 
@@ -265,8 +263,6 @@ extern PackedFloatPair g_cyclerMessageIntervalRange;
 
 void AppendToList(ObjectList* self, void* item);
 
-void* CloneSharedSpawnRecord(void* x);
-
 struct MemberTargetObject;
 
 // A message held back by SendMessageAfterDelay (a slot of the world's pool at +0x1BD0, in its
@@ -326,7 +322,6 @@ f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 struct ScaledDrawFrame { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10]; Quad16 m90[4]; };
 
-void* MultiplyMatrices(Quad16* out, void* b, Quad16* in);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 
@@ -490,7 +485,6 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 
 void CloseDmaTag(PacketWriter* self);
-void AddDmaRefTag(void* obj, s32 a, s32 b);
 void BeginDmaTag(PacketWriter* self);
 
 void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
@@ -523,7 +517,6 @@ s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** l
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
-void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 g_lastDmaRefStart;
 
 void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
@@ -618,7 +611,6 @@ extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
-void RunThread(void* a, s32 b);
 void func_0015E678(void);
 
 
@@ -1341,7 +1333,8 @@ void SetEffectSpawnerLimit(EffectSpawner* self, s32 a1)
         self->remaining = a1;
     } else if (self->mode == 0) {
         if (a1 == 0) {
-            SetEffectSpawnerActiveForever();
+            // retail's call leaves self where it already is in a0 and does not set it again
+            ((void (*)())SetEffectSpawnerActiveForever)();
         } else if (a1 == -1) {
             SetEffectSpawnerInactive(self);
         } else {
@@ -1386,7 +1379,7 @@ void SetEffectSpawnerKind(void* a0, s32 a1)
 // Sets the effect kind on the member's own spawn record.
 void SetOwnedSpawnRecordKind(void* a0, s32 a1)
 {
-    void* r = GetOwnedSpawnRecord(a0, 1);
+    void* r = GetOwnedSpawnRecord((RecordMember*)a0, 1);
     SetSpawnRecordKind((EffectSpawnerRecord*)r, a1);
 }
 
@@ -1585,7 +1578,6 @@ struct SpawnShape {
 };
 
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
-void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z);
 
 static inline f32 RandomInRange(const SpawnRange& r)
@@ -1789,7 +1781,6 @@ void ConvertSpawnToAnchorSpace(AnchoredSpawn* self, Vec4* pos, Vec4* dir)
 void InitSpawnRing(s32 n, SpawnSpan* span, s32 k, SpawnRing* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = WrapAngle(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = RandomFloatInRange(0.0f, 6.2831855f); }
 
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale);
-void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 
 // Gives the direction of particle number index of a ring spawn: the index is split into a step
 // along the ring (index / count) and one across it (index % count), each adds an angle (with
@@ -1907,7 +1898,7 @@ void SpawnRecordEffects(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Qu
         it->start = v5[i];
         it->life = v6[i] - v5[i];
         *(Quad16*)&it->q40 = self->q110;
-        FillLookDirectionBlock((Effect*)&it->fB0, self);
+        FillLookDirectionBlock(&it->fB0, (LookSource*)self);
         if (c->found0) it->i20 = c->found0;
         if (s7) {
             it->rotation[0] = s7->m110.r[0];
@@ -2079,8 +2070,6 @@ void GenerateSpawnArrays(s32 n, void* b, sptr* out)
 
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 void ComputeChainedWorldFrame(void* a, void* frame, void* out);
-// Left in this order: retail's call here evaluates the time before the pointers.
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 // Generates two sets of spawn arrays for the record (for the effects that need a start and an end):
 // the second set through the record's own sub-record, then, for each of the n entries, the pair of
@@ -2112,7 +2101,8 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
             f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
             if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
                 last = t;
-                ComputeObjectFrameAtTime((PlacedObject*)(((EffectSpawnerRecord*)r->rec)->target), 0, last, &P, &M, &V, &W);
+                // retail's caller evaluates the time before the pointers, as the third argument
+                ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))ComputeObjectFrameAtTime)((PlacedObject*)(((EffectSpawnerRecord*)r->rec)->target), 0, last, &P, &M, &V, &W);
             }
             Vec4* p = (Vec4*)(i * 16 + second->out[0]);
             Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
@@ -2150,15 +2140,15 @@ void SpawnEffectsFromRecord(s32 a, EffectSpawnerRecord* b, void* c)
     f.flag = 1;
     GenerateSpawnArrays(a, b, f.out);
     if (b->effectMode == 1) {
-        SpawnRecordEffects(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3]);
+        SpawnRecordEffects(b, (EffectOwnerSlot*)c, a, (Quad16*)f.out[0], (Quad16*)f.out[1], (f32*)f.out[2], (f32*)f.out[3]);
     } else {
         if (b->f130 == 2) {
-            GenerateSpawnSetupPair(a, b, f.out, f.pair);
+            GenerateSpawnSetupPair(a, b, &f, (SpawnSetup*)f.pair);
         } else {
             f.pair[0] = 0;
             f.pair[1] = 0;
         }
-        EmitParticleChunk(b, c, a, f.out[0], f.out[1], f.out[2], f.out[3], f.pair[0], f.pair[1]);
+        EmitParticleChunk(b, (EffectOwnerSlot*)c, a, (Quad16*)f.out[0], (Quad16*)f.out[1], (f32*)f.out[2], (f32*)f.out[3], (Quad16*)f.pair[0], (Quad16*)f.pair[1]);
     }
     PopBackMemoryMark();
 }
@@ -2320,7 +2310,6 @@ struct EffectSpinRecord {
     void* frame;        // 0x44
 };
 extern const Mat4A g_identityMatrix4;
-s32 ScaleMatrix(Mat4A* out, Mat4A* in, u128 scale);
 
 // Builds the spawner's per-step transform: a scale and translation, turned by the spin's axis (in
 // the spin frame's world axes when the mode is 1) at rate times dt, multiplied and scaled by dt;
@@ -2567,7 +2556,7 @@ void AddRecordMemberRangeEntry(RecordMember* self, s32 a, s32 b, f32 x, f32 y, f
 TransformRecord* GetOwnedSpawnRecord(RecordMember* self, s32 own)
 {
     if (own == 1) {
-        self->rec = (TransformRecord*)CloneSharedSpawnRecord(self->rec);
+        self->rec = (TransformRecord*)CloneSharedSpawnRecord((EffectSpawnerRecord*)self->rec);
     }
     return self->rec;
 }
@@ -2713,7 +2702,6 @@ struct __attribute__((aligned(16))) ChainFrame {
 
 void *StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
-Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
 struct ValueRange;
 f32 ClampToRange(ValueRange* span, f32 x);
@@ -3529,7 +3517,9 @@ void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
     ScaledDrawFrame f;
     BuildUniformScaleAboutPoint(0, &f.q0, self->currentScale);
     BuildPlacedObjectTransform(self, (Quad16*)arg2, (ScaledTransform*)f.m40);
-    MultiplyMatrices(f.m90, f.m40, &f.q0);
+    // retail's call passes the frame's own rows as the result's place, which an assignment of the
+    // returned matrix does not
+    ((void (*)(Quad16*, Quad16*, Quad16*))MultiplyMatrices)(f.m90, f.m40, &f.q0);
     f.m40[0] = f.m90[0];
     f.m40[1] = f.m90[1];
     f.m40[2] = f.m90[2];
@@ -3539,7 +3529,6 @@ void DrawScalingVolume(ScalingVolume* self, void* arg1, void* arg2)
 
 struct TreeNode03;
 struct FacePoint;
-s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 
 // Tests a world point against the volume's face tree: the point is moved into the volume's frame
 // and divided by its scale; false if the scale is almost zero.

@@ -8,6 +8,7 @@
 // 0x139C38. The alpha state packets belong here: their two words are this file's .data, which
 // WriteListedObjectParticlePacket reads. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "list_iter.h"
 #include "buffered_stream.h"
@@ -342,7 +343,6 @@ struct LookSource {
     LookSourceTail tail;    // 0x120
 };
 
-void FillLookDirectionBlock(void* out, LookSource* src);
 
 // Copies a look source's settings into the listed object: particle mode, colours (halved, in
 // reverse order), anim record, the three quadratic curves (over 1/duration) and a rate for the

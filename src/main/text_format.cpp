@@ -192,7 +192,6 @@ extern u8 g_charClassFlags[];
 extern "C" s32 GetStringLength(const char* s);
 void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str);
 void FormatIntegerArg(FormatSpec* sp, OutputBuffer* c, u64 v);
-void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, double value);
 s32 FormatFloatDigits(char* buf, s32 n, FormatSpec* sp, double value);
 void UppercaseString(char* p);
@@ -241,7 +240,6 @@ extern u8 g_hexDigits[];
 void* CopyString(void* dst, const char* src);
 extern "C" s32 GetStringLength(const char* s);
 s32 GetDecimalExponent(double v);
-u8 GetDecimalDigit(double v, s32 e, s32 i);
 extern "C" f32 Power(f32 x, f32 y);
 extern "C" double ConvertFloatToDouble(f32 x);
 extern "C" double MultiplyDoubles(double a, double b);
@@ -784,13 +782,14 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
         i = 0;
     }
     while (n-- > 0) {
-        *out++ = GetDecimalDigit(r, e, i--);
+        // GetDecimalDigit takes the double as the register view the soft-float calls give it
+        *out++ = ((s8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
     }
     if (sp->noprec == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
-            *out++ = GetDecimalDigit(r, e, i--);
+            *out++ = ((s8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
         }
         if (sp->conv == 'g' && buf < out) {
             while (buf < out && out[-1] == '0') out--;
@@ -950,7 +949,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         } else {
             u8* p = *va;
             *va = p + 8;
-            FormatFloatArg(sp, c, *(s64*)p);
+            FormatFloatArg(sp, c, *(double*)p);
         }
         return;
     case 'n':
@@ -1090,11 +1089,11 @@ void* AppendString(void* dst, const char* src)
 }
 
 // Gives the first place c occurs in s, or null.
-char* FindCharInString(char* s, s32 c)
+char* FindCharInString(const char* s, s32 c)
 {
     while (*s != 0) {
         if ((s8)*s == c) {
-            return s;
+            return (char*)s;
         }
         s++;
     }

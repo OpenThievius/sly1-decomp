@@ -8,6 +8,7 @@
 
 struct BufferedStream;
 struct Collider;
+struct DmaChannel;
 struct FlaggedObject;
 struct ListLink;
 struct ObjectList;
@@ -102,7 +103,7 @@ void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
-void SubmitPacketBuffer(PacketWriter* self, void* dma);
+void SubmitPacketBuffer(PacketWriter* self, DmaChannel* dma);
 void BeginDmaTag(PacketWriter* self);
 void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 void AddDmaCallTag(PacketWriter* self, s32 hi);

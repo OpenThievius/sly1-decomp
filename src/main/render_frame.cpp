@@ -8,6 +8,7 @@
 // font's .data ends before D_00262280 and its functions read this file's packet writers only as
 // globals, so the cut could lie from 0x15E5F0 to 0x15E6A8. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "effect_spawner.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -134,7 +135,7 @@ void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void CloseDmaTag(PacketWriter* self);
-void AddDmaRefTag(void* obj, s32 a, s32 b);
+void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 void BeginDmaTag(PacketWriter* self);
 
 
@@ -147,7 +148,6 @@ void ActivateRenderFrame(void* a, s32 b);
 
 void ConstructPacketWriters(s32 flag, s32 code);
 
-void AddDmaRefTag(void* list, u32 count, s32 value);
 extern s32 g_lastDmaRefStart;
 
 void AddDmaEndTag(PacketWriter* self);
@@ -199,7 +199,6 @@ extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
-void RunThread(s32 thread, void* arg);
 void func_0015E678(void);
 
 extern void* g_frameReadySemaphore;
@@ -376,7 +375,7 @@ void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
 {
     if (g_lastDmaRefStart != value) {
         g_lastDmaRefStart = value;
-        AddDmaRefTag(list, ((u32)(end - value) + 15) >> 4, value);
+        AddDmaRefTag((PacketWriter*)list, ((u32)(end - value) + 15) >> 4, value);
     }
 }
 

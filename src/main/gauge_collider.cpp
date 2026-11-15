@@ -3,6 +3,7 @@
 // gauge-counted object's start. Its name is ours, after the gauge collider and its agent, which
 // hold most of its code.
 #include "common.h"
+#include "asm_functions.h"
 #include "switched_collider.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -539,8 +540,6 @@ void StartGaugeCollider(GaugeCollider* self)
     AddStateWalkerListener((StateWalker*)self->phaseWalker, (PlacedObject**)self);
 }
 
-Mat3 MultiplyByTransposedMatrix3x3(const Mat3& a, const Mat3& b);
-void AddColliderForce(void* self, Vec4* force);
 extern const Vec4 g_unitZVector;
 
 
@@ -616,7 +615,6 @@ extern f32 D_0026A824;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 
-void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 struct Oscillator;
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
@@ -964,8 +962,6 @@ void ComputeGaugeColliderContactValue(GaugeCollider* ctx, BodyContact* out)
     out->friction = g_gaugeFriction;
 }
 
-void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
-f32 SplitVectorAlongAxis(const Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
 struct PlayingSound;
 
 // Applies the contact of the collider with the attached set it rests on, from the depth

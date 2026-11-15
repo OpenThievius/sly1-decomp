@@ -4,7 +4,7 @@
 // "2430") and the word D_002771C8 points at, which also differ from each other. CompareMemory
 // returns 0 for equal words, so a known answer gives 0.
 extern u8 D_eu_002800DC[];
-s32 CompareMemory(const void* a, const void* b, s32 n);
+#include "asm_functions.h"
 
 s32 IsFileServiceVersionUnknown(void)
 {

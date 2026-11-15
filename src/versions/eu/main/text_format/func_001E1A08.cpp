@@ -67,7 +67,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         } else {
             u8* p = *va;
             *va = p + 8;
-            FormatFloatArg(sp, c, *(s64*)p);
+            FormatFloatArg(sp, c, *(double*)p);
         }
         return;
     case 'n':

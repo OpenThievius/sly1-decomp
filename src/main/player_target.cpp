@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "on_off_object.h"
@@ -450,8 +451,6 @@ f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t)
     return f.result;
 }
 
-// Left in this order: retail's call here evaluates the time before the pointers.
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 extern const Vec4 g_zeroVector;
 
 // v made unit length, or fallback when shorter than 0.0001; returns its length.
@@ -479,7 +478,8 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out
     Vec4 vel;
     Vu0::Set(pos0, Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(t), Vu0::Q(self->gravity), Vu0::Scalar(t * (t * 0.5f))));
     p = *point;
-    TransformPointAtTime((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
+    // retail's caller evaluates the time before the pointers, as the third argument
+    ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))TransformPointAtTime)((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
     Vu0::Set(d, Vu0::Sub(Vu0::Q(p), Vu0::Q(pos0)));
     f32 r = g_targetReach;
     f32 dist2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
@@ -527,15 +527,12 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out
 // func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
 // function passes its own float parameter straight through.
 struct PathScoreArgs { Player* self; BaseObject* obj; s32 pad[2]; s32 c[4]; };
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void ScorePlayerLeapToPoint(f32 t, Player* self, BaseObject* obj, Vec4* point, f32* out1, Vec4* out2, Vec4* out3);
-
 // The score of a leap to the path's point at parameter t (ScorePlayerLeapToPoint).
 f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
 {
     f32 out;
-    ScorePlayerLeapToPoint(t, o->self, o->obj, (Vec4*)o->c, &out, 0, 0);
+    // retail's caller evaluates the time first, as the first argument
+    ((void (*)(f32, Player*, BaseObject*, Vec4*, f32*, Vec4*, Vec4*))ScorePlayerLeapToPoint)(t, o->self, o->obj, (Vec4*)o->c, &out, 0, 0);
     return out;
 }
 
@@ -1695,7 +1692,6 @@ void ResetPlayerOnOffObject(Player* self)
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void AddColliderForce(Player* self, void* v);
 
 // The step of state 6: on an active track the player is held to the track's speed limit: the
 // track's direction against gravity and the player's velocity along it give a force that keeps the

@@ -67,7 +67,6 @@ struct TimedAimRecord {
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void SetEffectSpawnerActiveForever(void* p);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 
 

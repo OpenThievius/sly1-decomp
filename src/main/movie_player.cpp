@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "child_group_object.h"
@@ -132,9 +133,9 @@ struct AttachedTransformFrame {
 
 
 
-void* MultiplyMatrices(void* out, void* b, void* in);
 
 extern s32 g_gifChannel;
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 extern "C" s32 AwaitSemaphore(s32 a);
 
@@ -192,7 +193,6 @@ extern u8 g_globalPointer[];
 extern s32 g_movieDecodeThread;
 
 s32 MakeThread(ThreadParams* p);
-void RunThread(s32 thread, void* arg);
 
 
 
@@ -348,7 +348,9 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
             }
             BuildPlacedObjectTransform(self, (Quad16*)in2, (ScaledTransform*)&f.blkA0);
             BuildMatrixFromRotationAndTranslation((const Vec4*)&f, &f.tbl30, (Mat4A*)&f.q60);
-            MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
+            // retail's call passes the frame's own block as the result's place, which an
+            // assignment of the returned matrix does not
+            ((void (*)(Mat4A*, Mat4A*, Vec4*))MultiplyMatrices)(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
             ApplyPlacedObjectTransform(self, (Camera*)in1, (ScaledTransform*)&f.blkA0);
         }
@@ -395,7 +397,6 @@ void AddContactListKind(ContactListObject* self, s32 value)
     }
 }
 
-void AddColliderForce(void* a, void* b);
 
 // Initialises the contact list object and sets its gravity to a fixed constant.
 void InitContactListObjectWithoutGravity(ContactListObject* self)
@@ -477,7 +478,6 @@ struct GliderListFrame {
 void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 
 // Moves the glider-like contact list object one step of dt: until its end time it follows a Hermite
 // curve to the anchor object's position a short time ahead, afterwards it coasts. Once ready it

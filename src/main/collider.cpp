@@ -10,6 +10,7 @@
 // lie at any function start from 0x1BB378 to 0x1BE1E8 (0x1BE068 would give the sort to the next
 // file), or the two could be one file. Its name is ours, after its class.
 #include "common.h"
+#include "asm_functions.h"
 #include "sound_record.h"
 #include "script_value.h"
 #include "cursor_animator.h"
@@ -87,7 +88,6 @@ void PopBackMemoryMark(void);
 void* AllocateBackMemory(u32 bytes);
 void* AllocateBackMemory(s32 size);
 s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
-void AddColliderForce(void* a, void* b);
 // What a vector is constrained by: an axis, and how (0 none, 1 the part along the axis removed,
 // 2 only the part along it kept, 3 zero).
 struct VectorConstraint {
@@ -123,7 +123,6 @@ extern "C" void SyncDataCache(s32 a);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void MovePlacedObject(Collider* self, f32 x, void* b);
 typedef signed int s32;
 typedef unsigned char u8;
 void* AllocateZeroedFrontMemory(s32 bytes);
@@ -640,7 +639,6 @@ LINKER_REMNANT(func_001B8FE0);
 
 ASM_FUNC(func_001B8FE8);
 
-void AddColliderForce(Collider* self, Vec4* force);
 
 // Adds a force that pulls the collider's position toward target and one that pulls its velocity
 // toward aim. Each uses a gain triple (c2*x + c1 + c0/x of the distance); the velocity pull is
@@ -675,7 +673,6 @@ void SteerColliderTowardPosition(Collider* self, Vec4* target, f32* pull, Vec4* 
     AddColliderForce(self, &acc);
 }
 
-void AddColliderTorque(Collider* self, Vec4* torque);
 
 // Adds a torque that turns the collider toward the rotation target (the gain triple applied to
 // the angle) and one that pulls its spin toward aim (the velocity-style gain capped at 1/limit).
@@ -725,7 +722,7 @@ void StepCollider(Collider* self, f32 t)
     if (self->parent == 0) {
         if ((self->flags538 & m) == 0) {
             ConstrainColliderVector(self, &self->v440, &self->gravity, &local, 0);
-            AddColliderForce(self, &local);
+            AddColliderForce(self, (Vec4*)&local);
         }
     }
     node = self->attached;
@@ -1282,9 +1279,7 @@ tail:
     ClearRootTries(o);
 }
 
-void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 struct Oscillator;
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 extern "C" f32 Arccosine(f32 x);
 
 struct OscillatorHolder { u8 pad00[0xC]; void* oscillator; };
@@ -1948,7 +1943,8 @@ void MoveCollider(Collider* self, f32 x, void* b)
     if (self->hook != 0) {
         AdvanceColliderMeshMotion(self, x);
     }
-    MovePlacedObject(self, x, b);
+    // MoveCollider still holds the step's flag as the pointer its own callers pass.
+    ((void (*)(Collider*, f32, void*))MovePlacedObject)(self, x, b);
 }
 
 
@@ -2080,7 +2076,6 @@ void ExtractContactsByPartMode(Collider* self, BodyContact** out)
 }
 
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 
 // Whether the point lies inside the collider: within the bounding radius when flag 0x8000<<25 is
 // set, or inside its plane tree.
@@ -2131,7 +2126,6 @@ struct ImpulseRow {
     Vec4 angular;          // 0x10
 };
 
-void ApplyColliderInverseInertia(Collider* self, Vec4* in, Vec4* out);
 
 // For one end of a contact, fills the rows (indexed by part) with the change of velocity and spin
 // the unit impulse along the contact makes on that part and each of its ancestors, up to a rigid
@@ -2166,7 +2160,6 @@ void ComputeColliderImpulseResponse(void* self, s32 a1, BodyContact* c, s32 idx,
     }
 }
 
-void ComputeColliderPointVelocity(Collider* body, Vec4* point, ImpulseRow* row, Vec4* out);
 
 // For each part below the root, adds to its impulse row the motion it gets from its parent's row
 // (the point velocity at the part's position and the parent's spin), honouring the anchor

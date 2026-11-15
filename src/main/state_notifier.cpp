@@ -4,6 +4,7 @@
 // derived from it, with their helpers. Its name is ours, after the state notifiers it
 // holds most of.
 #include "common.h"
+#include "asm_functions.h"
 #include "vu0.h"
 #include "mul_rotation.h"
 #include "asm_func.h"
@@ -597,7 +598,6 @@ struct CollisionMesh;
 struct MeshHitEntry;
 extern const Vec4 g_unitZVector;
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-f32 SplitVectorAlongAxis(Vec4* v, const Vec4* axis, Vec4* along, Vec4* across);
 
 // Bounces the notifier off the surfaces around it: gathers the colliders in a box of its collision
 // radius, finds the nearest triangle hit among the eligible ones and reflects its motion off that
@@ -855,7 +855,7 @@ void UpdateStateNotifier(StateNotifier* self, f32 dt)
 
 // States 4 and 5 scale the drawn object by a curve of the time in the state: each arm evaluates
 // it and splats it itself, so cross-jumping leaves only the arms' own loads in them.
-Mat4A MultiplyMatrices(const void* a, const void* b);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 // Draw hook that scales the notifier: in states 4 and 5 the scale grows (state 4, over
 // g_notifierGrowTime seconds from the state's start) or shrinks and is applied to the draw
@@ -898,7 +898,7 @@ void ApplyStateNotifierScale(StateNotifier* self, void* a, void* m)
             }
         BuildScaledTransformMatrix((f32*)g_zeroVector, (f32 (*)[4])g_identityMatrix, (f32*)&scale, (f32 (*)[4])&s);
         BuildPlacedObjectTransform(self, (Quad16*)m, (ScaledTransform*)&t);
-        *(Mat4A*)&t = MultiplyMatrices(&t, &s);
+        *(Mat4A*)&t = MultiplyMatrices(*(Mat4A*)&t, s);
         m = &t;
         break;
     }
@@ -911,8 +911,6 @@ extern f32 g_gameTime;
 extern u8 g_unitXVector[];
 void* GetActiveSwitchedColliderData(void);
 struct StateGraph;
-struct Node_1B6CF0;
-void AdvanceStateWalkerTime(Node_1B6CF0* self, f32 t);
 // The camera's state setter: keeps the eye and target offsets when the old state is one of -1, 2,
 // 4 and 5, sets the vectors of the new state, tells the object at 0x2EC (add to or remove from
 // its parent's list) and starts or stops the state walker of the state's event (0x260 to 0x263,
@@ -1014,7 +1012,7 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
             void* made = CreateStateWalker((StateGraph*)(self->stateGraph), self, event, 0);
             self->host = made;
             if (0.0f < self->walkerTimeOffset) {
-                AdvanceStateWalkerTime((Node_1B6CF0*)made, self->walkerTimeOffset);
+                AdvanceStateWalkerTime((StateWalker*)made, self->walkerTimeOffset);
             }
         } else {
             SetStateWalkerTarget((StateWalker*)h, event);

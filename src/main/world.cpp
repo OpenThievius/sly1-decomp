@@ -7,6 +7,7 @@
 // D_002751D4 and D_002751DC, which path_follower.cpp defines. Its name is ours, after its largest
 // family, the world and its script functions; it opens with the rest of the path follower.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "mul_rotation.h"
@@ -300,7 +301,6 @@ struct SegmentFrame { ClipPoint buf[4]; PackedColor tmp; };
 extern SegmentEnd g_projectionScale;
 extern SegmentEnd g_projectionOffset;
 
-UQuadword TransformVector4(u8* self, UQuadword q);
 s32 ClipSegmentToPlanes(ClipPoint* out);
 
 

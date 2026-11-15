@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "game_clock.h"
@@ -468,7 +469,6 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     SetPlayerState(self, 7, state);
 }
 
-void BuildPerpendicularPair(Vec4* dir, Vec4* a, const Vec4* b, const Vec4* c);
 s32 CreatePooledContact(void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7, f32 f);
 
 // The player held on its path: the contact row for the path's frame's root (or the player's own

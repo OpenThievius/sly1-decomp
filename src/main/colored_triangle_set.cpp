@@ -3,6 +3,7 @@
 // colored triangle set (class 0x8E, include/colored_triangle_set.h) with its drawing. Its name is
 // ours, after the class that holds most of its code.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "point_object.h"
 #include "colored_triangle_set.h"
@@ -63,7 +64,6 @@ union Quad128Floats {
     f32 f[4];
 };
 
-Quad128 TransformVector4(void* m, Quad128 v);
 
 void DrawTriangleGroups(ColoredTriangleSet* self, f32 a, f32 b, f32 c, f32 d);
 
