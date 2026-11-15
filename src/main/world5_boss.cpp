@@ -2,6 +2,7 @@
 // From 0x1793C0 to 0x17B998: the mode collider, the gauge mode object and the countdown. Its name
 // is ours, after the mode collider, which holds most of its code.
 #include "common.h"
+#include "asm_functions.h"
 #include "switched_collider.h"
 #include "world5_boss.h"
 #include "world5_countdown.h"
@@ -188,7 +189,6 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec4* a, Vec4* b);
 
 // Per-frame forces of the world 5 mode collider: in modes 0 and 1 the ordinary collider step; in
 // modes 2 and 3 it steers toward the anchor point (taken to the frame of its parent object), in
@@ -336,9 +336,6 @@ struct RampProfile;
 struct Vec4;
 struct Mat3;
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
-void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
 
 // The product a b of two rotations into out: a's rows loaded once, b's rows each rotated by
 // them, each result row stored to its vector local and then to out's row.
@@ -507,12 +504,14 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     }
     Mat3 rot;
     for (i = 0; i < 2; i++) {
-        ApproachRotationWithRamp(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
+        // Retail's caller evaluates the limit before the output rotation: the call names it there.
+        ((void (*)(Mat3*, Mat3*, RampProfile*, f32, Mat3*, Vec4*))ApproachRotationWithRamp)(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
         self->turnedParts[i]->desc02()->m1E(self->turnedParts[i], &rot);
     }
     if (self->thirdTurnedPart->orientationAttachment == 0) {
         MulRotationRowsIndexed(&aim, aim, self->thirdTurnedPart->m1A0);
-        ApproachRotationWithRamp(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
+        // Retail's caller evaluates the limit before the output rotation: the call names it there.
+        ((void (*)(Mat3*, Mat3*, RampProfile*, f32, Mat3*, Vec4*))ApproachRotationWithRamp)(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
         self->thirdTurnedPart->desc02()->m1E(self->thirdTurnedPart, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);
@@ -623,7 +622,6 @@ struct SenderValueMessage {
     s32 v;
 };
 
-void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
 
 extern f32 g_gameTime;
@@ -646,7 +644,7 @@ s32 AcceptWorld5ModeColliderRequest(World5ModeCollider* self, s32* arg)
     if (self->pulseActive != 0) {
         self->poseRateX = 0.0f;
         self->poseRateY = 3.0f;
-        ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
+        ComputeWorld5ModeColliderAnchors((World5ModeCollider*)self, (Vec4*)bufA, (Vec4*)bufB);
         TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec4*)bufA, 0, (Vec4*)bufB, 0);
         self->desc02()->m20(self, (Vec4*)bufB);
     }
@@ -733,7 +731,6 @@ void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode)
     ReplaceAnimationPlayer((Animation*)anim, self, 1, (AnimationPlayer**)&self->modeAnimPlayer, 0.0f, 1.0f);
 }
 
-void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 
 // Computes the collider's two anchor points, converts them to the ancestor frame and passes them
 // to descriptor slots 0x1D and 0x20 of the collider.
@@ -741,7 +738,7 @@ void PlaceWorld5ModeColliderAtAnchor(World5ModeCollider* self)
 {
     u8 bufA[16];
     u8 bufB[16];
-    ComputeWorld5ModeColliderAnchors(self, bufA, bufB);
+    ComputeWorld5ModeColliderAnchors((World5ModeCollider*)self, (Vec4*)bufA, (Vec4*)bufB);
     TransformStateToAncestorFrame((PlacedObject*)self->f668, 0, (Vec4*)bufA, 0, (Vec4*)bufB, 0);
     self->desc02()->m1D(self, (Vec4*)bufA);
     self->desc02()->m20(self, (Vec4*)bufB);

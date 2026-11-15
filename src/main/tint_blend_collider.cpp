@@ -4,6 +4,7 @@
 // previous file's, and ends at 0x2758D0, where class75_list.cpp's starts; its .rodata is the one
 // float func_001DFBE0 reads (0x24DCA8).
 #include "common.h"
+#include "asm_functions.h"
 #include "vu0.h"
 #include "asm_func.h"
 #include "switched_collider.h"
@@ -158,9 +159,7 @@ void StartRedirectObject(RedirectObject* self)
 
 extern s32 g_frameCount;
 extern f32 g_gameClock[];
-f32 SplitVectorAlongAxis(Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
 void OrthonormalizeMatrix(Mat3* m);
-Mat3 MultiplyByTransposedMatrix3x3(const Mat3& a, const Mat3& b);
 
 // The clock's step, read through the clock's address.
 static inline const f32& ClockStep(const f32* clock) { return clock[2]; }

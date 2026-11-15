@@ -13,8 +13,8 @@ struct Panel_131198_eu {
     u8 pad574[0x59C - 0x574];
     Font* smallFont;            // 0x59C
     u8 pad5A0[0x5A4 - 0x5A0];
-    void* bands;                // 0x5A4
-    s32 bandsSize;              // 0x5A8
+    s32 bandsQwc;               // 0x5A4
+    s32 bandsPacket;            // 0x5A8
     u8 pad5AC[0x5B0 - 0x5AC];
     void* child;                // 0x5B0
 };
@@ -90,6 +90,6 @@ void SetupTextPanel(Panel_131198_eu* self)
     }
     AddGifXyzfEntry(&gs, 0x9400, 0x8800, 0x0FFFFFF0, 0);
     AddGifXyzfEntry(&gs, 0x9400, 0x80C2, 0x0FFFFFF0, 0);
-    DetachPacketBufferCopy(&gs, (s32*)&self->bands, 0, &self->bandsSize, 0x15);
+    DetachPacketBufferCopy(&gs, &self->bandsQwc, 0, &self->bandsPacket, 0x15);
     PopBackMemoryMark();
 }

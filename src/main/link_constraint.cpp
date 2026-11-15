@@ -2,6 +2,7 @@
 // From 0x16C470 to 0x16CE00. Its name is ours, after ApplyLinkConstraint, nearly all of its code
 // (0x8D4 of 0x990 bytes); the small overrides before it are described below.
 #include "common.h"
+#include "asm_functions.h"
 #include "c52.h"
 #include "vu0.h"
 #include "placed_object.h"
@@ -72,10 +73,6 @@ void DrawC52Object(C52* self, void* arg1, void* arg2)
 }
 
 extern "C" f32 Arccosine(f32 x);
-void BuildAxisAngleMatrix(f32 angle, const Vec4* v, Mat3* out);
-// The definition takes the angle last; the EE passes it in its own register, and retail's
-// caller evaluates it first, as this order does.
-Mat3 MultiplyByTransposedMatrix3x3(const Mat3& a, const Mat3& b);
 extern Vec4 g_zeroVector;
 extern Mat3 g_identityMatrix;
 extern Vec4 g_unitXVector;
@@ -225,7 +222,8 @@ void ApplyLinkConstraint(PlacedObject* self)
         c = -1.0f;
     }
     Mat3 bend;
-    BuildAxisAngleMatrix(Arccosine(c) - angle, &axis, &bend);
+    // retail's call evaluates the angle before the pointers
+    ((void (*)(f32, const Vec4*, Mat3*))BuildAxisAngleMatrix)(Arccosine(c) - angle, &axis, &bend);
     Vec4 bent;
     Vec4 reachv;
     *(Vec*)&w = *(Vec*)&bent = Vu0::Rotate(bend, Vec::Of(w));
@@ -236,7 +234,7 @@ void ApplyLinkConstraint(PlacedObject* self)
     Vec4 dir;
     dir = t;
     *(Vec*)&dir = Vu0::DivX(Vec::Of(t), Vu0::Length(Vec::Of(t)));
-    BuildAxisAngleMatrix(self->linkRecord->angle, &dir, &twist);
+    BuildAxisAngleMatrix(&dir, &twist, self->linkRecord->angle);
     Mat3 R;
     MulRotationInto(&R, twist, swing);
     swing = R;

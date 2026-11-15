@@ -101,7 +101,7 @@ void SolveBezierSegment(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C
 // Evaluates one cubic Hermite segment of a scalar curve at time t of a segment of length dur,
 // between values a and c with slopes b and dd. Writes the value to p0, the first derivative (times
 // e) to p1 and the second derivative (times e squared) to p2; each may be null.
-void EvaluateHermiteSegment(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd)
+void EvaluateHermiteSegment(f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd, f32* p0, f32* p1, f32* p2)
 {
     f32 u = t / dur;
     f32 v = 1.0f - u;

@@ -11,6 +11,7 @@
 #include "screen_element.h"
 #include "asm_func.h"
 #include "fpu.h"
+#include "libm.h"
 #include "functions/game_progress.h"
 #include "functions/object_gatherer.h"
 #include "functions/on_off_object.h"

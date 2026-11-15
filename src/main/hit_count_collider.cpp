@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "id_linked_object.h"
 #include "asm_func.h"
 #include "vu0.h"
@@ -267,7 +268,6 @@ void ControlHitCountCollider(HitCountCollider* self, PadRecord* ev, f32 dt)
 
 
 void ClampVectorLength(Vec4* v, Vec4* out, f32 max);
-void AddColliderForce(void* a, void* b);
 
 // Per-frame step: steps the collider, turns it toward its heading (yaw only) with the turn ramp,
 // and applies a force that pulls its velocity toward the target velocity at 0x650, limited to a

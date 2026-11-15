@@ -192,7 +192,6 @@ extern u8 g_charClassFlags[];
 extern "C" s32 GetStringLength(const char* s);
 void FormatStringArg(FormatSpec* self, PaddedOutput* ctx, const char* str);
 void FormatIntegerArg(FormatSpec* sp, OutputBuffer* c, u64 v);
-void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, s64 s);
 void FormatFloatArg(FormatSpec* sp, OutputBuffer* c, double value);
 s32 FormatFloatDigits(char* buf, s32 n, FormatSpec* sp, double value);
 void UppercaseString(char* p);
@@ -225,11 +224,8 @@ struct RegDouble { u8 pad; };
 
 
 extern "C" f32 Power(f32 x, f32 y);
-RegDouble* MultiplyDoubles(RegDouble* self, u64 v);
-RegDouble* MultiplyDoubles(RegDouble* self, double v); // soft-float double in a1
-RegDouble* TruncateDouble(RegDouble* self);
-RegDouble* SubtractDoubles(RegDouble* self, RegDouble* v);
-s32 ConvertDoubleToS32(RegDouble* self);
+double TruncateDouble(double x);
+extern "C" double SubtractDoubles(double a, double b);
 
 
 
@@ -241,7 +237,6 @@ extern u8 g_hexDigits[];
 void* CopyString(void* dst, const char* src);
 extern "C" s32 GetStringLength(const char* s);
 s32 GetDecimalExponent(double v);
-u8 GetDecimalDigit(double v, s32 e, s32 i);
 extern "C" f32 Power(f32 x, f32 y);
 extern "C" double ConvertFloatToDouble(f32 x);
 extern "C" double MultiplyDoubles(double a, double b);
@@ -733,11 +728,13 @@ s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
         idx = 0;
     } else {
         f32 t = Power(10.0f, (f32)(-b));
-        RegDouble* p = MultiplyDoubles(self, ConvertFloatToDouble(t));
-        self = TruncateDouble(p);
-        p = TruncateDouble(MultiplyDoubles(self, 0.1));
-        p = MultiplyDoubles(p, (u64)0x4024000000000000ULL);
-        idx = ConvertDoubleToS32(SubtractDoubles(self, p));
+        // The value is held in the register view its callers give it (written on double, the code
+        // changes), so each soft-float call goes through the real function cast to that view.
+        RegDouble* p = ((RegDouble* (*)(RegDouble*, double))MultiplyDoubles)(self, ConvertFloatToDouble(t));
+        self = ((RegDouble* (*)(RegDouble*))TruncateDouble)(p);
+        p = ((RegDouble* (*)(RegDouble*))TruncateDouble)(((RegDouble* (*)(RegDouble*, double))MultiplyDoubles)(self, 0.1));
+        p = ((RegDouble* (*)(RegDouble*, u64))MultiplyDoubles)(p, (u64)0x4024000000000000ULL);
+        idx = ((s32 (*)(RegDouble*))ConvertDoubleToS32)(((RegDouble* (*)(RegDouble*, RegDouble*))SubtractDoubles)(self, p));
     }
     return ((s8*)&g_hexDigits)[idx];
 }
@@ -784,13 +781,14 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
         i = 0;
     }
     while (n-- > 0) {
-        *out++ = GetDecimalDigit(r, e, i--);
+        // GetDecimalDigit takes the double as the register view the soft-float calls give it
+        *out++ = ((s8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
     }
     if (sp->noprec == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
-            *out++ = GetDecimalDigit(r, e, i--);
+            *out++ = ((s8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
         }
         if (sp->conv == 'g' && buf < out) {
             while (buf < out && out[-1] == '0') out--;
@@ -950,7 +948,7 @@ void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* f
         } else {
             u8* p = *va;
             *va = p + 8;
-            FormatFloatArg(sp, c, *(s64*)p);
+            FormatFloatArg(sp, c, *(double*)p);
         }
         return;
     case 'n':
@@ -1090,11 +1088,11 @@ void* AppendString(void* dst, const char* src)
 }
 
 // Gives the first place c occurs in s, or null.
-char* FindCharInString(char* s, s32 c)
+char* FindCharInString(const char* s, s32 c)
 {
     while (*s != 0) {
         if ((s8)*s == c) {
-            return s;
+            return (char*)s;
         }
         s++;
     }

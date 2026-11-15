@@ -37,7 +37,7 @@ void InitMpegLibrary(void) {
     ResetIpu();
 }
 
-extern "C" void* FillMemory(s32 dst, s32 c, u32 n);
+extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void ReportMpegError(MpegDecoder* self, const char* value);
 void InitMpegRing(MpegRing* r, u32 start, u32 size);
 s32 AllocateFromMpegRing(MpegDecoder* owner, MpegRing* pool, u32 offset, u32 align);
@@ -52,12 +52,12 @@ void RestoreMpegDmaState(MpegHandle* self);
 
 // Sets up a decoder in a work area, reporting "The size of work area is too small" when it is, with
 // its ring buffer and DMA hooks (InitMoviePlayback calls it).
-s32 CreateMpegDecoder(MpegHandle* out, s32 mem, u32 size)
+s32 CreateMpegDecoder(MpegHandle* out, u8* mem, u32 size)
 {
     FillMemory(mem, 0, size);
     u32 base = ((u32)(mem + 3) >> 2) << 2;
     MpegDecoder* in = (MpegDecoder*)base;
-    s32 diff = base - mem;
+    s32 diff = base - (u32)mem;
     u32 rest = size - diff;
     if (rest < 0x10C0) {
         ReportMpegError(in, "The size of work area is too small");
@@ -199,16 +199,16 @@ s32 ReleaseMpegPictures(MpegHandle* device) {
 // addresses the function and its argument from two bases (the table's start, and its start moved
 // by the function's offset), which the words of the table's entries give where one
 // MpegCallback pointer would be a single base: the table is walked as words, as the original did.
-s32 SetMpegCallback(MpegHandle* obj, s32 index, s32 value, s32 second)
+void* SetMpegCallback(MpegHandle* obj, s32 index, void* fn, void* arg)
 {
-    u32* array = (u32*)obj->decoder;
-    u32* current = array + 3;
+    void** array = (void**)obj->decoder;
+    void** current = array + 3;
     u32 offset = index * 2;
     current += offset;
     array += offset;
-    array[4] = second;
-    s32 old = *current;
-    *current = value;
+    array[4] = arg;
+    void* old = *current;
+    *current = fn;
     return old;
 }
 
@@ -586,8 +586,8 @@ s32 SetPictureDimensions(MpegPicture* picture, s32 x, s32 y)
 
 u32 ReadIpuBits(MpegDecoder* obj, s32 a1);
 void WaitIpuCommandDone(MpegDecoder* d);
+void LoadIpuQuantiserMatrix(MpegDecoder* obj, u32 value, u8* table);
 void SendIpuCommand(MpegDecoder* obj, u32 value);
-void LoadIpuQuantiserMatrix(MpegDecoder* d, u32 value, u8* table);
 void ReadExtensionsAndUserData(MpegDecoder* self);
 void AllocatePictureBuffers(MpegHandle* handle);
 
@@ -724,7 +724,7 @@ extern "C" s32 EnableInterrupts(void);
 // Runs the callback with kinds 2 and 3 around a DMA of a 64-byte matrix to the IPU through channel
 // 4 followed by a command (0x50000000 or 0x58000000 from the caller), waiting for the IPU each step
 // (ReadSequenceHeader calls it for the default matrices).
-void LoadIpuQuantiserMatrix(MpegDecoder* obj, u32 value, u32 mask)
+void LoadIpuQuantiserMatrix(MpegDecoder* obj, u32 value, u8* table)
 {
     MpegSignal req;
     req.kind = 2;
@@ -734,7 +734,7 @@ void LoadIpuQuantiserMatrix(MpegDecoder* obj, u32 value, u32 mask)
     *(volatile u32*)0x10002000 = 0;
     WaitIpuCommandDone(obj);
     (void)DisableInterrupts();
-    *(volatile u32*)0x1000B410 = mask & 0x0FFFFFFF;
+    *(volatile u32*)0x1000B410 = (u32)table & 0x0FFFFFFF;
     *(volatile u32*)0x1000B420 = 4;
     *(volatile u32*)0x1000B400 = 0x101;
     (void)EnableInterrupts();

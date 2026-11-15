@@ -11,7 +11,7 @@ struct RenderFrame;
 s32 PackFrameColors(s32 cause);
 void InitRenderFrames(void);
 void BeginRenderFrame(void);
-void AddDmaRefTagIfChanged(void* list, s32 value, s32 end);
+void AddDmaRefTagIfChanged(void* list, void* value, void* end);
 void WriteGsFinishPacket(void* self, void* p, u8** n);
 void CloseDrawBuffer(void* obj, void* a, u8** b);
 void SubmitRenderFrame(void);

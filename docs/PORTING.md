@@ -92,6 +92,29 @@ engine, which reads the banks and decodes their SPU ADPCM samples itself, and it
 every call the game waits on: src/main/iop_commands.cpp loops until a call is no longer
 pending or its reply word is no longer -1, and hangs on a call no one answers.
 
+## A modern compiler
+
+`tools/modern_check.py` compiles every unit with a current Clang (syntax only, the PS2's 32-bit
+target), and CI fails if code a modern compiler rejects comes back (`config/modern_baseline.tsv`,
+zero port errors). What it reports apart, and what a port must change:
+
+- **g++ 2.95's named return values**, `T F(args) return r { ... }`: nine matrix functions
+  (`Vu0::Transpose` in include/vu0.h, `MultiplyMatrices` in src/main/matrix.cpp, and small
+  inline helpers in link_constraint.cpp, player_aim.cpp, collider.cpp and
+  tint_blend_collider.cpp) need them to match retail's code. A port declares `r` at the top of
+  the body and returns it.
+- **g++'s minimum and maximum operators**, `a <? b`, `a >? b`, `a >?= b`: a port writes them as
+  `a < b ? a : b` and the like.
+- **The old compiler's internals**: its variable-argument builtins (`__builtin_next_arg`) in the
+  formatted-output and script-argument code, the C++ runtime's exception records
+  (src/lib/exception.cpp, throw.c) and its three-argument `__builtin_eh_return`. A port uses its
+  own compiler's `<stdarg.h>` and C++ runtime.
+- **The PS2-only helpers** (include/vu0.h, system.h, fpu.h, mul_wide.h), which a port replaces
+  anyway (above).
+
+`s64` and `u64` are 64-bit machine-mode integers (include/common.h), so they stay 64 bits where
+`long` is 32.
+
 ## A warning for anyone editing include/vu0.h
 Adding or removing lines in include/vu0.h can change the compiled code of a function that
 includes it: inserting three comment lines near the top made func_001D7778 (StepPathFollower)

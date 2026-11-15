@@ -62,5 +62,5 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
     } else {
         self->f590 = g_scaleTargetSmall;
     }
-    self->f58C = ApproachValueWithRamp((RampProfile*)g_warpLevelRampKind2, 0, self->f58C, self->f590, g_gameClock.step);
+    self->f58C = ApproachValueWithRamp(self->f58C, self->f590, g_gameClock.step, (RampProfile*)g_warpLevelRampKind2, 0);
 }

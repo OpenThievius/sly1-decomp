@@ -17,7 +17,7 @@ void FinishMovie(MoviePlayer* self_)
     self->f0C = 0;
     ResetMovieStream((MovieStream*)(base + 0x80));
     StopMovieStream((MovieStream*)(base + 0x80));
-    ResetMpegDecoder((S_20B0C0*)(base + 0x10));
+    ResetMpegDecoder((MpegHandle*)(base + 0x10));
     (void)DeleteMpegDecoder((MpegHandle*)(base + 0x10));
     if (self->f148 != 0) {
         do {

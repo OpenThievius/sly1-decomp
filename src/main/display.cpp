@@ -43,7 +43,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 extern u8 g_screenClearPacketC[];
 void* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void AddDmaRefTag(DmaChainBlock* a, s32 n, void* table);
+void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendPacketToBothBuffers(void* chain);
@@ -118,7 +118,6 @@ void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendGsPacketAndWait(s32 channel, void* b);
 void FlipDisplayFrame(void);
-void AddDmaRefTag(void* self, s32 lo, s32 hi);
 
 extern "C" s32 GetGsInterruptMask(void);
 extern "C" s32 SwapGsInterruptMask(s32 mask);
@@ -418,7 +417,8 @@ void SendDisplayResetPacket(void)
 
     InitPacketBuffer((PacketWriter*)&a);
     UsePacketBufferMemory((PacketWriter*)&a, 2, &b);
-    AddDmaRefTag(&a, 0x2C, g_screenClearPacketC);
+    // the tag's address is the packet's own, which AddDmaRefTag takes as its integer bits
+    ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)&a, 0x2C, g_screenClearPacketC);
     AddDmaEndTag((PacketWriter*)&a);
     DetachPacketBuffer((PacketWriter*)&a, 0, 0);
     SendPacketToBothBuffers(&b);

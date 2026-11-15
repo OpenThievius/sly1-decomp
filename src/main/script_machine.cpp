@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "vu0.h"
 #include "entry_pool.h"
 #include "asm_func.h"
@@ -239,12 +240,6 @@ ScriptValue* AddScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* a
 ScriptValue* SetScriptExtraObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* UpdateScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* GetScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values);
-// How its callers declare it (KEPT: see build/swarm/v2/NOTES.md): they call it as GCC calls a
-// function that gives a class back, a `call` with no value (expand_call has no value register when
-// the result goes through the hidden address), which schedules the argument moves differently
-// from a call of a function returning a pointer. The plain value cannot say that.
-void MakeScriptRefList(ScriptValue* ret, s32 count, u8* values); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00117C48, func_00117D78 and func_00117F28
 ScriptValue* FindScriptObject(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectList(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -254,8 +249,6 @@ ScriptValue* GetScriptWorld(ScriptValue* ret, s32 count, ScriptValue* args, Scri
 ScriptValue* GetScriptCamera(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-// How its callers declare it; it is defined giving back a RetValue (KEPT, see there).
-ScriptValue* SearchScriptObjectHits(ScriptValue* ret, s32 id, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* CollectScriptObjectHits(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* FindScriptObjectHit(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* TransformScriptPointBetweenFrames(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -276,8 +269,6 @@ ScriptValue* EvalScriptDefine(ScriptValue* ret, R11B008Node* expr, ScriptScope* 
 ScriptValue* EvalScriptAssert(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 ScriptValue* EvalScriptIf(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 ScriptValue* EvalScriptOr(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
-// How func_0011A080 declares it; it is defined giving back a RetValue (KEPT, see there).
-ScriptValue* EvalScriptAnd(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 ScriptValue* EvalScriptCond(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 ScriptValue* EvalScriptCase(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 ScriptValue* EvalScriptLet(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
@@ -329,7 +320,8 @@ ScriptValue* AddScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, Scr
 ScriptValue* SubtractScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* DivideScriptValues(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
-ScriptValue* AppendScriptLists(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
+struct RetValue;
+RetValue AppendScriptLists(s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* GetScriptDotProduct(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* GetScriptCrossProduct(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
 ScriptValue* GetScriptVectorLength(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);
@@ -655,8 +647,6 @@ struct ScriptMatrixPayload {
 struct ScriptFloatPair {
     f32 v[2];
 };
-u128 ScaleQuadword(u128 s, u128 v);
-s32 ScaleMatrix(ScriptMatrixPayload* out, const ScriptMatrixPayload* m, u128 s);
 // A matrix scaled by a weight in a GPR (Vu0::ScalarInGpr), returned by value: ScaleMatrix into
 // the inline's own matrix, which the return copies into the caller's with CopyBytes. Inlined, the
 // call's arguments go straight into a0-a2, so retail forms the matrix's address afresh for
@@ -664,12 +654,12 @@ s32 ScaleMatrix(ScriptMatrixPayload* out, const ScriptMatrixPayload* m, u128 s);
 static inline ScriptMatrixPayload ScaledMatrix(const ScriptMatrixPayload* m, u128 s)
 {
     ScriptMatrixPayload r;
-    ScaleMatrix(&r, m, s);
+    ScaleMatrix((Mat4A*)&r, (const Mat4A*)m, s);
     return r;
 }
 u128* StoreFloatAsQuadword(u128* out, f32 f);
 void TransformByMatrixWithW(const Quad16* m, const Vec4* v, f32 w, Vec4* out);
-ScriptMatrixPayload MultiplyMatrices(const ScriptMatrixPayload* a, const void* b);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 void FreeMatrixPayload(void* p);
 
 // The script's * built-in: multiplies the first argument by each further one. Number times number
@@ -799,7 +789,7 @@ ScriptValue* MultiplyScriptValues(ScriptValue* ret, s32 count, ScriptValue* args
                 break;
             case 0x17: {
                 ScriptMatrixPayload c;
-                c = MultiplyMatrices(m, x->v);
+                *(Mat4A*)&c = MultiplyMatrices(*(Mat4A*)m, *(Mat4A*)x->v);
                 *m = c;
                 break;
             }
@@ -1668,8 +1658,9 @@ ScriptValue* ReturnScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args
 // KEPT (build/swarm/v2/NOTES.md): func_00114BB0, func_00118198 and func_00119218 give their
 // value back as a class (the result's place is GCC's hidden first argument), and their early
 // return keeps its own copy and destruction only so: written with the plain value and explicit
-// calls, GCC cross-jumps that return into the last one. Their callers (for func_00114BB0, the
-// table D_00259958) call them through the plain declarations above (ScriptValue* first).
+// calls, GCC cross-jumps that return into the last one. func_00117AF0 gives its list back the same
+// way. The table D_00259958 holds func_00114BB0 as a built-in, and the evaluator calls
+// func_00119218 with its own temporary as the result's place.
 struct RetValue : ScriptValue {
     RetValue() { InitScriptValue(this); }
     RetValue(const RetValue& o) { CopyConstructScriptValue(this, &o); }
@@ -3063,10 +3054,9 @@ ScriptValue* GetScriptObjectProperty(ScriptValue* ret, s32 count, ScriptValue* a
 // Turns count object pointers into a script list of tag 0x20 reference values, in order; a count of
 // 0 gives the empty list. The built-ins that search for objects use it to hand their results to the
 // script.
-ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values)
+RetValue MakeScriptRefList(s32 count, void** values)
 {
-    ScriptValue q;
-    InitScriptValue(&q);
+    RetValue q;
     if (count != 0) {
         R11B008Node* prev = 0;
         if (count > 0) {
@@ -3087,9 +3077,7 @@ ScriptValue* MakeScriptRefList(ScriptValue* ret, s32 count, void** values)
     } else {
         SetScriptValueTag(&q, 0);
     }
-    CopyConstructScriptValue(ret, &q);
-    DestroyScriptValue(&q, 2);
-    return ret;
+    return q;
 }
 
 // Script built-in: the first object of the current world with a given id (args[0], args[1]), or
@@ -3115,12 +3103,12 @@ ScriptValue* FindScriptObjectList(ScriptValue* ret, s32 count, ScriptValue* args
 {
     ScriptValue q;
     u8 buf[0x100];
-    ScriptValue t;
     InitScriptValue(&q);
     s32 r = GatherObjectsByMode(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
-    MakeScriptRefList(&t, r, buf);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = MakeScriptRefList(r, (void**)buf);
+        AssignScriptValue(&q, &t);
+    }
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3146,12 +3134,12 @@ ScriptValue* FindScriptObjectListById(ScriptValue* ret, s32 count, ScriptValue* 
 {
     ScriptValue q;
     u8 buf[0x100];
-    ScriptValue t;
     InitScriptValue(&q);
     s32 r = GatherObjectsByMode(g_currentWorld, 0x104, args[0].i, args[1].p, 0x40, buf);
-    MakeScriptRefList(&t, r, buf);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = MakeScriptRefList(r, (void**)buf);
+        AssignScriptValue(&q, &t);
+    }
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3193,12 +3181,12 @@ ScriptValue* GatherScriptObjectsById(ScriptValue* ret, s32 count, ScriptValue* a
 {
     ScriptValue q;
     u8 buf[0x400];
-    ScriptValue t;
     InitScriptValue(&q);
     s32 r = GatherObjectsById(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x100, buf);
-    MakeScriptRefList(&t, r, buf);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = MakeScriptRefList(r, (void**)buf);
+        AssignScriptValue(&q, &t);
+    }
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3214,7 +3202,6 @@ ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* ar
     ScriptValue q;
     Vec4 lo;
     Vec4 hi;
-    ScriptValue t;
     s32 n;
     u8* list;
     InitScriptValue(&q);
@@ -3222,9 +3209,10 @@ ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* ar
     Vu0::Set(hi, Vu0::Max(Vu0::Q(*args[0].Vector()), Vu0::Q(*args[1].Vector())));
     PushBackMemoryMark();
     GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, 0, 0, &n, (Collider***)&list);
-    MakeScriptRefList(&t, n, list);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = MakeScriptRefList(n, (void**)list);
+        AssignScriptValue(&q, &t);
+    }
     PopBackMemoryMark();
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3236,7 +3224,6 @@ ScriptValue* FindScriptObjectsInBox(ScriptValue* ret, s32 count, ScriptValue* ar
 ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
-    ScriptValue t;
     s32 n;
     u8* list;
     f32 scale;
@@ -3244,9 +3231,10 @@ ScriptValue* FindScriptObjectsInSphere(ScriptValue* ret, s32 count, ScriptValue*
     if (args[1].tag == 0x14) scale = (f32)args[1].i; else scale = args[1].f;
     PushBackMemoryMark();
     GatherCollidersInSphere(g_currentWorld, 0, scale, (Vec4*)args[0].v, 0, 0, &n, (Collider***)&list);
-    MakeScriptRefList(&t, n, list);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = MakeScriptRefList(n, (void**)list);
+        AssignScriptValue(&q, &t);
+    }
     PopBackMemoryMark();
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3326,11 +3314,11 @@ RetValue SearchScriptObjectHits(s32 id, s32 count, ScriptValue* args, ScriptScop
 ScriptValue* CollectScriptObjectHits(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
-    ScriptValue t;
     InitScriptValue(&q);
-    SearchScriptObjectHits(&t, 0x71, count, args, scope);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = SearchScriptObjectHits(0x71, count, args, scope);
+        AssignScriptValue(&q, &t);
+    }
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3340,11 +3328,11 @@ ScriptValue* CollectScriptObjectHits(ScriptValue* ret, s32 count, ScriptValue* a
 ScriptValue* FindScriptObjectHit(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
     ScriptValue q;
-    ScriptValue t;
     InitScriptValue(&q);
-    SearchScriptObjectHits(&t, 0x72, count, args, scope);
-    AssignScriptValue(&q, &t);
-    DestroyScriptValue(&t, 2);
+    {
+        RetValue t = SearchScriptObjectHits(0x72, count, args, scope);
+        AssignScriptValue(&q, &t);
+    }
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -4228,7 +4216,9 @@ ScriptValue* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptSco
         case 5: EvalScriptAssert(&u, expr, scope); goto tail;
         case 6: EvalScriptIf(&u, expr, scope); goto tail;
         case 7: EvalScriptOr(&u, expr, scope); goto tail;
-        case 8: EvalScriptAnd(&u, expr, scope); goto tail;
+        // EvalScriptAnd gives its value back as a class; the evaluator passes its own
+        // temporary as the result's place, as for the other forms
+        case 8: ((ScriptValue* (*)(ScriptValue*, R11B008Node*, ScriptScope*))EvalScriptAnd)(&u, expr, scope); goto tail;
         case 9: EvalScriptCond(&u, expr, scope); goto tail;
         case 11: EvalScriptCase(&u, expr, scope); goto tail;
         case 12: EvalScriptLet(&u, expr, scope); goto tail;

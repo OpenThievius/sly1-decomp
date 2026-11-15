@@ -8,6 +8,7 @@
 // alignment its own objects ask for, so the cut before could lie from 0x15AA50 to 0x15AAE0 and
 // the one after from 0x15C0A0 to 0x15C178. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "effect_spawner.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -167,7 +168,6 @@ struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
-typedef unsigned long u64;
 extern const Vec4 g_zeroVector;
 
 
@@ -282,10 +282,6 @@ void StartObjectCycler(ObjectCycler* self)
 extern f32 g_cyclerRotationRamp[6];
 extern f32 g_cyclerFallPositionSteer[4];
 extern f32 g_cyclerFallRotationSteer[4];
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
-void AddColliderForce(Collider* self, Vec4* force);
 struct RampProfile;
 struct Mat3;
 
@@ -303,7 +299,8 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         Vec4 k;
         Mat3 basis;
         f32 t = self->stateEnd + dt - g_gameClock[1];
-        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
         *(u128*)&k = Vu0::FromFloat(1.0f / dt);
         Vu0::Q(accel) = Vu0::MulX(Vu0::Q(accel), *(u128*)&k);

@@ -67,7 +67,6 @@ struct TimedAimRecord {
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
-void SetEffectSpawnerActiveForever(void* p);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
 
 
@@ -250,10 +249,9 @@ template <class T> struct NextInList {
 
 void PostLoadPlacedObject(PlacedObject* self);
 struct ValueListObject;
-struct Bits128;
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 void SetEffectSpawnerActiveForever(EffectSpawner* self);
-void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
+void QueryValueListMask(ValueListObject* self, f32 radius, u128* vec, s32* out);
 
 // The curve object at 0x34 of a path curve object.
 struct GroupCurveObject {
@@ -306,7 +304,7 @@ void PostLoadTimedGroup(TimedGroup* self)
         }
     }
     if ((self->flags & 0x3000000) != 0x2000000) {
-        QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (Bits128*)&self->v140, &self->visibilityMask);
+        QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (u128*)&self->v140, &self->visibilityMask);
     }
     PlacedObject* o = self;
     if (o->parent != 0) {
@@ -318,7 +316,7 @@ void PostLoadTimedGroup(TimedGroup* self)
             }
             up->boundRadius = reach;
             if ((up->flags & 0x3000000) != 0x2000000) {
-                QueryValueListMask((ValueListObject*)up->world->valueListObject, reach, (Bits128*)&up->v140, &up->visibilityMask);
+                QueryValueListMask((ValueListObject*)up->world->valueListObject, reach, (u128*)&up->v140, &up->visibilityMask);
             }
             o = (PlacedObject*)o->parent;
         } while (o->parent != 0);
@@ -1127,7 +1125,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
     }
     PushBackMemoryMark();
     Vec4* at = &pl->v140;
-    GatherCollidersInBox(self->world, 0, at, &self->root->v140, IsSequencedObjectCandidate, self, &count, &list);
+    GatherCollidersInBox(self->world, 0, at, &self->root->v140, (s32 (*)(void*, Collider*))IsSequencedObjectCandidate, self, &count, &list);
     if (FindNearestSpanObject(1, &self->v140, at, count, list, 0) == 0) {
         *state = self->repeating == 0 ? 2 : 6;
     }

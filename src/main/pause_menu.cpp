@@ -67,7 +67,7 @@ struct BarPacket { u8 bytes[0x400]; PacketWriter f; };
 void* InitGifPacket(PacketWriter* f);
 // The definition takes the four floats first; the EE passes them in their own registers, and
 // retail's caller evaluates them after the integers, as this order does.
-void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, PacketWriter* p, f32 x0, f32 y0, f32 x1, f32 y1);
+void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
 void EndGifPacket(PacketWriter* f);
 
 
@@ -476,7 +476,8 @@ void DrawLoadProgressBar(LoadProgress* o)
         u8 b = o->barColor.b;
         f32 y = TruncateFloat(412.909088f) * 1.1f;
         f32 z = (f32)(n2 + 10);
-        WriteColoredSpritePacket(r, g, b, 255, &buf.f, 10.0f, y, z, TruncateFloat(412.909088f) * 1.1f + 6.6000004f);
+        // retail's caller evaluates the colour and the packet before the corners
+        ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(r, g, b, 255, &buf.f, 10.0f, y, z, TruncateFloat(412.909088f) * 1.1f + 6.6000004f);
     }
     if (o->stalls <= 0) {
         c = o->color0;
@@ -492,7 +493,8 @@ void DrawLoadProgressBar(LoadProgress* o)
         f32 x = (f32)(n2 + 10);
         f32 y = TruncateFloat(412.909088f) * 1.1f;
         f32 z = (f32)(n1 + 10);
-        WriteColoredSpritePacket(r, g, b, 255, &buf.f, x, y, z, TruncateFloat(412.909088f) * 1.1f + 6.6000004f);
+        // retail's caller evaluates the colour and the packet before the corners
+        ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(r, g, b, 255, &buf.f, x, y, z, TruncateFloat(412.909088f) * 1.1f + 6.6000004f);
     }
     EndGifPacket(&buf.f);
     AddDmaEndTag(&buf.f);
@@ -1273,7 +1275,7 @@ void DrawPauseMenu(PauseMenu* self)
     if (self->page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->fade = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, self->fade, fade, g_gameClock[5]);
+    self->fade = ApproachValueWithRamp(self->fade, fade, g_gameClock[5], (RampProfile*)g_fadeRampProfile, 0);
     alpha = (u8)(s32)(self->fade * 255.0f);
     if (((MenuBoxStyle*)self->frame) != 0) {
         TextBoxLayout out;

@@ -52,7 +52,8 @@ struct ContactEvent {
 
 
 
-void* HandleObjectEvent(Collider* a, void* event);
+struct ObjectEvent;
+s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);
 
 void ExtractContactsByPartMode(Collider* self, BodyContact** out);
 
@@ -87,7 +88,7 @@ void SeekObjects105Animations(Player* self, s32 value);
 void ShowModeLabel(s32 mode);
 s32 FindNextTableIndexMatchingMask(PadRecord* self, s32 start, s32 count, s32* table);
 void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
-void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
+s32 HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg);
 
 // Changes to mode and shows its label: ends what the old mode was doing (releases a held or touched
@@ -215,7 +216,7 @@ void UpdateModeSelection(Player* self, PadRecord* pad)
         } else if (pad->buttons & 0x10) {
             self->speedUpAmount = 1.0f;
         } else {
-            self->speedUpAmount = ApproachValueWithRamp((RampProfile*)g_stepScaleRamp, 0, self->speedUpAmount, 0.0f, g_frameStep);
+            self->speedUpAmount = ApproachValueWithRamp(self->speedUpAmount, 0.0f, g_frameStep, (RampProfile*)g_stepScaleRamp, 0);
         }
         g_stepScale = self->speedUpAmount * g_stepScaleFast + (1.0f - self->speedUpAmount);
         break;
@@ -413,9 +414,9 @@ void CollectCountedColliderContacts(CountedCollider* self)
 
 // Slot 45 of the counted collider: handles the object event and, for a contact (flag 0x20), takes a
 // touch from the other object (forced when that is the player) and frees its contact chain.
-void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
+s32 HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1)
 {
-    void* r = HandleObjectEvent(a0, a1);
+    s32 r = HandleObjectEvent(a0, (ObjectEvent*)a1);
     if (r != 0 && (a1->flags & 0x20)) {
         ContactObject* a2 = a1->ref;
         s32 v1;

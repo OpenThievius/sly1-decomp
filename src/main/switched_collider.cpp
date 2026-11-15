@@ -10,6 +10,7 @@
 // the code is a choice: any function start from 0x191FD8 to 0x192380 (point_graph.cpp says why);
 // the cut is at 0x1921A8, the first switched collider function. Its name is ours, after the class.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "contactless_collider.h"
@@ -48,7 +49,6 @@ struct Mat3;
 s32 FindSwitchedColliderIndex(void* obj);
 s32 FindSwitchedColliderIndex(void* value);
 void ActivateSwitchedColliderIndex(s32 index);
-void* MoveMemory(void* dst, void* src, s32 size);
 void AddToSwitchedColliderList(void* self);
 void RemoveFromSwitchedColliderList(SwitchedCollider* value);
 void AddToSwitchedColliderList(SwitchedCollider* self);

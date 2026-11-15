@@ -62,7 +62,6 @@ void CopyFont(Font*, Font*);
 extern s32 g_fonts[];
 extern s32 g_defaultFont;
 
-FontGlyph* FindFontGlyph(Font* a, s32 b);
 
 void RewindTextReader(TextReader* self);
 s32 ReadTextChar(TextReader* self);
@@ -72,10 +71,9 @@ void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 
 void CopyFontMetrics(Font* self, Font* dst);
+FontGlyph* FindFontGlyph(Font* self, u8 key);
 
-FontGlyph* FindFontGlyph(Font* table, s8 key);
 
-void AddDmaRefTag(void* obj, s32 a, s32 b);
 
 void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj);
 s32 AddFontImagesToFrame(Font* self, void* obj);
@@ -90,7 +88,6 @@ void CopyMemory(void* dst, void* src, u32 size);
 
 void* InitGifPacket(void* p);
 
-void AddDmaRefTag(void* list, u32 count, s32 value);
 
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
@@ -131,7 +128,6 @@ void AddGifRegListFloat(PacketWriter* self, s32 tag, f32 value);
 void AddGifUvRegListEntry(PacketWriter* s, s32 a, s32 b);
 void AddGifXyzfRegListEntry(PacketWriter* self, s32 a1, s32 a2, u32 a3, u32 a4);
 
-FontGlyph* FindFontGlyph(Font* self, s8 key);
 
 s32 WrapTextLines(TextReader* self, f32 limit);
 f32 MeasureTextWidth(TextReader* self);
@@ -155,7 +151,6 @@ void* AllocateFrontMemory(s32 n);
 extern s32 g_glyphUOffset;
 extern s32 g_glyphVOffset;
 
-FontGlyph* FindFontGlyph(Font* self, s8 key);
 s32 AddFontImagesToFrame(Font* self, void* obj);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
@@ -170,8 +165,6 @@ void RewindTextReader(TextReader* self);
 
 
 typedef struct StringLayout StringLayout;
-typedef signed long s64;
-typedef unsigned long u64;
 
 
 
@@ -188,7 +181,6 @@ void PushFontScale(Font* font, f32 a, f32 b);
 
 
 
-FontGlyph* FindFontGlyph(Font* self, s8 key);
 void PushFontScale(Font* p, f32 a, f32 b);
 void PopFontScale(Font* p);
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
@@ -486,14 +478,16 @@ void CopyFont(Font* self, Font* dst)
 // Slot 2 of the font: true when the font has a glyph for the key.
 s32 HasFontGlyph(Font* a, s32 b)
 {
-    return FindFontGlyph(a, (s8)b) != 0;
+    // retail's caller passes the key sign-extended, as a signed char
+    return ((FontGlyph* (*)(Font*, s8))FindFontGlyph)(a, (s8)b) != 0;
 }
 
 // Slot 3 of the font: the advance of one character: its glyph's width plus 1 times the scale, or
 // the default advance when it has no glyph.
 f32 GetFontCharWidth(Font* self, s8 key)
 {
-    FontGlyph* e = FindFontGlyph(self, key);
+    // retail's caller passes the key sign-extended, as a signed char
+    FontGlyph* e = ((FontGlyph* (*)(Font*, s8))FindFontGlyph)(self, key);
     f32 x;
     f32 y;
     if (e == 0) {
@@ -513,11 +507,11 @@ s32 AddFontImagesToFrame(Font* self, void* obj)
     s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
         CloseDmaTag((PacketWriter*)obj);
-        AddDmaRefTag(obj, self->imageTagCount, self->imageTagData);
-        AddDmaRefTag(obj, self->imgA->blockCount, self->imgA->data);
+        AddDmaRefTag((PacketWriter*)obj, self->imageTagCount, self->imageTagData);
+        AddDmaRefTag((PacketWriter*)obj, self->imgA->blockCount, self->imgA->data);
         if (self->imgB != 0) {
-            AddDmaRefTag(obj, self->paletteTagCount, self->paletteTagData);
-            AddDmaRefTag(obj, self->imgB->blockCount, self->imgB->data);
+            AddDmaRefTag((PacketWriter*)obj, self->paletteTagCount, self->paletteTagData);
+            AddDmaRefTag((PacketWriter*)obj, self->imgB->blockCount, self->imgB->data);
         }
         BeginDmaTag((PacketWriter*)obj);
         g_buildFrame->flags |= self->mask;
@@ -568,7 +562,8 @@ void BeginFontGlyphPacket(Font* self, void* obj)
 // the scale).
 f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
 {
-    FontGlyph* e = FindFontGlyph(self, key);
+    // retail's caller passes the key sign-extended, as a signed char
+    FontGlyph* e = ((FontGlyph* (*)(Font*, s8))FindFontGlyph)(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->texWordU >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -596,7 +591,8 @@ f32 DrawFontGlyph(f32 x, f32 y, Font* self, s8 key, u32 color, PacketWriter* s)
 // images to the frame if needed and writes the sprite's GIF tag, UVs and positions.
 void DrawFontGlyphTurned(Font* self, s8 key, u32 color, PacketWriter* s, f32 x, f32 y)
 {
-    FontGlyph* e = FindFontGlyph(self, key);
+    // retail's caller passes the key sign-extended, as a signed char
+    FontGlyph* e = ((FontGlyph* (*)(Font*, s8))FindFontGlyph)(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->texWordU >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -662,7 +658,8 @@ void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
 // drawn as the sprites of the frame around the rectangle.
 void DrawFontFrame(Font* self, FrameGlyph* item, FrameRect* r, PacketWriter* s)
 {
-    FontGlyph* e = FindFontGlyph(self, item->key);
+    // retail's caller passes the key sign-extended, as a signed char
+    FontGlyph* e = ((FontGlyph* (*)(Font*, s8))FindFontGlyph)(self, item->key);
     if (e != 0) {
         PushFontScale(item->font, item->scaleX, item->scaleY);
         f32 top = r->y;

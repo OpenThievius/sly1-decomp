@@ -50,8 +50,8 @@ struct Obj_eu_1367B8 {
     u32 highlight;              // 0x580
     u8 glyph;                   // 0x584
     u8 pad585[0x5A4 - 0x585];
-    void* bands;                // 0x5A4
-    s32 bandsSize;              // 0x5A8
+    s32 bandsQwc;               // 0x5A4
+    s32 bandsPacket;            // 0x5A8
 };
 
 // PAL's layout, a word longer.
@@ -99,7 +99,7 @@ void DrawTextPanel(Obj_eu_1367B8* self)
     case 1:
     case 2:
         DrawTextPanelCenterFrame((CaptionBox*)self, &g_gsPacketWriter);
-        AddDmaRefTag(&g_gsPacketWriter, self->bands, self->bandsSize);
+        AddDmaRefTag(&g_gsPacketWriter, self->bandsQwc, self->bandsPacket);
         DrawCompassStrip((CaptionBox*)self, &g_gsPacketWriter);
         DrawTextPanelControlLabels((CaptionBox*)self, &g_gsPacketWriter);
         DrawTextPanelBorders((CaptionBox*)self, &g_gsPacketWriter);

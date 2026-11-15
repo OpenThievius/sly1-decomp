@@ -8,6 +8,7 @@
 // font's .data ends before D_00262280 and its functions read this file's packet writers only as
 // globals, so the cut could lie from 0x15E5F0 to 0x15E6A8. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "effect_spawner.h"
 #include "vu0.h"
 #include "asm_func.h"
@@ -129,12 +130,11 @@ extern u8 g_groupMicroprogramEnd[];
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void WriteVifFlush(PacketWriter* b);
 void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
-void AddDmaRefTagIfChanged(void* self, void* a, void* b);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void CloseDmaTag(PacketWriter* self);
-void AddDmaRefTag(void* obj, s32 a, s32 b);
+void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 void BeginDmaTag(PacketWriter* self);
 
 
@@ -147,8 +147,7 @@ void ActivateRenderFrame(void* a, s32 b);
 
 void ConstructPacketWriters(s32 flag, s32 code);
 
-void AddDmaRefTag(void* list, u32 count, s32 value);
-extern s32 g_lastDmaRefStart;
+extern void* g_lastDmaRefStart;
 
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
@@ -199,7 +198,6 @@ extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 void* CreateLockSemaphore(s32 initCount, s32 maxCount);
-void RunThread(s32 thread, void* arg);
 void func_0015E678(void);
 
 extern void* g_frameReadySemaphore;
@@ -228,8 +226,6 @@ s32 IsListEmpty(ObjectList* l);
 void RemoveFromList(ObjectList* list, void* item);
 void AppendToList(ObjectList* self, void* item);
 void ClearList(ObjectList* l);
-typedef signed long s64;
-typedef unsigned long u64;
 extern void* g_drawingFrame;
 extern void* g_frameReadySemaphore;
 extern volatile s32 g_renderThreadWaiting;
@@ -372,11 +368,13 @@ void BeginRenderFrame(void)
 
 // Adds a DMA reference tag for the data from value to end (in quadwords) unless it is the same
 // start as the last one added.
-void AddDmaRefTagIfChanged(void* list, s32 value, s32 end)
+void AddDmaRefTagIfChanged(void* list, void* value, void* end)
 {
     if (g_lastDmaRefStart != value) {
         g_lastDmaRefStart = value;
-        AddDmaRefTag(list, ((u32)(end - value) + 15) >> 4, value);
+        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
+        // as a word (a physical address among them), so this call views it with a pointer.
+        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)list, ((u32)((u8*)end - (u8*)value) + 15) >> 4, value);
     }
 }
 
@@ -664,7 +662,7 @@ ObjectList g_deferredReleaseListA = {};
 ObjectList g_deferredReleaseListB = {};
 // size: 12-byte record copied into Slot r38 by func_0015EC68
 ObjectList g_deferredReleaseListC = {};
-s32 g_lastDmaRefStart = 0;
+void* g_lastDmaRefStart = 0;
 // size: s32 (sw), 4-byte label
 s32 g_codeChecksumFailed = 0;
 u32 g_renderFrameIndex = 0;

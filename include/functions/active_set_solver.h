@@ -16,10 +16,10 @@ void DrawPlacedObjectParts(DeferredRequest* self);
 void InitActiveSetSolver(ActiveSetSolver* self, s32 count);
 void ResetActiveSetSolver(ActiveSetSolver* self);
 void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item);
-void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6);
+void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, BodyContact** contacts, s32* sizes, void** lists);
 void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x);
-void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6);
-void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, BodyContact** contacts, s32 a4, s32 a5, f32 dt);
+void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, BodyContact** contacts, s32* sizes, void** lists);
+void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, BodyContact** contacts, s32* sizes, void** lists, f32 dt);
 void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Collider*** lists, f32 maxLin, f32 maxAng);
 void SolveActiveSetSystem(s32 count, u8* data, f32* values, f32* out);
 

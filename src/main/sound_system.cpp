@@ -864,7 +864,8 @@ ListenerDistanceFn ChooseSoundListenerFunction(void)
     n = PeekStackValue(&g_camera->ctl460);
     if (n >= 3) return MeasureListenerDistance;
     if (n <= 0) return MeasureListenerDistance;
-    return MeasureCameraWeightedDistance;
+    // the function takes Vec4 pointers; callers see it as taking the listener and position
+    return (ListenerDistanceFn)MeasureCameraWeightedDistance;
 }
 
 // The distance from the listener to position, by the function ChooseSoundListenerFunction picks.

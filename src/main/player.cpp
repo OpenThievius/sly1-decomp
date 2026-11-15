@@ -3,6 +3,7 @@
 // include/switched_collider.h), its methods, its state changes and its target choice. Its name
 // is ours, after the class.
 #include "common.h"
+#include "asm_functions.h"
 #include "globals.h"
 #include "switched_collider.h"
 #include "node_query.h"
@@ -591,9 +592,6 @@ static inline f32 EvalCurve3(const f32* c, f32 t) { return c[0] + t * (c[1] + t 
 
 extern f32 g_gameClock[];
 
-f32 SplitVectorAlongAxis(const Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
-void AddColliderTorque(void* self, Vec4* torque);
-void AddColliderForce(void* self, void* force);
 
 // a blended toward b by t.
 static inline f32 BlendRamp(f32 t, f32 a, f32 b)
@@ -707,7 +705,6 @@ void ApplyPlayerDefaultSteering(Player* self)
 void ApplyPlayerDefaultSteering(Player* self);
 void *StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
-s128 ScaleQuadword(s128 a, s128 b);
 void* StoreQuadword(u128* out, u128 v);
 
 // Stores v as the direction at dir and steers the player toward the offset along it. Both
@@ -882,7 +879,6 @@ void ApplyPendingPlayerStateRequest(Player* self)
 }
 
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
-void BuildPerpendicularPair(Vec4* dir, Vec4* out, const Vec4* a, const Vec4* b);
 // Frees the player's chain of pooled contacts and, for the states that are pinned to something,
 // puts a contact back: state 7 pins to the path, state 6 to the target, and state 8 (holding a
 // ledge) adds an object contact at the ledge point, offset by the ledge slack and the hand offset.
@@ -1307,7 +1303,6 @@ s32 AimPlayerAtTarget(Player* self)
 struct PosedPart { u8 pad00[0x10]; s8 state; s8 next; u8 pad12[0x20 - 0x12]; Vec4 offset; u8 pad30[0x40 - 0x30]; Mat3 rotation; };
 
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
-f32 SplitVectorAlongAxis(const Vec4* v, const Vec4* axis, Vec4* along, Vec4* rest);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec4* origin, Vec4* vel, Vec4* velSum, Vec4* spin, Vec4* spinSum);
 void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t);
 
@@ -1709,7 +1704,6 @@ extern void* g_currentWarpPage;
 extern f32 D_00263894;
 extern f32 D_00263898;
 extern f32 g_scaleApproachRamp[3];
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void OrientPlayerSpinPart(Player* self, Mat3* out, f32 t);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
@@ -1740,10 +1734,10 @@ void BlendPlayerPose(Player* self, void* a, void* b)
         self->outerFadeScale = k * D_00263894 + (1.0f - k) * ramp;
     } else {
         f32 one = 1.0f;
-        self->outerFadeScale = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->outerFadeScale, one, g_gameClock[2]);
+        self->outerFadeScale = ApproachValueWithRamp(self->outerFadeScale, one, g_gameClock[2], (RampProfile*)g_scaleApproachRamp, 0);
         target = one;
     }
-    f32 spin = ApproachValueWithRamp((RampProfile*)g_scaleApproachRamp, 0, self->innerFadeScale, target, g_gameClock[2]);
+    f32 spin = ApproachValueWithRamp(self->innerFadeScale, target, g_gameClock[2], (RampProfile*)g_scaleApproachRamp, 0);
     self->innerFadeScale = spin;
     if (self->outerFadeScale < 1.0f || spin < 1.0f) {
         BuildPlacedObjectTransform(self, (Quad16*)b, &out);
@@ -1789,7 +1783,6 @@ void BlendPlayerPose(Player* self, void* a, void* b)
     ((Collider*)self->f61C)->flags &= ~(0x8000ULL << 17);
 }
 
-void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, f32 radius, FollowProbe* out); // the float where retail's caller passes it; the definition has it last
 
 // Recomputes the collider frame, then the two follow probes toward the linked parts (f610 and
 // f614), or marks them invalid when there are none or the player is in state 6 with target mode 7.
@@ -1811,8 +1804,9 @@ void RecomputePlayerFrame(Player* self)
             goto clear;
         }
         f32 k = 6.0f;
-        BuildPartProbeTowardLink(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)&self->footProbeA));
-        BuildPartProbeTowardLink(self, (PlacedObject*)self->linkPartB, self->linkPartB, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)&self->footProbeB));
+        // retail's caller evaluates the radius before the probe, as the fifth argument
+        ((void (*)(void*, PlacedObject*, void*, PlacedObject*, f32, FollowProbe*))BuildPartProbeTowardLink)(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)&self->footProbeA));
+        ((void (*)(void*, PlacedObject*, void*, PlacedObject*, f32, FollowProbe*))BuildPartProbeTowardLink)(self, (PlacedObject*)self->linkPartB, self->linkPartB, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)&self->footProbeB));
     }
     return;
 clear:
@@ -1864,10 +1858,6 @@ void DrawPlayer(Player* self, void* a, void* b)
 
 
 extern "C" f32 FloatRemainder(f32 x, f32 y);
-// The floats where retail's caller passes them; the definition has them last.
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-f32 ApproachValueWithRamp(RampProfile* k, f32 x, f32 y, f32* out, f32 z);
 
 // Advances the player's spin angle (radians): at the target rate while one is set, wrapped at 2 pi;
 // with no target it ramps the angle back to a full turn (spinRate follows the ramp) and zeroes it
@@ -1886,7 +1876,7 @@ void UpdatePlayerSpin(Player* self)
         if (self->spinAngle == 0.0f) {
             return;
         }
-        f32 r = ApproachValueWithRamp((RampProfile*)&g_spinRampParams, self->spinAngle, 6.2831855f, &self->spinRate, g_frameDt[0]);
+        f32 r = ApproachValueWithRamp(self->spinAngle, 6.2831855f, g_frameDt[0], (RampProfile*)&g_spinRampParams, &self->spinRate);
         self->spinAngle = r;
         if (r == 6.2831855f) {
             self->spinAngle = 0.0f;
@@ -1902,9 +1892,7 @@ struct ContactChainOwner {
     BodyContact* chain;       // 0x554
 };
 
-// Left with a third argument: PrunePlayerContacts matches only with k passed in $a2, which no
-// other call of IsObjectOfKind sets.
-s32 IsObjectOfKind(void* key, s32 kind, s32 extra);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 
 // Filters the player's contact list after collision: contacts with the held object go back to the
@@ -1928,7 +1916,9 @@ void PrunePlayerContacts(Player* self)
                     s32 k = (n->end[0].body != self);
                     if (n->end[k].part == self->heldObject) {
                         void* other = n->end[1 - k].body;
-                        if (other == 0 || IsObjectOfKind(other, 0x46, k) == 0) {
+                        // PrunePlayerContacts matches only with k passed in $a2, which no other
+                        // call of IsObjectOfKind sets
+                        if (other == 0 || ((s32 (*)(void*, s32, s32))IsObjectOfKind)(other, 0x46, k) == 0) {
                             *slot = n->next;
                             n->next = head;
                             head = n;
@@ -2145,7 +2135,6 @@ extern f32 g_pivotApproachRamp[4];
 extern f32 g_heightApproachRamp[4];
 
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 struct PushRecord;
 void FillPlayerPushRecord(Player* self, PushRecord* out);
 #include "value_range.h"
@@ -2205,7 +2194,7 @@ void CapturePlayerPose(Player* self, ColliderPose* pose, f32 dt)
             if (g_camera->snapping != 0) {
                 pose->position.z = z;
             } else {
-                f32 v = ApproachValueWithRamp((RampProfile*)g_heightApproachRamp, 0, last.z, z, g_gameClock[2]);
+                f32 v = ApproachValueWithRamp(last.z, z, g_gameClock[2], (RampProfile*)g_heightApproachRamp, 0);
                 pose->position.z = v;
                 f32 zlo = self->pos.z + g_cameraPoseMinOffset;
                 f32 zhi = self->pos.z + g_cameraPoseMaxOffset;
@@ -2327,7 +2316,6 @@ struct PushHolderDesc {
 };
 struct PushObject { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PushHolder* holder; u8 pad38[0x50 - 0x38]; u32 flags; };
 struct PushRecord { u8 pad00[0x30]; f32 heading; s32 f34; };
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 // Fills the record the pose takes while the player is pushed along an object (state 6, mode 0): the
 // heading from the heading matrix's x axis and, by the on/off phase, the point v2690 the player is
@@ -2422,7 +2410,7 @@ void FillPlayerPushRecord(Player* self, PushRecord* out)
     }
     OnOffObject* target = self->ownOnOffObject;
     f32* slot = &target->block2F0.f10[0];
-    self->ownOnOffObject->block2F0.f10[0] = ApproachValueWithRamp((RampProfile*)g_forceApproachRamp, 0, *slot, force, g_frameDt[0]);
+    self->ownOnOffObject->block2F0.f10[0] = ApproachValueWithRamp(*slot, force, g_frameDt[0], (RampProfile*)g_forceApproachRamp, 0);
 }
 
 
@@ -3337,7 +3325,6 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 f32 GetAnimationMarkerTime(Animation* self, s32 key);
-void BuildPerpendicularPair(Vec4* dir, Vec4* out, const Vec4* a, const Vec4* b);
 void StopAnimationPlayer(AnimationPlayer* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
@@ -4812,7 +4799,7 @@ void UpdatePlayerGrabs(Player* self)
         ComputeObjectMotionInFrame((PlacedObject*)c->end[e].part, 0, &rec->pos, (Vec4*)&rec->dir, 0, 0, 0);
         Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(rec->pos)));
     }
-    HeapSortRecords(recs, n, 0x40, CompareKeysAscending);
+    HeapSortRecords(recs, n, 0x40, (s32 (*)(void*, void*))CompareKeysAscending);
     for (i = 0; i < n; i++) {
         rec = &recs[i];
         PlacedObject* node = FindNodeForQuery(rec, self->foundNodeCount, self->foundNodes);
@@ -5045,7 +5032,6 @@ walker:
 
 
 
-void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 
@@ -5098,7 +5084,6 @@ void StartPlacedObject(void* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 
 
-void ComputeWorld5ModeColliderAnchors(void* self, void* a, void* b);
 void TransformStateToAncestorFrame(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 
@@ -5144,7 +5129,6 @@ struct TargetShaped {
 };
 s32 IsObjectOfKind(BaseObject* list, s32 key);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin); // the float where retail's caller passes it; the definition has it last
 // EXACT: gravity read in each expression that weights it, as a value of its own: the -0.5 dt
 // weight then comes before the load in the insn order, and sched1 keeps it there
 // (docs/TOOLCHAIN.md, "sched1").
@@ -5190,7 +5174,8 @@ void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec4* vel, Vec
         p = src->v10;
     }
     a = g_zeroVector;
-    TransformPointAtTime((PlacedObject*)parent, 0, dt, &p, 0, &a, 0);
+    // retail's caller evaluates the time before the pointers, as the third argument
+    ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))TransformPointAtTime)((PlacedObject*)parent, 0, dt, &p, 0, &a, 0);
     u128 end = Vu0::Add(Vu0::Q(p), Vu0::Q(off));
     u128 v = Vu0::DivX(Vu0::Sub(end, Vu0::Q(self->v140)), Vu0::Scalar(dt));
     v = Vu0::MulAddX(v, Vu0::Q(self->gravity), Vu0::Scalar(dt * -0.5f));
@@ -5445,7 +5430,6 @@ extern f32 D_00263C20[];
 extern f32 D_00263C30[];
 extern f32 D_00263C40[];
 
-void ComputeWorld5ModeColliderAnchors(World5ModeCollider* self, Vec4* a, Vec4* b);
 
 
 // A 0x20-byte candidate: an object, its distance along its curve (class 0x6E) and the point
@@ -5543,7 +5527,6 @@ done:
 }
 
 extern const Vec4 g_zeroVector;
-void* MoveMemory(void* dst, void* src, s32 size);
 // Keeps the player's memo of places it has stood (up to 32 entries of key object, position or
 // distance along it, and time). Each frame it makes the entry for the current place (the object the
 // state is bound to, the path position or the ground contact; some states record nothing), moves an

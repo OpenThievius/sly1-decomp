@@ -31,7 +31,6 @@ struct BaseObject;
 
 extern f32 g_gameTime[];
 extern u8 g_class75List[];
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, f32 t, Vec4* vel, Vec4* spin);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern const T2195_Vt g_ownerPoseSourceMethods;
 
@@ -543,7 +542,8 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         if ((n->count & mode) == 0) {
             continue;
         }
-        ComputeObjectFrameAtTime((PlacedObject*)n->parent, 0, &objOrigin, &objRot, a, 0, 0);
+        // retail's caller passes the time as the fifth argument, between the pointers
+        ((void (*)(PlacedObject*, PlacedObject*, Vec4*, Mat3*, f32, Vec4*, Vec4*))ComputeObjectFrameAtTime)((PlacedObject*)n->parent, 0, &objOrigin, &objRot, a, 0, 0);
         GetObjectWorldPosition(n, &delta);
         Vu0::Q(delta) = Vu0::Add(Vu0::Q(delta), Vu0::Q(local));
         Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec4*)&n->pos)), Vu0::Q(objOrigin));

@@ -251,7 +251,8 @@ struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
 struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
 
-s32 ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
+struct HullPoint;
+s32 ComputeHullSeenFromCamera(Vec4* pos, s32 n, HullPoint* pts);
 
 struct PlayerListHolder { u8 pad0[0x6C]; ObjectList list; };
 
@@ -542,7 +543,7 @@ void SetupTextPanel(CaptionBox* self)
     }
     AddGifXyzfEntry(&gs, 0x9400, 0x8700, 0x0FFFFFF0, 0);
     AddGifXyzfEntry(&gs, 0x9400, 0x80FA, 0x0FFFFFF0, 0);
-    DetachPacketBufferCopy(&gs, (s32*)&self->bands, 0, &self->bandsSize, 0x15);
+    DetachPacketBufferCopy(&gs, &self->bandsQwc, 0, &self->bandsPacket, 0x15);
     PopBackMemoryMark();
 }
 
@@ -1373,7 +1374,7 @@ void CollectPanelEntriesOfClass(CaptionBox* self, s32 kind, void* a2, void* a3, 
         ((void (*)(void*, PanelEntryPosition*, f32*))a2)(e->obj, &e->v, &e->radius);
         e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->position) - e->radius;
     }
-    HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
+    HeapSortRecords(entries, n, 0x20, (s32 (*)(void*, void*))(kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey));
     s32 mayStart = 1;
     FillMemory(self->blockA, 0, 0x10);
     if (!(g_panelStartCooldown < g_gameClock[1] - *(f32*)&self->countA)) {
@@ -1458,7 +1459,8 @@ LINKER_REMNANT(func_00135E40);
 void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out)
 {
     *out = self->v;
-    ComputeHullSeenFromCamera(out, 1);
+    // The record is the one point of the hull: retail's caller leaves out in the third register.
+    ComputeHullSeenFromCamera((Vec4*)out, 1, (HullPoint*)out);
 }
 
 LINKER_REMNANT(func_00135E70);
@@ -1708,7 +1710,6 @@ extern PacketWriter g_gsPacketWriter;
 s32 AreMenusClosed(void);
 void DrawCompassStrip(CaptionBox* self, PacketWriter* gs);
 void DrawTextPanelControlLabels(CaptionBox* self, PacketWriter* gs);
-void AddDmaRefTag(PacketWriter* gs, void* data, s32 size);
 void SeekTextReader(TextReader* self, s32 n);
 void DrawAlignedText(TextReader* self, TextBoxLayout* p, Vec4U* clip, PacketWriter* s);
 
@@ -1757,7 +1758,7 @@ void DrawTextPanel(CaptionBox* self)
     case 1:
     case 2:
         DrawTextPanelCenterFrame(self, &g_gsPacketWriter);
-        AddDmaRefTag(&g_gsPacketWriter, self->bands, self->bandsSize);
+        AddDmaRefTag(&g_gsPacketWriter, self->bandsQwc, self->bandsPacket);
         DrawCompassStrip(self, &g_gsPacketWriter);
         DrawTextPanelControlLabels(self, &g_gsPacketWriter);
         DrawTextPanelBorders(self, &g_gsPacketWriter);

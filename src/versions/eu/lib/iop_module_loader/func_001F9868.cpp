@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL copies the name with its own copy of CopyStringBounded (func_001F7738, the same bytes), placed elsewhere
-void* CopyStringBounded(ModuleBlob* dst, ModuleBlob* src, s32 n);
 
 s32 SendModuleLoadRequest(ModuleBlob* src, s32 size, ModuleBlob* data, s32* out, s32 cmd)
 {
@@ -11,7 +10,7 @@ s32 SendModuleLoadRequest(ModuleBlob* src, s32 size, ModuleBlob* data, s32* out,
         return -0x10004;
     }
     ModuleBlob* p = &g_moduleLoaderBuffer.name;
-    CopyStringBounded(p, src, 0xFC);
+    CopyStringBounded((char*)p, (const char*)src, 0xFC);
     ModuleLoadBuffer* q = (ModuleLoadBuffer*)((u8*)p - 8);
     q->name.b[0xFB] = 0;
     if (data != 0) {

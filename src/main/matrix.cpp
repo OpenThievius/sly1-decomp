@@ -22,7 +22,6 @@ extern u8 g_unitZVector[];
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" f32 Arcsine(f32 x);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-Mat4A MultiplyMatrices(Quad16* m, Quad16* in);
 void PushBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
@@ -76,8 +75,10 @@ ASM_FUNC(func_00188628);
 // in times m, row by row: each row of in through m (TransformMatrixByObject's product). The
 // matrix is returned by value: the caller passes the address of its result in a0 and gets it
 // back in v0, and each row goes to the result (g++'s named return value) as soon as it is made.
-Mat4A MultiplyMatrices(Quad16* m, Quad16* in) return out
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b) return out
 {
+    const Quad16* m = (const Quad16*)&a;
+    const Quad16* in = (const Quad16*)&b;
     u128 m0 = Vu0::Q(m[0]);
     u128 m1 = Vu0::Q(m[1]);
     u128 m2 = Vu0::Q(m[2]);
@@ -361,7 +362,7 @@ void TransformMatrixByObject(u8* self, void* arg, Quad16* out)
     Quad16 tmp[4];
 
     InvertRigidTransform(self + 0x30, self, tmp);
-    *(Mat4A*)out = MultiplyMatrices((Quad16*)arg, tmp);
+    *(Mat4A*)out = MultiplyMatrices(*(Mat4A*)arg, *(Mat4A*)tmp);
 }
 
 // The angle of a vector in the xy plane and its elevation, in radians, written through the two out
@@ -691,8 +692,8 @@ void BuildScaleAboutFrame(Vec4* pos, Mat3* rot, f32* scale, Mat4A* out)
     scaling.m[1][1] = scale[1];
     scaling.m[2][2] = scale[2];
     scaling.m[3][3] = 1.0f;
-    step = MultiplyMatrices((Quad16*)&scaling, (Quad16*)&inverse);
-    *out = MultiplyMatrices((Quad16*)&frame, (Quad16*)&step);
+    step = MultiplyMatrices(scaling, inverse);
+    *out = MultiplyMatrices(frame, step);
 }
 
 // The rotation that turns a into the direction of b, about their cross product made unit (x

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
@@ -416,7 +417,6 @@ void StepTurningCollider(TurningCollider* self, f32 dt)
 }
 
 extern f32 g_frameDt;
-void AddColliderForce(void* target, void* slot);
 
 // Turns the collider toward its heading matrix at the current frame's step (turnGain), then, when
 // it follows a mesh, adds two constrained forces derived from cross products of its two angular

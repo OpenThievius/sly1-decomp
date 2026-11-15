@@ -21,7 +21,7 @@ void TakeCountedColliderTouch(CountedCollider* self, void* v, s32 flag);
 void UpdateCountedCollider(CountedCollider* self, f32 dt);
 void StepCountedCollider(CountedCollider* self, f32 t);
 void CollectCountedColliderContacts(CountedCollider* self);
-void* HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
+s32 HandleCountedColliderEvent(CountedCollider* a0, ContactEvent* a1);
 void ComputeCountedColliderWorldFrame(CountedCollider* self);
 void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMessage* msg);
 

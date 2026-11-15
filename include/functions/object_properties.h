@@ -19,7 +19,7 @@ void* GetScriptEntryScope(s32 index, World* self);
 ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
 PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key);
 ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals);

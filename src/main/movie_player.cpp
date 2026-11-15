@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "child_group_object.h"
@@ -21,6 +22,7 @@
 #include "functions/base_object.h"
 #include "functions/collider.h"
 #include "functions/collider_span.h"
+#include "functions/curve_segment.h"
 #include "functions/disc_access.h"
 #include "functions/display.h"
 #include "functions/game_clock.h"
@@ -28,6 +30,7 @@
 #include "functions/iop_commands.h"
 #include "functions/matrix.h"
 #include "functions/mpeg_decoder.h"
+#include "functions/mpeg_demultiplexer.h"
 #include "functions/pad_input.h"
 #include "functions/placed_object.h"
 #include "functions/point_graph.h"
@@ -37,10 +40,8 @@
 #include "functions/text_format.h"
 #include "functions/warp_menu.h"
 struct BufferedStream;
-struct Device_20B0B0;
 struct MpegHandle;
 struct Outer_20AE40;
-struct S_20B0C0;
 
 struct Mat3;
 struct Vec4;
@@ -132,9 +133,9 @@ struct AttachedTransformFrame {
 
 
 
-void* MultiplyMatrices(void* out, void* b, void* in);
 
 extern s32 g_gifChannel;
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 extern "C" s32 AwaitSemaphore(s32 a);
 
@@ -142,7 +143,6 @@ extern u8 g_movieCrcTable[];
 
 extern s32 g_fieldOffsetMode;
 
-void ResetMpegDecoder(S_20B0C0* d);
 
 
 
@@ -182,7 +182,6 @@ extern s32 g_discSectorCheckState;
 
 struct GameClock;
 struct ScreenFade;
-s32 GetMpegDecoderStatus(Device_20B0B0* device);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -192,17 +191,12 @@ extern u8 g_globalPointer[];
 extern s32 g_movieDecodeThread;
 
 s32 MakeThread(ThreadParams* p);
-void RunThread(s32 thread, void* arg);
 
 
 
 struct ReaderEmpty {
     static bool Of(StreamReaderWindow* b) { return b->readyLength == b->usedLength; }
 };
-struct Ctx_20A220;
-struct Args_20A220;
-typedef s32 (*Handler_20A220)(Ctx_20A220* ctx, Args_20A220* args, void* arg);
-s32 DemultiplexBuffer(Ctx_20A220* ctx, s32 a, s32 b);
 
 
 extern "C" void PostSemaphore(s32 a);
@@ -215,9 +209,6 @@ extern u8 g_movieUploadPacket[];
 extern u8 g_movieDrawPacket[];
 extern u8 g_moviePlayerChecksumEnd[];
 
-s32 CreateMpegDecoder(void* self, void* a, s32 b);
-Handler_20A220 SetStreamCallback(Ctx_20A220* self, s32 idx, s32 key, Handler_20A220 handler, void* arg);
-s32 SetMpegCallback(void* self, s32 a, void* fn, void* arg);
 
 s32 FindKeyIndex(IdentityKey* key);
 u8* GetMovieTitle(s32 index);
@@ -348,7 +339,9 @@ void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2)
             }
             BuildPlacedObjectTransform(self, (Quad16*)in2, (ScaledTransform*)&f.blkA0);
             BuildMatrixFromRotationAndTranslation((const Vec4*)&f, &f.tbl30, (Mat4A*)&f.q60);
-            MultiplyMatrices(&f.blkF0, &f.blkA0, &f.q60);
+            // retail's call passes the frame's own block as the result's place, which an
+            // assignment of the returned matrix does not
+            ((void (*)(Mat4A*, Mat4A*, Vec4*))MultiplyMatrices)(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
             ApplyPlacedObjectTransform(self, (Camera*)in1, (ScaledTransform*)&f.blkA0);
         }
@@ -395,7 +388,6 @@ void AddContactListKind(ContactListObject* self, s32 value)
     }
 }
 
-void AddColliderForce(void* a, void* b);
 
 // Initialises the contact list object and sets its gravity to a fixed constant.
 void InitContactListObjectWithoutGravity(ContactListObject* self)
@@ -474,10 +466,6 @@ struct GliderListFrame {
     ~GliderListFrame() { g_activeListFrames = (ListFrame*)prev; }
 };
 
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 
 // Moves the glider-like contact list object one step of dt: until its end time it follows a Hermite
 // curve to the anchor object's position a short time ahead, afterwards it coasts. Once ready it
@@ -507,7 +495,8 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         }
         Vec4 outPos;
         Vec4 outVel;
-        EvaluateHermiteVectorSegment(remain, dt, 1.0f, &self->pos, &self->v150, &pos, &vel, &outPos, &outVel, &accel);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(remain, dt, 1.0f, &self->pos, &self->v150, &pos, &vel, &outPos, &outVel, &accel);
         self->pos = outPos;
         self->v150 = outVel;
     } else {
@@ -1011,7 +1000,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
     InitStreamReader(&loc, g_packetBufferMemory);
     if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback(self, &loc);
-        while (!GetMpegDecoderStatus((Device_20B0B0*)&self->decoder)) {
+        while (!GetMpegDecoderStatus((MpegHandle*)&self->decoder)) {
             AdvanceGameClockElapsed((GameClock*)g_gameClock);
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
@@ -1054,12 +1043,12 @@ void InitMoviePlayback(MoviePlayer* self, void* v)
     InitRingBuffer(&self->videoRing, 0x30000, (u8*)((s32)g_movieVideoRingBuffer | 0x20000000));
     StartMovieStream(&self->stream);
     InitMpegLibrary();
-    CreateMpegDecoder(&self->decoder, self->decoderWork, 0x152F68);
-    SetStreamCallback((Ctx_20A220*)&self->decoder, 0, 0, (Handler_20A220)AcceptMovieDataIntoRing, self);
-    SetStreamCallback((Ctx_20A220*)&self->decoder, 2, 0, (Handler_20A220)PassMovieDataToStream, self);
-    SetMpegCallback(&self->decoder, 1, (void*)FlushMovieToIpu, self);
-    SetMpegCallback(&self->decoder, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
-    SetMpegCallback(&self->decoder, 0, (void*)AcceptMovieDecoderEvent, self);
+    CreateMpegDecoder((MpegHandle*)&self->decoder, self->decoderWork, 0x152F68);
+    SetStreamCallback((MpegHandle*)&self->decoder, 0, 0, (MpegStreamFn)AcceptMovieDataIntoRing, self);
+    SetStreamCallback((MpegHandle*)&self->decoder, 2, 0, (MpegStreamFn)PassMovieDataToStream, self);
+    SetMpegCallback((MpegHandle*)&self->decoder, 1, (void*)FlushMovieToIpu, self);
+    SetMpegCallback((MpegHandle*)&self->decoder, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    SetMpegCallback((MpegHandle*)&self->decoder, 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder(self, 1) != 0) {
     }
     self->uploadPacket = g_movieUploadPacket;
@@ -1154,7 +1143,7 @@ void FinishMovie(MoviePlayer* self)
     self->reader = 0;
     ResetMovieStream(&self->stream);
     StopMovieStream(&self->stream);
-    ResetMpegDecoder((S_20B0C0*)&self->decoder);
+    ResetMpegDecoder((MpegHandle*)&self->decoder);
     (void)DeleteMpegDecoder((MpegHandle*)&self->decoder);
     if (self->threadStep != 0) {
         do {
@@ -1182,7 +1171,7 @@ s32 FeedMovieDecoder(MoviePlayer* self, s32 wait)
     SyncDataCache(0);
     StreamReaderWindow* buffer = self->reader;
     s32 count = buffer->readyLength - buffer->usedLength;
-    s32 result = DemultiplexBuffer((Ctx_20A220*)&self->decoder, buffer->readyStart + buffer->usedLength, count);
+    s32 result = DemultiplexBuffer((MpegHandle*)&self->decoder, buffer->readyStart + buffer->usedLength, count);
     ConsumeStreamBytes(self->reader, result);
     return result;
 }

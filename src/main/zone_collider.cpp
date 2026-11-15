@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "flag_table.h"
 #include "asm_func.h"
 #include "list_iter.h"
@@ -132,7 +133,7 @@ void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartMaskedCollider(MaskedCollider* self)
 {
     StartPlacedObject(self);
-    AppendQueuedCall(self->world, AttachMaskedColliderChildren, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)AttachMaskedColliderChildren, self, 0, 0);
 }
 
 extern u8 g_flagTable[];
@@ -1326,7 +1327,6 @@ void LoadTriggerZone(TriggerZone* self, BufferedStream* stream)
     CollectZoneChildren(&self->zone, self);
 }
 
-void* MoveMemory(void* end, void* begin, s32 bytes);
 
 // Adds a quad to the trigger zone; an object matching id 0x200 puts its quad first (shifting
 // the others up), any other goes last.
@@ -1888,7 +1888,6 @@ struct ZoneTarget {
     Vec4 v140;             // 0x140
 };
 
-s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 void CopyMemory(void* dst, void* src, u32 size);
 
 // The zone collider's per-frame update: after the collider's, a timed mode (2) ends when its

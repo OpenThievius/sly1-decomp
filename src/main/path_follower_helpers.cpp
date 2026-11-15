@@ -329,7 +329,7 @@ void UpdatePathFollowerSound(PathFollower* self, f32 dt)
     } else if (hi < t) {
         t = hi;
     }
-    self->soundSpeed = ApproachValueWithRamp((RampProfile*)g_followerSpeedRamp, 0, self->soundSpeed, t, dt);
+    self->soundSpeed = ApproachValueWithRamp(self->soundSpeed, t, dt, (RampProfile*)g_followerSpeedRamp, 0);
     f32 fwd = Vu0::ToFloat(Vu0::Dot(Vec::Of(self->v150), Vec::Of(self->m110.r[0]))) / g_followerSoundSpeedScale;
     f32 lo1 = 0.0f;
     f32 hi1 = 1.0f;
