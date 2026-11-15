@@ -10,7 +10,7 @@ import modern_check  # noqa: E402
 
 class SanitizeTest(unittest.TestCase):
     def test_minimum_and_maximum_operators_keep_their_columns(self):
-        src = "x = a <? b; y = c >? d;"
+        src = "x = a <? b; y = c >? d; n >?= s; m <?= t;"
         out = modern_check.sanitize(src)
         self.assertEqual(len(out), len(src))
         self.assertNotIn("<?", out)

@@ -15,13 +15,14 @@ sorts each error:
                 they pass, and any error inside those headers (g++ 2.95's named return values). A port replaces these helpers (docs/PORTING.md), so they are counted
                 and not listed.
     toolchain   the 1999 compiler's own internals: its variable-argument builtins
-                (`__builtin_next_arg`) and the C++ runtime's exception records; a port uses its
+                (`__builtin_next_arg`), the C++ runtime's exception records and its
+                `__builtin_eh_return` (three arguments there, two in later compilers); a port uses its
                 own compiler's <stdarg.h> and runtime. Counted, not listed.
     port        everything else: code a modern compiler rejects, which a port must change.
 
 Two g++ 2.95 extensions removed from later compilers are rewritten on a copy of the tree first,
 so the rest of each file is still checked: the minimum and maximum operators (`a <? b`,
-`a >? b`), and named return values (`T F(args) return r { ... }`, which retail's matrix
+`a >? b`, and `a >?= b`), and named return values (`T F(args) return r { ... }`, which retail's matrix
 functions need, docs/TOOLCHAIN.md), listed in the report as changes a port must make. config/modern_baseline.tsv records each file's port errors; `--check`
 fails when a file has more than its baseline, so a change cannot add new ones. Needs `clang`
 (or $CLANG); without it, `--check` says so and passes.
@@ -81,8 +82,12 @@ def sanitize(text):
             elif ch == "'":
                 state = "char"
             elif ch in "<>" and nx == "?" and text[i - 1:i] != ch:
-                out.append("+ ")
-                i += 2
+                if text[i + 2:i + 3] == "=":    # the compound forms, `a >?= b`
+                    out.append("+= ")
+                    i += 3
+                else:
+                    out.append("+ ")
+                    i += 2
                 continue
         elif state == "line":
             if ch == "\n":
@@ -148,8 +153,10 @@ def compile_unit(clang, tmp, unit):
         if os.path.isabs(f):
             f = os.path.relpath(os.path.realpath(f), os.path.realpath(tmp))
         msg = m.group("msg")
+        src = Path(tmp) / f
+        line = src.read_text(errors="replace").split("\n")[int(m.group("line")) - 1] if src.exists() else ""
         kind = ("ps2" if PS2.search(msg) or f in HELPERS else
-                "toolchain" if TOOLCHAIN.search(msg) else "port")
+                "toolchain" if TOOLCHAIN.search(msg) or "__builtin_eh_return" in line else "port")
         errors.append((unit, f, int(m.group("line")), kind, m.group("msg")))
     return errors
 
