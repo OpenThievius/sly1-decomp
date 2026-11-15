@@ -224,22 +224,19 @@ struct PlaneTreeOutput;
 extern u8 g_flushBatchProgram[];
 extern u8 g_stripMeshMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
+void WriteVifMscal(PacketWriter* s, void* program);
 
 extern u8 g_morphTargetMode0Program[];
 extern u8 g_morphTargetMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 extern u8 g_morphTargetMode0Program[];
 extern u8 g_morphTargetMode1Program[];
 
-void WriteVifMscal(void* obj, void* data);
 
 extern u8 g_flushBatchProgram[];
 extern u8 g_stripMeshMode1Program[];
 
-void WriteVifMscal(void* obj, void* text);
 
 
 // the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
@@ -301,12 +298,10 @@ void SetElementStackState(ElementStack* self, s32 state);
 extern u8 g_flushBatchProgram[];
 extern u8 g_stripMeshMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 extern u8 g_morphTargetMode0Program[];
 extern u8 g_morphTargetMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 
 extern u8 g_flagTable[];
@@ -370,7 +365,6 @@ void RewindPacketBuffer(PacketWriter* f);
 void AddGifXyzfEntry(PacketWriter* f, s32 a1, s32 a2, s32 a3, s32 a4);
 void WriteVifStrow(PacketWriter* s, u32* src);
 void WriteVifStmask(PacketWriter* s, s32 value);
-void WriteVifMscal(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
 
 
@@ -477,8 +471,7 @@ extern u8 g_litBatchFinishProgram[];
 
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifMscal(PacketWriter* s, void* data);
-void WriteVifMscalf(PacketWriter* s, void* data);
+void WriteVifMscalf(PacketWriter* s, void* program);
 void WriteVifFlushE(PacketWriter* s);
 void CloseDmaTag(PacketWriter* s);
 void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
@@ -508,8 +501,6 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifStrow(PacketWriter* s, u32* src);
 void WriteVifStmask(PacketWriter* s, s32 value);
-void WriteVifMscal(PacketWriter* s, void* data);
-void WriteVifMscalf(PacketWriter* s, void* data);
 void WriteVifFlushE(PacketWriter* s);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
@@ -542,7 +533,6 @@ void* InitPacketWriter(PacketWriter* self);
 void AllocateQuadwordBuffer(PacketWriter* buffer, u32 count, u32 kind);
 void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
-void WriteVifMscal(void* s, void* n);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 
@@ -578,7 +568,6 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifStcycl(PacketWriter* b, u32 x, u32 y);
 void WriteVifStrow(PacketWriter* b, u32* src);
 void WriteVifStmask(PacketWriter* self, s32 value);
-void WriteVifMscal(PacketSlot* s, void* data);
 void WriteVifFlushE(PacketWriter* b);
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);

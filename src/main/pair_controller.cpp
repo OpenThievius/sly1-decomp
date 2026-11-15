@@ -524,7 +524,7 @@ void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
             ramp.maxSpeed = lim[0] + along;
             ramp.endSpeed = lim[1] + along;
             ramp.rampTime = lim[2];
-            f32 res = ApproachValueWithRamp(&ramp, &out, 0.0f, l, g_frameDt);
+            f32 res = ApproachValueWithRamp(0.0f, l, g_frameDt, &ramp, &out);
             u128 w = Vu0::Scalar(res);
             Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(dir), w);
             Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(split), Vu0::Q(dir), Vu0::ScalarAt(out));
@@ -2324,7 +2324,7 @@ void UpdateObjectCreator(ObjectCreator* self, f32 dt)
         SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)anchor->watchedObject)->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
         f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
         ramp.Set(3000.0f, 0.0f, 0.2f);
-        f32 speed = ApproachValueWithRamp(&ramp, 0, len, 3000.0f, g_frameDt);
+        f32 speed = ApproachValueWithRamp(len, 3000.0f, g_frameDt, &ramp, 0);
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(speed));
         PlacedObject* o = (PlacedObject*)self->created;
         o->desc02()->m20(o, &vel);

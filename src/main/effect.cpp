@@ -1103,9 +1103,6 @@ void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->fB0 = -8.0f;
 }
 
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 // The move of a drifting effect: the plain effect move, then, in 3 of 10 frames when it has a
 // velocity, a sideways push in a random direction across that velocity, at a random speed of 100 to
 // 400 units/s scaled down by the roll.
@@ -1133,7 +1130,8 @@ void MoveDriftingEffect(Effect* self, f32 dt)
         Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), Vu0::Length(Vu0::Q(dir)));
         BuildPerpendicularPair(&dir, side, &g_unitXVector, &g_unitZVector);
         f32 speed = RandomFloatInRange(100.0f, (1.0f - r * 3.3333333f) * 300.0f + 100.0f);
-        ComputeSinCos(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
+        // Retail's caller evaluates the angle before the outputs' addresses: the call names it first.
+        ((void (*)(f32, f32*, f32*))ComputeSinCos)(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
         Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(side[0]), Vu0::Scalar(s * speed), Vu0::Q(side[1]), Vu0::Scalar(c * speed));
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(push), Vu0::Scalar(dt));
     }

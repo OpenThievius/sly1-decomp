@@ -110,10 +110,6 @@ extern void PopBackMemoryMark(void);
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
 
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteSegment(f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd, f32* p0, f32* p1, f32* p2);
-
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
 
 
@@ -211,7 +207,6 @@ struct KeyedCurveClosure {
 f32 g_valueRampProfile[4] = { 3.0f, 1.0f, 0.1f, 0.0f };
 extern f32 g_frameStep;
 extern f32 g_frameDt;
-extern f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 
@@ -2164,7 +2159,7 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
     case 3: {
         f32 cur = self->owner->currentValues[val];
         f32 limit = self->owner->frameStepClock ? g_frameStep : g_frameDt;
-        self->owner->currentValues[val] = ApproachValueWithRamp((RampProfile*)g_valueRampProfile, 0, cur, ret, limit);
+        self->owner->currentValues[val] = ApproachValueWithRamp(cur, ret, limit, (RampProfile*)g_valueRampProfile, 0);
         break;
     }
     }

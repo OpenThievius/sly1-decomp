@@ -937,7 +937,7 @@ extern f32 D_00263E74;
 extern f32 D_00264040;
 extern f32 D_00264044;
 extern f32 D_00264048[2];
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime;
 extern f32 g_gameClock[];
@@ -1200,8 +1200,10 @@ void UpdatePlayerState2(Player* p)
     if (p->subState < 16) {
         if (p->subState >= 9) {
             f32 t = ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1] + g_gameClock[2];
-            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
-            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
+            // Retail's caller evaluates the floats first: the call names them first.
+            ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
+            // Retail's caller evaluates the floats first: the call names them first.
+            ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
             if (D_00264048[0] < (Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(b))) + Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(c)))) * (t * 0.5f)) {
                 SetPlayerState(p, 2, 2);
             }

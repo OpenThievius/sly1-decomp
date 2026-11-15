@@ -9,7 +9,7 @@ void PlayMovie(MoviePlayer* self, IdentityKey* key)
     InitStreamReader(&loc, g_packetBufferMemory);
     if (KeyIdOfMovie::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
         InitMoviePlayback(self, &loc);
-        while (!GetMpegDecoderStatus((Device_20B0B0*)&self->decoder)) {
+        while (!GetMpegDecoderStatus((MpegHandle*)&self->decoder)) {
             AdvanceGameClockElapsed((GameClock*)g_gameClock);
             UpdatePadConnection(&g_padRecord);
             s32 flag = 0;

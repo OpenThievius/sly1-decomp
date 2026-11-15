@@ -670,7 +670,6 @@ s32 PeekIpuBits(MpegDecoder* obj, s32 a1)
 }
 
 extern u32 g_ipuCommandWindowInvalid[];
-extern s64 WaitIpuCommandResult(MpegDecoder* c, u32* v);
 
 // Sends the IPU a command that consumes n bits and refreshes the bit window.
 void SkipIpuBits(MpegDecoder* s0, u32 s1)
@@ -689,7 +688,7 @@ void SkipIpuBits(MpegDecoder* s0, u32 s1)
     *(volatile u32*)0x10002000 = v;
     p = &g_ipuCommandWindowInvalid[v >> 28];
     s0->windowInvalid = *p;
-    s0->window = WaitIpuCommandResult(s0, p);
+    s0->window = WaitIpuCommandResult(s0);
     s0->windowBits = 0x20;
 }
 

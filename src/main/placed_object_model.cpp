@@ -75,32 +75,26 @@ void PopBackMemoryMark(void);
 extern u8 g_flushBatchProgram[];
 extern u8 g_stripMeshMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 extern u8 g_morphTargetMode0Program[];
 extern u8 g_morphTargetMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 extern u8 g_morphTargetMode0Program[];
 extern u8 g_morphTargetMode1Program[];
 
-void WriteVifMscal(void* obj, void* data);
 
 extern u8 g_flushBatchProgram[];
 extern u8 g_stripMeshMode1Program[];
 
-void WriteVifMscal(void* obj, void* text);
 
 extern u8 g_flushBatchProgram[];
 extern u8 g_stripMeshMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 extern u8 g_morphTargetMode0Program[];
 extern u8 g_morphTargetMode1Program[];
 
-void WriteVifMscal(void* s, s32 n);
 
 // EXACT: self->block store ahead of self->f20 store.
 
@@ -113,7 +107,6 @@ extern u8 g_morphTargetTailProgram[];
 extern u8 g_morphTargetEndProgram[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifMscal(PacketWriter* s, void* data);
 void WriteMorphTargetMscal(s32 mode, void* obj);
 
 
@@ -142,8 +135,6 @@ extern u8 g_litBatchThirdProgram[];
 extern u8 g_litBatchFinishProgram[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifMscal(PacketWriter* s, void* data);
-void WriteVifMscalf(PacketWriter* s, void* data);
 void CopyMemory(void* dst, void* src, u32 size);
 
 
@@ -162,8 +153,6 @@ extern u8 g_extraStreamFirstProgram[];
 extern u8 g_unlitExtraStreamSecondProgram[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifMscal(PacketWriter* s, void* data);
-void WriteVifMscalf(PacketWriter* s, void* data);
 void WriteVifUnpack(PacketWriter* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteStripMeshMscal(s32 mode, void* obj);
@@ -215,8 +204,6 @@ extern u8 g_extraStreamFirstProgram[];
 extern u8 g_litExtraStreamSecondProgram[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void WriteVifMscal(PacketSlot* s, void* data);
-void WriteVifUnpack(PacketSlot* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* AllocateZeroedFrontMemory(s32 bytes);
 void WriteStripMeshMscal(s32 mode, void* obj);
 void WriteStripMeshMscal(s32 mode, void* obj);
@@ -772,10 +759,10 @@ void WriteStripMeshMscal(s32 mode, void* obj)
 {
     switch (mode) {
     case 0:
-        WriteVifMscal(obj, g_flushBatchProgram);
+        WriteVifMscal((PacketWriter*)obj, g_flushBatchProgram);
         break;
     case 1:
-        WriteVifMscal(obj, g_stripMeshMode1Program);
+        WriteVifMscal((PacketWriter*)obj, g_stripMeshMode1Program);
         break;
     }
 }
@@ -786,10 +773,10 @@ void WriteMorphTargetMscal(s32 mode, void* obj)
 {
     switch (mode) {
     case 0:
-        WriteVifMscal(obj, g_morphTargetMode0Program);
+        WriteVifMscal((PacketWriter*)obj, g_morphTargetMode0Program);
         break;
     case 1:
-        WriteVifMscal(obj, g_morphTargetMode1Program);
+        WriteVifMscal((PacketWriter*)obj, g_morphTargetMode1Program);
         break;
     }
 }
@@ -1175,7 +1162,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
                 *wOut++ = weights[r->pos * hdr->count + j];
             }
         }
-        WriteVifMscal(&pkt[0], g_skinWeightProgram);
+        WriteVifMscal((PacketWriter*)&pkt[0], g_skinWeightProgram);
     }
     if (self->nweights != 0) {
         hdr->p->off[3] = off;
@@ -1191,7 +1178,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
                 dOut[i].y = v->y - vecs[r->pos].y;
                 dOut[i].z = v->z - vecs[r->pos].z;
             }
-            WriteVifMscal(&pkt[0], g_positionDeltaProgram);
+            WriteVifMscal((PacketWriter*)&pkt[0], g_positionDeltaProgram);
             WriteVifFlushE((PacketWriter*)&pkt[0]);
         }
     }
@@ -1206,7 +1193,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     ReserveVifUnpack((PacketWriter*)&pkt[1], 0xE, n, hdr->p->off[0] + 1, 0, &cOut);
     WriteVifStcycl((PacketWriter*)&pkt[1], 1, 1);
     if (hdr->count > 0) {
-        WriteVifMscal(&pkt[1], g_litSkinWeightProgram);
+        WriteVifMscal((PacketWriter*)&pkt[1], g_litSkinWeightProgram);
     }
     if (self->nweights > 0) {
         for (s32 m = 0; m < self->nweights; m++) {
@@ -1222,11 +1209,11 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
                 nDelta[i].y = v->y - nrms[r->nrm].y;
                 nDelta[i].z = v->z - nrms[r->nrm].z;
             }
-            WriteVifMscal(&pkt[1], g_normalDeltaProgram);
+            WriteVifMscal((PacketWriter*)&pkt[1], g_normalDeltaProgram);
         }
-        WriteVifMscal(&pkt[1], g_normalDeltaFinishProgram);
+        WriteVifMscal((PacketWriter*)&pkt[1], g_normalDeltaFinishProgram);
     }
-    WriteVifMscal(&pkt[1], g_litBatchProgram);
+    WriteVifMscal((PacketWriter*)&pkt[1], g_litBatchProgram);
     for (i = 0; i < n; i++) {
         s32 j;
         r = &recs[i];
@@ -1292,27 +1279,27 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     if (node != 0 && (node->flags & 2)) {
         ReserveVifUnpack((PacketWriter*)&pkt[2], 4, 1, 0x16, &a, (u8**)&b);
         QueueNodeLink(b, a, node);
-        WriteVifMscal(&pkt[2], g_nodeLinkProgram);
+        WriteVifMscal((PacketWriter*)&pkt[2], g_nodeLinkProgram);
     }
     if (hdr->extra != 0) {
         StripExtra* e = hdr->extra;
         for (s32 i = 0; i < obj->link->extraCount; i++) {
             ReserveVifUnpack((PacketWriter*)&pkt[2], 0xC, n, off, 0, (u8**)&e->a24[i]);
             if (obj->link->f18 != 0) {
-                WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a14[i]);
-                WriteVifMscal(&pkt[2], g_extraStreamFirstProgram);
+                WriteVifUnpack((PacketWriter*)&pkt[2], 0xC, 4, 0, 0x16, &e->a14[i]);
+                WriteVifMscal((PacketWriter*)&pkt[2], g_extraStreamFirstProgram);
                 WriteVifFlushE((PacketWriter*)&pkt[2]);
             }
             if (obj->link->f14 != 0) {
-                WriteVifUnpack(&pkt[2], 0xC, 4, 0, 0x16, &e->a4[i]);
-                WriteVifMscal(&pkt[2], g_litExtraStreamSecondProgram);
+                WriteVifUnpack((PacketWriter*)&pkt[2], 0xC, 4, 0, 0x16, &e->a4[i]);
+                WriteVifMscal((PacketWriter*)&pkt[2], g_litExtraStreamSecondProgram);
                 WriteVifFlushE((PacketWriter*)&pkt[2]);
             }
         }
         hdr->p->off[3] = off;
         off += n;
     }
-    WriteVifMscal(&pkt[2], g_litBatchThirdProgram);
+    WriteVifMscal((PacketWriter*)&pkt[2], g_litBatchThirdProgram);
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
@@ -1342,14 +1329,14 @@ void BuildPartVifPackets(PartPacketContext* a, PartPacketSource* b, PartPackets*
     WriteVifStcycl((PacketWriter*)buf, 1, 4);
     ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->lo + 1, 0, (u8**)&c->firstUnpackCursor);
     WriteVifStcycl((PacketWriter*)buf, 1, 1);
-    WriteVifMscal(buf, g_litBatchFinishProgram);
+    WriteVifMscal((PacketWriter*)buf, g_litBatchFinishProgram);
     DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->firstQwc, (u8**)&c->firstBuffer);
     AllocateQuadwordBuffer((PacketWriter*)buf, (u32)((s0 + 4) / 2), 0x1A);
     WriteVifStcycl((PacketWriter*)buf, 1, 4);
     ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->lo + 2, 0, (u8**)&c->secondUnpackCursor);
     WriteVifStcycl((PacketWriter*)buf, 1, 1);
     ReserveVifUnpack((PacketWriter*)buf, 0xE, s0, b->unpack->hi, 0, 0);
-    WriteVifMscal(buf, g_litBatchSecondFinishProgram);
+    WriteVifMscal((PacketWriter*)buf, g_litBatchSecondFinishProgram);
     DetachPacketBuffer((PacketWriter*)buf, (u32*)&c->secondQwc, (u8**)&c->secondBuffer);
 }
 

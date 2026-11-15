@@ -1655,9 +1655,7 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-struct Bits128;
 struct ValueListObject;
-void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
 // The product a b into the object's world matrix (m110), written through the object: b's rows
 // read by index (MulRotationRowsIndexed), each result row stored to its vector local and to the
@@ -1720,7 +1718,7 @@ void ComputePlacedObjectWorldFrame(PlacedObject* self)
     u32 kind = self->bits24;
     if (kind == 2) {
         if (self->world->valueListObject != 0) {
-            QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (Bits128*)&self->v140, &self->visibilityMask);
+            QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (u128*)&self->v140, &self->visibilityMask);
         } else {
             self->visibilityMask = 0x0FFFFFFF;
         }
@@ -2225,7 +2223,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
                 goal = 0.5f;
             }
             if (goal != state->fade) {
-                state->fade = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, state->fade, goal, g_gameClock.dt);
+                state->fade = ApproachValueWithRamp(state->fade, goal, g_gameClock.dt, (RampProfile*)g_fadeRampProfile, 0);
             }
             rec.block.outerFade = rec.block.outerFade * state->fade;
         }

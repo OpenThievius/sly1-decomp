@@ -225,7 +225,6 @@ struct PadStick {
 extern AimReticle g_spinningSpriteElement;
 extern u8 g_blankPadRecord[];
 extern u8 g_modeWalkerScreenPoint[];
-void ControlPathFollower(PathFollower* self, PadStick* pad, f32 dt);
 void SteerWalkerAimAtNearestTarget(AimReticle* self, PadStick* pad);
 typedef void (*FrameFn)(void* self, Mat3* m);
 
@@ -240,7 +239,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
     Vec4 pos;
     Vec4 d;
     f32 angle;
-    ControlPathFollower(self, pad, dt);
+    ControlPathFollower(self, (PadRecord*)pad, dt);
     GetStateWalkerCurrentKey(self->stateWalker, &cur);
     GetStateWalkerTargetKey(self->stateWalker, &target);
     switch (self->walkerMode) {
@@ -634,16 +633,16 @@ void SteerWalkerAimAtNearestTarget(AimReticle* self, PadStick* pad)
             chosen = o;
         }
     }
-    self->rateX = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateX, pad->x, g_gameClock[2]);
+    self->rateX = ApproachValueWithRamp(self->rateX, pad->x, g_gameClock[2], (RampProfile*)g_walkerAimRateRamp, 0);
     f32 y = pad->y;
     if (g_saveData->optionFlags & 0x400) {
         y = -y;
     }
-    self->rateY = ApproachValueWithRamp((RampProfile*)g_walkerAimRateRamp, 0, self->rateY, y, g_gameClock[2]);
+    self->rateY = ApproachValueWithRamp(self->rateY, y, g_gameClock[2], (RampProfile*)g_walkerAimRateRamp, 0);
     self->aim[0] = ClampHelper::Of(self->aim[0] + g_gameClock[2] * self->rateX * g_walkerAimRateScale, -1.0f, 1.0f);
     self->aim[1] = ClampHelper::Of(self->aim[1] - g_gameClock[2] * self->rateY * g_walkerAimRateScale, -1.0f, 1.0f);
     f32 far = 1000.0f;
-    self->aim[2] = ApproachValueWithRamp((RampProfile*)g_walkerAimDistanceRamp, 0, self->aim[2], far >? best.z, g_gameClock[2]);
+    self->aim[2] = ApproachValueWithRamp(self->aim[2], far >? best.z, g_gameClock[2], (RampProfile*)g_walkerAimDistanceRamp, 0);
     self->target = chosen;
 }
 
@@ -674,7 +673,7 @@ void DrawSpinningSpriteElement(AimReticle* self)
     if (g_camera->snapping != 0) {
         self->alphaScale = target;
     } else {
-        self->alphaScale = ApproachValueWithRamp((RampProfile*)g_walkerAlphaRamp, 0, self->alphaScale, target, g_frameStep);
+        self->alphaScale = ApproachValueWithRamp(self->alphaScale, target, g_frameStep, (RampProfile*)g_walkerAlphaRamp, 0);
     }
     if (self->alphaScale == 0.0f) {
         return;

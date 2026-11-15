@@ -60,7 +60,6 @@ extern f32 g_timeScale;
 
 void SetCameraControllerOwner(CameraController* self, Camera* owner);
 
-s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
 
 // What SetSinCosPair fills: the two results of ComputeSinCos and a word it clears.
 #include "sin_cos_pair.h"
@@ -69,7 +68,6 @@ struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-s32 GetCameraControllerTargetPoint(void* out, TargetCameraController* self);
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -244,7 +242,6 @@ void InitTargetCameraController(TargetCameraController* self, Camera* owner)
 // and sets the near distance to 49 (the old one is kept).
 void ActivateTargetCameraController(TargetCameraController* self)
 {
-    Quad4 tmp;
     Camera* eng = (Camera*)self->owner;
     VectorToAngles((Vec3*)eng->g80, &self->g08, &self->pitch);
     f32 d = self->zoomDivisor;
@@ -256,8 +253,8 @@ void ActivateTargetCameraController(TargetCameraController* self)
     f32 a = eng->zoomGoal;
     self->zoomMax = a;
     self->zoomMin = a / d;
-    GetCameraControllerTargetPoint(&tmp, self);
-    SetCameraLookAnchor(eng, (Quad16*)&tmp);
+    Quad16 tmp = GetCameraControllerTargetPoint(self);
+    SetCameraLookAnchor(eng, &tmp);
     self->savedNearDistance = eng->nearDistance;
     SetCameraNearDistance(eng, 49.0f);
 }

@@ -251,7 +251,8 @@ struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
 struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
 
-s32 ComputeHullSeenFromCamera(PanelEntryPosition* v, s32 mode);
+struct HullPoint;
+s32 ComputeHullSeenFromCamera(Vec4* pos, s32 n, HullPoint* pts);
 
 struct PlayerListHolder { u8 pad0[0x6C]; ObjectList list; };
 
@@ -1458,7 +1459,8 @@ LINKER_REMNANT(func_00135E40);
 void ReadAdjustedPanelEntryPosition(PanelEntrySource* self, s32 unused, PanelEntryPosition* out)
 {
     *out = self->v;
-    ComputeHullSeenFromCamera(out, 1);
+    // The record is the one point of the hull: retail's caller leaves out in the third register.
+    ComputeHullSeenFromCamera((Vec4*)out, 1, (HullPoint*)out);
 }
 
 LINKER_REMNANT(func_00135E70);

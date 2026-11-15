@@ -21,7 +21,7 @@ extern "C" void ConstructBestTimeTextStyleAtStartup();
 extern "C" void ConstructWarpTextStyleGlobalsAtStartup();
 extern "C" void ConstructTriangleGroupColorsAtStartup();
 extern "C" void ConstructMovieRingSinkAtStartup();
-s32 ConstructSwitchedColliderDefaultsAtStartup();
+extern "C" void ConstructSwitchedColliderDefaultsAtStartup();
 extern "C" void ConstructScratchpadTransfersAtStartup();
 extern "C" void ConstructWorldLoadRequestGlobalAtStartup();
 void ConstructGreyColorAtStartup();

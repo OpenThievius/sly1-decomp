@@ -102,7 +102,6 @@ f32 GetWrappedDifference(f32 x, f32 lim, f32 base);
 extern f32 g_gameClock[];
 
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 
@@ -121,7 +120,7 @@ extern f32 g_steerAngleGain;
 extern f32 g_steerAngleLimit;
 extern f32 g_frameDt;
 extern f32 g_steerAngleRamp[3];
-extern "C" f32 ArctangentOfRatio(f32 y, f32 x); f32 WrapAngle(f32 a); f32 ClampToMagnitude(f32 a, f32 b); f32 ApproachAngleWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x); f32 WrapAngle(f32 a); f32 ClampToMagnitude(f32 a, f32 b);
 
 typedef int Quadword __attribute__((mode(TI)));
 
@@ -1064,7 +1063,7 @@ f32 FindNearestValueOutsideSpans(s32 count, ValueRange* spans, f32 x)
 void UpdatePathFollowerPace(PathFollower* self)
 {
     if (self != GetActiveSwitchedCollider()) {
-        self->pace = ApproachValueWithRamp((RampProfile*)g_paceRamp, 0, self->pace, self->paceTarget, g_gameClock[2]);
+        self->pace = ApproachValueWithRamp(self->pace, self->paceTarget, g_gameClock[2], (RampProfile*)g_paceRamp, 0);
         if (!(g_gameClock[1] < self->paceChangeTime)) {
             f32 one = 1.0f;  // hoisted: retail holds 1.0f in $f3 before the multiply
             s32 idx = 3 * (self->lap - 1) + self->currentMarker->index;
@@ -1178,7 +1177,7 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
     Vu0::Q(hi) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(dir), Vu0::ScalarAt(g_lateralOffsetRange.hi));
     FindPathCurveNearestTime(self->sidePath->curve, &lo, &hi, &out, 0, &self->sidePathTime, 0, self->sidePathTime);
     f32 ahead = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(out), Vu0::Q(pos)), Vu0::Q(dir)));
-    f32 want = ApproachValueWithRamp((RampProfile*)g_lateralOffsetRamp, 0, self->sideTarget, ahead, g_gameClock[2]);
+    f32 want = ApproachValueWithRamp(self->sideTarget, ahead, g_gameClock[2], (RampProfile*)g_lateralOffsetRamp, 0);
     f32 best = FindNearestValueOutsideSpans(k, spans, want);
     if (!IsInsideRange(&g_lateralOffsetRange, best)) {
         best = want;
@@ -1254,7 +1253,7 @@ void SteerPathFollower(PathFollower* self)
     f32 a = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 b = WrapAngle(self->targetHeading - a);
     f32 c = ClampToMagnitude(g_steerAngleGain * b, g_steerAngleLimit);
-    self->steerAngle = ApproachAngleWithRamp((u8*)g_steerAngleRamp, 0, self->steerAngle, c, g_frameDt);
+    self->steerAngle = ApproachAngleWithRamp(self->steerAngle, c, g_frameDt, (u8*)g_steerAngleRamp, 0);
     for (u32 i = 0; i < 4; i++) {
         FollowerObjectSlot* s = &self->wheels[i];
         if ((s32)i < 2) {

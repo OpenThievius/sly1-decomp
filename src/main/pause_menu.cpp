@@ -1275,7 +1275,7 @@ void DrawPauseMenu(PauseMenu* self)
     if (self->page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->fade = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, self->fade, fade, g_gameClock[5]);
+    self->fade = ApproachValueWithRamp(self->fade, fade, g_gameClock[5], (RampProfile*)g_fadeRampProfile, 0);
     alpha = (u8)(s32)(self->fade * 255.0f);
     if (((MenuBoxStyle*)self->frame) != 0) {
         TextBoxLayout out;
