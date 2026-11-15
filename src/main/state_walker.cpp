@@ -806,7 +806,7 @@ void StartNextStateWalkerEdge(StateWalker* self)
                 CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->object, self->playerFlags, &self->player, fa, fb);
                 if (self->player != 0)
                 {
-                    AddAnimationPlayerCallback(self->player, HandleStateWalkerTrackEnd, self);
+                    AddAnimationPlayerCallback(self->player, (void*)HandleStateWalkerTrackEnd, self);
                 }
             }
             if (old != 0)
@@ -1136,7 +1136,7 @@ s32 IsCompanionAgentTargetReachable(CompanionAgent* self)
             Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(buf[i]));
             Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(buf[i]));
         }
-        GatherCollidersInBox(self->world, 0, &lo, &hi, IsCompanionAgentBlocker, self, &count, &list);
+        GatherCollidersInBox(self->world, 0, &lo, &hi, (s32 (*)(void*, Collider*))IsCompanionAgentBlocker, self, &count, &list);
         for (i = 0; i < n; i++) {
             if (FindNearestSpanObject(0, pos, &buf[i], count, list, 0) == 0) break;
         }

@@ -168,7 +168,6 @@ struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
 
 
-typedef unsigned long u64;
 extern const Vec4 g_zeroVector;
 
 

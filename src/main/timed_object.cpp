@@ -1125,7 +1125,7 @@ void ChooseSequencedObjectState(TimedObject* self, s32* state)
     }
     PushBackMemoryMark();
     Vec4* at = &pl->v140;
-    GatherCollidersInBox(self->world, 0, at, &self->root->v140, IsSequencedObjectCandidate, self, &count, &list);
+    GatherCollidersInBox(self->world, 0, at, &self->root->v140, (s32 (*)(void*, Collider*))IsSequencedObjectCandidate, self, &count, &list);
     if (FindNearestSpanObject(1, &self->v140, at, count, list, 0) == 0) {
         *state = self->repeating == 0 ? 2 : 6;
     }

@@ -4799,7 +4799,7 @@ void UpdatePlayerGrabs(Player* self)
         ComputeObjectMotionInFrame((PlacedObject*)c->end[e].part, 0, &rec->pos, (Vec4*)&rec->dir, 0, 0, 0);
         Vu0::StoreX(rec->key, Vu0::Dot(Vu0::Q(target->m110.r[0]), Vu0::Q(rec->pos)));
     }
-    HeapSortRecords(recs, n, 0x40, CompareKeysAscending);
+    HeapSortRecords(recs, n, 0x40, (s32 (*)(void*, void*))CompareKeysAscending);
     for (i = 0; i < n; i++) {
         rec = &recs[i];
         PlacedObject* node = FindNodeForQuery(rec, self->foundNodeCount, self->foundNodes);

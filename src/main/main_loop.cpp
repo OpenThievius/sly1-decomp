@@ -224,7 +224,7 @@ void UploadLightVolumes(World* world)
          l != 0 && count < sizeof(g_sortedLights) / sizeof(g_sortedLights[0]); l = l->next) {
         g_sortedLights[count++] = l;
     }
-    HeapSortRecords(g_sortedLights, count, 4, CompareObjectsForSort);
+    HeapSortRecords(g_sortedLights, count, 4, (s32 (*)(void*, void*))CompareObjectsForSort);
     g_lightGroupCount = 0;
     g_lightCount = 0;
     s32 i;

@@ -9,6 +9,14 @@
  * code. */
 #include "common.h"
 
+/* Modern compilers' __builtin_eh_return takes only the offset and the handler; the old one also
+ * takes the context. The old compiler never sees the second form. */
+#ifdef __clang__
+#define EH_RETURN(ctx, offset, handler) __builtin_eh_return(offset, handler)
+#else
+#define EH_RETURN(ctx, offset, handler) __builtin_eh_return(ctx, offset, handler)
+#endif
+
 /* A frame's unwind table entry: its first word is 0xFFFFFFFE when the frame has no handler. */
 typedef struct UnwindEntry {
     u32 word;
@@ -548,7 +556,7 @@ here:
     *cp = *cur;
     handler = FindHandlerAndRestoreRegisters(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
     offset = cur->cfa - cp->cfa;
-    __builtin_eh_return(ctx, offset, handler);
+    EH_RETURN(ctx, offset, handler);
 }
 
 /* Throw: the same, after recording the index the thrower passes. */
@@ -574,5 +582,5 @@ here:
     *cp = *cur;
     handler = FindHandlerAndRestoreRegisters(ctx, (char*)__builtin_return_address(0) - 1, cp, &cur);
     offset = cur->cfa - cp->cfa;
-    __builtin_eh_return(ctx, offset, handler);
+    EH_RETURN(ctx, offset, handler);
 }

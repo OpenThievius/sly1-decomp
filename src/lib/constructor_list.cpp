@@ -30,12 +30,12 @@ extern "C" void DestroyScriptMachineStaticsAtExit();
 extern "C" void DestroyValuePoolsAtExit();
 void ReleaseProgramFrameInfo();
 void* g_constructorList[26] = {
-    (void*)0x12, ConstructScriptMachineStaticsAtStartup, ConstructValuePoolsAtStartup, ConstructTextPanelStaticsAtStartup,
-    ConstructCameraStaticColorAtStartup, ResetPacketWriters, ConstructDefaultRgbaColorAtStartup, ConstructBoxStylesAtStartup,
-    ConstructTriangleGroupColorsAtStartup, ConstructMovieRingSinkAtStartup, ConstructSwitchedColliderDefaultsAtStartup, ConstructMenuBoxStyleAtStartup,
-    ConstructScreenTextStylesAtStartup, ConstructScratchpadTransfersAtStartup, ConstructBestTimeTextStyleAtStartup, ConstructWorldLoadRequestGlobalAtStartup,
-    ConstructGreyColorAtStartup, ConstructWarpTextStyleGlobalsAtStartup, RegisterProgramFrameInfo, 0,
-    (void*)3, DestroyScriptMachineStaticsAtExit, DestroyValuePoolsAtExit, ReleaseProgramFrameInfo, 0,
+    (void*)0x12, (void*)ConstructScriptMachineStaticsAtStartup, (void*)ConstructValuePoolsAtStartup, (void*)ConstructTextPanelStaticsAtStartup,
+    (void*)ConstructCameraStaticColorAtStartup, (void*)ResetPacketWriters, (void*)ConstructDefaultRgbaColorAtStartup, (void*)ConstructBoxStylesAtStartup,
+    (void*)ConstructTriangleGroupColorsAtStartup, (void*)ConstructMovieRingSinkAtStartup, (void*)ConstructSwitchedColliderDefaultsAtStartup, (void*)ConstructMenuBoxStyleAtStartup,
+    (void*)ConstructScreenTextStylesAtStartup, (void*)ConstructScratchpadTransfersAtStartup, (void*)ConstructBestTimeTextStyleAtStartup, (void*)ConstructWorldLoadRequestGlobalAtStartup,
+    (void*)ConstructGreyColorAtStartup, (void*)ConstructWarpTextStyleGlobalsAtStartup, (void*)RegisterProgramFrameInfo, 0,
+    (void*)3, (void*)DestroyScriptMachineStaticsAtExit, (void*)DestroyValuePoolsAtExit, (void*)ReleaseProgramFrameInfo, 0,
     (void*)6
 };
 

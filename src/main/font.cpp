@@ -165,8 +165,6 @@ void RewindTextReader(TextReader* self);
 
 
 typedef struct StringLayout StringLayout;
-typedef signed long s64;
-typedef unsigned long u64;
 
 
 

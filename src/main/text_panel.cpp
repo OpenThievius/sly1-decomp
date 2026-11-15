@@ -1374,7 +1374,7 @@ void CollectPanelEntriesOfClass(CaptionBox* self, s32 kind, void* a2, void* a3, 
         ((void (*)(void*, PanelEntryPosition*, f32*))a2)(e->obj, &e->v, &e->radius);
         e->key = Vu0::Distance(e->v, *(PanelEntryPosition*)g_camera->position) - e->radius;
     }
-    HeapSortRecords(entries, n, 0x20, kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey);
+    HeapSortRecords(entries, n, 0x20, (s32 (*)(void*, void*))(kind == 0x2E ? CompareEntriesFlaggedLast : CompareEntriesByAttachedKey));
     s32 mayStart = 1;
     FillMemory(self->blockA, 0, 0x10);
     if (!(g_panelStartCooldown < g_gameClock[1] - *(f32*)&self->countA)) {

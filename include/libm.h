@@ -28,6 +28,13 @@ s32 IsFinite(f32 x);
 s32 IsNotANumber(f32 x);
 double RoundToInteger(double x);
 
+/* The compiler's own absolute value of a float: the old compiler treats this name as its builtin. */
+#ifdef __cplusplus
+extern "C" float fabsf(float);
+#else
+float fabsf(float);
+#endif
+
 double ConvertFloatToDouble(f32 x);
 f32 ConvertDoubleToFloat(double x);
 double SubtractDoubles(double a, double b);

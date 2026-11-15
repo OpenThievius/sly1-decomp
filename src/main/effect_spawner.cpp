@@ -641,8 +641,6 @@ typedef signed short s16;
 typedef unsigned short u16;
 typedef signed int s32;
 typedef unsigned int u32;
-typedef signed long s64;
-typedef unsigned long u64;
 typedef float f32;
 
 
@@ -855,7 +853,7 @@ void ResolveEffectSpawnerLinks(EffectSpawner* self)
     if (self->id2F8[0] != -1) {
         SpawnerLinkedObject* r = (SpawnerLinkedObject*)FindFirstObjectById(self->world, 0x104, self->id2F8[0], self);
         s2->target = r;
-        if (r != 0) AppendQueuedCall(self->world, (void (*)(void))ReparentEffectSpawnerToSource, self, 0, 0);
+        if (r != 0) AppendQueuedCall(self->world, (void*)ReparentEffectSpawnerToSource, self, 0, 0);
     }
     if (self->id2F8[1] != -1) {
         s2->found[0] = FindFirstObjectById(self->world, 0x104, self->id2F8[1], self);

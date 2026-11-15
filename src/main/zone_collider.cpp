@@ -133,7 +133,7 @@ void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartMaskedCollider(MaskedCollider* self)
 {
     StartPlacedObject(self);
-    AppendQueuedCall(self->world, AttachMaskedColliderChildren, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)AttachMaskedColliderChildren, self, 0, 0);
 }
 
 extern u8 g_flagTable[];

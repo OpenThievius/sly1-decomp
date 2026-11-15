@@ -226,8 +226,6 @@ s32 IsListEmpty(ObjectList* l);
 void RemoveFromList(ObjectList* list, void* item);
 void AppendToList(ObjectList* self, void* item);
 void ClearList(ObjectList* l);
-typedef signed long s64;
-typedef unsigned long u64;
 extern void* g_drawingFrame;
 extern void* g_frameReadySemaphore;
 extern volatile s32 g_renderThreadWaiting;

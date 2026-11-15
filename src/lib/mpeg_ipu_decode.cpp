@@ -1684,7 +1684,7 @@ void ConvertPictureColours(MpegDecoder* self, MpegPicture* d)
     xfer.size = count * 0x18;
     xfer.addr = addr & 0xFFFFFFF;
     if (xfer.size > chunk) {
-        s32 id = AddDmaHandlerAlt(4, ContinueColourConversionInput, 0, &xfer);
+        s32 id = AddDmaHandlerAlt(4, (s32 (*)(s32, void*))ContinueColourConversionInput, 0, &xfer);
         *(volatile u32*)0x1000E010 = 0x10;
         EnableDmaInterrupt(4);
         (void)DisableInterrupts();

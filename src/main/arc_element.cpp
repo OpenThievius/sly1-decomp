@@ -296,7 +296,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         Vec4 pos;
         SpanHit hit;
         PushBackMemoryMark();
-        GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
+        GatherCollidersInBox(self->world, 0, &lo, &hi, (s32 (*)(void*, Collider*))IsPlayerLinkedColliderCandidate, self, &n, &list);
         Collider* found = (Collider*)FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
         if (found != 0 && found->id != 1) {
             *(u8**)e0 = (u8*)found;
