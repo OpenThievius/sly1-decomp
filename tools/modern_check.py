@@ -14,11 +14,15 @@ sorts each error:
                 vector-unit registers and constraints Clang does not know, the 128-bit values
                 they pass, and any error inside those headers (g++ 2.95's named return values). A port replaces these helpers (docs/PORTING.md), so they are counted
                 and not listed.
+    toolchain   the 1999 compiler's own internals: its variable-argument builtins
+                (`__builtin_next_arg`) and the C++ runtime's exception records; a port uses its
+                own compiler's <stdarg.h> and runtime. Counted, not listed.
     port        everything else: code a modern compiler rejects, which a port must change.
 
-g++ 2.95's minimum and maximum operators (`a <? b`, `a >? b`), removed from later compilers, are
-rewritten to a plain expression on a copy of the tree first, keeping every column, so the rest of
-the file is still checked. config/modern_baseline.tsv records each file's port errors; `--check`
+Two g++ 2.95 extensions removed from later compilers are rewritten on a copy of the tree first,
+so the rest of each file is still checked: the minimum and maximum operators (`a <? b`,
+`a >? b`), and named return values (`T F(args) return r { ... }`, which retail's matrix
+functions need, docs/TOOLCHAIN.md), listed in the report as changes a port must make. config/modern_baseline.tsv records each file's port errors; `--check`
 fails when a file has more than its baseline, so a change cannot add new ones. Needs `clang`
 (or $CLANG); without it, `--check` says so and passes.
 """
@@ -44,6 +48,10 @@ PS2 = re.compile(r"in asm$|unknown register name|cannot take the address of an r
 # The PS2-only helper headers (docs/PORTING.md): a port replaces them, so their own errors (vector
 # registers, g++ 2.95's named return values) are not the port's to fix in the game code.
 HELPERS = {"include/vu0.h", "include/fpu.h", "include/system.h", "include/mul_wide.h"}
+# The 1999 compiler's own internals the code reaches: its variable-argument builtins and the C++
+# runtime's exception records. A port uses its own compiler's <stdarg.h> and C++ runtime.
+TOOLCHAIN = re.compile(r"'__builtin_(?:next_arg|args_info|saveregs)'|'__exception_info'|"
+                       r"include <typeinfo> before using the 'typeid'")
 ERROR = re.compile(r"^(?P<file>[^:\n]+):(?P<line>\d+):(?P<col>\d+): error: (?P<msg>.*)$", re.M)
 
 
@@ -101,14 +109,34 @@ def sanitize(text):
     return "".join(out)
 
 
+# g++ 2.95's named return value: `T F(args) return name {` declares `name` as the result.
+NAMED_RETURN = re.compile(r"^(?!\s*//)(?P<head>[^\n;{}/]*?(?P<type>[A-Za-z_][\w:]*)\s+[\w:]+\s*\((?:(?!//)[^;{}])*?\))\s*"
+                          r"return\s+(?P<name>\w+)\s*\n\{", re.M)
+
+
+def standard_returns(text):
+    """[(line, name)] of g++'s named return values in text, and the text with each rewritten to
+    standard C++ (the name declared at the top of the body; a modern compiler then sees the rest)."""
+    found = []
+
+    def sub(m):
+        found.append((text.count("\n", 0, m.start()) + 1, m.group("name")))
+        return "%s\n{ %s %s;" % (m.group("head"), m.group("type"), m.group("name"))
+    return NAMED_RETURN.sub(sub, text), found
+
+
 def mirror(tmp):
+    named = []
     for d in ("include", "src"):
         for path in (ROOT / d).rglob("*"):
             if path.is_dir() or path.suffix not in (".h", ".c", ".cpp", ".inc"):
                 continue
             dst = Path(tmp) / path.relative_to(ROOT)
             dst.parent.mkdir(parents=True, exist_ok=True)
-            dst.write_text(sanitize(path.read_text(errors="replace")))
+            text, found = standard_returns(path.read_text(errors="replace"))
+            named += [(str(path.relative_to(ROOT)), line, name) for line, name in found]
+            dst.write_text(sanitize(text))
+    return named
 
 
 def compile_unit(clang, tmp, unit):
@@ -119,14 +147,16 @@ def compile_unit(clang, tmp, unit):
         f = m.group("file")
         if os.path.isabs(f):
             f = os.path.relpath(os.path.realpath(f), os.path.realpath(tmp))
-        kind = "ps2" if PS2.search(m.group("msg")) or f in HELPERS else "port"
+        msg = m.group("msg")
+        kind = ("ps2" if PS2.search(msg) or f in HELPERS else
+                "toolchain" if TOOLCHAIN.search(msg) else "port")
         errors.append((unit, f, int(m.group("line")), kind, m.group("msg")))
     return errors
 
 
 def run(clang):
     with tempfile.TemporaryDirectory(prefix="sly1-modern-") as tmp:
-        mirror(tmp)
+        run.named = mirror(tmp)
         with concurrent.futures.ThreadPoolExecutor(os.cpu_count() or 4) as ex:
             results = list(ex.map(lambda u: compile_unit(clang, tmp, u), units()))
     # An error in a header shows once per unit that includes it: count it once.
@@ -173,7 +203,10 @@ def main(argv=None):
     errors = run(clang)
     kinds = collections.Counter(kind for *_, kind, _ in errors)
     counts = per_file(errors)
-    print("%d port errors in %d files; %d in the PS2-only helpers" % (kinds["port"], len(counts), kinds["ps2"]))
+    print("%d port errors in %d files; %d in the PS2-only helpers; %d on the old compiler's internals"
+          % (kinds["port"], len(counts), kinds["ps2"], kinds["toolchain"]))
+    print("%d g++ named return values, rewritten for the check; a port rewrites them: %s"
+          % (len(run.named), ", ".join("%s:%d" % (f, l) for f, l, _ in run.named)))
     if args.baseline:
         write_baseline(counts)
         print("wrote %s" % BASELINE.relative_to(ROOT))
