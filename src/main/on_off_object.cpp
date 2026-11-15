@@ -9,6 +9,7 @@
 // cut is at 0x1E2420, the first on-off object function. It holds several families; its name is
 // ours, after the largest, the on-off object and its camera controller.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "on_off_object.h"
 #include "collider.h"
@@ -129,7 +130,6 @@ struct FacePoint {
 };
 
 
-s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 
 
 
@@ -1175,8 +1175,8 @@ f32 GetSpanCandidateValue(void* a0, void* a1, void* a2, SpanCandidate* a3)
     return a3->value;
 }
 
-struct MeshHit;
-typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHit* hit);
+struct MeshHitSample;
+typedef f32 (*MeshHitWeigh)(void* ctx, void* a, void* b, MeshHitSample* hit);
 void ComputeConstrainedPushOut(void* ctx, s32 count, Collider** objs, MeshHitWeigh fn, f32 r, f32 limit, void* a4, Vec4* origin, Vec4* out);
 // Looks for a camera position that sees the target through free space: from the point p and the
 // wanted position q it finds the first free span among the colliders in the box, and when q is

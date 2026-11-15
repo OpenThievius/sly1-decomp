@@ -4,7 +4,7 @@ struct Obj_eu_18F448 {
     u8 pad0[0xC];
     void* fC;
     u8 pad1[0x48];
-    void* f58;
+    u8* f58;
     void* f5C;
     u8 pad2[0xC8];
     void* f128;
@@ -37,15 +37,15 @@ void InitMoviePlayback(MoviePlayer* self_, void* v)
     InitRingBuffer((RingBuffer*)((u8*)self + 0x60), 0x30000, (u8*)((s32)D_eu_00448240 | 0x20000000));
     StartMovieStream((MovieStream*)((u8*)self + 0x80));
     InitMpegLibrary();
-    CreateMpegDecoder((u8*)self + 0x10, self->f58, 0x152F68);
-    SetStreamCallback((Ctx_20A220*)((u8*)self + 0x10), 0, 0, (Handler_20A220)AcceptMovieDataIntoRing, self);
+    CreateMpegDecoder((MpegHandle*)((u8*)self + 0x10), self->f58, 0x152F68);
+    SetStreamCallback((MpegHandle*)((u8*)self + 0x10), 0, 0, (MpegStreamFn)AcceptMovieDataIntoRing, self);
     for (n = 0; D_eu_002636EC >= n; n++) {
-        SetStreamCallback((Ctx_20A220*)((u8*)self + 0x10), 2, n, (Handler_20A220)PassMovieDataToStream, self);
-        SetStreamCallback((Ctx_20A220*)((u8*)self + 0x10), 3, n, (Handler_20A220)PassMovieDataToStream, self);
+        SetStreamCallback((MpegHandle*)((u8*)self + 0x10), 2, n, (MpegStreamFn)PassMovieDataToStream, self);
+        SetStreamCallback((MpegHandle*)((u8*)self + 0x10), 3, n, (MpegStreamFn)PassMovieDataToStream, self);
     }
-    SetMpegCallback((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
-    SetMpegCallback((u8*)self + 0x10, 4, (void*)FeedMovieDecoderWithoutWaiting, self);
-    SetMpegCallback((u8*)self + 0x10, 0, (void*)AcceptMovieDecoderEvent, self);
+    SetMpegCallback((MpegHandle*)((u8*)self + 0x10), 1, (void*)FlushMovieToIpu, self);
+    SetMpegCallback((MpegHandle*)((u8*)self + 0x10), 4, (void*)FeedMovieDecoderWithoutWaiting, self);
+    SetMpegCallback((MpegHandle*)((u8*)self + 0x10), 0, (void*)AcceptMovieDecoderEvent, self);
     while (FeedMovieDecoder((MoviePlayer*)self, 1) == 0) {
     }
     self->f128 = D_eu_005A4240;

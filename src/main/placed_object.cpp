@@ -7,6 +7,7 @@
 // curve_segment.cpp made on loop.c's threshold (that file's head), which no boundary signal shows.
 // Between the two it could still be several files.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "mul_rotation.h"
@@ -443,7 +444,6 @@ struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
 void *StoreFloatAsQuadword(U128* out, f32 value);
 void* CopyQuadword(u128* out, void* src);
-U128 ScaleQuadword(U128 a, U128 b);
 U128 StoreQuadword(u128* out, u128 v);
 void SetVelocitySpring(PlacedObject* self, Quad16* src);
 
@@ -719,7 +719,6 @@ void AcquirePadSelectFlag(World* a0);
 void ReleasePadSelectFlag(World* self);
 
 void StopAnimationPlayer(AnimationPlayer* self);
-void CreateAnimationPlayerWithoutPresetTargets(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
 
 
 
@@ -745,7 +744,6 @@ void RemoveQueuedCalls(World* self, u32 mask, void* code, void* arg, s32 k2, s32
 
 extern "C" f32 FloatRemainder(f32 x, f32 y);
 
-void* MoveMemory(AnimationTrack* dst, AnimationTrack* src, s32 bytes);
 
 
 // was NEAR: call result is stored directly (retail copies v0 to v1 first, then s1=v1 for the out pointer); 5 lines differ
@@ -1657,9 +1655,7 @@ void RecomputePlacedObjectFrame(PlacedObject* self)
     }
 }
 
-struct Bits128;
 struct ValueListObject;
-void QueryValueListMask(ValueListObject* self, f32 radius, Bits128* vec, s32* out);
 
 // The product a b into the object's world matrix (m110), written through the object: b's rows
 // read by index (MulRotationRowsIndexed), each result row stored to its vector local and to the
@@ -1722,7 +1718,7 @@ void ComputePlacedObjectWorldFrame(PlacedObject* self)
     u32 kind = self->bits24;
     if (kind == 2) {
         if (self->world->valueListObject != 0) {
-            QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (Bits128*)&self->v140, &self->visibilityMask);
+            QueryValueListMask((ValueListObject*)self->world->valueListObject, self->boundRadius, (u128*)&self->v140, &self->visibilityMask);
         } else {
             self->visibilityMask = 0x0FFFFFFF;
         }
@@ -2227,7 +2223,7 @@ void QueuePlacedObjectModelParts(PlacedObject* self, Camera* cam, Quad16* src)
                 goal = 0.5f;
             }
             if (goal != state->fade) {
-                state->fade = ApproachValueWithRamp((RampProfile*)g_fadeRampProfile, 0, state->fade, goal, g_gameClock.dt);
+                state->fade = ApproachValueWithRamp(state->fade, goal, g_gameClock.dt, (RampProfile*)g_fadeRampProfile, 0);
             }
             rec.block.outerFade = rec.block.outerFade * state->fade;
         }
@@ -2934,7 +2930,6 @@ void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4*
     *out = *in;
 }
 
-Mat3 MultiplyByTransposedMatrix3x3(void* m, Mat3* in);
 
 // The rotation in from's frame (the world's for none) in to's frame: through from's rotation,
 // then the product with the transpose of to's.
@@ -2948,7 +2943,7 @@ void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat3* 
             in = &world;
         }
         if (to != 0) {
-            t = MultiplyByTransposedMatrix3x3(&to->m110, in);
+            t = MultiplyByTransposedMatrix3x3(to->m110, *in);
             *out = t;
             return;
         }
@@ -3320,7 +3315,7 @@ void RemoveObjectFrameOffsetFromPose(PlacedObject* self, Mat3* m)
             *m = t;
         }
         if (p->flags & 2) {
-            t = MultiplyByTransposedMatrix3x3((u8*)&p->m[1], m);
+            t = MultiplyByTransposedMatrix3x3(*(Mat3*)&p->m[1], *m);
             *m = t;
         }
     }
@@ -5141,9 +5136,6 @@ void* FindOrCreateSeekedAnimationPlayer(void* self, BaseObject* key, s32 a2, s32
     return out;
 }
 
-// Left in this order: ReplaceAnimationPlayer passes the floats before the last two arguments,
-// which retail's call sets up after them.
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out);
 
 // Stops and clears *out's player and, if anim is non-null, creates a new player for it without
 // preset targets.
@@ -5154,7 +5146,8 @@ void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, Anima
         *out = 0;
     }
     if (anim != 0) {
-        CreateAnimationPlayerWithoutPresetTargets(anim, owner, fa, fb, flags, out);
+        // retail's call sets the floats up before the last two arguments
+        ((void (*)(Animation*, BaseObject*, f32, f32, s32, AnimationPlayer**))CreateAnimationPlayerWithoutPresetTargets)(anim, owner, fa, fb, flags, out);
     }
 }
 

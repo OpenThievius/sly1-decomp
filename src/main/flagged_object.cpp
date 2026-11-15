@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "list_iter.h"
 #include "flagged_object.h"
@@ -165,7 +166,6 @@ void ReadObjectTransformAndTables(MeshObject* self, BufferedStream* stream)
 }
 
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
-s32 IsPointInsideFaceTree(void* self, void* value);
 
 // Whether a point lies inside the object's shape: converts it to the object's frame and tests
 // it against the face tree.
@@ -173,7 +173,7 @@ s32 TestPointAgainstObjectShape(ObjectGatherer* self, void* value)
 {
     Quad_00141170 local;
     ConvertPointIntoObjectFrame((TransformObject*)self, (Vec4*)value, (Vec4*)&local);
-    return IsPointInsideFaceTree(self->f8C, &local);
+    return IsPointInsideFaceTree((TreeNode03*)self->f8C, (FacePoint*)&local);
 }
 
 

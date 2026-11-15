@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "transform_object.h"
 #include "shapes.h"
 #include "script_value.h"
@@ -104,7 +105,6 @@ void CopyVec2(Point2* a0, Point2* a1)
     a0->y = a1->y;
 }
 
-void* MoveMemory(void* dst, void* src, s32 size);
 struct RampProfile;
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 struct PartDrawRequest;

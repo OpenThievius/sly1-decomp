@@ -30,7 +30,7 @@ struct ChildHitRecord {
         Vec4 v[2];         // 0x00: the point of the hit and the direction (0x10), as vectors
     };
     f32 value;              // 0x20
-    s32 key;                // 0x24
+    void* key;              // 0x24: the object of the hit
     u8 pad28[8];
 };
 
@@ -113,7 +113,7 @@ void InitChildGroupObject(ChildGroupObject* self);                          // s
 void CopyChildGroupObject(ChildGroupObject* self, ChildGroupObject* other);              // slot 9
 void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream);                          // slot 10
 void StartChildGroupObject(ChildGroupObject* self);                          // slot 16
-void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
+void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 kind);                       // slot 60
 void InitContactListObject(ContactListObject* self);                          // slot 0
 void LoadContactListObject(ContactListObject* self, BufferedStream* stream);                          // slot 10

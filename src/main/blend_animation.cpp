@@ -397,13 +397,10 @@ void SetBlendItemWeights(BlendAnimationView* self, s32 a1, s32 a2, void* a3)
     }
 }
 
-
-void* FindEntryByObjectId(BlendAnimationView* self, void* key);
-
 // Sets flag 1 of the sub-record of the blend entry for this object id, if it has one.
 void SetBlendEntryRecordFlag(BlendAnimationView* blend, void* key)
 {
-    BlendSourceEntry* o = (BlendSourceEntry*)FindEntryByObjectId(blend, key);
+    BlendSourceEntry* o = (BlendSourceEntry*)FindEntryByObjectId(blend, (BaseObject*)key);
     if (o) {
         if (o->sub) {
             o->sub->flag = 1;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "shapes.h"
 #include "vu0.h"
 #include "object_message.h"
@@ -154,7 +155,6 @@ void LoadAgent(Agent* self, void* a1)
     ResolveAgentSecondaryClips(self);
 }
 
-void CopySwitchedCollider(Agent* self, void* src);
 
 // Slot 9 of the agent: copies as a switched collider but keeps its own keeper record and roster,
 // and remembers the object it was copied from.
@@ -162,7 +162,7 @@ void CopyAgent(Agent* self, void* src)
 {
     s32 b = self->flagIndex;
     s32 a = (s32)self->roster;
-    CopySwitchedCollider(self, src);
+    CopySwitchedCollider(self, (SwitchedCollider*)src);
     self->flagIndex = b;
     self->roster = (void*)a;
     self->copySource = src;
@@ -338,7 +338,6 @@ static inline f32 LimitToUnitRange(f32 g)
 typedef int Quadword128 __attribute__((mode(TI)));
 void *StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
-Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
 
 // k times the vector at p, into dst (the quadword helpers' product).
@@ -352,7 +351,6 @@ static inline void StoreScaledQuadword(Vec4* dst, f32 k, u8* p)
     StoreQuadword((u128*)dst, ScaleQuadword(tv, u));
 }
 extern "C" f32 Arccosine(f32 x);
-void AddColliderForce(Agent* self, Vec4* v);
 extern "C" void* CopyBytes(void* dst, void* src, s32 n);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec4* out, f32 t, f32 u);
 
@@ -435,9 +433,6 @@ f32 ComputeAgentTargetBearing(Agent* self)
     return WrapAngle(a - ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x));
 }
 
-// The definition takes the angle last; the EE passes it in its own register, and retail's
-// callers evaluate it before the matrix, as this order does.
-void BuildAxisAngleMatrix(const Vec4* v, f32 angle, Mat3* out);
 
 // Sets the agent's heading and pitch and rebuilds its heading matrix from them (yaw and pitch, or a
 // turn about the up axis when it has no pitch), unless facing is blocked.
@@ -450,7 +445,8 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
     if (t != 0) {
         BuildYawPitchMatrix(x, y, &self->headingMatrix);
     } else {
-        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, x, &self->headingMatrix);
+        // retail's call evaluates the angle before the matrix
+        ((void (*)(const Vec4*, f32, Mat3*))BuildAxisAngleMatrix)((const Vec4*)&g_unitZVector, x, &self->headingMatrix);
     }
 }
 
@@ -592,7 +588,7 @@ void UpdateAgent(Agent* self, f32 dt)
         } else {
             push = g_unitZVector;
         }
-        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, self->heading, &spin);
+        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, &spin, self->heading);
         BuildShortestArcRotation(&g_unitZVector, &push, &arc);
         MulRotationInto(self, arc, spin);
     }

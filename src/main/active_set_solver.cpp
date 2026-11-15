@@ -17,6 +17,7 @@
 // start the data allows (its caller QueuePlacedObjectDraw stays in pooled_object.cpp); the
 // solver's own functions begin at InitActiveSetSolver. The name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "gauge_manager.h"
 #include "asm_func.h"
 #include "pooled_object.h"
@@ -88,7 +89,7 @@ struct PartDrawFrame {
 
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void* MultiplyMatrices(Quad16* out, void* b, void* in);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 struct PartDrawRequest;
 
 // The file's .data: the view matrix DrawPlacedObjectParts multiplies the object's transform by.
@@ -111,7 +112,9 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     f.object = s1;
     f.record = s1->sub22C;
     i = 0;
-    MultiplyMatrices(f.qC0, &g_unitSquareToClipMatrix, &((DrawRangeRecord*)s1->drawRange)->m70);
+    // retail's call passes the frame's own rows as the result's place, which an assignment of the
+    // returned matrix does not
+    ((void (*)(Quad16*, Mat4A*, void*))MultiplyMatrices)(f.qC0, &g_unitSquareToClipMatrix, &((DrawRangeRecord*)s1->drawRange)->m70);
     f.q80[0] = f.qC0[0];
     f.q80[1] = f.qC0[1];
     f.q80[2] = f.qC0[2];
@@ -198,32 +201,30 @@ void AddActiveSetItem(ActiveSetSolver* self, ActiveSetItem* item)
 }
 
 typedef void (*EndRowsFn)(Collider* body, s32 a1, void* contact, s32 end, ActiveSetItem* item, f32* rows);
-typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, s32 extra, f32* rows);
-void ComputeColliderPointVelocity(Collider* body, Vec4* point, void* motion, Vec4* out);
+typedef void (*EndFillFn)(Collider* body, s32 a1, s32 size, void* extra, f32* rows);
 
 // Fills in what the solver needs of a constraint item the first time it is used: for each body of
 // its contact the rows of that body's response to a unit impulse (the bodies' slots 58 and 59),
 // then the axes (relative point velocity of the bodies at each other constraint's contact) and
 // its own row of dot products against every item's axis.
-void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, s32 a4, s32 a5, s32 a6)
+void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a3, BodyContact** contacts, s32* sizes, void** lists)
 {
     BodyContact* contact = (BodyContact*)n->owner;
     for (s32 i = 0; i < 2; i++) {
         Collider* body = contact->end[i].body;
         if (body != 0 && body->solverIndex >= 0) {
-            s32 idx = body->solverIndex << 2;
-            s32* size = (s32*)(idx + a5);
-            f32* r = (f32*)AllocateZeroedBackMemory(*size << 5);
+            s32 idx = body->solverIndex;
+            f32* r = (f32*)AllocateZeroedBackMemory(sizes[idx] << 5);
             n->rows[i] = r;
             ((EndRowsFn*)body->desc)[58](body, a1, contact, i, n, r);
-            ((EndFillFn*)body->desc)[59](body, a1, *size, *(s32*)(idx + a6), r);
+            ((EndFillFn*)body->desc)[59](body, a1, sizes[idx], lists[idx], r);
         }
     }
     Vec4* axes = (Vec4*)AllocateBackMemory(a3 << 4);
     n->axes = (u8(*)[16])axes;
     Vec4 out[2];
     for (s32 i = 0; i < a3; i++, axes++) {
-        ContactEnd03* e = *(ContactEnd03**)(i * 4 + a4);
+        ContactEnd03* e = contacts[i]->end;
         for (s32 j = 0; j < 2; j++) {
             Collider* body = e[j].body;
             if (body == 0 || body->solverIndex < 0) {
@@ -231,11 +232,11 @@ void BuildContactItemRows(ActiveSetSolver* self, s32 a1, ActiveSetItem* n, s32 a
             } else if (body == contact->end[0].body) {
                 Collider* part = e[j].part;
                 // address arithmetic over a variable index
-                ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
+                ComputeColliderPointVelocity(part, &e[j].point, (ImpulseRow*)((u8*)n->rows[0] + (part->index << 5)), &out[j]);
             } else if (body == contact->end[1].body) {
                 Collider* part = e[j].part;
                 // address arithmetic over a variable index
-                ComputeColliderPointVelocity(part, &e[j].point, (f32*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
+                ComputeColliderPointVelocity(part, &e[j].point, (ImpulseRow*)((u8*)n->rows[1] + (part->index << 5)), &out[j]);
             } else {
                 Vu0::Q(out[j]) = Vu0::Zero();
             }
@@ -389,7 +390,7 @@ void PivotActiveSet(ActiveSetSolver* self, ActiveSetItem* x)
 // Solves the constraint items for non-negative (or bounded) values: first activates all the
 // equality items (kind 2) and solves, then repeatedly picks the pending item whose residual is
 // most negative (below -0.01) and pivots it in, until none is left.
-void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6)
+void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, BodyContact** contacts, s32* sizes, void** lists)
 {
     ListFrameWords fr;
     ListFrame frame;
@@ -407,7 +408,7 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
     while (node != 0) {
         if (node->kind == 2) {
             if (node->row == 0) {
-                BuildContactItemRows(self, a1, node, a3, a4, a5, a6);
+                BuildContactItemRows(self, a1, node, a3, contacts, sizes, lists);
             }
             RemoveFromList(&self->pending, node);
             AppendToList(&self->active, node);
@@ -431,7 +432,7 @@ void RunActiveSetSolver(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s
         }
         if (!sel) break;
         if (sel->row == 0) {
-            BuildContactItemRows(self, a1, sel, a3, a4, a5, a6);
+            BuildContactItemRows(self, a1, sel, a3, contacts, sizes, lists);
         }
         PivotActiveSet(self, (ActiveSetItem*)sel);
     }
@@ -443,12 +444,12 @@ typedef void (*HandlerFn)(void* handler, s32 flags, ActiveSetItem* item, s32 end
 // surface (above a small threshold) it adds a bounded friction item (limit = the normal force
 // times the friction) paired with the normal item, lets the handlers see it, and solves again;
 // repeats until no contact slides.
-void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, BodyContact** contacts, s32 a4, s32 a5, f32 dt)
+void AddFrictionItemsAndSolve(ActiveSetSolver* self, s32 a1, s32 n, BodyContact** contacts, s32* sizes, void** lists, f32 dt)
 {
     u128 zero = Vu0::Zero();
     Vec4 best;
     for (;;) {
-        RunActiveSetSolver(self, a1, n, (s32)contacts, a4, a5);
+        RunActiveSetSolver(self, a1, n, contacts, sizes, lists);
         s32 bestIndex = -1;
         Vu0::Q(best) = zero;
         f32 top = 0.01f;
@@ -595,7 +596,7 @@ void ApplySolvedImpulsesToParts(ActiveSetSolver* self, s32 n, s32* counts, Colli
                 Vec4 ang;
                 Vec4 linLocal;
                 Vec4 angLocal;
-                ComputeColliderPointVelocity(parent, &body->v140, up, &lin);
+                ComputeColliderPointVelocity(parent, &body->v140, (ImpulseRow*)up, &lin);
                 Vu0::Q(lin) = Vu0::Sub(Vu0::Vec::Of(own->lin), Vu0::Vec::Of(lin)).q;
                 Vu0::Q(ang) = Vu0::Sub(Vu0::Vec::Of(own->ang), Vu0::Vec::Of(up->ang)).q;
                 Vu0::Q(linLocal) = Vu0::RotateTransposed(parent->m110, Vu0::Vec::Of(lin)).q;

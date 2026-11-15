@@ -3,6 +3,7 @@
 // memory card (include/memory_card.h): its states, its save files and the calls to the card.
 // Its name is ours, after the card.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "memory_card.h"
 #include "thread_params.h"
@@ -113,7 +114,6 @@ void RunBackgroundJob()
 extern u8 g_backgroundJobStack[];
 extern u8 g_globalPointer[];
 s32 MakeThread(ThreadParams* param);
-void RunThread(s32 thread, void* arg);
 
 // Waits for the previous job, then runs fn(arg) on a new thread (priority 3, 0x4000-byte stack)
 // through RunBackgroundJob; the job's result starts as 0x20 (running).

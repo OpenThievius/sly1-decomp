@@ -33,6 +33,7 @@
 #include "pad_record.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "shapes.h"
 #include "object_finder.h"
 #include "list_walk.h"
 #include "element_stack_state.h"
@@ -736,7 +737,7 @@ struct SpinKeyframe {
     u8 to[0x10];            // 0x50
 };
 
-SpinFrame4 MultiplyMatrices(const SpinFrame4& a, const SpinFrame4& b);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 static inline void MulRotation(Mat3* out, const Mat3& a, const Mat3& b)
 {
@@ -790,7 +791,7 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
         }
         SpinKeyframe* k = ((SpinKeyframe**)self->keyframes)[index];
         BuildMatrixFromRotationAndTranslation((const Vec4*)k->from, (const Mat3*)k->to, (Mat4A*)&key);
-        base = MultiplyMatrices(base, key);
+        *(Mat4A*)&base = MultiplyMatrices(*(Mat4A*)&base, *(Mat4A*)&key);
     }
     ApplyPlacedObjectTransform(self, (Camera*)a1, (ScaledTransform*)&base);
 }

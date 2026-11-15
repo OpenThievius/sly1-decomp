@@ -9,6 +9,7 @@
 // which BuildCombinedBlendAnimation calls, goes with the blend animations). The name is ours,
 // after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "list_iter.h"
 #include "buffered_stream.h"
@@ -197,7 +198,6 @@ void AddColliderToSweepAxes(World* self, void* arg)
     MarkSweepAxesUnsorted(self);
 }
 
-void* MoveMemory(void* dst, void* src, s32 bytes);
 
 // Takes the collider's two entries out of each of the three axes: the scan passes the other
 // colliders' entries, remembers the collider's start entry (flag 0) and stops at its end entry,
@@ -251,7 +251,6 @@ void MarkSweepAxesUnsorted(World* a0)
     a0->sweepSorted = 0;
 }
 
-void* MoveMemory(void* dst, void* src, s32 bytes);
 
 // An entry of one of the three sweep axes (0x200 of them each in buf1AD8): a body's start (0)
 // or end (1) on the axis and the bound it reads.

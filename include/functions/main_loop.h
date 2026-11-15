@@ -22,7 +22,7 @@ void AssignAimTarget(AimAttachment* self, void* obj, Vec4* src);
 void* ResolveAimTarget(AimAttachment* a0);
 void SwitchAimByTargetDistance(AimAttachment* self);
 void GetAimRotation(AimAttachment* self, f32 dt, Mat3* rot, Vec4* vec);
-void RunMainLoop(s32 a, s32 b);
+extern "C" void RunMainLoop(s32 a, s32 b);
 void LoadIopModules();
 void SendVif0StartupPacket(void);
 void SendVif1StartupPacket();

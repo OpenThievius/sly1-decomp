@@ -8,6 +8,7 @@
 // after its first and largest family, the oscillator; the transform objects, arrival points,
 // object sub-groups and contact trackers after it are smaller.
 #include "transform_object.h"
+#include "asm_functions.h"
 #include "warp_page.h"
 #include "oscillator.h"
 #include "camera.h"
@@ -357,7 +358,7 @@ static inline f32 MaxA(f32 a, f32 b) { return a >? b; }
 static inline f32 MaxB(f32 a, f32 b) { return b >? a; }
 void InitIdentityMatrix(Mat4* self);
 void* InvertMatrix4x4(void* a0, void* a1);
-Mat4R MultiplyMatrices(const Mat4R& a, const Mat4R& b);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out);
 
 // Rebuilds the oscillator's per-vertex tables after its parts or entries changed (framesDirty):
@@ -401,7 +402,7 @@ void RefreshOscillatorFrames(Oscillator* self)
             InvertMatrix4x4(&m, &inv);
             dir = Vu0::TransformRows(Vu0::Q(inv.r[0]), Vu0::Q(inv.r[1]), Vu0::Q(inv.r[2]), Vu0::Q(inv.r[3]), dir, 1.0f);
             if (mesh->matrix != 0) {
-                m = MultiplyMatrices(*(Mat4R*)part->m40, *(Mat4R*)mesh->matrix);
+                *(Mat4A*)&m = MultiplyMatrices(*(Mat4A*)part->m40, *(Mat4A*)mesh->matrix);
             }
         }
         for (s32 i = 0; i < mesh->blockCount; i++) {
@@ -457,7 +458,7 @@ void RefreshOscillatorFrames(Oscillator* self)
             Mat4R mat;
             BuildMatrixFromRotationAndTranslation(&obj->v140, &obj->m110, (Mat4A*)&mat);
             if (mesh->matrix != 0) {
-                mat = MultiplyMatrices(mat, *(Mat4R*)mesh->matrix);
+                *(Mat4A*)&mat = MultiplyMatrices(*(Mat4A*)&mat, *(Mat4A*)mesh->matrix);
             }
             u128 pivot = Vu0::Add(Vu0::Q(obj->v140), Vu0::RotateUntied(obj->m110, dir));
             for (s32 j = 0; j < self->entryCount; j++) {
@@ -1336,7 +1337,6 @@ extern CaptionBox g_typedTextCaptionBox;
 s32 GetEntryIdByKey(KeyedEntry* key);
 struct TreeNode03;
 struct FacePoint;
-s32 IsPointInsideFaceTree(TreeNode03* self, FacePoint* value);
 void StartObjectSubGroupFinish(ObjectSubGroup* self);
 
 // Per-frame update of a sub group, a state machine on where the player is relative to its face
@@ -1546,7 +1546,6 @@ struct PooledContact;
 struct OwnerMessage;
 void OfferTrackedNodeLaunch(ContactTrackerRecord* self, void* a1, TrackedNodeOffer* out);
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 
 // Per-frame update of a collider that reacts to the active switched collider overlapping it (part
 // mode 1 or 4): checks that the bounding spheres overlap, then tests the other's mesh or point

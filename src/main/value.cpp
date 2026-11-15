@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "entry_pool.h"
 #include "script_value.h"
 #include "buffered_stream.h"
@@ -22,7 +23,6 @@ struct PairPayload { U64P xy; };
 struct TriplePayload { U64P xy; s32 z; };
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-s32 CompareMemory(void* a, void* b, s32 n);
 void* TakePoolEntry(EntryPool* pool);
 void InitEntryPool(EntryPool* pool, s32 size, s32 count);
 void ShutDownEntryPool(EntryPool* pool);

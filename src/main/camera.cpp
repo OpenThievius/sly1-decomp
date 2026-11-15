@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "shapes.h"
 #include "collider.h"
 #include "world.h"
@@ -250,7 +251,7 @@ void UpdateCameraMatrices(Camera* self);
 
 void InitIdentityMatrix(Mat4* self);
 void* InvertMatrix4x4(void* a0, void* a1);
-Mat4A MultiplyMatrices(Quad16* m, Quad16* in);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 
 
@@ -943,7 +944,7 @@ void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out)
         pa++;
     } while (n >= 0);
     InvertMatrix4x4(&m, &v);
-    Mat4A r = MultiplyMatrices((Quad16*)c, (Quad16*)&v);
+    Mat4A r = MultiplyMatrices(*(Mat4A*)c, *(Mat4A*)&v);
     out[0] = ((Quad16*)&r)[0];
     out[1] = ((Quad16*)&r)[1];
     out[2] = ((Quad16*)&r)[2];
@@ -1253,7 +1254,6 @@ store:
 
 LINKER_REMNANT(func_00145080);
 
-void* MoveMemory(void* dst, void* src, s32 bytes);
 
 // Moves the entries from the given one on up by one, to open a slot for a new entry.
 // Its parameter copies give retail its (i * 16 + self) base shared by both pointers
@@ -1600,7 +1600,7 @@ extern f32 g_frameStep;
 f32 ComputeCameraHitClearance(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
 {
     f32 out;
-    ApproachValueWithRamp(&g_cameraClearanceRamp, &out, h->dist, self->nearClearance - g_cameraProbeRadius, g_frameStep);
+    ApproachValueWithRamp(h->dist, self->nearClearance - g_cameraProbeRadius, g_frameStep, &g_cameraClearanceRamp, &out);
     return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
 }
 

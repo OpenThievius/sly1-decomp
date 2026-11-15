@@ -50,7 +50,7 @@ struct ScriptValueFilter;
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void* AllocateFrontMemory(s32 size);
 s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 s32 ReadBufferedU32(BufferedStream* in);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -109,9 +109,6 @@ extern "C" void StartDmaChainToMemory(DmaChannel* ch);
 // of `type` to it).
 #include "script_list.h"
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-// Declared void with an address-sized integer: retail's func_001C1A28 schedules its call as one
-// whose result is unused (the definition, below, returns out and takes the address as void*).
-void ReadPropertyValue(ScriptValue* out, sptr base, PropertyDescriptor* d);
 extern PropertyList g_classPropertyLists[];
 // (if/else with the small path first moved $s0/$s1)
 ScriptValue *ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
@@ -147,7 +144,7 @@ ScriptValue* EvalScriptEntry(ScriptValue* self, s32 index, World* ctx);
 PropertyDescriptor* FindPropertyDescriptor(BaseObject* self, s32 key);
 ScriptValue* BuildScriptListFromCallback(ScriptValue* self, void* ctx, s32 v, PropertyGetter cb);
 ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d);
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value);
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value);
 s32 ScriptListContainsValue(ScriptValueFilter* filter, void* val);
 ScriptValue* StoreScriptArguments(ScriptValue* out, s32 n, ScriptValue* args, const u32* kinds, void** dsts);
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals);
@@ -447,7 +444,7 @@ ScriptValue* ReadPropertyValue(ScriptValue* out, void* base, PropertyDescriptor*
 }
 
 // Converts value as a property of the builder's type and appends it, as a new node, to the list.
-s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value)
+s32 AppendPropertyToScriptList(ScriptListBuilder* self, void* value)
 {
     PropertyDescriptor d;
     ScriptValue t;
@@ -456,7 +453,9 @@ s32 AppendPropertyToScriptList(ScriptListBuilder* self, sptr value)
     d.type = self->type;
     d.getter = 0;
     R11B008Node* n = NewScriptValueNode();
-    ReadPropertyValue(&t, value, &d);
+    // retail schedules this call as one whose result is unused, as a call of a function giving
+    // nothing back
+    ((void (*)(ScriptValue*, void*, PropertyDescriptor*))ReadPropertyValue)(&t, value, &d);
     AssignScriptValue(n, &t);
     DestroyScriptValue(&t, 2);
     if (self->head != 0) {
@@ -596,7 +595,7 @@ ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr*
     list.tail = 0;
     for (s32 i = 0; i < n; i++) {
         list.type = keys[i];
-        AppendPropertyToScriptList(&list, vals[i]);
+        AppendPropertyToScriptList(&list, (void*)vals[i]);
     }
     if (list.head) {
         SetScriptValueChain(&q, list.head);

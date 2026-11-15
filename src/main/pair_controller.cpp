@@ -10,6 +10,7 @@
 // .data is the globals below. Its name is ours, after its largest family, the pair controller and
 // the paired objects (classes 0x5F and 0x42); none of its families names the whole.
 #include "common.h"
+#include "asm_functions.h"
 #include "vu0.h"
 #include "list_iter.h"
 #include "aim_blend_grid.h"
@@ -416,7 +417,6 @@ s32 g_padPatternSetting = 0;
 
 
 
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 extern const Vec4 g_unitZVector;
 
 // Slot 0 of the walker collider: switched-collider init, both states -1 and a speed scale of
@@ -524,7 +524,7 @@ void UpdateWalkerCollider(WalkerCollider* self, f32 dt)
             ramp.maxSpeed = lim[0] + along;
             ramp.endSpeed = lim[1] + along;
             ramp.rampTime = lim[2];
-            f32 res = ApproachValueWithRamp(&ramp, &out, 0.0f, l, g_frameDt);
+            f32 res = ApproachValueWithRamp(0.0f, l, g_frameDt, &ramp, &out);
             u128 w = Vu0::Scalar(res);
             Vu0::Q(pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(dir), w);
             Vu0::Q(vel) = Vu0::MulAddX(Vu0::Q(split), Vu0::Q(dir), Vu0::ScalarAt(out));
@@ -2324,7 +2324,7 @@ void UpdateObjectCreator(ObjectCreator* self, f32 dt)
         SetDirectionOr(dir, Vu0::Sub(Vu0::Q(((PlacedObject*)anchor->watchedObject)->v140), Vu0::Q(((PlacedObject*)self->created)->v140)), g_unitXVector);
         f32 len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(((PlacedObject*)self->created)->v150)));
         ramp.Set(3000.0f, 0.0f, 0.2f);
-        f32 speed = ApproachValueWithRamp(&ramp, 0, len, 3000.0f, g_frameDt);
+        f32 speed = ApproachValueWithRamp(len, 3000.0f, g_frameDt, &ramp, 0);
         Vu0::Q(vel) = Vu0::MulX(Vu0::Q(dir), Vu0::Scalar(speed));
         PlacedObject* o = (PlacedObject*)self->created;
         o->desc02()->m20(o, &vel);

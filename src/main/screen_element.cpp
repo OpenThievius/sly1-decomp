@@ -1370,7 +1370,7 @@ void DrawGauge(GaugeBar* self)
         flag = d < 0.75f;
     }
     u32 grey = 0xFF808080;
-    self->fill = ApproachValueWithRamp(&g_gaugeFillRamp, 0, self->fill, self->fillTarget, g_gameClock.dt);
+    self->fill = ApproachValueWithRamp(self->fill, self->fillTarget, g_gameClock.dt, &g_gaugeFillRamp, 0);
     f32 y = self->barH;
     f32 h = self->fill * y;
     y -= h;

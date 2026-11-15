@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "state_trigger.h"
@@ -563,7 +564,6 @@ void ResolvePlayerTableObjects(Player* self)
 }
 
 
-void AddColliderForce(Collider* self, Vec4* force);
 
 // Per-frame forces of the request sub states: in 0x25, 0x26, 0x29 and 0x30 it cancels gravity and
 // steers the position toward rest (holding the height in 0x29 and 0x30 from the heading

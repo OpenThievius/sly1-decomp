@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "game_clock.h"
@@ -244,9 +245,6 @@ struct PathRamp { f32 rate; f32 f04; f32 f08; f32 f0C; };
 
 struct Vec4;
 struct RampProfile;
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-u128 ApproachPointWithRamp(u128 from, u128 to, RampProfile* ramp, Vec4* vel, f32 limit);
 struct RampProfile;
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
@@ -297,8 +295,7 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     s32 rev;
     f32 k;
 
-    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(g_zeroVector), (RampProfile*)g_pathVelocityRamp, 0,
-                                                g_gameClock.dt);
+    Vu0::Q(self->pathPoseOffset) = ApproachPointWithRamp(Vu0::Q(self->pathPoseOffset), Vu0::Q(g_zeroVector), g_gameClock.dt, (RampProfile*)g_pathVelocityRamp, 0);
     if (self->subState == 0x17 || self->subState == 0x1B) {
         Vu0::Set(self->headingVelocity, Vu0::Zero());
         return;
@@ -468,8 +465,8 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
     SetPlayerState(self, 7, state);
 }
 
-void BuildPerpendicularPair(Vec4* dir, Vec4* a, const Vec4* b, const Vec4* c);
-s32 CreatePooledContact(void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7, f32 f);
+struct PooledContact;
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 // The player held on its path: the contact row for the path's frame's root (or the player's own
 // list at +0x4B4 when the frame has no flag 2), the point and direction at the player's length in
@@ -508,9 +505,12 @@ void PinPlayerToPath(Player* self)
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
     TransformPointBetweenFrames(self, 0, &self->v23E0, &local);
     Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(self->pathPoseOffset)), Vu0::Q(pos));
-    CreatePooledContact(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
-    CreatePooledContact(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
-    CreatePooledContact(self, path->frame, &local, &dir, 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))));
+    // Retail's caller evaluates the depth last: the call names it last.
+    ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
+    // Retail's caller evaluates the depth last: the call names it last.
+    ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
+    // Retail's caller evaluates the depth last: the call names it last.
+    ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, path->frame, &local, &dir, 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))));
     *link = (BodyContact*)row->head;
 }
 

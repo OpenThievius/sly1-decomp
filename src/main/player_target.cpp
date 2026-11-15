@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "on_off_object.h"
@@ -284,9 +285,7 @@ s32 ChooseNearbyPlayerTarget(PlayerTargetState* self, void* target, s32* out)
     return r;
 }
 
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc);
 
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
 // Scores landing on a moving target: when the player can reach the point's height, it builds a
@@ -325,9 +324,11 @@ void ScorePlayerTargetPlacement(Player* self, Vec4* point, BaseObject* obj, Vec4
         *outTime = t;
     }
     if (outCost != 0) {
-        EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, 0.0f, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
         f32 a = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg1), Vu0::Q(seg1))));
-        EvaluateHermiteVectorSegment(t, t, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, t, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
         f32 b = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg2), Vu0::Q(seg2))));
         *outCost = ((a + b) * (t * 0.5f)) <? 1000000.0f;
     }
@@ -450,8 +451,6 @@ f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t)
     return f.result;
 }
 
-// Left in this order: retail's call here evaluates the time before the pointers.
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 extern const Vec4 g_zeroVector;
 
 // v made unit length, or fallback when shorter than 0.0001; returns its length.
@@ -479,7 +478,8 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out
     Vec4 vel;
     Vu0::Set(pos0, Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(t), Vu0::Q(self->gravity), Vu0::Scalar(t * (t * 0.5f))));
     p = *point;
-    TransformPointAtTime((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
+    // retail's caller evaluates the time before the pointers, as the third argument
+    ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))TransformPointAtTime)((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
     Vu0::Set(d, Vu0::Sub(Vu0::Q(p), Vu0::Q(pos0)));
     f32 r = g_targetReach;
     f32 dist2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
@@ -527,15 +527,12 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out
 // func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
 // function passes its own float parameter straight through.
 struct PathScoreArgs { Player* self; BaseObject* obj; s32 pad[2]; s32 c[4]; };
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void ScorePlayerLeapToPoint(f32 t, Player* self, BaseObject* obj, Vec4* point, f32* out1, Vec4* out2, Vec4* out3);
-
 // The score of a leap to the path's point at parameter t (ScorePlayerLeapToPoint).
 f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
 {
     f32 out;
-    ScorePlayerLeapToPoint(t, o->self, o->obj, (Vec4*)o->c, &out, 0, 0);
+    // retail's caller evaluates the time first, as the first argument
+    ((void (*)(f32, Player*, BaseObject*, Vec4*, f32*, Vec4*, Vec4*))ScorePlayerLeapToPoint)(t, o->self, o->obj, (Vec4*)o->c, &out, 0, 0);
     return out;
 }
 
@@ -583,7 +580,6 @@ struct TargetSpanHit {
 };
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
@@ -611,7 +607,8 @@ s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, vo
     GatherCollidersInBox(self->world, (Collider*)self, &lo, &hi, (s32 (*)(void*, Collider*))a1, a2, &n0, &n1);
     f32 t = 0.0f;
     for (;;) {
-        EvaluateHermiteVectorSegment(limit, t, 1.0f, (const Vec4*)pa, (const Vec4*)pb, pc, (const Vec4*)pd, &q, 0, 0);
+        // Retail's caller evaluates the floats first: the call names them first.
+        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(limit, t, 1.0f, (const Vec4*)pa, (const Vec4*)pb, pc, (const Vec4*)pd, &q, 0, 0);
         if (t != 0.0f) {
             if (FindNearestSpanObject(0, &p, &q, n0, n1, (ColliderSpan*)&hit) != 0) {
                 if (100.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pc))))) {
@@ -1695,7 +1692,6 @@ void ResetPlayerOnOffObject(Player* self)
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-void AddColliderForce(Player* self, void* v);
 
 // The step of state 6: on an active track the player is held to the track's speed limit: the
 // track's direction against gravity and the player's velocity along it give a force that keeps the

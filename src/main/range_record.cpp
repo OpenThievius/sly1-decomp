@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "asm_functions.h"
 #include "fpu.h"
 #include "vu0.h"
 #include "path_curve_object.h"
@@ -35,7 +36,6 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 extern s32 g_meshQueueCount;
 extern u8 g_meshQueueEntries[];
 struct BufferedStream;
-s32 RangeRecordReachesSphere(RangeRecord* node, void* a1, f32 f);
 extern "C" f32 Tangent(f32 x);
 extern u8 g_identityMatrix4[];
 
@@ -325,7 +325,7 @@ struct RangeUniforms {
 };
 void* InitPacketWriter(PacketWriter* p);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
-void WriteVifMscal(PacketWriter* s, void* data);
+void WriteVifMscal(PacketWriter* s, void* program);
 void WriteVifFlushE(PacketWriter* s);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 eps);
 extern u8 g_rangeRecordProgram[];

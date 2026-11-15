@@ -8,6 +8,7 @@
 // of data in the buffer D_00628C00, and returns the reply's size and its word; func_001F9A90
 // sends one with the command 0.
 #include "common.h"
+#include "asm_functions.h"
 #include "remote_call_client.h"
 #include "asm_func.h"
 
@@ -28,10 +29,8 @@ static s32 g_moduleLoaderVersion;
 
 extern char D_00276970[16];
 
-s32 CompareMemory(const void* a, const void* b, s32 n);
 extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-void* CopyStringBounded(ModuleBlob* dst, ModuleBlob* src, s32 n);
 s32 BindModuleLoader(void);
 
 // A word read at any alignment.
@@ -100,7 +99,7 @@ s32 SendModuleLoadRequest(ModuleBlob* src, s32 size, ModuleBlob* data, s32* out,
         return -0x10004;
     }
     ModuleBlob* p = &g_moduleLoaderBuffer.name;
-    CopyStringBounded(p, src, 0xFC);
+    CopyStringBounded((char*)p, (const char*)src, 0xFC);
     ModuleLoadBuffer* q = (ModuleLoadBuffer*)((u8*)p - 8);
     q->name.b[0xFB] = 0;
     if (data != 0) {

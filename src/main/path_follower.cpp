@@ -7,6 +7,7 @@
 // Its name is ours, after its largest family, the path follower's start and steps (class 0x19),
 // whose other functions follow in path_follower_helpers.cpp and world.cpp.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "vu0.h"
 #include "mul_rotation.h"
@@ -101,7 +102,6 @@ f32 GetWrappedDifference(f32 x, f32 lim, f32 base);
 extern f32 g_gameClock[];
 
 struct RampProfile;
-f32 ApproachValueWithRamp(RampProfile* k, f32* out, f32 x, f32 y, f32 z);
 
 
 
@@ -120,7 +120,7 @@ extern f32 g_steerAngleGain;
 extern f32 g_steerAngleLimit;
 extern f32 g_frameDt;
 extern f32 g_steerAngleRamp[3];
-extern "C" f32 ArctangentOfRatio(f32 y, f32 x); f32 WrapAngle(f32 a); f32 ClampToMagnitude(f32 a, f32 b); f32 ApproachAngleWithRamp(void* p, void* out, f32 a, f32 b, f32 c);
+extern "C" f32 ArctangentOfRatio(f32 y, f32 x); f32 WrapAngle(f32 a); f32 ClampToMagnitude(f32 a, f32 b);
 
 typedef int Quadword __attribute__((mode(TI)));
 
@@ -340,7 +340,6 @@ struct HitMessage {
 
 struct Oscillator;
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out);
 typedef s32 (*MessageHandlerFn)(Collider* self, s32 a, OwnerMessage* msg);
 typedef void (*HitFn)(Collider* self, HitMessage* msg);
@@ -465,7 +464,6 @@ s32 ProbeColliderBelowPoint(Player* self, Collider* col, Vec4* out)
 }
 
 struct AttachedSet;
-void AddColliderForce(void* a, void* b);
 
 // The player's reaction to touching an attached set: in sub states 6 and 0x2B (while falling) the
 // collider's own reaction, in 0x27 and 0x2F a damped force that follows the set's motion at the
@@ -543,7 +541,6 @@ s32 TestStandInMayContact(StandIn* self, Collider* value)
     return TestCollidersMayContact(self, value);
 }
 
-Quadword ScaleQuadword(Quadword a, Quadword b);
 extern Quad16 g_zeroQuad;
 
 // k times the vector at p, into dst (the quadword helpers' product).
@@ -832,13 +829,9 @@ extern f32 g_wheelSpinCurve[];
 extern f32 g_wheelSpinRange[];
 extern f32 g_forceLeverDrop;
 
-void AddColliderForce(void* a, void* b);
 void* StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
 void* StoreQuadword(u128* out, u128 v);
-void ApplyColliderInverseInertia(Collider* self, Vec4* in, Vec4* out);
-void AddColliderTorque(Collider* self, Vec4* torque);
-Quadword ScaleQuadword(Quadword a, Quadword b);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 f32 ApproachValueWithRamp(f32 x, f32 y, f32 z, RampProfile* k, f32* out);
@@ -1070,7 +1063,7 @@ f32 FindNearestValueOutsideSpans(s32 count, ValueRange* spans, f32 x)
 void UpdatePathFollowerPace(PathFollower* self)
 {
     if (self != GetActiveSwitchedCollider()) {
-        self->pace = ApproachValueWithRamp((RampProfile*)g_paceRamp, 0, self->pace, self->paceTarget, g_gameClock[2]);
+        self->pace = ApproachValueWithRamp(self->pace, self->paceTarget, g_gameClock[2], (RampProfile*)g_paceRamp, 0);
         if (!(g_gameClock[1] < self->paceChangeTime)) {
             f32 one = 1.0f;  // hoisted: retail holds 1.0f in $f3 before the multiply
             s32 idx = 3 * (self->lap - 1) + self->currentMarker->index;
@@ -1184,7 +1177,7 @@ void AdvancePathFollowerAlongPath(PathFollower* self, s32* nearby)
     Vu0::Q(hi) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(dir), Vu0::ScalarAt(g_lateralOffsetRange.hi));
     FindPathCurveNearestTime(self->sidePath->curve, &lo, &hi, &out, 0, &self->sidePathTime, 0, self->sidePathTime);
     f32 ahead = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Sub(Vu0::Q(out), Vu0::Q(pos)), Vu0::Q(dir)));
-    f32 want = ApproachValueWithRamp((RampProfile*)g_lateralOffsetRamp, 0, self->sideTarget, ahead, g_gameClock[2]);
+    f32 want = ApproachValueWithRamp(self->sideTarget, ahead, g_gameClock[2], (RampProfile*)g_lateralOffsetRamp, 0);
     f32 best = FindNearestValueOutsideSpans(k, spans, want);
     if (!IsInsideRange(&g_lateralOffsetRange, best)) {
         best = want;
@@ -1260,7 +1253,7 @@ void SteerPathFollower(PathFollower* self)
     f32 a = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 b = WrapAngle(self->targetHeading - a);
     f32 c = ClampToMagnitude(g_steerAngleGain * b, g_steerAngleLimit);
-    self->steerAngle = ApproachAngleWithRamp((u8*)g_steerAngleRamp, 0, self->steerAngle, c, g_frameDt);
+    self->steerAngle = ApproachAngleWithRamp(self->steerAngle, c, g_frameDt, (u8*)g_steerAngleRamp, 0);
     for (u32 i = 0; i < 4; i++) {
         FollowerObjectSlot* s = &self->wheels[i];
         if ((s32)i < 2) {

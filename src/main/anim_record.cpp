@@ -100,8 +100,6 @@ extern u8 g_crossfadeAnimatorMethods[];
 extern const Fn_Table g_scrollAnimatorMethods[];
 extern const Fn_Table g_circleAnimatorMethods[];
 extern const Fn_Table g_triangleAnimatorMethods[];
-#include "random_range_low.h"
-s32 RandomIntInRange(RandomRangeLow lo, s32 hi);
 
 // The file's .data, in retail's order.
 s32 g_animRecordCount = 0;
@@ -1120,9 +1118,7 @@ void StepRandomJumpAnimator(RandomJumpAnimator* self, f32 x)
         self->wait = self->wait - x;
         return;
     }
-    RandomRangeLow lo;
-    lo.v = 1;
-    s32 v = RandomIntInRange(lo, count - 1);
+    s32 v = RandomIntInRange(1, count - 1);
     s32 rem = (self->cursor.frame + v) % self->cursor.record->count;
     SetCursorFrame(&self->cursor, rem);
     self->wait = RandomFloatInRange(self->waitMin, self->waitMax);

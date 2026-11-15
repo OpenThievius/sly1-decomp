@@ -9,25 +9,25 @@
 #include "common.h"
 
 extern "C" void ConstructScriptMachineStaticsAtStartup();
-void ConstructValuePoolsAtStartup();
+extern "C" void ConstructValuePoolsAtStartup();
 extern "C" void ConstructTextPanelStaticsAtStartup();
 extern "C" void ConstructCameraStaticColorAtStartup();
 void ResetPacketWriters();
-void ConstructDefaultRgbaColorAtStartup();
+extern "C" void ConstructDefaultRgbaColorAtStartup();
 extern "C" void ConstructBoxStylesAtStartup();
 extern "C" void ConstructMenuBoxStyleAtStartup();
 void ConstructScreenTextStylesAtStartup();
-void ConstructBestTimeTextStyleAtStartup();
+extern "C" void ConstructBestTimeTextStyleAtStartup();
 extern "C" void ConstructWarpTextStyleGlobalsAtStartup();
 extern "C" void ConstructTriangleGroupColorsAtStartup();
 extern "C" void ConstructMovieRingSinkAtStartup();
-s32 ConstructSwitchedColliderDefaultsAtStartup();
+extern "C" void ConstructSwitchedColliderDefaultsAtStartup();
 extern "C" void ConstructScratchpadTransfersAtStartup();
 extern "C" void ConstructWorldLoadRequestGlobalAtStartup();
 void ConstructGreyColorAtStartup();
 void RegisterProgramFrameInfo();
 extern "C" void DestroyScriptMachineStaticsAtExit();
-void DestroyValuePoolsAtExit();
+extern "C" void DestroyValuePoolsAtExit();
 void ReleaseProgramFrameInfo();
 void* g_constructorList[26] = {
     (void*)0x12, ConstructScriptMachineStaticsAtStartup, ConstructValuePoolsAtStartup, ConstructTextPanelStaticsAtStartup,

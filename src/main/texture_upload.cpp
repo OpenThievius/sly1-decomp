@@ -90,7 +90,6 @@ extern s32 g_imageRecordCountB;
 
 
 
-void BeginImageTransfer(TransferBase dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
 
 
 extern s32 g_imageRecordCountB;
@@ -100,7 +99,7 @@ extern s32 g_imageSlotsA;
 
 void* InitPacketWriter(PacketWriter* f);
 void WriteVifFlush(PacketWriter* f);
-void WriteVifDirect(PacketWriter* f, s32 a, s32 b, s32 c);
+void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
 
 
@@ -156,9 +155,7 @@ void StartPaletteUpload(PaletteRecord* e, s32 v, void* ctx)
 {
     s32 step = (e->f4 > 16) ? 16 : 8;
     s32 n = e->f4 - 1;
-    TransferBase p;
-    p.v = v;
-    BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->blockCount, ctx);
+    BeginImageTransfer(v, 1, 0, step, ((n + step) & -step) / step, e->blockCount, ctx);
 }
 
 // Fills the image record's TEX0 word: the base at a1, the buffer width and pixel format from the
@@ -431,7 +428,7 @@ s32 UploadImagesByMask(u32 mask)
     PacketWriter fb;
     u8 buf[0xA0];
     s32 o0;
-    s32 o1;
+    u8* o1;
     s32 res;
     s32 i;
 
@@ -452,7 +449,7 @@ s32 UploadImagesByMask(u32 mask)
             BuildPaletteTexRegister(e, n);
             StartPaletteUpload(e, n, &fa);
             *(u64*)(fa.curS - 0x10) |= 0x8000;
-            DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
+            DetachPacketBuffer(&fa, (u32*)&o0, &o1);
             WriteVifDirect(&fb, o0, o1, 0);
             WriteVifDirectRef(&fb, e->blockCount, e->data, 0);
             if (e->f0 & 0x40000000) {
@@ -471,7 +468,7 @@ s32 UploadImagesByMask(u32 mask)
                 BuildImageTexRegister(e, n);
                 StartImageUpload(e, n, &fa);
                 *(u64*)(fa.curS - 0x10) |= 0x8000;
-                DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
+                DetachPacketBuffer(&fa, (u32*)&o0, &o1);
                 WriteVifDirect(&fb, o0, o1, 0);
                 WriteVifDirectRef(&fb, e->blockCount, e->data, 0);
                 if (e->f4 & 0x40000000) {
@@ -487,7 +484,7 @@ s32 UploadImagesByMask(u32 mask)
         BeginGifTag(&fa, 0, 1, 0xE);
         AddGifRegisterWrite(&fa, 0x3F, 0);
         EndGifPacket(&fa);
-        DetachPacketBuffer(&fa, (u32*)&o0, (u8**)&o1);
+        DetachPacketBuffer(&fa, (u32*)&o0, &o1);
         WriteVifDirect(&fb, o0, o1, 0);
         WriteVifFlush(&fb);
         CloseDmaTag(&fb);

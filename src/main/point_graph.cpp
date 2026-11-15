@@ -237,7 +237,7 @@ void QueueModelPartDraws(PlacedObject* self, Camera* cam)
             }
             if (target != st->fade) {
                 ModelPartState* home = (ModelPartState*)((u8*)self->partStates + (j + i) * 0x28);
-                f32 a = ApproachValueWithRamp((RampProfile*)g_pointFadeRamp, 0, st->fade, target, g_gameClock[2]);
+                f32 a = ApproachValueWithRamp(st->fade, target, g_gameClock[2], (RampProfile*)g_pointFadeRamp, 0);
                 st->fade = a;
                 home->fade = a;
             }

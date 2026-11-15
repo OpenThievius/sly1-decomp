@@ -3,6 +3,7 @@
 // UpdatePlayerState2) with its ledge contacts and jump velocities, then the point objects' list.
 // Its name is ours, after the player's mode 2, which holds nearly all of its code.
 #include "common.h"
+#include "asm_functions.h"
 #include "point_object.h"
 #include "collider.h"
 #include "globals.h"
@@ -114,7 +115,6 @@ f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
 ObjectList g_pointObjects = {0};
 
 extern f32 g_gameClock[];
-void AddColliderForce(void* target, Vec4* force);
 
 // The step of state 2: turns toward the heading matrix, then by sub-state: 6 steers toward the
 // stick's target position, 8 holds the player up against gravity until a marker of its animation
@@ -214,7 +214,6 @@ void StepPlayerState2(Player* self)
     }
 }
 
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 extern f32 g_gameTime;
 
 struct LeapCandidatePart {
@@ -470,7 +469,6 @@ s32 ComputeLedgeEdgeOffset(void* unused, Collider* c, MeshEdgePair* e, Vec4* out
 }
 
 
-void BuildPerpendicularPair(Quad16* q, void* out, const Vec4* a, const Vec4* b);
 
 // Probes the surroundings of a ledge point: builds a frame at ctx from the direction in src and
 // tests eleven fixed segments of it (g_probeSegmentEndpoints) against the contacted objects' parts.
@@ -483,7 +481,7 @@ s32 TestProbeSegmentsAgainstColliders(Collider* self, void* ctx, Quad16* src)
     q = *src;
     s32 hits = 0;
     // stack scratch: a frame and the segment spans, not an object
-    BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
+    BuildPerpendicularPair((Vec4*)&q, (Vec4*)(buf + 0x10), &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation((const Vec4*)ctx, (const Mat3*)&q, (Mat4A*)(buf + 0x30));
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
         TransformByMatrixWithW((const Quad16*)(buf + 0x30), &g_probeSegmentEndpoints[i], 1.0f, (Vec4*)(buf + 0x70));
@@ -597,7 +595,6 @@ s32 ComputeLedgeOffsetForContact(Collider* self, Collider* part, Vec4* point, s3
 
 extern f32 g_gameTime;
 extern f32 g_contactSideSigns[];
-s32 FindPlaneTreeNodeForPoint(Vec4* p, void* tree);
 // Looks for a contact the player could grab as a ledge (not in the first 0.15 s of the state): of
 // its vertex, edge and face contacts it keeps the highest one with a usable ledge
 // (ComputeLedgeOffsetForContact) that the player is not moving away from and whose point is not
@@ -940,7 +937,7 @@ extern f32 D_00263E74;
 extern f32 D_00264040;
 extern f32 D_00264044;
 extern f32 D_00264048[2];
-void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
+void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime;
 extern f32 g_gameClock[];
@@ -1203,8 +1200,10 @@ void UpdatePlayerState2(Player* p)
     if (p->subState < 16) {
         if (p->subState >= 9) {
             f32 t = ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1] + g_gameClock[2];
-            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
-            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
+            // Retail's caller evaluates the floats first: the call names them first.
+            ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
+            // Retail's caller evaluates the floats first: the call names them first.
+            ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
             if (D_00264048[0] < (Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(b))) + Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(c)))) * (t * 0.5f)) {
                 SetPlayerState(p, 2, 2);
             }

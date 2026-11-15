@@ -2269,11 +2269,11 @@ void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out
 
 // Closes the buffer's tag, flushes the data cache, starts the DMA chain from the buffer's start on
 // the given channel and rewinds the cursor.
-void SubmitPacketBuffer(PacketWriter* self, void* dma)
+void SubmitPacketBuffer(PacketWriter* self, DmaChannel* dma)
 {
     CloseDmaTag(self);
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)dma, self->begin);
+    StartDmaChain(dma, self->begin);
     self->cur = self->begin;
 }
 

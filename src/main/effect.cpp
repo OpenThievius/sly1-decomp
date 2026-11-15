@@ -11,6 +11,7 @@
 // padding marks either edge, so the cut could lie at any function start from 0x1A3598 to
 // 0x1A3B20, or the two could be one file. Its name is ours, after its role.
 #include "common.h"
+#include "asm_functions.h"
 #include "vu0.h"
 #include "list_iter.h"
 #include "aim_blend_grid.h"
@@ -94,7 +95,6 @@ extern f32 g_gameTime;
 
 
 struct TreeNode03;
-s32 FindPlaneTreeNodeForPoint(Vec4* pos, TreeNode03* nodes);
 
 struct Oscillator;
 
@@ -336,7 +336,6 @@ void *StoreFloatAsQuadword(u128* out, f32 f);
 
 void* CopyQuadword(u128* out, void* src);
 
-Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 
 void* StoreQuadword(u128* out, u128 v);
 
@@ -1104,10 +1103,6 @@ void InitRisingEffect(Effect* self, void* pos, f32 scale, s32 flags)
     self->fB0 = -8.0f;
 }
 
-// The definition's parameters in the order the call below writes them: retail's caller
-// evaluates its float arguments there, and only their place in the list decides that.
-void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
-void BuildPerpendicularPair(Vec4* in, Vec4* out, const Vec4* a, const Vec4* b);
 // The move of a drifting effect: the plain effect move, then, in 3 of 10 frames when it has a
 // velocity, a sideways push in a random direction across that velocity, at a random speed of 100 to
 // 400 units/s scaled down by the roll.
@@ -1135,7 +1130,8 @@ void MoveDriftingEffect(Effect* self, f32 dt)
         Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), Vu0::Length(Vu0::Q(dir)));
         BuildPerpendicularPair(&dir, side, &g_unitXVector, &g_unitZVector);
         f32 speed = RandomFloatInRange(100.0f, (1.0f - r * 3.3333333f) * 300.0f + 100.0f);
-        ComputeSinCos(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
+        // Retail's caller evaluates the angle before the outputs' addresses: the call names it first.
+        ((void (*)(f32, f32*, f32*))ComputeSinCos)(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
         Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(side[0]), Vu0::Scalar(s * speed), Vu0::Q(side[1]), Vu0::Scalar(c * speed));
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(push), Vu0::Scalar(dt));
     }
@@ -2027,7 +2023,7 @@ struct HullPoint {
     u8 pad24[0x30 - 0x24];
 };
 
-Mat4A MultiplyMatrices(void* m, void* in);
+Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 // The frame looking from the camera toward pos: the camera's position moved to the origin, then
 // the basis built from the direction (its rows as the columns), and the product passed to
@@ -2055,7 +2051,7 @@ s32 ComputeHullSeenFromCamera(Vec4* pos, s32 n, HullPoint* pts)
     m1.m[0][2] = rot.r[0].x;
     m1.m[1][2] = rot.r[0].y;
     m1.m[2][2] = rot.r[0].z;
-    t = MultiplyMatrices(&m1, &m0);
+    t = MultiplyMatrices(*(Mat4A*)&m1, *(Mat4A*)&m0);
     return ComputeProjectedHull(&t, n, pts);
 }
 
@@ -2251,7 +2247,6 @@ void SetRandomEffectSpin(Effect* self)
     BuildBasisFromX((Vec4*)&axis, (Mat3*)self->rotation);
 }
 
-f32 SplitVectorAlongAxis(Vec4* v, Vec4* axis, Vec4* along, Vec4* rest);
 
 // A quadratic in z (poly[0] + poly[1] z + poly[2] z^2), clamped to range[0]..range[1]; the same
 // inline as player_state2.cpp's.
@@ -2373,7 +2368,6 @@ s32 IsEffectAimCandidate(EffectSpawnerRecord* self, Collider* other)
 typedef int Quadword128 __attribute__((mode(TI)));
 void *StoreFloatAsQuadword(u128* out, f32 f);
 void* CopyQuadword(u128* out, void* src);
-Quadword128 ScaleQuadword(Quadword128 a, Quadword128 b);
 void* StoreQuadword(u128* out, u128 v);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);

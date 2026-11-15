@@ -22,6 +22,7 @@
 #include "functions/effect_spawner.h"
 #include "functions/main_loop.h"
 #include "functions/pooled_object.h"
+#include "functions/render_frame.h"
 #include "functions/warp_menu.h"
 
 // The scale and offset the projection constants upload (func_0019D860); func_001DD3E0 reads
@@ -53,7 +54,6 @@ extern u8 g_groupMicroprogram[];
 extern u8 g_groupMicroprogramEnd[];
 void UploadProjectionConstants(void);
 void UploadCameraOncePerFrame(void);
-void AddDmaRefTagIfChanged(void* self, void* a, void* b);
 extern WarpPage* g_currentWarpPage;   // the warp page on view (warp_menu sets its mode and cursor)
 extern s32 g_maskImageUploads[];
 extern Camera* g_camera;
@@ -66,7 +66,6 @@ void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void AddGifRgbaEntry(PacketWriter* p, u32 c);
 void AddGifXyzfEntry(PacketWriter* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void WriteCameraMatricesPacket(Camera* self);
-void AddDmaRefTagIfChanged(void*, void*, void*);
 void UploadGroupConstants(void);
 extern u32 g_cameraUploadedThisFrame;
 extern u8 g_alternateMicroprogram[];

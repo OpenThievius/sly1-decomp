@@ -217,7 +217,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
         }
         SetContactPairFlags(self->world, self->contacts, ((Collider*)a->root)->contacts, 0x40, 0);
         ChildHitRecord* e = &self->entries[self->entryCount++];
-        e->key = (s32)a;
+        e->key = a;
         u128 point = Vu0::Q(span.q[0]);
         Vu0::Q(e->v[0]) = point;
         u128 dir = Vu0::Q(span.q[2]);
@@ -229,12 +229,14 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
     }
 }
 
-s32 CreatePooledContact(void*, s32, void*, void*, s32, s32, s32, void*, f32);
+
+struct PooledContact;
+PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
 
 // Looks up the entry with the given key among the object's entries and, if found and the object
 // is active, creates a pooled contact for it (kind 9) carrying that entry's data and value; this
 // is the slot the class tables share with the other colliders.
-void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
+void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, s32 a2, s32 a3, s32 a4, void* arg5)
 {
     s32 i;
     if (self->active) {
@@ -243,7 +245,8 @@ void RunKeyedChildGroupEntry(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s3
         }
         if (i < self->entryCount) {
             ChildHitRecord* e = &self->entries[i];
-            CreatePooledContact(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
+            // Retail's caller evaluates the depth last: the call names it last.
+            ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
         }
     }
 }

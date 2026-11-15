@@ -34,7 +34,7 @@ s32 FormatToStringBounded(char* dst, s32 cap, const char* fmt, ...);
 extern "C" s32 GetStringLength(const char* s);
 void* CopyString(void* dst, const char* src);
 void* AppendString(void* dst, const char* src);
-char* FindCharInString(char* s, s32 c);
+char* FindCharInString(const char* s, s32 c);
 void UppercaseString(char* p);
 s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void InitRecursiveLock(RecursiveLock* self);

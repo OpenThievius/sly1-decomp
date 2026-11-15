@@ -9,6 +9,7 @@
 // .rodata is the message, its .data the thread id D_00277128 and its .bss the stack, the
 // semaphore id and the ring, 0x625770 to 0x625F80.
 #include "common.h"
+#include "asm_functions.h"
 #include "asm_func.h"
 #include "system.h"
 #include "semaphore_params.h"
@@ -67,7 +68,6 @@ extern u8 g_globalPointer[];
 extern "C" s32 NewSemaphore(SemaphoreParams* p);
 s32 MakeThread(ThreadParams* p);
 extern "C" s32 FreeSemaphore(s32 h);
-void RunThread(s32 h, RequestRing* q);
 extern "C" s32 GetCurrentThreadId(void);
 void SetThreadPriority(s32 h, s32 v);
 
