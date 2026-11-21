@@ -4537,6 +4537,9 @@ L0410:
 }
 
 // Starts the screen fade with a request of kind 1 for the given object and value (count passed on).
+// Retail leaves the request's f0C (the second arrival key QueueWorldLoad passes on) unset: it is
+// whatever the stack held, and StartScreenFade keeps it. Harmless while the first key is -1
+// (FindArrivalPoint then ignores the second); nothing may rely on its value.
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 {
     FadeRequest m;

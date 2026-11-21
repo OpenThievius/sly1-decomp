@@ -144,7 +144,6 @@ void UpdateC24Object(PathSpeedCollider* self, f32 dt)
 
 typedef void (*WeightCurveFn)(void* curve, void* owner, s32 a2, f32* out0, f32* out1, f32 x, f32 y);
 typedef void (*CurveSampleDirFn)(PathCurve* self, f32 len, Vec4* pos, Vec4* dir);
-typedef void (*ChildStepFn)(BaseObject* self, f32 dt, s32 flag);
 
 
 // Moves the path-speed object to the point and velocity its curve table gives for the current
@@ -185,7 +184,7 @@ void MoveC24Object(PathSpeedCollider* self, s32 a1, f32 dt)
     BaseObject* n = (BaseObject*)head;
     while (n != 0) {
         if (n->desc->flags & 1) {
-            ((ChildStepFn)n->desc->m1B)(n, dt, 1);
+            n->desc->step(n, dt, 1);
         }
         void* next = *(void**)frame.cursor;
         frame.cursor = (void*)((s32)next + frame.next_off);

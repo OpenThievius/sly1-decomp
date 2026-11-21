@@ -1797,7 +1797,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     BaseObject* obj;
     while ((obj = ListWalkNextBase::Of(&it)) != 0) {
         if ((obj->desc->flags & 1) != 0) {
-            ((void (*)(BaseObject*, f32, s32))obj->desc->m1B)(obj, dt, moved);
+            obj->desc->step(obj, dt, moved);
         }
     }
     if (moved != 0) {
@@ -5600,7 +5600,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         if (id == -1) {
             return;
         }
-        busy = IsSoundEntryAvailable(id);
+        busy = IsSoundEntryLooping(id);
         if (self->p50 != 0 && busy != 0) {
             return;
         }

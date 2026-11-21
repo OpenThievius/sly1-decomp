@@ -226,7 +226,7 @@ tail:
 
 
 // Moves the collider, then calls slot 0x12 of its descriptor if it has one.
-void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
+void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, s32 flag)
 {
     MoveCollider(self, t, 0);
     void (*fn)(BaseObject*) = self->desc->m12;

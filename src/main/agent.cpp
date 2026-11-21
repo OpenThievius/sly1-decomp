@@ -2231,10 +2231,10 @@ s32 IsObjectOfKind(BaseObject* list, s32 key);
 // The agent's collision callback: adds a probe contact unless contacts are disabled and, for its
 // own target (or a parentless object of kind 0x4C), adds the mesh contacts between each attached
 // mesh key object and the other collider into hitContacts, which DispatchAgentContactHits reads.
-void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, FaceRef* a3, u8* a4, void* a5)
 {
     if (a0->contactsDisabled == 0) {
-        AddTurningColliderProbeContact(a0, a1, (void*)a4, (void*)a5);
+        AddTurningColliderProbeContact(a0, a1, a4, a5);
     }
     if (a1 != a0->desc08()->m62(a0)) {
         if (a1->parent != 0) {
@@ -2252,7 +2252,7 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
                               ((Collider*)e->obj)->tree.count,
                               (FaceRef*)((Collider*)e->obj)->tree.nodes, 0, (PooledContact**)&a0->hitContacts);
             } else if (a3 != 0) {
-                CreateMeshPairContacts((Collider*)e->obj, a1, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)&a0->hitContacts);
+                CreateMeshPairContacts((Collider*)e->obj, a1, a2, a3, a4, (PooledContact**)&a0->hitContacts);
             }
         }
     }

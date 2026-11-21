@@ -5105,7 +5105,7 @@
      "address": "2984",
      "metadata": {
       "virtual_address": "1169248",
-      "demangled_name": "TestSoundInBank"
+      "demangled_name": "TestSoundLoops"
      }
     },
     {
@@ -35146,7 +35146,7 @@
      "address": "896",
      "metadata": {
       "virtual_address": "1828200",
-      "demangled_name": "IsSoundEntryAvailable"
+      "demangled_name": "IsSoundEntryLooping"
      }
     },
     {

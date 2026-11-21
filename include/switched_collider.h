@@ -122,8 +122,8 @@ struct StepSequenceGroup {
 struct PlayerMessageRecord {
     s32 kind;               // 0x00
     s32 arg;                // 0x04
-    s32 data;               // 0x08
-    s32 fn;                 // 0x0C
+    void* data;             // 0x08: what the callback is called with (the sending object)
+    void (*fn)(void* sender, Player* self);   // 0x0C
 };
 
 // One of class 0x19's four slots at 0x6B0: an object and a position.

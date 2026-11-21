@@ -20,7 +20,7 @@ struct Vec4;
 void InitContactListObject(ContactListObject* self);
 void LoadContactListObject(ContactListObject* self, BufferedStream* stream);
 void UnregisterContactListObject(ContactListObject* self);
-void MoveContactListObject(ContactListObject* self, void* b, f32 x);
+void MoveContactListObject(ContactListObject* self, s32 flag, f32 x);
 void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec4* v);
 void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2);
 s32 TestContactListMayContact(ContactListObject* self, void* key);

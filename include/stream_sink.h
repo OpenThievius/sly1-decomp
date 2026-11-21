@@ -1,47 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Kind v24b5: the movie player's data sinks, two C++ classes with two virtuals each (GCC vtables
-// D_0024B598 and D_0024B5B8, vptr at +0). Written for this project from what retail's code does
+// The movie player's data sink: a C++ class with two virtuals (GCC vtables D_0024B598, for the
+// IPU's input DMA channel, and D_0024B5B8, for the ring buffer in the IOP's memory read through
+// the SIF; vptr at +0). Written for this project from what retail's code does
 // (config/us/tables.tsv, kinds.tsv).
 //
-// src/main/movie_player.cpp is a whole file and defines both classes with real virtual functions
-// (TransferSink with its IopRingSink and IpuDmaSink; their vtables and the Put/Idle methods are
-// compiler-generated, config/us/generated.tsv): that file keeps them, and nothing includes this
-// header yet. It documents the layouts as plain structs for the callers outside that file
-// (func_0013C9D0 reads a sink through entry 1), whose entries are GCC 2.95's
-// {s16 delta; s16 index; fn}, entry 0 being {offset-to-top, rtti} = {0, 0, 0}.
+// DrainRingBuffer (src/main/ring_buffer.cpp) calls the sink through its virtual methods, and
+// src/main/movie_player.cpp defines the two classes derived from it (IopRingSink and IpuDmaSink,
+// include/movie_player.h; their vtables and the Put/Idle methods are compiler-generated,
+// config/us/generated.tsv). One declaration for both files: the compiler's own table is used
+// everywhere, so the call is right with whatever layout the compiler gives it. On retail's
+// compiler the entries are {s16 delta; s16 index; fn}, entry 0 being {offset-to-top, rtti} =
+// {0, 0, 0}, and the virtual call adds the entry's delta to the sink.
 #ifndef STREAM_SINK_H
 #define STREAM_SINK_H
 
 #include "common.h"
 
-struct StreamSink;
-
-struct StreamSinkMethods {
-    s16 adj0; s16 idx0; void* fn0;                                              // 0x00
-    s16 adj1; s16 idx1; s32 (*put)(StreamSink* self, s32 size, u8* buf);             // 0x08: moves up to `size` bytes
-    s16 adj2; s16 idx2; s32 (*idle)(StreamSink* self);                               // 0x10
+// Where a transfer's data goes: two virtual methods, which retail's vtables list in this order.
+// Put moves up to `size` bytes and returns how many it took; Idle says whether the sink is idle.
+class TransferSink {
+public:
+    virtual s32 Put(s32 size, u8* buf) = 0;
+    virtual s32 Idle() = 0;
 };
-
-// D_0024B598, the IPU's input DMA channel (IpuDmaSink: Put starts a transfer of up to 0x1000
-// bytes and returns its size, Idle returns 1). func_0018ECA8 keeps one on its stack.
-struct StreamSink {
-    const StreamSinkMethods* methods;   // 0x00
-};
-
-// D_0024B5B8, a ring buffer in the IOP's memory read through the SIF (IopRingSink). The movie
-// player's stream embeds one at +0x6C of its 0x94 bytes, which is the global D_00269AEC. Put
-// reads up to `available` bytes in pieces of func_0018E7C0, never past the end of the ring.
-struct RingStreamSink : StreamSink {
-    s32 iopAddr;            // 0x04: the ring's address in the IOP
-    s32 size;               // 0x08: its size
-    s32 readPos;            // 0x0C: the read position
-    s32 writePos;           // 0x10: the write position (func_0018E838)
-    s32 available;          // 0x14: the bytes ready (the size at reset, func_0018E6A0)
-    s32 taken;              // 0x18: the bytes taken since the reset
-    s32 takenTotal;         // 0x1C: the bytes taken in all
-};
-
-typedef char check_StreamSink[sizeof(StreamSink) == 0x4 ? 1 : -1];
-typedef char check_RingStreamSink[sizeof(RingStreamSink) == 0x20 ? 1 : -1];
 
 #endif

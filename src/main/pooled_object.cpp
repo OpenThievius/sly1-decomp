@@ -2493,7 +2493,7 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
 
 // If the object has a draw range, runs its slot-27 method and queues a deferred request that draws
 // its parts with a transform built from the given matrix.
-void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2)
+void QueuePlacedObjectDraw(TextureRenderObject* self, void* unused, void* a2)
 {
     (void)unused;
     if (self->drawRange != 0) {

@@ -106,7 +106,6 @@ extern u8 g_movieDataRingBuffer[];
 // A block of data the decoder hands a stream callback.
 struct MovieDataBlock { u8 pad0[8]; u8* data; s32 size; };
 
-struct StreamSink;
 
 
 void* InitGifPacket(PacketWriter* self);
@@ -276,7 +275,7 @@ void UnregisterContactListObject(ContactListObject* self)
 
 // Moves the collider with its position and orientation attachments set aside for the move,
 // after rebuilding its basis from its velocity when it is ready.
-void MoveContactListObject(ContactListObject* self, void* b, f32 x)
+void MoveContactListObject(ContactListObject* self, s32 flag, f32 x)
 {
     if (self->ready != 0) {
         BuildBasisFromX(&self->v150, &self->rot);
@@ -285,7 +284,7 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
     s32 s0 = (s32)self->orientationAttachment;
     self->positionAttachment = 0;
     self->orientationAttachment = 0;
-    MoveCollider(self, x, b);
+    MoveCollider(self, x, flag);
     self->positionAttachment = (Attachment*)s1;
     self->orientationAttachment = (Attachment*)s0;
 }
@@ -531,7 +530,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
     if (n != 0) {
         do {
             if (((PlacedObject*)n)->desc->flags & 1) {
-                ((void (*)(void*, f32, s32))((PlacedObject*)n)->desc->m1B)(n, dt, 1);
+                ((PlacedObject*)n)->desc->step((PlacedObject*)n, dt, 1);
             }
             void* c = f.cur;
             s32 o = f.off;
@@ -828,7 +827,7 @@ void UpdateMovieStream(MovieStream* self)
 {
     switch (self->state) {
     case 2:
-        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, (StreamSink*)&self->sink);
+        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, &self->sink);
         if (self->sink.freeBytes != 0) {
             break;
         }
@@ -838,7 +837,7 @@ void UpdateMovieStream(MovieStream* self)
     case 3: {
         IopRingSink* s0 = &self->sink;
         UpdateIopRingSink(s0);
-        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, (StreamSink*)s0);
+        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, s0);
         break;
     }
     }
@@ -877,7 +876,7 @@ s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self)
     {
         IpuDmaSink dma;
         ConsumeSpan(&self->videoRing, 0);
-        DrainRingBuffer(&self->videoRing, 0, (StreamSink*)&dma);
+        DrainRingBuffer(&self->videoRing, 0, &dma);
     }
     return 1;
 }

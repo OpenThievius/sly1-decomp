@@ -549,7 +549,7 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
     if (c != 0) {
         do {
             if (c->desc->flags & 1) {
-                ((void (*)(PlacedObject*, f32, s32))c->desc->m1B)(c, dt, 1);
+                c->desc->step(c, dt, 1);
             }
             PlacedObject* next = *(PlacedObject**)frame.cursor;
             frame.cursor = (u8*)next + frame.next_off;

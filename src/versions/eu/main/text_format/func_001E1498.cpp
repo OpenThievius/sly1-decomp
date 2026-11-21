@@ -38,14 +38,13 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
         i = 0;
     }
     while (n-- > 0) {
-        // GetDecimalDigit takes the double as the register view the soft-float calls give it
-        *out++ = ((u8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
+        *out++ = GetDecimalDigit(r, e, i--);
     }
     if (sp->noprec == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
-            *out++ = ((u8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
+            *out++ = GetDecimalDigit(r, e, i--);
         }
         if (sp->conv == 'g' && buf < out) {
             while (buf < out && ((u8*)out)[-1] == '0') out--;

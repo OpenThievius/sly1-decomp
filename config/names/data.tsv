@@ -401,7 +401,7 @@ D_00244DFC	g_scriptEventPairs	the pair lists BuildScriptListFromPairs reads at t
 D_00244EC0	g_scriptEventOffsets	word offsets TriggerScriptEvent indexes by event number to find that event's pair list inside D_00244DFC
 D_00244F40	g_soundBankKeys	seven 32-byte records whose xored word pairs func_001BE268 decodes into the key it loads each bank with
 D_00245020	g_soundEntries	table of (bank, index) pairs indexed by sound id; StartSoundEffect and EnsureSoundEntryBankLoaded read the entry's bank before starting or loading
-D_00246838	g_soundEntryForcedAvailable	0x304 words ORed into the per-entry availability by func_001BE268
+D_00246838	g_soundEntryForcedLoops	0x304 words ORed into the per-entry loops flag by func_001BE268
 D_00247448	g_classDescriptorTable	the class descriptors listed by class id: IsClassOfKind and the pose-source lookup index it by id (include/class_descriptor.h names it as the list of descriptors)
 D_002476A0	g_crc32Table	lookup table StepMemoryChecksum and StepDiscSectorCheck index to run a table-driven CRC-32
 D_00247AA0	g_discCheckReadMode	the ReadMode StartDiscRead and ReadDiscSectors are given (disc_access.cpp 164, 216, 226)
@@ -555,8 +555,8 @@ D_0024B3D0	g_iconSysMagic	the 4-byte magic and a byte WriteMemoryCardSaveHeader 
 D_0024B3D8	g_iconFileName	"sly.ico": the icon file name WriteMemoryCardSaveHeader copies into its header fields f104 and f144 and WriteMemoryCardIcon writes
 D_0024B3E0	g_pathJoinFormat	"%s/%s" format the save code builds directory/name paths with
 D_0024B3E8	g_iconSysFileName	"icon.sys": the name WriteMemoryCardSaveHeader joins to its directory with g_pathJoinFormat
-D_0024B598	g_dmaStreamSinkMethods	movie data sink table of the IPU input DMA channel (include/stream_sink.h)
-D_0024B5B8	g_ringStreamSinkMethods	movie data sink table of the ring buffer in IOP memory read through the SIF (include/stream_sink.h)
+D_0024B598	g_dmaStreamSinkMethods	movie data sink table of the IPU input DMA channel (include/stream_sink.h, TransferSink)
+D_0024B5B8	g_ringStreamSinkMethods	movie data sink table of the ring buffer in IOP memory read through the SIF (include/stream_sink.h, TransferSink)
 D_0024C9C0	g_walkerControlRamp	ramp profile (30, 0, 0.2, 0) ControlWalkerCollider copies into its local ramp (f.ramp)
 D_0024C9D0	g_pairControllerPoseTable	pose table InitPairController copies into the controller after the base set-up
 D_0024D2A8	g_randomWalkSteps	table StepBiasedRandomWalk copies (steps of -5 or +1) and indexes by a random row and the walk position
@@ -1805,7 +1805,7 @@ D_00604788	g_cameraUploadedThisFrame	set by UploadCameraOncePerFrame when it run
 D_0060478C	g_projectionConstantsUploaded	UploadProjectionConstants sends the projection packet only while it is 0 and sets it to 1 (group_marker.cpp 210)
 D_00604790	g_soundBankHandles	bank handle per bank index, set by func_001BE268; cleared by func_001BF130
 D_006047B0	g_soundBankLoaded	per-bank flag func_001BE268 sets after loading, tested by func_001BE568
-D_006047D0	g_soundEntryAvailable	per-entry flag func_001BE268 fills for every entry of a loaded bank; func_001BE568 returns it
+D_006047D0	g_soundEntryLoops	per-entry loops flag (the sound goes on until stopped) func_001BE268 fills for every entry of a loaded bank; func_001BE568 returns it
 D_006053E0	g_cachedVoiceParams	array SetCachedVoiceParam writes and GetCachedVoiceParam and RefreshCachedVoiceParam read by index
 D_00605440	g_sprChainTagsA	the 8 DMA tags of the first scratchpad transfer's chain (MakeSprTransfer(0)), read uncached
 D_006054C0	g_sprChainTagsB	the 8 DMA tags of the second scratchpad transfer's chain (MakeSprTransfer(1)), read uncached

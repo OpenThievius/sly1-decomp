@@ -1326,7 +1326,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
         break;
     case 2: {
         BaseObject* anchor = (BaseObject*)self->p128;
-        anchor->desc->m1A(anchor, (s32)OnTrailAnchorEnded, (s32)self);
+        anchor->desc->m1A(anchor, (void*)OnTrailAnchorEnded, self);
         if (kind == 0) {
             if (extra != 0) {
                 Vu0::Q(self->prevPos) = Vu0::Q(*(Quad219C*)extra);
@@ -1355,7 +1355,7 @@ void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
         Vu0::Q(self->pos) = Vu0::Q(other->v140);
         Vu0::Q(self->qA0) = Vu0::Q(other->v150);
         self->p128 = (Effect*)other;
-        other->desc->m19(other, (void*)OnTrailAnchorEnded, (s32)self);
+        other->desc->m19(other, (void*)OnTrailAnchorEnded, self);
         break;
     }
     case 0:

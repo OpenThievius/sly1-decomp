@@ -118,7 +118,7 @@ void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s3
 void InitContactListObject(ContactListObject* self);                          // slot 0
 void LoadContactListObject(ContactListObject* self, BufferedStream* stream);                          // slot 10
 void UnregisterContactListObject(ContactListObject* self);                          // slot 7
-void MoveContactListObject(ContactListObject* self, void* b, f32 x);          // slot 27
+void MoveContactListObject(ContactListObject* self, s32 flag, f32 x);          // slot 27
 void ApplyContactListAttachments(ContactListObject* self, void* in1, void* in2);    // slot 36
 s32 TestContactListMayContact(ContactListObject* self, void* key);                // slot 56
 s32 TestStandInMayContact(StandIn* self, Collider* value);                // slot 56

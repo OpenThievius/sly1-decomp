@@ -1938,13 +1938,14 @@ void AdvanceColliderMeshMotion(Collider* self, f32 dt)
 }
 
 // Advances the mesh motion when the collider has a hook, then moves the placed object by x.
-void MoveCollider(Collider* self, f32 x, void* b)
+void MoveCollider(Collider* self, f32 x, s32 flag)
 {
     if (self->hook != 0) {
         AdvanceColliderMeshMotion(self, x);
     }
-    // MoveCollider still holds the step's flag as the pointer its own callers pass.
-    ((void (*)(Collider*, f32, void*))MovePlacedObject)(self, x, b);
+    // The call is written with the float first, as retail schedules it (a call with MovePlacedObject's own
+    // parameter order puts the argument moves in the other order).
+    ((void (*)(Collider*, f32, s32))MovePlacedObject)(self, x, flag);
 }
 
 

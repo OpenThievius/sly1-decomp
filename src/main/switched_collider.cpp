@@ -402,7 +402,7 @@ void* GetActiveSwitchedColliderData()
 }
 
 // Gives back interact flags a and b both set to 1.
-void GetSwitchedColliderInteractFlags(s32, s32, InteractFlags* out)
+void GetSwitchedColliderInteractFlags(void*, void*, InteractFlags* out)
 {
     out->b = 1;
     out->a = 1;

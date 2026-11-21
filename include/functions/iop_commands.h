@@ -25,7 +25,7 @@ void ResumeIopVoice(s32 a0);
 void SuspendIopVoices(u32 a0);
 void ResumeIopVoices(u32 a0);
 s32 IsVoiceBusy(s32 a0);
-s32 TestSoundInBank(s32 a0, s32 a1);
+s32 TestSoundLoops(s32 a0, s32 a1);
 void SetVoiceVolumePan(s32 a0, s32 a1, s32 a2);
 s32 GetSoundPitchBase(s32 a, s32 b);
 void SetVoicePitch(s32 x, s32 y);

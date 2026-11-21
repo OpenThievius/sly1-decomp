@@ -114,6 +114,6 @@ void CloseDmaTag(PacketWriter* self);
 void SkipDisplayListWriterSlot();
 void InitTextureRenderObject(TextureRenderObject* self);
 void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a);
-void QueuePlacedObjectDraw(TextureRenderObject* self, s32 unused, void* a2);
+void QueuePlacedObjectDraw(TextureRenderObject* self, void* unused, void* a2);
 
 #endif

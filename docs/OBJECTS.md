@@ -174,7 +174,7 @@ Stream layout of every event (ReadAnimationEvents, func_0012BC38): s8 kind; then
 
 | Kind | Payload | What it does | Evidence (function names) |
 | --- | --- | --- | --- |
-| 0x00 | s16 sound id, s16 target object id, s32 range A, s32 range B, f32 volume, f32 pitch, f32 extra (24 bytes). Reader merges adjacent kind-0 events with equal time into one SoundChoice of up to 6 ids | Picks one of the ids (random, never repeating the last), finds target object by id (else the player's object) and starts a sound effect on it with the ranges, volume, pitch; keeps the playing sound in the player; falls back to a default positionless start (3000/300/1.0) when no target | ReadAnimationEvents; RunAnimationEvent; RandomIntInRange; IsSoundEntryAvailable; FindFirstObjectById; StartSoundEffect |
+| 0x00 | s16 sound id, s16 target object id, s32 range A, s32 range B, f32 volume, f32 pitch, f32 extra (24 bytes). Reader merges adjacent kind-0 events with equal time into one SoundChoice of up to 6 ids | Picks one of the ids (random, never repeating the last), finds target object by id (else the player's object) and starts a sound effect on it with the ranges, volume, pitch; keeps the playing sound in the player; falls back to a default positionless start (3000/300/1.0) when no target | ReadAnimationEvents; RunAnimationEvent; RandomIntInRange; IsSoundEntryLooping; FindFirstObjectById; StartSoundEffect |
 | 0x01 | none | Stops the sound this player is holding | RunAnimationEvent; StopSoundRecord |
 | 0x02 | none | Restores the volume of channel 2 | RestoreVolumeChannel2 |
 | 0x03 | none | Silences volume channel 2 | SilenceVolumeChannel2 |

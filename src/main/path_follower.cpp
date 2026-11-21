@@ -314,9 +314,9 @@ void FinishPlayerRequest(Player* self)
         self->requestAccepted = 0;
     }
     if (self->lastMessage.fn != 0) {
-        s32 fn = self->lastMessage.fn;
+        void (*fn)(void*, Player*) = self->lastMessage.fn;
         self->lastMessage.fn = 0;
-        ((void (*)(s32, Player*))fn)(self->lastMessage.data, self);
+        fn(self->lastMessage.data, self);
     } else {
         Vec4 v = self->v150;
         v.z = g_requestFinishMinSpeedZ >? v.z;

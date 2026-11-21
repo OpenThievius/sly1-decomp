@@ -93,7 +93,7 @@ void UpdateTouchingParts(Collider* self);
 s32 RequestColliderLaunch(Collider* self, void* source, TrackedNodeOffer* offer);
 void InitColliderMeshMotion(Collider* self);
 void AdvanceColliderMeshMotion(Collider* self, f32 dt);
-void MoveCollider(Collider* self, f32 x, void* b);
+void MoveCollider(Collider* self, f32 x, s32 flag);
 void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2);
 void ComputeColliderJumpVelocity(Collider* self, f32* p, f32* out, f32 a);
 s32 HandleObjectEvent(Collider* self, ObjectEvent* shape);

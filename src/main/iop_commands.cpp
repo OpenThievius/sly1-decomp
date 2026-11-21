@@ -470,8 +470,8 @@ void RequestVoiceCallback(s32 value, IopCallbackFn a1, u64 a2)
     QueueIopCommand(0x19, 4, &local, a1, a2);
 }
 
-// Asks the IOP (command 0x1A) whether a sound is in a bank; returns the reply.
-s32 TestSoundInBank(s32 a0, s32 a1)
+// Asks the IOP (command 0x1A) whether a sound of a bank loops (goes on until stopped); returns the reply.
+s32 TestSoundLoops(s32 a0, s32 a1)
 {
     s32 local[2];
     local[0] = a0;

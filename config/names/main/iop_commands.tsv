@@ -20,7 +20,7 @@ func_0011D6A8	SuspendIopVoices	queues command 0x16 with a voice mask; func_0018E
 func_0011D6D8	ResumeIopVoices	queues command 0x17 with a voice mask; func_0018EAA0 passes 0xFFFFFFFF last, after restoring the volume channels SuspendIopVoices' caller saved
 func_0011D708	IsVoiceBusy	sends command 0x19 with a voice handle and returns the reply, which sound_system.cpp loops on after StopSoundVoice until it reads 0
 func_0011D730	RequestVoiceCallback	queues command 0x19 with a voice handle plus a callback function and a 64-bit argument for PollIopCommands to call (sound_system.cpp passes func_001BFFC8 and a record address)
-func_0011D760	TestSoundInBank	sends IOP command 0x1A with a bank handle and a sound's argument and returns the reply; EnsureSoundBankLoaded marks each of the bank's sound entries available when it is nonzero
+func_0011D760	TestSoundLoops	sends IOP command 0x1A with a bank handle and a sound's argument and returns the reply; EnsureSoundBankLoaded marks each of the bank's sound entries as looping when it is nonzero; evidence: the answer is the keepWhenFar of InitSoundRecord, and the bank record word at +6 is set for the looping records
 func_0011D798	SetVoiceVolumePan	sends command 0x1B with a voice handle and two words; ApplySoundRecordVolumePan passes the record's volume times 1024 and a pan angle, and the stream voice reset passes 0, 0
 func_0011D7D8	GetSoundPitchBase	sends command 0x1C with a bank handle and a sound index and returns the reply, which func_001BF7F8 adds to its scaled pitch term
 func_0011D810	SetVoicePitch	sends command 0x1E with a voice handle and a value func_001BF7F8 clamps to -0x8000..0x7FFF

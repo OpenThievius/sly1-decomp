@@ -681,7 +681,7 @@ void RunPlayerCallback(Player* self)
 }
 
 
-typedef void (*PlayerRequestFn)(s32 data, Player* self);
+typedef void (*PlayerRequestFn)(void* data, Player* self);
 struct PlayerRequestMessage { Player* self; s32 v; };
 
 s32 MaskWorldBitsBySave(void);
