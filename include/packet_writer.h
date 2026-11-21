@@ -54,4 +54,8 @@ struct PacketWriter {
 
 typedef char check_PacketWriter[sizeof(PacketWriter) == 0x30 ? 1 : -1];
 
+// The address a DMA tag takes for a buffer: the physical address, the low 28 bits of the pointer.
+// The cast between a pointer and an integer is the operation itself (a mask on the address).
+#define DMA_PHYSICAL_ADDRESS(p) ((void*)((uptr)(p) & 0xFFFFFFF))
+
 #endif

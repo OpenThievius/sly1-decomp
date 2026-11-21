@@ -70,7 +70,8 @@ struct SortKeyedObject : PlacedObject {
 
 
 
-extern s32 g_vif0Channel;
+struct DmaChannel;
+extern DmaChannel* g_vif0Channel;
 extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
@@ -79,7 +80,8 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
 
-extern u8 g_vif1Channel[];
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
 extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);
@@ -293,8 +295,8 @@ void UploadLightVolumes(World* world)
         }
     }
     AddDmaEndTag(&pw);
-    SubmitPacketBuffer(&pw, (DmaChannel*)g_vif0Channel);
-    WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
+    SubmitPacketBuffer(&pw, g_vif0Channel);
+    WaitDmaChannel(g_vif0Channel, 0, 0);
     PopBackMemoryMark();
 }
 
@@ -561,8 +563,8 @@ void SendVif0StartupPacket(void)
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)g_vif0Channel, g_vu0ProgramChain);
-    WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
+    StartDmaChain(g_vif0Channel, g_vu0ProgramChain);
+    WaitDmaChannel(g_vif0Channel, 0, 0);
     s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
 }
@@ -571,12 +573,12 @@ void SendVif0StartupPacket(void)
 // waits for it to finish.
 void SendVif1StartupPacket()
 {
-    DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
+    DmaChannelFlags* p = (DmaChannelFlags*)g_vif1Channel;
     p->flags |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), g_vu1ProgramChain);
-    WaitDmaChannel((DmaChannel*)(*(void**)g_vif1Channel), 0, 0);
-    (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
+    StartDmaChain(g_vif1Channel, g_vu1ProgramChain);
+    WaitDmaChannel(g_vif1Channel, 0, 0);
+    ((DmaChannelFlags*)g_vif1Channel)->flags &= ~0x40;
 }
 
 // Runs the table of 0x1D startup initialisers in order behind a load-progress display (colours set

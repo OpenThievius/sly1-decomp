@@ -87,7 +87,8 @@ struct TexturePacketValue : PacketWriter { s32 value; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
 void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
@@ -143,7 +144,8 @@ struct GsDBuff;
 extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 extern "C" s32 SendDrawEnvironment(void* self);
 struct DmaChannel;
@@ -162,7 +164,8 @@ void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** o
 
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);

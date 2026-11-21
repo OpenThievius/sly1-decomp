@@ -40,7 +40,8 @@ struct TexturePacketBuffer : PacketWriter { u8* packet; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
@@ -67,7 +68,8 @@ s32 g_meshQueueCount = 0;
 BumpAllocator g_bumpAllocator = { 0 };
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 
 
@@ -76,7 +78,8 @@ extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 
 extern s32 g_imageRecordCountA;

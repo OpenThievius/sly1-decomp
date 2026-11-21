@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL starts the counter at 0x1D and calls func_00193288 only while D_eu_0026321C is non-zero.
-extern s32 D_eu_0026321C;
+struct DmaChannel;
+extern DmaChannel* D_eu_0026321C;
 void RunStartupInitializers(void)
 {
     ProgressFrame fr;

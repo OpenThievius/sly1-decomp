@@ -133,7 +133,8 @@ struct AttachedTransformFrame {
 
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 extern "C" s32 AwaitSemaphore(s32 sema);
@@ -229,7 +230,7 @@ s32 PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
 s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self);
 s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2);
 s32 AcceptMovieDecoderEvent(void);
-void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h);
+void UploadMovieFrame(void* p, u8* addr, s32 w, s32 h);
 void DrawMovieFrame(void* self, s32 a1, s32 a2);
 void QueueMovie(MoviePlayer* self, void* p);
 void PlayQueuedMovies(MoviePlayer* self);
@@ -901,7 +902,7 @@ s32 AcceptMovieDecoderEvent(void)
 
 // Builds the packet that copies a decoded picture of w by h pixels from main memory (addr) into GS
 // memory in 16x16 blocks of 0x40 quadwords each, then a flush register write.
-void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
+void UploadMovieFrame(void* p, u8* addr, s32 w, s32 h)
 {
     s32 ny = w / 16;
     s32 nx = h / 16;
@@ -921,7 +922,7 @@ void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
             AddGifRegisterWrite(&f, 0x51, ((u64)(y << 4) << 32) | ((u64)(x << 4) << 48));
             AddGifRegisterWrite(&f, 0x53, 0);
             AddGifImageTag(&f, 0x40);
-            AddDmaRefTag(&f, 0x40, (void*)(addr & 0xFFFFFFF));
+            AddDmaRefTag(&f, 0x40, DMA_PHYSICAL_ADDRESS(addr));
             addr += 0x400;
         }
     }
@@ -1123,7 +1124,7 @@ void StepMovieFrame(MoviePlayer* self)
         return;
     }
     if (self->decoder.skipPicture == 0) {
-        UploadMovieFrame(self->uploadPacket, (s32)self->picture, self->decoder.width, self->decoder.height);
+        UploadMovieFrame(self->uploadPacket, self->picture, self->decoder.width, self->decoder.height);
         DrawMovieFrame(self->drawPacket, self->decoder.width, self->decoder.height);
         SyncDataCache(0);
     }

@@ -51,7 +51,7 @@ s32 PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
 s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self);
 s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2);
 s32 AcceptMovieDecoderEvent(void);
-void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h);
+void UploadMovieFrame(void* p, u8* addr, s32 w, s32 h);
 void DrawMovieFrame(void* self, s32 a1, s32 a2);
 void QueueMovie(MoviePlayer* self, void* p);
 void PlayQueuedMovies(MoviePlayer* self);

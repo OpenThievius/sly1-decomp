@@ -110,7 +110,7 @@ void PushBackMemoryMark(void);
 s32* AllocateBackMemory(s32 bytes);
 void CopyMemory(void* dst, void* src, u32 size);
 void PopBackMemoryMark(void);
-s32 IsPointPathShortcutBlocked(void* self, s32 a, s32 b);
+s32 IsPointPathShortcutBlocked(void* self, Vec4* a, Vec4* b);
 void UpdateAgentGoal(Agent* self, s32 flag);
 void SetAgentGoalPoint(Agent* self, Vec4* p);
 // Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
@@ -839,10 +839,10 @@ s32 CollectSegmentSpansInPlaneTree(PlaneNode* root, Vec4* a, Vec4* b, s32 max, C
 
 // A straight path from b to c is free (0) only when it crosses the plane tree as one span running
 // the whole segment (times 0 to 1); any other result blocks it (1).
-s32 IsPointPathShortcutBlocked(void* a, s32 b, s32 c)
+s32 IsPointPathShortcutBlocked(void* a, Vec4* b, Vec4* c)
 {
     ColliderSpan out[2];
-    switch (CollectSegmentSpansInPlaneTree((PlaneNode*)a, (Vec4*)b, (Vec4*)c, 2, out)) {
+    switch (CollectSegmentSpansInPlaneTree((PlaneNode*)a, b, c, 2, out)) {
     case 0:
         return 1;
     case 1:
@@ -954,17 +954,17 @@ void SearchPointGraph(PointGraph* graph, GraphPoint* from, GraphPoint* goal, s32
 // Shortens a path of point indexes in place: keeps the first and last points and each point after
 // which the straight shortcut from the last kept point is blocked (IsPointPathShortcutBlocked),
 // repeating while it still shortens. *a1 is the count.
-void SimplifyPointPath(void* a0, s32* a1, s32* a2)
+void SimplifyPointPath(void* a0, s32* a1, Vec4** a2)
 {
     s32 count;
-    s32* out;
-    s32* end;
-    s32* last;
-    s32* base;
-    s32* q;
-    s32* p;
+    Vec4** out;
+    Vec4** end;
+    Vec4** last;
+    Vec4** base;
+    Vec4** q;
+    Vec4** p;
     s32 n;
-    s32 val;
+    Vec4* val;
 
     last = a2;
     base = a2;
@@ -972,7 +972,7 @@ void SimplifyPointPath(void* a0, s32* a1, s32* a2)
     q = base + 2;
     PushBackMemoryMark();
     n = *a1;
-    out = AllocateBackMemory(n << 2);
+    out = (Vec4**)AllocateBackMemory(n << 2);
     end = base + n;
     out[0] = base[0];
     count = 1;
@@ -1090,7 +1090,7 @@ s32 FindPointGraphPath(PointGraph* graph, Vec4* start, Vec4* goal, s32 maxOut, V
     }
     SearchPointGraph(graph, (GraphPoint*)&node1, (GraphPoint*)&node2, 0x80, &count, (GraphPoint**)path);
     if (count >= 3) {
-        SimplifyPointPath(graph->faces, &count, (s32*)path);
+        SimplifyPointPath(graph->faces, &count, (Vec4**)path);
     }
     s32 n = MinOfCounts(maxOut, count);
     for (s32 i = 0; i < n; i++) {

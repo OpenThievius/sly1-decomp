@@ -6,7 +6,7 @@ struct Obj_18F6E8_eu {
     s32 f14;
     s32 f18;
     u8 pad1[0x5C - 0x1C];
-    s32 f5C;
+    u8* f5C;
     u8 pad2[0x128 - 0x60];
     void* f128;
     void* f12C;
@@ -24,7 +24,7 @@ void StepMovieFrame(MoviePlayer* self_)
             (void)FeedMovieDecoder((MoviePlayer*)self, 0);
         } while (self->f148 == 1);
     }
-    if (DecodeMpegPicture((MpegHandle*)((u8*)self + 0x10), (void*)self->f5C, 0x4B0) < 0) {
+    if (DecodeMpegPicture((MpegHandle*)((u8*)self + 0x10), self->f5C, 0x4B0) < 0) {
         return;
     }
     if (self->f18 == 0) {

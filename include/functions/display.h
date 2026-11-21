@@ -6,6 +6,7 @@
 
 #include "common.h"
 
+struct DmaChannel;
 struct Rgba4;
 
 void ApplyFieldDisplayOffset(void);
@@ -15,7 +16,7 @@ void FlipDisplayFrame(void);
 void ApplyPendingDisplayFlip(void);
 void ResetDisplayBuffers(void);
 s32 HandleGsFinish(s32 cause);
-void SendGsPacketAndWait(s32 channel, void* b);
+void SendGsPacketAndWait(DmaChannel* channel, void* b);
 void FillScreenColor(u8* buffer, Rgba4* color, s32 flag);
 void InitDisplay(void);
 void SendPacketToBothBuffers(void* chain);

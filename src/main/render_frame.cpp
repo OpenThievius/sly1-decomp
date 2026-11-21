@@ -138,8 +138,9 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void BeginDmaTag(PacketWriter* self);
 
 
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 
 void* InitPacketWriter(PacketWriter* self);
 void ActivateRenderFrame(void* a, s32 b);
@@ -167,7 +168,8 @@ extern s32 g_frameReadySemaphore;
 
 extern s32 g_drawFrameData;
 extern void* g_maskedImagesPacket;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -203,8 +205,9 @@ void func_0015E678(void);
 extern s32 g_frameReadySemaphore;
 extern s32 g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 extern s32 g_fieldOffsetMode;
 
 void VerifyCodeChecksum(void);
@@ -435,7 +438,7 @@ void ActivateRenderFrame(RenderFrame* self)
     SwitchActiveImageMask(self->imageMask);
     if (self->hasMaskedImages != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
-        StartDmaChain((DmaChannel*)g_gifChannel, g_maskedImagesPacket);
+        StartDmaChain(g_gifChannel, g_maskedImagesPacket);
     }
 }
 
@@ -484,7 +487,7 @@ void RunRenderThread(void)
         *(volatile s32*)0x10003010 = 0;
         SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufA);
         BlitFrameToDisplay();
-        WaitDmaChannel((DmaChannel*)g_vif1Channel, 0, 0);
+        WaitDmaChannel(g_vif1Channel, 0, 0);
         PostSemaphore(g_frameDoneSemaphore);
         FlipDisplayFrame();
         g_fieldOffsetMode = 1;

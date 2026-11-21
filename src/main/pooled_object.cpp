@@ -280,8 +280,12 @@ void PrependToList(ObjectList*, u32);
 extern "C" s32 ResetDmaController(s32 mode);
 extern void ResetGsPaths();
 struct DmaChannel;
-extern "C" u32 GetDmaChannel(u32 index);
-extern u32 g_vif0Channel, g_vif1Channel, g_gifChannel, g_fromSprChannel, g_toSprChannel;
+extern "C" DmaChannel* GetDmaChannel(u32 index);
+extern DmaChannel* g_vif0Channel;
+extern DmaChannel* g_fromSprChannel;
+extern DmaChannel* g_toSprChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 
 u8* ReservePermanentMemory(s32 size);
 
@@ -2528,10 +2532,10 @@ ScatterTable g_scatterTableEarlyGame = { 0, 1.0f, 0.0f, 0.0f, 0.1f, -0.8f, 0.0f,
 // size: func_00151A68 clears 0x24 bytes of it
 ScatterController g_scatterController = {};
 // size: semaphore id from func_002027A0 (lw/sw), 4-byte label
-u32 g_vif0Channel = 0;
-u32 g_vif1Channel = 0;
-u32 g_gifChannel = 0;
-u32 g_fromSprChannel = 0;
+DmaChannel* g_vif0Channel = 0;
+DmaChannel* g_vif1Channel = 0;
+DmaChannel* g_gifChannel = 0;
+DmaChannel* g_fromSprChannel = 0;
 // The file's last .data: the 8 zero bytes after it are the linker's padding before
 // active_set_solver.cpp's 16-aligned .data (D_00261F30).
-u32 g_toSprChannel = 0;
+DmaChannel* g_toSprChannel = 0;

@@ -310,14 +310,16 @@ void MeasurePointToSegment(Vec4* p, Vec4* a, Vec4* b, f32* t, f32* dist)
     *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(sum));
 }
 
-extern s32 g_vif0Channel;
+struct DmaChannel;
+extern DmaChannel* g_vif0Channel;
 extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
-extern u8 g_vif1Channel[];
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
 extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);

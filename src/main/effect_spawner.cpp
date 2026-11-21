@@ -496,8 +496,9 @@ extern Font* g_defaultFont;
 void CopyMemory(void* dst, void* src, u32 size);
 
 
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 
 
 
@@ -537,7 +538,8 @@ extern s32 g_frameReadySemaphore;
 
 extern s32 g_drawFrameData;
 extern void* g_maskedImagesPacket;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -617,8 +619,9 @@ void func_0015E678(void);
 extern s32 g_frameReadySemaphore;
 extern s32 g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 extern s32 g_fieldOffsetMode;
 
 extern "C" s32 AwaitSemaphore(s32 sema);
