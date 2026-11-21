@@ -35,7 +35,7 @@ void SetSwitchedColliderEnabled(SwitchedCollider* self, s32 value);
 void ActivateSwitchedCollider(void* value);
 void* GetActiveSwitchedColliderData();
 void GetSwitchedColliderInteractFlags(void*, void*, InteractFlags* out);
-void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value);
+void ShowTypedTextCaptionBox(SwitchedCollider* self, void* value);
 void HandleStepSequenceSkipButtons(void* self, PadRecord* rec);
 void UpdateSwitchedCollider(SwitchedCollider* self, f32 dt);
 void FinishSwitchedCollider(SwitchedCollider* self);

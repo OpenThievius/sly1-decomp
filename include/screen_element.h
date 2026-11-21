@@ -26,6 +26,8 @@ struct PadRecord;   // the pad's state (include/pad_record.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
+// The same for a pointer: an element's field that holds an object and is stored unaligned.
+struct __attribute__((packed)) T217D_Ptr { void* v; };
 // A float that may sit at any address: storing one is a pair of unaligned stores (swl, swr).
 struct __attribute__((packed)) T217D_Float { f32 v; };
 // A colour as four bytes (red, green, blue, alpha), copied as a whole.

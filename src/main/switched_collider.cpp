@@ -409,10 +409,10 @@ void GetSwitchedColliderInteractFlags(void*, void*, InteractFlags* out)
 }
 
 // Stores value in the typed-text caption box and pushes the box on the element stack.
-void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
+void ShowTypedTextCaptionBox(SwitchedCollider* self, void* value)
 {
     CaptionBox* block = &g_typedTextCaptionBox;
-    ((T217D_Word*)&block->child)->v = value;
+    ((T217D_Ptr*)&block->child)->v = value;
     PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
 }
 
