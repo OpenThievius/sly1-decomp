@@ -635,6 +635,23 @@ class DeclsTest(unittest.TestCase):
                                "func_00100010": ("float", False), "func_00100018": ("value", False),
                                "func_00100020": ("value", True)})
 
+    def test_expected_declarations_need_a_reason_and_must_not_go_stale(self):
+        import decls
+        rows = [("src/main/a.cpp", 3, "func_00100000", "void", "defined value"),
+                ("src/main/b.cpp", 9, "func_00100008", "void", "defined value")]
+        expected = {("func_00100000", "src/main/a.cpp", "void"): "retail's callers need it",
+                    ("func_00100010", "src/main/c.cpp", "void"): "no longer reported"}
+        left, known, stale = decls.split_expected(rows, expected)
+        self.assertEqual([r[2] for r in left], ["func_00100008"])
+        self.assertEqual([r[2] for r in known], ["func_00100000"])
+        self.assertEqual(stale, [("func_00100010", "src/main/c.cpp")])
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "t.tsv")
+            with open(path, "w") as f:
+                f.write("function\tfile\tdeclared\treason\nfunc_00100000\tsrc/main/a.cpp\tvoid\t\n")
+            with self.assertRaises(SystemExit):
+                decls.read_expected(path)
+
     def test_what_an_instruction_does_with_the_result(self):
         import decls
         use = lambda text, reg: decls.register_use(*decls.operands(text), reg)

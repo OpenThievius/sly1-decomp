@@ -23,6 +23,7 @@ procedure; read it before you match anything.
 | `config/<version>/functions.tsv`, `config/eu/map.tsv` | every function, and PAL's pairing with US | `tools/inventory.py` |
 | `config/<version>/layout.tsv` | what each part of the executable is: game code, libraries, data sections | by hand |
 | `config/cflags.tsv` | the compiler, and the flags of each source file | by hand |
+| `config/decls_expected.tsv` | the declarations that contradict their definition because retail's code needs them so (a result returned by value that GCC 2.95 calls without reading `$v0`), each with its reason; tools/decls.py reports the others and fails on a row that no longer applies | by hand, rarely |
 | `config/us/c_data.tsv` | every global the C defines, from the last full build that printed `MATCH` (counted as matched data) | `tools/build.py` |
 | `config/us/generated.tsv` | the functions the compiler makes for a file (a static initialiser, the constructor that calls it), under retail's names | by hand |
 | `config/us/statics.tsv` | the labels retail has for a function's `static` variables and their guards (docs/AGENT_WORKFLOW.md) | by hand |
@@ -74,7 +75,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/regalloc.py FILE FUNC [--version eu]` | for each register that differs from retail's, the value (pseudo) that holds it, where it is born and dies, which allocator placed it, what took retail's register and the likely lever, from the compiler's `.lreg`/`.greg` dumps |
 | `python3 tools/headers.py write\|check` | the headers of include/functions/ from the definitions, and whether they agree (CI, through tests/test_headers.py) |
 | `python3 tools/modern_check.py [--check]` | compiles the source with a modern Clang, syntax only: code a port's compiler would reject (CI keeps it at zero; docs/PORTING.md lists what a port still rewrites) |
-| `python3 tools/decls.py` | declarations whose return type contradicts the function's C definition or retail's callers (a wrong `void` looks like a register tie in the caller) |
+| `python3 tools/decls.py` | declarations whose return type contradicts the function's C definition or retail's callers (a wrong `void` looks like a register tie in the caller), but for those `config/decls_expected.tsv` explains |
 | `python3 tools/params.py [--file main/x.cpp] [--summary] [--version eu]` | declarations whose parameters differ from the function's C definition, read from the mangled symbols of the last build, with the kind of difference (count, linkage, pointer against integer, `void*`, pointee, scalar, float order); the build links by address and does not see them, a port's linker does |
 | `python3 tools/nonmatching.py check` | re-scores the near misses in `nonmatching/` and writes the index (`--check` in CI) |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |

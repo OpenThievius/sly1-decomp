@@ -30,6 +30,7 @@ nothing, since a caller may ignore a result.
 """
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -296,12 +297,49 @@ def problems(uses=None, near_misses=False, bodies=None):
     return out
 
 
+EXPECTED = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "decls_expected.tsv")
+
+
+def read_expected(path=EXPECTED):
+    """{(function, file, declared): reason} of config/decls_expected.tsv: the declarations that
+    contradict their definition because retail's code needs them so, each with its reason. The
+    reason is required: a row is a decision, not a way to quiet the check."""
+    out = {}
+    if not os.path.exists(path):
+        return out
+    with open(path) as f:
+        for n, line in enumerate(f):
+            cells = line.rstrip("\n").split("\t")
+            if n == 0 or not line.strip():
+                continue
+            if len(cells) != 4 or not cells[3].strip():
+                raise SystemExit("%s:%d: a row is function, file, declared, reason" % (path, n + 1))
+            out[(cells[0], cells[1], cells[2])] = cells[3]
+    return out
+
+
+def split_expected(rows, expected):
+    """The rows left to report, those the table expects, and the table's rows that no longer
+    match anything reported (stale: the table must not outlive what it explains)."""
+    left, known, seen = [], [], set()
+    for row in rows:
+        key = (row[2], str(row[0]).replace(os.sep, "/"), row[3])
+        if key in expected:
+            known.append(row)
+            seen.add(key)
+        else:
+            left.append(row)
+    stale = sorted((k[0], k[1]) for k in expected if k not in seen)
+    return left, known, stale
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--names", action="store_true", help="only the functions, one per line")
     parser.add_argument("--near-misses", action="store_true", help="also the declarations in nonmatching/")
     args = parser.parse_args(argv)
     rows = problems(near_misses=args.near_misses)
+    rows, known, stale = split_expected(rows, read_expected())
     if args.names:
         for name in sorted({r[2] for r in rows}):
             print(name)
@@ -309,7 +347,11 @@ def main(argv=None):
         for path, line, name, kind, why in rows:
             print("%s:%d: %s declared %s: %s" % (path, line, name, kind, why))
     print("%d declaration(s) of %d function(s)" % (len(rows), len({r[2] for r in rows})), file=sys.stderr)
-    return 0
+    if known:
+        print("%d more as config/decls_expected.tsv says they must be" % len(known), file=sys.stderr)
+    for name, path in stale:
+        print("config/decls_expected.tsv: %s in %s is no longer reported: take the row out" % (name, path))
+    return 1 if stale else 0
 
 
 if __name__ == "__main__":

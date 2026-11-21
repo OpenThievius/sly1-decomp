@@ -1,0 +1,3 @@
+function	file	declared	reason
+func_001C2320	src/main/base_object.cpp	void	the original returned a ScriptValue by value, which GCC 2.95 calls without reading $v0; declared as a pointer, two instructions change places in three callers (the comment at the declaration)
+func_0011A080	src/main/object_properties.cpp	void	the original returned a ScriptValue by value, which GCC 2.95 calls without reading $v0; declared as a pointer, two instructions change places in three callers (the comment at the declaration)
