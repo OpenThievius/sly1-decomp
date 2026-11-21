@@ -444,7 +444,7 @@ struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
 void *StoreFloatAsQuadword(U128* out, f32 value);
 void* CopyQuadword(u128* out, void* src);
-U128 StoreQuadword(u128* out, u128 v);
+u128* StoreQuadword(u128* out, u128 v);
 void SetVelocitySpring(PlacedObject* self, Quad16* src);
 
 // A ramp profile (+0x21C, +0x220) as the setters copy it: four floats at an address they do not
