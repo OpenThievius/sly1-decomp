@@ -8,7 +8,7 @@ void ShowStepSequenceText(void* value, StepSequenceHost* object)
         object->vt->f158(object, value);
     } else {
         ((Global_2701F8_eu*)&g_typedTextCaptionBox)->value = value;
-        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
     }
 }
 

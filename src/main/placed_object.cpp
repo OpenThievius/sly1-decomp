@@ -768,7 +768,6 @@ union EventScratch {
 
 extern u8 g_padRecord[];
 extern u8 g_moviePlayer[];
-extern u8 g_elementStack[];
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -6030,14 +6029,14 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         break;
     case 55:
     {
-        u8* sys = g_elementStack;
-        ((U32P*)&((ElementStack*)sys)->resumeState)->v = 0;
-        SetElementStackState((ElementStack*)sys, 0);
+        ElementStack* sys = &g_elementStack;
+        ((U32P*)&sys->resumeState)->v = 0;
+        SetElementStackState(sys, 0);
     }
         break;
     case 56:
     {
-        ElementStack* sys = (ElementStack*)g_elementStack;
+        ElementStack* sys = &g_elementStack;
         sys->resumeState = 1;
         SetElementStackState(sys, 1);
     }

@@ -64,7 +64,6 @@ void* CreateEffect(s32 kind, EffectOwner* sys);
 void AddEffectListener(void* node, void* owner);
 // Descriptor slot 72 as func_00192880 calls it, with the collider switched from or to.
 typedef void (*ActivationHook)(void* self, s32 mode, void* other);
-extern u8 g_elementStack[];
 extern s32 g_padRouting;
 extern u8* g_playerStepSequence;
 // A record whose 16-bit flags sit at 0xAA.
@@ -414,7 +413,7 @@ void ShowTypedTextCaptionBox(SwitchedCollider* self, u32 value)
 {
     CaptionBox* block = &g_typedTextCaptionBox;
     ((T217D_Word*)&block->child)->v = value;
-    PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+    PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
 }
 
 // Skip handling for step sequences: unless a camera controller is on top, a press of the buttons

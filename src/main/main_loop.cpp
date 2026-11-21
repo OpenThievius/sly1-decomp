@@ -2,6 +2,7 @@
 // The file from 0x184D78 to 0x185C18: an object sort, the aim helpers, the main loop with the
 // IOP modules it loads and the startup initializers it runs. Its name is ours, after the loop.
 #include "common.h"
+#include "screen_element.h"
 #include "asm_func.h"
 #include "functions/camera.h"
 #include "functions/class75_list.h"
@@ -93,7 +94,6 @@ struct DmaChannelFlags {
 
 
 extern s32 g_worldLoadRequest;
-extern u8 g_elementStack[];
 extern s32 g_frameCount;
 
 void RunStartupInitializers(void);
@@ -498,7 +498,7 @@ extern "C" void RunMainLoop(s32 a, s32 b)
         UpdatePadConnection(&g_padRecord);
         RunCompletedButtonCode();
         UpdateMemoryCard(&g_memoryCard);
-        UpdateElementStack((ElementStack*)g_elementStack);
+        UpdateElementStack(&g_elementStack);
         AddElapsedTime(g_gameClock.dt);
         if (g_currentWorld != 0) {
             UpdateCameraLocation(g_camera);
@@ -507,9 +507,9 @@ extern "C" void RunMainLoop(s32 a, s32 b)
             if (g_currentWorld->desc->m11 != 0)
                 g_currentWorld->desc->m11(g_currentWorld, g_gameClock.dt);
             RunWorldFrameLists(g_currentWorld, g_camera);
-            QueueScreenElementDraws((ElementStack*)g_elementStack);
+            QueueScreenElementDraws(&g_elementStack);
             SubmitDeferredRequests(g_currentWorld, g_camera);
-            DrawAllScreenElements((ElementStack*)g_elementStack);
+            DrawAllScreenElements(&g_elementStack);
             SubmitRenderFrame();
         }
         g_frameCount++;

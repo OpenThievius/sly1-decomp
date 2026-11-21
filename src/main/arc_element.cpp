@@ -200,7 +200,6 @@ void ControlPlayerLinkedCollider(PlayerLinkedCollider* self, void* obj, f32 t)
 }
 
 extern Camera* g_camera;
-extern u8 g_elementStack[];
 
 
 // Called when the collider is switched on (p non-zero) or off: on, pushes the caption box and a
@@ -211,7 +210,7 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
         g_camera->ctl460.zoomDivisor = 100.0f;
-        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         SetTextPanelState(&g_typedTextCaptionBox, 5);
         g_camera->ctl460.anchorObject = (void*)self->f61C;
         if (self->f630 != 0) {
@@ -224,7 +223,7 @@ void HandlePlayerLinkedColliderActivation(PlayerLinkedCollider* self, u8* p)
         SetStateWalkerTarget(self->stateWalker, 0x359);
     } else {
         g_camera->ctl460.zoomDivisor = 10.0f;
-        PopStackElement((ElementStack*)g_elementStack);
+        PopStackElement(&g_elementStack);
         RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, self, 0);
         PopStackValue(&g_camera->ctl460);
         SetStateWalkerTarget(self->stateWalker, 0x358);

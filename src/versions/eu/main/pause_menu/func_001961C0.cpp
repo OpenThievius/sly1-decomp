@@ -15,7 +15,7 @@ void CancelPauseMenuPage(Self_1961C0_eu* self)
         SetPauseMenuLayerPage(self, 0, -1);
         break;
     case 23:
-        if ((u32)(D_00275BF0 - 1) < 2) {
+        if ((u32)(g_elementStack.resumeState - 1) < 2) {
             SetPauseMenuLayerPage(self, 0, -1);
             break;
         }

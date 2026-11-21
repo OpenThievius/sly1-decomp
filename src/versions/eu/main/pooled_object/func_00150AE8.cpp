@@ -71,7 +71,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     case 3:
         if (self->mode2D0 != 2) {
             if (!(self->step2E4 < self->count2DC) || g_resumeSoundSetupDone == 1) {
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
                 s1 = self->state2D4;
             }
         }

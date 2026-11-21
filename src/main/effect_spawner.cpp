@@ -8,6 +8,7 @@
 // smaller groups after them could be files of their own. Its name is ours, after its largest
 // family, the effect spawner, whose spawn record the member objects share.
 #include "common.h"
+#include "screen_element.h"
 #include "asm_functions.h"
 #include "effect_spawner.h"
 #include "attached_set.h"
@@ -369,7 +370,6 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
 // with that colour at +0x60 (DeferredRequest's Rgba4 would copy it unaligned).
 struct __attribute__((aligned(4))) FadeColor { u8 c[4]; };
 struct FadeEffectRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
-extern s32 D_00275BC4;
 
 extern s32 g_displayMode;
 extern f32 g_gameTime;
@@ -3111,7 +3111,7 @@ void DrawScreenFill(u8* a0)
 // leaves the world's fade list. Does nothing unless the game is in state 3 and not in 1 or 2.
 void UpdateColorFade(ColorFade* self)
 {
-    if (D_00275BC4 != 3) return;
+    if (g_elementStack.state != 3) return;
     s32 g = g_displayMode;
     if (g == 1) return;
     if (g == 2) return;

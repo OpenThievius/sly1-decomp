@@ -329,7 +329,6 @@ void StartPadPattern(PadPatternPlayer* self, PadPattern* p, f32 f);
 
 extern f32 g_frameStep;
 
-extern u8 g_elementStack[];
 
 extern u8 g_scatterController[];
 
@@ -1141,7 +1140,7 @@ void SetPairControllerState(PairController* self, s32 state)
         if (w) {
             CaptionBox* box = &g_typedTextCaptionBox;
             ((PtrP*)&box->child)->v = w;
-            PushStackElement((ElementStack*)g_elementStack, box);
+            PushStackElement(&g_elementStack, box);
         }
         break;
     }
@@ -1156,7 +1155,7 @@ void SetPairControllerState(PairController* self, s32 state)
         self->link = (LinkedObject*)v;
         if (v) {
             g_typedTextCaptionBox.child = (void*)v;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         for (o = self->head384; o; o = o->nextActive) SetPairedState(o, 8);
         ResetScatterLevels((ScatterController*)g_scatterController);
@@ -1166,7 +1165,7 @@ void SetPairControllerState(PairController* self, s32 state)
         self->link = (LinkedObject*)v;
         if (v) {
             g_typedTextCaptionBox.child = (void*)v;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         for (o = self->head384; o; o = o->nextActive) {
             BaseObject* l = (BaseObject*)o->partner;

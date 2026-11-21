@@ -55,7 +55,6 @@ struct Vec4;
 
 
 extern Player* g_player;
-extern s32 D_00275BEC;
 extern f32 g_timeScale;
 
 void SetCameraControllerOwner(CameraController* self, Camera* owner);

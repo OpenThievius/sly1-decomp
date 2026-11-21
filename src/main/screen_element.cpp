@@ -187,7 +187,6 @@ extern TextStyle g_pointerCaptionStyle;
 extern "C" s32 CompareStrings(const char* a, const char* b);
 
 
-extern u8 g_elementStack[];
 
 s32 MatchesObjectId(void* key, s32 item);
 
@@ -197,7 +196,6 @@ extern TextStyle g_copiedCaptionStyle;
 // NEAR: register and load order of D_00262C84 vs D_00269988 (retail keeps the x load in v1, ours in a0; xori placed differently)
 
 struct Node_001AE178 { u8 pad0[0xC]; f32 f0C; };
-extern s32 D_00275BF0;
 extern s32 D_00262C84;
 extern Node_001AE178* D_00269988;
 
@@ -1911,7 +1909,7 @@ void UpdateHintGlyphElement(HintGlyphElement* self)
     if (self->flag == 0) goto tail;
     g = g_player;
     if (g != 0 && g->state == 6) goto tail;
-    m = (ElementStack*)g_elementStack;
+    m = &g_elementStack;
     if (m->state == 3 && m->count < 2) {
         self->vt->m14(self);
         return;
@@ -2150,7 +2148,7 @@ void SetElementModeRebuildingText(PromptElement* self, s32 force)
 // then updates the slide.
 void UpdatePromptElement(PromptElement* self)
 {
-    if (D_00275BF0 == 1) {
+    if (g_elementStack.resumeState == 1) {
         s32 b = 0;
         s32 a = D_00262C84 == 3;
         if (D_00269988 != 0 && D_00269988->f0C != 0.0f) {

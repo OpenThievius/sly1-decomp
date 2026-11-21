@@ -253,7 +253,6 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
 void* GetIndexedTargetSlot(void* self, s32 index);
 
 
-extern u8 g_elementStack[];
 void PushStackElement(ElementStack* self, ScreenElement* node);
 
 
@@ -352,7 +351,6 @@ void AppendToList(ObjectList* self, void* item);
 
 void* AllocateZeroedFrontMemory(s32 n);
 
-extern u8 g_elementStack[];
 void ShowCountedScreenElement(World* self);
 void HideCountedScreenElement(World* self);
 void PopStackElement(ElementStack* g);
@@ -360,7 +358,6 @@ void PopStackElement(ElementStack* g);
 extern s32 g_resumeSoundSetupDone;
 extern s32 D_00270B30;
 extern s32 D_002717A8;
-extern u8 g_elementStack[];
 
 void SetStepSequenceState(StepSequence* self, s32 mode);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
@@ -1386,7 +1383,7 @@ void UpdateStepSequence(StepSequence* self, f32 dt)
     case 3:
         if (self->mode2D0 != 2) {
             if (!(self->step2E4 < self->count2DC) || g_resumeSoundSetupDone == 1) {
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
                 s1 = self->state2D4;
             }
         }
@@ -1689,7 +1686,7 @@ void SkipRemainingSteps(StepSequence* self)
             }
         }
         if (self->mode2D0 == 2)
-            PopStackElement((ElementStack*)g_elementStack);
+            PopStackElement(&g_elementStack);
     }
 }
 
@@ -1727,7 +1724,7 @@ void ShowStepSequenceText(StepSequence* value, StepSequenceHost* object)
         object->vt->f158(object, value);
     } else {
         g_typedTextCaptionBox.child = value;
-        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
     }
 }
 

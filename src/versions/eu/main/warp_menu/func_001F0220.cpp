@@ -67,8 +67,8 @@ L0354:
     goto L02A0;
 
 L0364:
-    ((Sys_1F0220_eu*)g_elementStack)->f30 = 8;
-    SetElementStackState((ElementStack*)g_elementStack, 8);
+    ((Sys_1F0220_eu*)&g_elementStack)->f30 = 8;
+    SetElementStackState(&g_elementStack, 8);
     self->mode = mode;
     goto L0404;
 
@@ -83,7 +83,7 @@ L0374:
 
 L038C:
     {
-        if (self->style == D_00275BF0) {
+        if (self->style == g_elementStack.resumeState) {
             s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 D_eu_00274868.f570 = D_eu_00274868.f574[idx];

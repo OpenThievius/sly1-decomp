@@ -146,7 +146,7 @@ f32 D_00262E30 = 50.0f;
 
 // The path the player follows (0x23B8, 0x23BC): its frame, its curve, and whether it is a rail.
 struct PathRecord { u8 pad00[0x18]; PlacedObject* frame; u8 pad1C[0x34 - 0x1C]; PathCurve* curve; u8 pad38[0x40 - 0x38]; s32 isRail; };
-typedef s32 (*VFn_170410)(Player* self, void* out);
+typedef s32 (*VFn_170410)(Player* self, void* out, s32 end);
 
 f32 g_slideRateFirst = 0.8f;
 f32 g_slideRateSecond = 0.5f;
@@ -788,7 +788,7 @@ void StepPlayer(Player* self, f32 t)
 // fixed rates, state 7 none, a contact the player can stand on (virtual method 90) a fixed
 // friction, and state 4 other fixed rates for most sub-states. The friction is divided by the
 // gravity scale at the end.
-void ComputePlayerSlideRates(Player* self, BodyContact* out)
+void ComputePlayerSlideRates(Player* self, BodyContact* out, s32 end)
 {
     f32 a;
     f32 b;
@@ -797,7 +797,7 @@ void ComputePlayerSlideRates(Player* self, BodyContact* out)
         b = g_slideRateSecond;
     } else if (self->state == 7) {
         goto zero_both;
-    } else if (((VFn_170410*)self->desc)[90](self, out) != 0) {
+    } else if (((VFn_170410*)self->desc)[90](self, out, end) != 0) {
         if (self->state == 6 && self->targetMode == 4 && ((PathRecord*)self->targetTrack)->isRail != 0) {
             goto zero_both;
         }
@@ -2477,7 +2477,6 @@ void UpdatePlayerGrabs(Player* self);
 extern s32 g_controlBlockingElementCount;
 extern s32 g_resumeSoundSetupDone;
 extern StepSequence* g_playerStepSequence;
-extern u8 g_elementStack[];
 
 // Slot 73 of class 0x07: the player's control for a frame. Without control (an activation queued, the
 // entry queue running) the pad is a cleared record. It works out a jump (the pad's 0x40 bit near a
@@ -2881,7 +2880,7 @@ held:
             if (skipStep) {
                 if (self->subState == 0x22) {
                     sub = 0x23;
-                    PopStackElement((ElementStack*)g_elementStack);
+                    PopStackElement(&g_elementStack);
                     break;
                 }
             } else if (self->subState == 0x22) {
@@ -3612,7 +3611,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 12:
             RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)&g_camera->ctl460, self, 0);
             if (D_00270454 != 0) {
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
             }
             break;
         case 9:
@@ -4470,7 +4469,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             RequestCameraSnap(g_camera, 0);
             g_typedTextCaptionBox.child = self->pendingCaption;
             self->pendingCaption = 0;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
             break;
         }
         case 35:
@@ -4869,10 +4868,9 @@ struct InteractTarget {
     u8 pad0[0x2D0];
     s32 mode;               // 0x2D0
 };
-extern s32 D_00275BC4;
 
 // Says what the player can do with an interact target, by state: out[0] (can start it) and out[1]
-// (can take it), mostly depending on the target's mode being 1. out[0] is cleared unless D_00275BC4
+// (can take it), mostly depending on the target's mode being 1. out[0] is cleared unless g_elementStack.state
 // is 3.
 void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
 {
@@ -4915,11 +4913,10 @@ void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
         out[1] = 1;
         break;
     }
-    if (D_00275BC4 != 3)
+    if (g_elementStack.state != 3)
         out[0] = 0;
 }
 
-extern u8 g_elementStack[];
 
 
 // For an interact target of mode 1 or 2 shows it in the typed-text caption box. Otherwise, unless
@@ -4928,7 +4925,7 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
 {
     if ((u32)(node->mode - 1) < 2) {
         g_typedTextCaptionBox.child = node;
-        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         return;
     }
     if (self->state != 0xC) {

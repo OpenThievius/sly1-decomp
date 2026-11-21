@@ -4151,7 +4151,7 @@ ScriptValue* EvalScriptCall(ScriptValue* ret, R11B008Node* expr, ScriptScope* sc
         break;
     }
     CopyConstructScriptValue(ret, &b);
-    p = &t;
+    p = arr + 32;
     while (arr != p) {
         p--;
         DestroyScriptValue(p, 0);

@@ -36,7 +36,6 @@
 #include "shapes.h"
 #include "object_finder.h"
 #include "list_walk.h"
-#include "element_stack_state.h"
 #include "functions/base_object.h"
 #include "functions/blend_animation.h"
 #include "functions/buffered_stream.h"
@@ -78,8 +77,6 @@ struct ActiveColliderData {
 };
 // One of the nine 0x78-byte records at the start of a level's record (G27C230): its flags.
 struct LevelTaskRecord { s32 flags; u8 rest[0x74]; };
-// The element stack (g_elementStack), as game_progress.cpp and selection_menus.cpp view it.
-extern ElementStackState g_elementStack;
 struct StateWalker;
 struct StateGraph;
 void CopyMemory(void* dst, void* src, u32 size);
@@ -1250,7 +1247,7 @@ void RecordC17ColliderCompletion(ProgressCollider* self)
     }
 
     if (D_00270454 != 0) {
-        PopStackElement((ElementStack*)&g_elementStack);
+        PopStackElement(&g_elementStack);
     }
     if ((self->levelBit & (s64)0xF000FFFF) != 0) {
         G27C230* ctx = g_currentLevelRecord;

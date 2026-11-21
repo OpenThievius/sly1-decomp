@@ -81,7 +81,6 @@ void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 void BuildPauseMenuPage(PauseMenu* self);
 void SetPauseMenuPage(void* self, s32 v);
 
-extern u8 g_elementStack[];
 
 void ChangePauseMenuPage(void* self, s32 a, s32 b);
 void SetPauseMenuPage(void* self, s32 v);
@@ -104,14 +103,12 @@ struct DisplayPositionRegs {
     DisplayReg64 displayRegB;
 };
 extern DisplayPositionRegs g_displayRegisters;
-extern s32 D_00275BF0;
 extern f32 g_screenAdjustSavedX;
 extern f32 g_screenAdjustSavedY;
 void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value);
 extern "C" s32 ConvertFloatToU32(f32 value);
 
 
-extern u8 g_elementStack[];
 extern u8 g_objectFadeIn[];
 extern CardSlot g_cardSlots[];
 
@@ -163,7 +160,6 @@ enum PadSelectBits {
     PAD_SELECT_NONE = 0
 };
 
-extern u8 g_elementStack[];
 extern u8* g_activeStepSequence;
 
 void ChangePauseMenuPage(PauseMenu* self, s32 a, s32 b);
@@ -200,7 +196,6 @@ struct MenuPage { char* title; f32 titleScale; f32 itemScale; s32 vertical; s32 
 extern MenuPage g_pauseMenuPages[33];
 
 extern f32 g_gameClock[];
-extern s32 D_00275BEC;
 extern f32 D_00262CEC;
 extern u8 g_fadeRampProfile[];
 extern u8 g_gsPacketWriter[];
@@ -610,12 +605,12 @@ void BuildPauseMenuPage(PauseMenu* self)
             s32 show = 1;
             switch (item) {
             case 6:
-                show = ((ElementStack*)g_elementStack)->resumeState == 1;
+                show = g_elementStack.resumeState == 1;
                 break;
             case 7:             // shown always: retail's compare tree tests it
                 break;
             case 8:
-                show = ((ElementStack*)g_elementStack)->resumeState != 1;
+                show = g_elementStack.resumeState != 1;
                 break;
             }
             if (show != 0) {
@@ -833,15 +828,15 @@ void SetPauseMenuOpen(PauseMenu* self, s32 mode) {
         s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             PauseStagedBankVoice();
-            SetElementStackState((ElementStack*)g_elementStack, 5);
+            SetElementStackState(&g_elementStack, 5);
         } else if (g_activeStepSequence != 0) {
-            SetElementStackState((ElementStack*)g_elementStack, 5);
+            SetElementStackState(&g_elementStack, 5);
         } else {
-            u8* base = g_elementStack;
-            if (((s32*)base)[1] == 3) {
-                SetElementStackState((ElementStack*)base, 4);
+            ElementStack* base = &g_elementStack;
+            if (base->state == 3) {
+                SetElementStackState(base, 4);
             } else {
-                SetElementStackState((ElementStack*)base, 5);
+                SetElementStackState(base, 5);
             }
         }
         ChangePauseMenuPage(self, -1, self->page);
@@ -852,13 +847,13 @@ void SetPauseMenuOpen(PauseMenu* self, s32 mode) {
         s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             ResumeStagedBankVoice();
-            SetElementStackState((ElementStack*)g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         } else if (g_activeStepSequence != 0) {
-            SetElementStackState((ElementStack*)g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         } else if (self->page != 0) {
-            SetElementStackState((ElementStack*)g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         } else {
-            SetElementStackState((ElementStack*)g_elementStack, 6);
+            SetElementStackState(&g_elementStack, 6);
         }
         ChangePauseMenuPage(self, self->page, -1);
         self->vt->m15(self);
@@ -1192,11 +1187,11 @@ void SetPauseMenuLayerPage(PauseMenu* self, s32 idx, s32 value)
     }
     if (s2 == -1) {
         if (self->open != 0) {
-            PopStackElement((ElementStack*)g_elementStack);
+            PopStackElement(&g_elementStack);
         }
     } else {
         if (self->open == 0) {
-            PushStackElement((ElementStack*)g_elementStack, self);
+            PushStackElement(&g_elementStack, self);
         }
     }
 }
@@ -1272,7 +1267,7 @@ void DrawPauseMenu(PauseMenu* self)
     pulse = Sine(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
     menu = &g_pauseMenuPages[self->page];
     fade = 1.0f;
-    if (self->page == 0 && D_00275BEC == 2) {
+    if (self->page == 0 && g_elementStack.count == 2) {
         fade = 1.0f - D_00262CEC;
     }
     self->fade = ApproachValueWithRamp(self->fade, fade, g_gameClock[5], (RampProfile*)g_fadeRampProfile, 0);
@@ -1425,7 +1420,7 @@ void ActivatePauseMenuSelection(PauseMenu* self)
             WarpPageList* s = &g_mapScreenList;
             if (s->current != 0) {
                 SetPauseMenuLayerPage(self, 0, -1);
-                PushStackElement((ElementStack*)g_elementStack, s);
+                PushStackElement(&g_elementStack, s);
                 return;
             }
             StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
@@ -1718,7 +1713,7 @@ void CancelPauseMenuPage(PauseMenu* self)
         SetPauseMenuLayerPage(self, 0, -1);
         break;
     case 23:
-        if ((u32)(D_00275BF0 - 1) < 2) {
+        if ((u32)(g_elementStack.resumeState - 1) < 2) {
             SetPauseMenuLayerPage(self, 0, -1);
             break;
         }

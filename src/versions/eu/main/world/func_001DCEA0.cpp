@@ -79,7 +79,7 @@ void LoadWorld(World* self, BufferedStream* s)
     g_activeListFrames = frame.prev;
     RunQueuedCalls(self);
     UpdateScatterLevelLimits((ScatterController*)g_scatterController);
-    ResumeElementStackState(g_elementStack);
+    ResumeElementStackState(&g_elementStack);
     if (((MapScreen_eu*)&g_mapScreenList)->current == 0 && g_saveData->levelIndex != 0) {
         AllocateZeroedFrontMemory(0x80000);
     }

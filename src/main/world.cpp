@@ -178,7 +178,6 @@ s32 GetCachedVoiceParam(s32 index);
 
 extern s32 g_switchedColliderCount;
 extern s32 g_padSelectFlags;
-extern u8 g_elementStack[];
 struct ColoredTriangleSet;
 extern ColoredTriangleSet* g_coloredTriangleSet;
 extern f32 g_stepScale;
@@ -1094,7 +1093,7 @@ void ResetWorldSubsystems(World* a0)
         StopAllSoundsAndWait();
         ResetScreenResources();
         ShutDownScriptValuePools();
-        ResetElementStack((ElementStack*)g_elementStack);
+        ResetElementStack(&g_elementStack);
         ResetFrontMemory();
         // a field access here changes retail's code: the elements' callback words (onDone, onWarn)
         // are stored packed, and the elements are reached through byte pointers
@@ -1860,7 +1859,7 @@ void LoadWorld(World* self, BufferedStream* s)
     g_activeListFrames = frame.prev;
     RunQueuedCalls(self);
     UpdateScatterLevelLimits((ScatterController*)g_scatterController);
-    ResumeElementStackState(g_elementStack);
+    ResumeElementStackState(&g_elementStack);
     if (g_mapScreenList.current == 0 && g_saveData->levelIndex != 0) {
         AllocateZeroedFrontMemory(0x80000);
     }
@@ -2195,7 +2194,7 @@ void PopActiveSequenceElement(World* world)
     StepSequence* ctx = g_activeStepSequence;
     if (ctx != 0 && ctx->state2D4 != 4) {
         u32 t = (u32)(ctx->mode2D0 - 1);
-        if (t < 2) PopStackElement((ElementStack*)g_elementStack);
+        if (t < 2) PopStackElement(&g_elementStack);
     }
 }
 

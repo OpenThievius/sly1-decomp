@@ -168,7 +168,9 @@ struct AimPlayer {
 };
 
 struct AimSlotObject;
-typedef void (*AimSlotFn)(AimSlotObject* self, ...);
+typedef void (*AimSlotFn)(AimSlotObject* self);
+// Slot 35 (CopyPlacedObjectFrame) takes the other object.
+typedef void (*AimSlotCopyFn)(AimSlotObject* self, void* other);
 struct AimSlotObject { AimSlotFn* vt; };
 
 struct AimSoundSource { u8 pad0[0xAC]; s32 fAC; };
@@ -377,14 +379,14 @@ void SetPlayerAimMode(Player* self, s32 state)
             AimSlotObject* a = (AimSlotObject*)self->f23D8;
             a->vt[6](a);
             a = (AimSlotObject*)self->f23D8;
-            a->vt[35](a, self->f23D0);
+            ((AimSlotCopyFn)a->vt[35])(a, self->f23D0);
             a = (AimSlotObject*)self->f23D0;
             a->vt[7](a);
         } else {
             AimSlotObject* a = (AimSlotObject*)self->f23D0;
             a->vt[6](a);
             a = (AimSlotObject*)self->f23D0;
-            a->vt[35](a, self->f23D8);
+            ((AimSlotCopyFn)a->vt[35])(a, self->f23D8);
             a = (AimSlotObject*)self->f23D8;
             a->vt[7](a);
         }

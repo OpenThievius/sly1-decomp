@@ -60,7 +60,7 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
             if (g->f250 != 0) {
                 return;
             }
-            PushStackElement((ElementStack*)g_elementStack, &g_gridSelector);
+            PushStackElement(&g_elementStack, &g_gridSelector);
             return;
         }
         Obj_16B580_eu* g = (Obj_16B580_eu*)&g_mapScreenList;
@@ -68,7 +68,7 @@ void HandleSelectionCaptionInput(Obj_16B580_eu* self, PadRecord* arg)
             return;
         }
         g->p260 = *(Obj_16B580_eu**)((u8*)&g_mapScreenList + idx * 4 + 0x264 + 0x310);
-        PushStackElement((ElementStack*)g_elementStack, &g_mapScreenList);
+        PushStackElement(&g_elementStack, &g_mapScreenList);
         return;
     }
     if (p->currentEntry != p->index) {

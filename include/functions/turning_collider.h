@@ -37,7 +37,7 @@ void CopyTurningColliderMeshesInFrame(TurningCollider* self, Collider* other, s3
 void StepTurningCollider(TurningCollider* self, f32 dt);
 void ApplyTurningColliderDrive(TurningCollider* self);
 s32 IsTurningColliderGroundContact(TurningCollider* self, BodyContact* a, s32 idx);
-void ComputeTurningColliderContactValue(TurningCollider* self, BodyContact* out);
+void ComputeTurningColliderContactValue(TurningCollider* self, BodyContact* out, s32 end);
 void ClampTurningColliderContactLimit(TurningCollider* self, s32 flags, ContactLimit03* limit);
 void ClampColliderContactLimit(Collider* self, s32 flags, ContactLimit03* limit);
 void BuildTurningColliderHeadingMatrix(TurningCollider* self);

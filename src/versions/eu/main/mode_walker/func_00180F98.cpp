@@ -16,6 +16,6 @@ void StartModeWalkerObject(ModeWalker* self)
     self->paceChangeTime = 3.4028234663852886e+38f;
     u8* base = (u8*)&g_spinningSpriteElement;
     ((T217D_Float*)(base + 0x598))->v = 0.0f;
-    *(s32*)(base + 0x594) = FindAnimRecord(0x36A);
+    *(AnimRecord**)(base + 0x594) = FindAnimRecord(0x36A);
 }
 

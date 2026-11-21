@@ -8,7 +8,7 @@ void HandleGridSelectorInput(Ctx_eu_16BBA8* ctx, PadRecord* o)
 
     if ((o->flags & 0x9B0) != 0 || (o->connectionMode == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(o, 0x9B0);
-        PopStackElement((ElementStack*)g_elementStack);
+        PopStackElement(&g_elementStack);
         return;
     }
     if ((o->flags & 0x40) != 0) {

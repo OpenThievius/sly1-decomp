@@ -30,7 +30,7 @@ void ResumeAtSavedLevel(void)
                 }
             }
             g_elementStack.resumeState = -1;
-            SetElementStackState((ElementStack*)&g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         }
     }
 }

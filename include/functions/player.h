@@ -31,7 +31,7 @@ void LoadPlayer(Player* self, BufferedStream* stream);
 void StartPlayer(Player* self);
 void ApplyPlayerDefaultSteering(Player* self);
 void StepPlayer(Player* self, f32 t);
-void ComputePlayerSlideRates(Player* self, BodyContact* out);
+void ComputePlayerSlideRates(Player* self, BodyContact* out, s32 end);
 void ClampPlayerContactLimit(Player* self, s32 flags, ContactLimit03* out);
 void ApplyPendingPlayerStateRequest(Player* self);
 void ReleasePlayerContacts(Player* self);

@@ -446,16 +446,6 @@ extern CounterCaption g_completionPercentCaption;    // D_002181F0
 typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];
 typedef char check_T217D_330[sizeof(ButtonHintElement) == 0x260 ? 1 : -1];
 
-// The stack of screen elements the menus push and pop (g_elementStack, D_00275BC0): its state
-// (SetElementStackState), and the elements, whose top gets the pad each frame
-// (UpdateElementStack, warp_menu.cpp).
-struct ElementStack {
-    u8 pad00[4];
-    s32 state;              // 0x04: 0 .. 8 (SetElementStackState)
-    f32 stateTime;          // 0x08: the clock when the state was set
-    ScreenElement* items[8]; // 0x0C: items[count - 1] is the top
-    s32 count;              // 0x2C: 1 for the base element alone
-    s32 resumeState;        // 0x30: the state that state 3 stands for, -1 for 3 itself
-};
+#include "element_stack.h"
 
 #endif

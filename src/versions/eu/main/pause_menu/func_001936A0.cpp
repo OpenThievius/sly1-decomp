@@ -94,12 +94,12 @@ void BuildPauseMenuPage(Self_1936A0_eu* self)
             s32 show = 1;
             switch (item) {
             case 6:
-                show = ((ElementStack*)g_elementStack)->resumeState == 1;
+                show = g_elementStack.resumeState == 1;
                 break;
             case 7:
                 break;
             case 8:
-                show = ((ElementStack*)g_elementStack)->resumeState != 1;
+                show = g_elementStack.resumeState != 1;
                 break;
             }
             if (show != 0) {

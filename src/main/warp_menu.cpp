@@ -515,16 +515,9 @@ ObjectLink g_world1BossLinks[8] = {
     { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
     { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
 };
-// word read whole / address only, 4 bytes to next label
-// readers pass only its address; byte buffer, size to next label
-u8 g_elementStack[4] = {0};
-INCLUDE_DATA(D_00275BC4);
-// size: s32 read as one word (pooled_object.cpp and screen_element.cpp test bit 8)
-// size: s32 compared with 1 in item_column.cpp and 2 in pause_menu.cpp
-s32 D_00275BEC = 0;
-// size: s32, the element stack's resumeState (+0x30): compared with 1 and 2 in pause_menu.cpp and
-// screen_element.cpp, with the style in this file
-s32 D_00275BF0 = 0;
+// The whole element stack (0x34 bytes, to D_00275BF4): its first word is padding, the rest are the
+// state, the elements, their count and the resume state that the readers name by field.
+ElementStack g_elementStack = {0};
 // Unread and unexplained: a zero word and the table {3, 10, 6, 63, 3, 11, 5, 31} follow it up to
 // D_00275C18, which nothing reads; their bytes come from the disassembly.
 INCLUDE_DATA(D_00275BF4);
@@ -873,7 +866,7 @@ done:
 // Initialises the global element stack that the pause and map screens push to and pop from.
 void InitGlobalElementStack(void)
 {
-    InitElementStack((ElementStack*)g_elementStack);
+    InitElementStack(&g_elementStack);
 }
 
 // Clears the saved and pending states to -1, enters state 3 and leaves the stack holding only its
@@ -4499,7 +4492,7 @@ L0354:
     goto L02A0;
 
 L0364:
-    SetElementStackState((ElementStack*)g_elementStack, 8);
+    SetElementStackState(&g_elementStack, 8);
     self->mode = mode;
     goto L0404;
 
@@ -4514,7 +4507,7 @@ L0374:
 
 L038C:
     {
-        if (self->style == D_00275BF0) {
+        if (self->style == g_elementStack.resumeState) {
             s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 g_mapScreenList.current = g_mapScreenList.nodes[idx];
@@ -4558,7 +4551,7 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 // the page compares its cursor with it before confirming.
 s32 GetCurrentWarpEntry(void)
 {
-    if (D_00275BF0 != 2) {
+    if (g_elementStack.resumeState != 2) {
         return g_saveData->entryIndex;
     }
     return 10;
@@ -4816,7 +4809,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
                 target = GetCurrentWarpEntry();
             }
             Animation* anim = self->entries[target].animation;
-            if (D_00275BF0 != 2) {
+            if (g_elementStack.resumeState != 2) {
                 self->entries[GetCurrentWarpEntry()].cursorLevel = 0.0f;
                 self->entries[self->cursor].cursorLevel = 1.0f;
                 self->entries[self->cursor].availableLevel = 1.0f;
@@ -5220,7 +5213,7 @@ void HandleWarpMenuInput(WarpPageList* self, PadRecord* t)
     if (self->current->mode != 2) return;
     if (self->current->warpChosen != 0) return;
     if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
-        PopStackElement((ElementStack*)g_elementStack);
+        PopStackElement(&g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
         return;
     }
@@ -5246,13 +5239,13 @@ void HandleWarpMenuInput(WarpPageList* self, PadRecord* t)
             if (s3 != 0) {
                 IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->warpChosen = 1;
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            PopStackElement((ElementStack*)g_elementStack);
+            PopStackElement(&g_elementStack);
         }
     }
 
@@ -5287,7 +5280,7 @@ void SetWarpMenuOpen(WarpPageList* self, s32 a1)
         self->vt->m14(self);
         SetPadSelectFlags(1);
         ResetPadStepRepeat(&g_padRecord);
-        SetElementStackState((ElementStack*)g_elementStack, 7);
+        SetElementStackState(&g_elementStack, 7);
     } else {
         self->vt->m15(self);
         if (self->current->warpChosen == 0) {
@@ -5297,7 +5290,7 @@ void SetWarpMenuOpen(WarpPageList* self, s32 a1)
                 SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
-            SetElementStackState((ElementStack*)g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
             GameProgress* g = g_saveData;
             if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
                 ResumeStagedBankVoice();

@@ -30,7 +30,7 @@
 #include "word_copy.h"
 #include "camera.h"
 #include "object_finder.h"
-#include "element_stack_state.h"
+#include "element_stack.h"
 #include "mesh_face03.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
@@ -286,7 +286,6 @@ struct PlayerListWalk {
     }
 };
 
-extern ElementStackState g_elementStack;
 extern SessionKey g_sessionFadeKey;
 extern s32 g_resumeSoundSetupDone;
 
@@ -1385,7 +1384,7 @@ void ResumeAtSavedLevel(void)
                 }
             }
             g_elementStack.resumeState = -1;
-            SetElementStackState((ElementStack*)&g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         }
     }
 }

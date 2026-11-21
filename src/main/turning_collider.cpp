@@ -484,14 +484,14 @@ s32 IsTurningColliderGroundContact(TurningCollider* self, BodyContact* a, s32 id
     return 0;
 }
 
-// Slot 86 (func_001C5248: does a contact hold the body up), called with the caller's own
-// arguments left in place.
-typedef s32 (*ContactTestFn)(void* self);
+// Slot 90 (func_001C5248: does a contact hold the body up), called with the contact and end index
+// its caller passes in $a1 and $a2.
+typedef s32 (*ContactTestFn)(void* self, void* contact, s32 end);
 // Sets the contact's friction to a constant and bounce to 0 when the class's method at 0x168
 // says so, otherwise friction and bounce to 0.
-void ComputeTurningColliderContactValue(TurningCollider* self, BodyContact* out)
+void ComputeTurningColliderContactValue(TurningCollider* self, BodyContact* out, s32 end)
 {
-    if (((ContactTestFn*)self->desc)[0x168 / 4](self)) {
+    if (((ContactTestFn*)self->desc)[0x168 / 4](self, out, end)) {
         f32 d = g_turningColliderContactFriction;
         out->bounce = 0;
         out->friction = d;
@@ -523,7 +523,7 @@ void BuildTurningColliderHeadingMatrix(TurningCollider* self)
 // Resolves the ground contact when the class's method 90 says it applies.
 void ResolveTurningColliderContact(TurningCollider* self, void* b, s32 c)
 {
-    if (((ContactTestFn*)self->desc)[90](self)) {
+    if (((ContactTestFn*)self->desc)[90](self, b, c)) {
         ResolveTurningColliderGroundContact(self, (BodyContact*)b, c);
     }
 }

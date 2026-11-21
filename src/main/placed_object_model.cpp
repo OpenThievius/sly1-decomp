@@ -693,7 +693,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                     }
                 }
                 // address arithmetic over a variable index
-                strip->unpack = (StripUnpack*)((u8*)strip->unpack + (strip->addr[0] - starts[0]));
+                strip->unpack = (StripUnpack*)((u8*)strip->unpack + (s32)(strip->addr[0] - starts[0]));
                 BuildPartVifPackets((PartPacketContext*)part, (PartPacketSource*)strip, (PartPackets*)pp);
                 PopBackMemoryMark();
             }
@@ -744,7 +744,7 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                 DetachPacketBufferCopy((PacketWriter*)&pw, &m->qwc, &start, (s32*)&m->addr, 0x13);
                 RemapMeshQueueValues(queued, m->qwc * 16, start, m->addr);
                 // address arithmetic over a variable index
-                m->p = (u16*)((u8*)m->p + (m->addr - start));
+                m->p = (u16*)((u8*)m->p + (s32)(m->addr - start));
                 PopBackMemoryMark();
             }
         }

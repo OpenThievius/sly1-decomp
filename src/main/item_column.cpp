@@ -31,7 +31,6 @@
 #include "pad_record.h"
 #include "ramp_profile.h"
 
-extern s32 D_00275BEC;
 extern f32 g_timeScale;
 extern T217D_Vt g_buttonHintElementMethods;
 
@@ -95,10 +94,10 @@ void UpdateItemColumnSlide(StackedCaptionGroup* self)
 }
 
 // Draws the column's items stacked downward from its position, each scaled in blend by
-// g_timeScale for the draw, while D_00275BEC is 1.
+// g_timeScale for the draw, while g_elementStack.count is 1.
 void DrawItemColumn(StackedCaptionGroup* self)
 {
-    if (D_00275BEC == 1) {
+    if (g_elementStack.count == 1) {
         f32 acc = self->y;
         s32 i;
         for (i = 0; i < self->count; i++) {
