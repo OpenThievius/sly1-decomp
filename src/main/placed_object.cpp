@@ -1758,7 +1758,7 @@ void OrthonormalizeMatrix(Mat3* m);
 // Advances the object by one step: takes the position and rotation from its attachments, or
 // integrates velocity, acceleration and spin over the frame time, then moves each child that wants
 // it (desc flag 1). If anything moved and flag is 0, it calls the object's moved callback.
-void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
+void MovePlacedObject(PlacedObject* self, f32 dt, s32 flag)
 {
     Attachment* pa = self->positionAttachment;
     Attachment* ra = self->orientationAttachment;

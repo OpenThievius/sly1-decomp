@@ -11,7 +11,7 @@ struct Glob_eu_18EBE8 {
 
 extern Glob_eu_18EBE8 D_eu_0026AC60;
 extern s32 D_eu_0026321C;
-extern "C" s32 AwaitSemaphore(s32 a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void SendGsPacketAndWait(s32 channel, void* b);
 void ApplyPendingDisplayFlip(void);
 void FlipDisplayFrame(void);

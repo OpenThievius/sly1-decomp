@@ -263,7 +263,7 @@ struct SpanHit {
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-u8* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
 struct PlacementRecord;
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
@@ -296,7 +296,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, (s32 (*)(void*, Collider*))IsPlayerLinkedColliderCandidate, self, &n, &list);
-        Collider* found = (Collider*)FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
+        Collider* found = FindNearestSpanObject(0, &lo, &hi, n, list, (ColliderSpan*)&hit);
         if (found != 0 && found->id != 1) {
             *(u8**)e0 = (u8*)found;
             TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec4*)&hit, (Vec4*)&pool->fF0);

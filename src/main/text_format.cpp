@@ -92,11 +92,11 @@ s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 
 // A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
 // how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
-struct RecursiveLock { s32 count; s32 last; void* sema; };
+struct RecursiveLock { s32 count; s32 last; s32 sema; };
 
 
 
-extern "C" void PostSemaphore(void* a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 
 
@@ -111,7 +111,7 @@ extern "C" s64 RemainderUnsigned64(u64 num, u64 den);
 
 
 extern "C" s32 GetCurrentThreadId(void);
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 
 
@@ -1128,7 +1128,7 @@ LINKER_REMNANT(func_001E22B8);
 void InitRecursiveLock(RecursiveLock* self)
 {
     self->last = -1;
-    self->sema = (void*)CreateLockSemaphore(1, 1);
+    self->sema = CreateLockSemaphore(1, 1);
 }
 
 // Takes the lock: a thread that already holds it just counts one more entry, any other waits on the

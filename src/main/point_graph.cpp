@@ -87,7 +87,7 @@ extern void HandleAgentNotification(Agent* self, s32 kind, AgentNotification* ms
 s32 FindPointGraphPath(PointGraph* graph, Vec4* start, Vec4* goal, s32 maxOut, Vec4* out);
 s32 FindPointGraphTriangleWithin(PlaneNode* node, Vec4* p);
 void SnapPointToPointGraph(PointGraph* self, Vec4* p, Vec4* out);
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 extern "C" void SyncDataCache(s32 a);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
 struct RampProfile;

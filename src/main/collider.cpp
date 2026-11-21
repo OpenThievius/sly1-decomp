@@ -114,7 +114,7 @@ void ReadFaceTree(BufferedStream* in, CollisionMesh* a, MeshTree* out);
 f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* self, void* out);
 void ReadBufferedVector3(BufferedStream* src, void* dst);
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
@@ -1943,9 +1943,7 @@ void MoveCollider(Collider* self, f32 x, s32 flag)
     if (self->hook != 0) {
         AdvanceColliderMeshMotion(self, x);
     }
-    // The call is written with the float first, as retail schedules it (a call with MovePlacedObject's own
-    // parameter order puts the argument moves in the other order).
-    ((void (*)(Collider*, f32, s32))MovePlacedObject)(self, x, flag);
+    MovePlacedObject(self, x, flag);
 }
 
 

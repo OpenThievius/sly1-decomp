@@ -11,10 +11,7 @@
 #include "common.h"
 
 struct BackgroundJob {
-    union {
-        void* semaphore;    // 0x00: RunBackgroundJob
-        s32 semaphoreId;    // 0x00: InitBackgroundJob stores the semaphore it creates
-    };
+    s32 semaphore;          // 0x00: InitBackgroundJob stores the semaphore it creates, RunBackgroundJob waits on it
     s32 thread;             // 0x04: InitBackgroundJob, RunBackgroundJob (-1 when no thread runs)
     s32 (*job)(void* a);    // 0x08: RunBackgroundJob calls it
     void* arg;              // 0x0C: RunBackgroundJob

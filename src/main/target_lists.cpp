@@ -233,10 +233,10 @@ extern f32 g_gameTime[];
 
 
 
-extern "C" s32 GetGsInterruptMask(s32 mask);
+extern "C" s32 GetGsInterruptMask(void);
 extern "C" s32 SwapGsInterruptMask(s32 mask);
 extern "C" void SyncDataCache(s32 a);
-extern "C" s32 AwaitSemaphore(s32 a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 
 extern f32 g_gameTime[];

@@ -127,7 +127,7 @@ void ConsumeSpan(RingBuffer* p, s32 n)
     p->held -= n;
 }
 
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 
 // Reads up to want bytes from the memory reader into dst, advances it and gives back the count
 // read.

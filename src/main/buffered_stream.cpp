@@ -332,7 +332,7 @@ void RefillBufferedStream(BufferedStream* self)
 
 
 void RefillBufferedStream(BufferedStream* d);
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 
 // Decompresses the next block of the stream into the scratchpad at 0x70000000 (0x2000 bytes at a
 // time): a flag byte per eight items says whether each is a literal byte or a back-reference copy,

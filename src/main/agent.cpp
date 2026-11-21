@@ -351,7 +351,7 @@ static inline void StoreScaledQuadword(Vec4* dst, f32 k, u8* p)
     StoreQuadword((u128*)dst, ScaleQuadword(tv, u));
 }
 extern "C" f32 Arccosine(f32 x);
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec4* out, f32 t, f32 u);
 
 // The agent's per-step motion: while following a clip's own motion it pushes along the clip's root

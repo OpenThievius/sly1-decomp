@@ -136,7 +136,7 @@ struct AttachedTransformFrame {
 extern s32 g_gifChannel;
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
-extern "C" s32 AwaitSemaphore(s32 a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 extern u8 g_movieCrcTable[];
 
@@ -198,7 +198,7 @@ struct ReaderEmpty {
 };
 
 
-extern "C" void PostSemaphore(s32 a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 
 extern u8 g_movieDecoderWork[];

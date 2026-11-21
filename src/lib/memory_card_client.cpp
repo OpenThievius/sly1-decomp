@@ -109,7 +109,7 @@ extern "C" s32 NewSemaphore(SemaphoreParams* r);
 s32 SyncCardRequest(s32 noWait, s32* a1, s32* a2);
 extern "C" s32 AwaitSemaphore(s32 sema);
 extern "C" s32 TrySemaphore(s32 sema);
-extern "C" void PostSemaphore(s32 sema);
+extern "C" s32 PostSemaphore(s32 sema);
 extern "C" void InitRemoteCalls(s32 mode);
 extern "C" s32 PrintFormatted(const char* fmt, ...);
 

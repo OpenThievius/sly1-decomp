@@ -525,13 +525,13 @@ void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void ClearList(ObjectList* p);
-extern "C" s32 PostSemaphore(void* a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 extern ObjectList g_deferredReleaseListA;
 extern ObjectList g_deferredReleaseListB;
 extern ObjectList g_deferredReleaseListC;
 extern s32 g_buildFrameData;
-extern void* g_frameReadySemaphore;
+extern s32 g_frameReadySemaphore;
 
 
 
@@ -579,12 +579,12 @@ extern u32 g_packetBufferMemory[];
 extern u8 g_codeChecksumSize[];
 extern s32 g_codeChecksumFailed;
 
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameDoneSemaphore;
 extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
 extern s32 g_fieldOffsetMode;
 
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 
 
@@ -604,24 +604,24 @@ void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
 extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
-extern void* g_frameReadySemaphore;
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameReadySemaphore;
+extern s32 g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-void* CreateLockSemaphore(s32 initCount, s32 maxCount);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void func_0015E678(void);
 
 
 
-extern void* g_frameReadySemaphore;
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameReadySemaphore;
+extern s32 g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
 extern s32 g_vif1Channel;
 extern s32 g_gifChannel;
 extern s32 g_fieldOffsetMode;
 
-extern "C" s32 AwaitSemaphore(void* p);
+extern "C" s32 AwaitSemaphore(s32 sema);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
@@ -654,14 +654,14 @@ typedef float f32;
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
 extern void* g_drawingFrame;
-extern void* g_frameReadySemaphore;
+extern s32 g_frameReadySemaphore;
 extern volatile s32 g_renderThreadWaiting;
 
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameDoneSemaphore;
 extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* self);
 
