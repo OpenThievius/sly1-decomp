@@ -21,7 +21,6 @@ struct ParentFrame;
 struct PathCurveObject;
 struct PathFollower;
 struct PlacedObject;
-struct QueuedCall;
 struct T219CHook;
 struct TouchedObjectLink;
 struct Vec4;
