@@ -230,7 +230,7 @@ struct NodeQueryFrame {
     s32 kind;
     u8 pad14[0x40 - 0x14];
 };
-s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 // The file's .data, in retail's order.
 f32 g_gaugeNoticeTopSpeed = 2200.0f;

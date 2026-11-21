@@ -118,7 +118,7 @@ extern f32 g_gameClock[];
 
 
 
-void* AreMenusAndFadeClear(void* zero);
+s32 AreMenusAndFadeClear(void* zero);
 
 extern f32 g_gameTime[];
 
@@ -311,7 +311,7 @@ void SkipRemainingSteps(StepSequence* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
-void* GetListLinks(void* a, void* b);
+ListLink* GetListLinks(void* a, void* b);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(ObjectList* self, s32 offset);
@@ -320,7 +320,7 @@ void SetListLinkOffset(ObjectList* self, s32 offset);
 extern s32 g_resumeSoundSetupDone;
 void SetStepSequenceState(StepSequence* self, s32 mode);
 
-u32 GetListLinks(ObjectList* node, u32 value);
+ListLink* GetListLinks(ObjectList* node, u32 value);
 void ClearList(ObjectList* node);
 
 
@@ -1156,7 +1156,7 @@ void ReadSequenceSteps(void* unused, BufferedStream* rd, s32* outCount, Sequence
         switch (e->type) {
         case 0:
         case 7:
-            ReadOptionalBufferedBlock(rd, (u32*)&e->w4);
+            ReadOptionalBufferedBlock(rd, (u8**)&e->w4);
             break;
         case 1:
         case 2:

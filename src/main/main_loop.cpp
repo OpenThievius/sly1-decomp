@@ -113,7 +113,7 @@ typedef void (*StartupFn)(void);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 
-s32 InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
+LoadProgress* InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
 void BeginLoadProgress(LoadProgress* p);
 void UpdateLoadProgress(LoadProgress* self, s32 value);
 void EndLoadProgress(LoadProgress* p);

@@ -331,7 +331,7 @@ extern ColoredTriangleSet* g_coloredTriangleSet;
 // retail's caller evaluates them after the integers, as this order does.
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 g_packetWriterVtable[];
-s32 InitPacketBuffer(PacketWriter* self);
+PacketWriter* InitPacketBuffer(PacketWriter* self);
 // The ListFrame of func_001EECE0's walk of its children, opened and closed by its lifetime.
 struct ChildWalkFrame {
     s32* a; s32* b; s32 c; ChildWalkFrame* prev;

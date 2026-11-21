@@ -41,7 +41,7 @@ extern "C" void PostSemaphore(void* a);
 s32 EndOwnThread();
 void SetThreadPriority(s32 thread, s32 b);
 void SetPauseMenuLayerPage(PauseMenu* self, s32 a, s32 b);
-s32 InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
+BufferedStream* InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
 s32 OpenBufferedSectorStreamRange(BufferedStream* o, KeyId* p);
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void CloseBufferedStream(BufferedStream* o);

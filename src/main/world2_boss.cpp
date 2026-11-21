@@ -67,7 +67,7 @@ struct PlayerBlendItem;
 struct TurningCollider;
 struct StateGraph;
 void StartAgent(Agent* self);
-s32 ResolveAgentClip(Agent* self, s32 id);
+void* ResolveAgentClip(Agent* self, s32 id);
 void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 struct AgentNotification;
 s32 GetAgentRosterState(Agent* self);
@@ -387,7 +387,7 @@ void AdvanceWorld2BossPhase(World2Boss* self)
 {
     DecrementGaugeCount((GaugeBar*)&g_gaugeBarElement);
     s32 idx = self->phase;
-    ChangeAgentState(self, g_world2BossPhaseStates[idx], (void*)self->phaseClips[idx]);
+    ChangeAgentState(self, g_world2BossPhaseStates[idx], self->phaseClips[idx]);
     s32 n = self->phase;
     self->pendingWalkerTarget = g_world2BossPhaseValues[n];
     self->phase = n + 1;

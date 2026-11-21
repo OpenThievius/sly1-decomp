@@ -74,7 +74,8 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 
 
-s32 CreateWeightCurve(s32 a);
+struct WeightCurve;
+WeightCurve* CreateWeightCurve(s32 a);
 
 void* AllocateFrontMemory(s32 size);
 
@@ -124,7 +125,8 @@ extern f32 g_unitRange[];
 
 
 
-s32 FindAnimRecord(s32 key);
+struct AnimRecord;
+AnimRecord* FindAnimRecord(s32 key);
 
 
 

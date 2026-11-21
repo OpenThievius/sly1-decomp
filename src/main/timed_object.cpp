@@ -583,7 +583,7 @@ s32 IsTimedGroupCandidate(TimedObject* a0, Collider* a1)
 
 }
 
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void SetEffectSpawnerInactive(EffectSpawner* self);
 
@@ -1079,7 +1079,7 @@ s32 IsSequencedObjectCandidate(TimedObject* self, Collider* other)
 
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 extern const Vec4 g_unitXVector;
 
 // Slot 72 of class 0x32: picks the state from the player's place (inside the object or not, and

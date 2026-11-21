@@ -20,8 +20,8 @@ struct Vec4U;
 
 void ClearDefaultFont(void);
 s32 IsFontLoaded(s32 a0);
-s32 GetFontById(s32 a);
-s32 FindFontByKeyChar(s32 a0);
+Font* GetFontById(s32 a);
+Font* FindFontByKeyChar(s32 a0);
 void CopyFontMetrics(Font* src, Font* dst);
 void SetFontClipRect(Font* unused, Vec4U* v, PacketWriter* obj);
 void ResetFontClipRect(Font* unused, Vec4U* clip, PacketWriter* obj);

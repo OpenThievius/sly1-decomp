@@ -205,7 +205,7 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
     ((IdLinkedObject*)self->drivenObject)->linkId = 0;
 }
 
-bool AreMenusAndFadeClear();
+s32 AreMenusAndFadeClear();
 
 // Shows the two counter captions (method 0x14) while the menus and fade are clear and hides them
 // (method 0x15) otherwise.

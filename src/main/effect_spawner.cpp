@@ -123,7 +123,7 @@ struct StreamWord {
 
 void* AllocateFrontMemory(s32 size);
 struct BufferedStream;
-void* ReadBufferedU8(BufferedStream* self);
+s32 ReadBufferedU8(BufferedStream* self);
 StreamWord ReadBufferedU32(BufferedStream* self);
 
 void* AllocateFrontMemory(s32 size);
@@ -461,8 +461,8 @@ struct FloatPair2 { f32 x; f32 y; };
 extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
 
-extern s32 g_fonts[];
-extern s32 g_defaultFont;
+extern Font* g_fonts[];
+extern Font* g_defaultFont;
 
 
 
@@ -491,7 +491,7 @@ void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 tag, s64 value);
 void BeginGifRegListTag(void* obj, s32 tag, s64 value);
 
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -513,7 +513,7 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 struct GroundCandidate;
 struct GroundFilterContext;
 void PushBackMemoryMark(void* self);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
@@ -549,7 +549,7 @@ extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 
 
 extern s8 g_fontEscapeKeys[];
-extern s32 g_fonts[];
+extern Font* g_fonts[];
 
 
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two

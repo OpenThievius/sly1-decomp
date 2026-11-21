@@ -184,7 +184,7 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec4* out)
     }
 }
 ASM_FUNC(func_001D3A38);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // Casts the segment from one point to another against the colliders in its bounding box; gives 1
 // and the fraction of the way to the nearest hit in *ratio (1.0 when it hits nothing).
@@ -199,7 +199,7 @@ s32 FindObjectAlongSegment(PlacedObject* self, Vec4* from, Vec4* to, f32* ratio)
     b = *to;
     PushBackMemoryMark();
     GatherCollidersInBox(self->world, (Collider*)self, &a, &b, 0, 0, &count, &list);
-    s32 found = FindNearestSpanObject(0, &a, &b, count, list, &hit);
+    Collider* found = FindNearestSpanObject(0, &a, &b, count, list, &hit);
     *ratio = found != 0 ? Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.q[0]), Vu0::Q(a)))) / Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b)))) : 1.0f;
     PopBackMemoryMark();
     return found != 0;

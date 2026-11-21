@@ -78,7 +78,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 #include "dma_chain_block.h"
 
 extern u8 g_screenClearPacketC[];
-void* InitPacketBuffer(PacketWriter* self);
+PacketWriter* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
@@ -171,7 +171,7 @@ extern s32 g_imageRecordCountA;
 extern s32 g_imageRecordCountB;
 
 
-void* IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 struct ChildListWalk {
     ObjectList* iter;

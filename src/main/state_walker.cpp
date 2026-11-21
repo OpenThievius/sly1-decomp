@@ -1050,7 +1050,7 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
 s32 IsPadSelectFlagHeld(World* world);
 struct ObjectGatherer;
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
 

@@ -2449,7 +2449,7 @@ void DrawStreakedEffect(Effect* self, void* a1)
     }
 }
 
-s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 // The contact method of a streaked effect: when it checks (i124) it first runs a node query of kind
 // 0x10 and removes itself if a node takes it. If it bounces (i120) it moves to the hit point and

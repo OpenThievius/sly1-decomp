@@ -565,7 +565,7 @@ struct SoundChoice {
 
 s32 ReadBufferedS8(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 n);
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
+void ReadOptionalBufferedBlock(BufferedStream* self, u8** out);
 s32 ReadBufferedS16(BufferedStream* self);
 s32 ReadBufferedS32(BufferedStream* self);
 f32 ReadBufferedFloat(BufferedStream* r);
@@ -4788,7 +4788,7 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
         switch (e->kind) {
         case 44:
         case 51:
-            ReadOptionalBufferedBlock((BufferedStream*)r, (u32*)&e->a8.i);
+            ReadOptionalBufferedBlock((BufferedStream*)r, (u8**)&e->a8.i);
             break;
         case 0: {
             SoundChoice t;

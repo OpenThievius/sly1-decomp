@@ -70,7 +70,7 @@ void RunDueDelayedScriptCalls(World* self, f32 limit);
 void* AllocateTouchNode(World* self);
 void FreeTouchNodes(World* owner, TouchedObjectLink* node);
 void PushCloneBatch(World* self, void* src, s32 n);
-s32 PopSpawnedClone(World* self, s32 index);
+PlacedObject* PopSpawnedClone(World* self, s32 index);
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 void UnlinkContactTable(BodyContactTable* a0, BodyContactTable** a1);

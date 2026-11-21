@@ -467,7 +467,7 @@ void LoadPlayer(Player* self, BufferedStream* stream)
 u8* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
 void InsertAttachment(PlacedObject* self, Attachment* src);
 void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out);
-s32 FindAnimRecord(s32 key);
+AnimRecord* FindAnimRecord(s32 key);
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void* AllocateZeroedFrontMemory(s32 n);
 extern u8 g_childSumPoseSourceMethods[];
@@ -1556,7 +1556,7 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
 }
 
 struct ProbeResult { u8 pad00[0x20]; Vec4 v20; };
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
@@ -1583,7 +1583,7 @@ s32 ProbePlayerFootGround(Player* self, void* record, void* part)
     TransformPointBetweenFrames(self, 0, &p->v30, &from);
     TransformPointBetweenFrames(self, 0, &p->v40, &to);
     GatherCollidersInBox(self->world, (Collider*)self->root, &from, &to, 0, 0, &count, &list);
-    s32 found = FindNearestSpanObject(0, &from, &to, count, list, &span);
+    Collider* found = FindNearestSpanObject(0, &from, &to, count, list, &span);
     PopBackMemoryMark();
     if (found != 0) {
         Vu0::Q(span.q[0]) = Vu0::Sub(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector));
@@ -4955,7 +4955,7 @@ void SetPlayerPosition(Player* self, Vec4* pos)
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 void SetFollowObjects(void* a, s32 b, s32 c);
-s32 FindAnimRecord(s32 key);
+AnimRecord* FindAnimRecord(s32 key);
 
 
 

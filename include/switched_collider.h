@@ -372,7 +372,7 @@ struct Player : TurningCollider {
         u8 trail[0x21C0 - 0x1520];  // 0x1520: a record func_001C29E8 and func_001C3028 work on
         struct {
             void* trailOwner;   // 0x1520: the object the trail follows (the player's f23D0)
-            s32 trailAnimRecord; // 0x1524: FindAnimRecord(0x15A)
+            void* trailAnimRecord; // 0x1524: FindAnimRecord(0x15A)
             u8 pad1528[0x1530 - 0x1528];
             f32 f1530;          // 0x1530
             u8 pad1534[0x1538 - 0x1534];
@@ -803,7 +803,7 @@ struct World2Boss : Agent {
     void* keyedObjects;     // 0xE24
     s32 phase;              // 0xE28: the number of phases passed
     s32 drawsRing;          // 0xE2C: set while the marker ring is drawn
-    s32 phaseClips[3];      // 0xE30
+    void* phaseClips[3];     // 0xE30
     s32 pendingWalkerTarget; // 0xE3C: the walker key to go to when state 16 ends
     Vec4 launchPoint;      // 0xE40
 };

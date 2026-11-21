@@ -368,7 +368,7 @@ struct AimReticle : ScreenElement {
     u8 pad268[0x270 - 0x268];
     f32 aim[4];                 // 0x270: the aim, x and y in -1..1, and the zoom (func_00181ED0); the sprite's place as a fraction of the screen (func_001821B0)
     void* target;               // 0x280: the class 0x75 object the aim chose last (func_00181ED0)
-    s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
+    void* icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
     f32 alphaScale;             // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 

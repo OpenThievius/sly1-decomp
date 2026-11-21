@@ -29,11 +29,11 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, (u32*)&self->commentaryRecord);
+    ReadOptionalBufferedBlock(s, (u8**)&self->commentaryRecord);
     ReadBufferedString(s, (u8**)&self->creditsText);
-    ReadOptionalBufferedBlock(s, (u32*)&self->stagedBank);
+    ReadOptionalBufferedBlock(s, (u8**)&self->stagedBank);
     for (s32 k = 0; k < 14; k++) {
-        ReadOptionalBufferedBlock(s, (u32*)&D_eu_0027EEA0[k]);
+        ReadOptionalBufferedBlock(s, (u8**)&D_eu_0027EEA0[k]);
     }
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);

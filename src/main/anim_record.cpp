@@ -76,7 +76,7 @@ struct LoadedFont : Font {
 };
 extern s32 g_fontCount;
 extern LoadedFont* g_fontRecords;
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 extern AnimCursor* g_lastPendingCursor;
 extern AnimCursor* g_pendingCursors;
 struct FacingXY { f32 x; f32 y; };
@@ -647,7 +647,7 @@ void BuildAnimRecordGifPackets(s32 mask)
     }
 }
 
-extern s32 g_fonts[5];
+extern Font* g_fonts[5];
 // Clears the level's screen resources: its record tables, fonts, animators and image masks.
 void ResetScreenResources(void)
 {

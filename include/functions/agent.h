@@ -65,7 +65,7 @@ void DrawAgent(Agent* self, void* unused1, void* unused2);
 s32 IsAgentSlotIndex(s32 index);
 void SetAgentStateClipId(Agent* self, s32 index, s32 value);
 void SetAgentStateClip(Agent* self, s32 index, s32 value);
-s32 GetAgentStateClip(Agent* self, s32 index);
+void* GetAgentStateClip(Agent* self, s32 index);
 void AddAgentExtraClip(Agent* self, s32 a1, s32 a2);
 void* ResolveAgentClip(Agent* self, s32 id);
 void ResolveAgentClips(Agent* self);

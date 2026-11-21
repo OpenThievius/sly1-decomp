@@ -112,7 +112,7 @@ void CopyMemory(void* dst, void* src, u32 size);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 struct ValueRange;
 void CopyTransposedMatrix(Quad16* src, Quad16* dst);
-void* InvertMatrix4x4(void* a0, void* a1);
+s32 InvertMatrix4x4(void* a0, void* a1);
 void TransformMatrixByObject(u8* self, void* arg, Quad16* out);
 void MatrixToEulerAngles(Mat4* self, Vec3* out);
 void MatrixToAxisAngle(Mat3* m, f32* angle, Vec4* axis);
@@ -143,7 +143,7 @@ extern s32 D_00259DE8;
 s32 IsPoolEntryUnmarked(void* payload);
 void MarkPoolEntryUsed(void* payload);
 
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // This file's functions. The built-ins (ScriptBuiltinFn) and their helpers:
 ScriptValue* IgnoreScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope);

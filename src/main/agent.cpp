@@ -889,7 +889,7 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
 }
 
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // Whether two points are within reach of each other in the ground plane (x and y).
 static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
@@ -1515,7 +1515,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 #include "agent_request.h"
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 // Slot 76 of the agent: refuses (0) when slot 75 refuses the kind; otherwise builds a node query
 // from the request (its object, kind and the agent's position) and returns whether a node accepts
@@ -1955,11 +1955,11 @@ void SetAgentStateClip(Agent* self, s32 index, s32 value)
 }
 
 
-s32 GetAgentStateClip(Agent* self, s32 index)
+void* GetAgentStateClip(Agent* self, s32 index)
 {
     if (IsAgentSlotIndex(index) == 0)
         return 0;
-    return (s32)self->stateClips[index].obj;
+    return self->stateClips[index].obj;
 }
 
 // Adds an extra clip (a hit mask and a clip id) to the agent's list of at most 4; ResolveAgentClips

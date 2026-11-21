@@ -88,7 +88,7 @@ extern f32 g_gameTime;
 extern f32 g_frameDt;
 
 
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 
 typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 

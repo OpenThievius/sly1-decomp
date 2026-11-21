@@ -59,8 +59,8 @@ extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
 void CopyFont(Font*, Font*);
 
-extern s32 g_fonts[];
-extern s32 g_defaultFont;
+extern Font* g_fonts[];
+extern Font* g_defaultFont;
 
 
 void RewindTextReader(TextReader* self);
@@ -81,7 +81,7 @@ void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void BeginGifRegListTag(PacketWriter* self, u32 a1, u64 a2);
 
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -106,7 +106,7 @@ s32 ReadTextChar(TextReader* self);
 s32 WrapTextLines(TextReader* self, f32 limit);
 
 extern s8 g_fontEscapeKeys[];
-extern s32 g_fonts[];
+extern Font* g_fonts[];
 
 s32 WrapFontString(Font* self, u8* s, f32 w);
 
@@ -173,7 +173,7 @@ s32 ReadTextChar(TextReader* self);
 void SetTextDefaultColor(TextReader* self, LayoutRgba* p);
 
 // Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
-s32 FindFontByKeyChar(s32 id);
+Font* FindFontByKeyChar(s32 id);
 void CopyFont(Font* font, Font* out);
 void PopFontScale(Font* font);
 void PushFontScale(Font* font, f32 a, f32 b);
@@ -199,7 +199,7 @@ s32 IsFontLoaded(s32 a0)
     if (a0 == -1) {
         goto none;
     }
-    if (((s32*)g_fonts)[a0] != 0) {
+    if (g_fonts[a0] != 0) {
         goto some;
     }
 none:
@@ -209,12 +209,12 @@ some:
 }
 
 // The font registered under an id, the default font when none is, 0 for -1.
-s32 GetFontById(s32 a)
+Font* GetFontById(s32 a)
 {
     if (a == -1) {
         return 0;
     }
-    s32 v = g_fonts[a];
+    Font* v = g_fonts[a];
     if (v != 0) {
         return v;
     }
@@ -223,7 +223,7 @@ s32 GetFontById(s32 a)
 
 // Looks a character up in the table of five font escape keys and returns the font at the same
 // index, or 0; the text reader uses it for font changes inside a text.
-s32 FindFontByKeyChar(s32 a0)
+Font* FindFontByKeyChar(s32 a0)
 {
     s8 key = (s8)a0;
     s32 i = 0;
@@ -718,7 +718,7 @@ void LoadFont(Font* obj, BufferedStream* src)
     ReadBufferedStreamBytes(src, 0x10, &l);
     s32 idx = l.b7;
     obj->id = idx;
-    g_fonts[idx] = (s32)obj;
+    g_fonts[idx] = obj;
     obj->imgA = (ImageRecord*)((u8*)g_imageRecordsA + l.u0 * 32);
     void* t;
     if (l.u2 != 0xFFFF) {
@@ -893,7 +893,7 @@ s32 ReadTextChar(TextReader* self)
                 self->fontChanged = changed;
                 self->cur += 2;
             } else {
-                Font* nf = (Font*)FindFontByKeyChar(p[1]);
+                Font* nf = FindFontByKeyChar(p[1]);
                 if (nf != 0) {
                     CopyFont(nf, inl);
                     self->cur += 2;
@@ -1164,6 +1164,6 @@ s32 g_fontCount = 0;
 // size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label
 u8* g_fontRecords = 0;
 // size: loop bound 5, stride 4 in func_0015C200
-s32 g_fonts[5] = {0};
+Font* g_fonts[5] = {0};
 // size: s32 (lw/sw), 4-byte label
-s32 g_defaultFont = 0;
+Font* g_defaultFont = 0;

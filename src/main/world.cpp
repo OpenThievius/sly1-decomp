@@ -261,7 +261,7 @@ void SetPauseMenuLayerPage(PauseMenu* self, s32 mode, s32 value);
 s32 ReadBufferedU32(BufferedStream* self);
 void SkipBufferedBlock(BufferedStream* self);
 
-struct CloneBatch { s32 count; s32* values; };
+struct CloneBatch { s32 count; PlacedObject** values; };
 
 struct __attribute__((packed)) PackedCloneBatch { s32 n; void* buf; };
 
@@ -1420,7 +1420,7 @@ void PushCloneBatch(World* self, void* src, s32 n)
 }
 
 // Pops and gives back the last value of the world's clone batch number index.
-s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->cloneBatches)[index]; s->count--; return s->values[s->count]; }
+PlacedObject* PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->cloneBatches)[index]; s->count--; return s->values[s->count]; }
 
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ColliderListWalker {
@@ -1754,7 +1754,7 @@ s32 ReadBufferedU8(BufferedStream* s);
 s32 ReadBufferedS16(BufferedStream* s);
 void SkipBufferedBlocks(BufferedStream* s);
 void ReadPropertyRecords(void* self, void* obj);
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
+void ReadOptionalBufferedBlock(BufferedStream* self, u8** out);
 void ReadBufferedString(BufferedStream* self, u8** out);
 void ReadSlotObjects(World* self, void* a1, void* a2);
 void ReadBufferedBlockBody(BufferedStream* s);
@@ -1813,9 +1813,9 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, (u32*)&self->commentaryRecord);
+    ReadOptionalBufferedBlock(s, (u8**)&self->commentaryRecord);
     ReadBufferedString(s, (u8**)&self->creditsText);
-    ReadOptionalBufferedBlock(s, (u32*)&self->stagedBank);
+    ReadOptionalBufferedBlock(s, (u8**)&self->stagedBank);
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);
     ReadBufferedBlockBody(s);

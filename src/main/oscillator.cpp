@@ -258,7 +258,7 @@ void AddTrackedNode(ContactTrackerRecord* self, BaseObject* n);
 
 s32 IsObjectDescendantOf(BaseObject* node, BaseObject* target);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 struct GathererQuery {
     ContactTracker* self;
@@ -357,7 +357,7 @@ static inline f32 MinB(f32 a, f32 b) { return b <? a; }
 static inline f32 MaxA(f32 a, f32 b) { return a >? b; }
 static inline f32 MaxB(f32 a, f32 b) { return b >? a; }
 void InitIdentityMatrix(Mat4* self);
-void* InvertMatrix4x4(void* a0, void* a1);
+s32 InvertMatrix4x4(void* a0, void* a1);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out);
 
@@ -1181,8 +1181,8 @@ larg:
 // each).
 void LoadObjectSubGroup(ObjectSubGroup* self, void* s3)
 {
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->levelEntry);
-    ReadOptionalBufferedBlock((BufferedStream*)s3, (u32*)&self->flaggedFadeText);
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u8**)&self->levelEntry);
+    ReadOptionalBufferedBlock((BufferedStream*)s3, (u8**)&self->flaggedFadeText);
     ReadBufferedRotation3((BufferedStream*)s3, &self->rot);
     ReadBufferedVector3((BufferedStream*)s3, &self->pos);
     void (*f)(BaseObject* self) = self->desc->m12;

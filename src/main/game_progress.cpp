@@ -330,7 +330,7 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table g_gifPacketMethods[];
-s32 InitPacketBuffer(PacketWriter* a);
+PacketWriter* InitPacketBuffer(PacketWriter* a);
 
 void ApplyCompletionFlags(s32 mode);
 

@@ -46,7 +46,8 @@ struct Mat3;
 
 
 
-s32 CreateWeightCurve(u32 kind);
+struct WeightCurve;
+WeightCurve* CreateWeightCurve(u32 kind);
 
 void* AllocateFrontMemory(s32 size);
 

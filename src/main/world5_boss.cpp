@@ -159,7 +159,8 @@ struct BlendAnimation;
 struct Collider;
 struct BlendAnimationView;
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
-s32 FindAnimRecord(s32 key);
+struct AnimRecord;
+AnimRecord* FindAnimRecord(s32 key);
 
 // Starts the world 5 mode collider: resolves its links, makes its follow objects and state
 // walker, builds the five-weight blend animation (rest, minus and plus x and y) with the rest

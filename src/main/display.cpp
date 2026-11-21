@@ -41,7 +41,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 #include "dma_chain_block.h"
 
 extern u8 g_screenClearPacketC[];
-void* InitPacketBuffer(PacketWriter* self);
+PacketWriter* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
 void AddDmaEndTag(PacketWriter* self);

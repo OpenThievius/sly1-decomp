@@ -75,7 +75,7 @@ extern f32 g_frameDt;
 
 void StepTimer(TimerElement* self, f32 value);
 
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 
 typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 
@@ -230,7 +230,7 @@ extern f32 D_0027240C;
 extern s32 D_00272420;
 extern u8 g_backgroundJob[];
 
-void* ComputeCompletionPercent(GameProgress* progress);
+s32 ComputeCompletionPercent(GameProgress* progress);
 
 
 void SetElementTextFromEntry(ScreenElement* self, s32 hi, s32 lo);
@@ -240,7 +240,7 @@ extern f32 g_titleFontScaleX;
 extern f32 g_titleFontScaleY;
 extern TextStyle g_titleStyle;
 
-void* FindAnimRecord(s32 key);
+AnimRecord* FindAnimRecord(s32 key);
 
 extern f32 g_letterGlyphScale;
 
@@ -251,7 +251,7 @@ struct ProgressEntry {
 };
 
 extern s32 FormatToString(char* dst, const char* fmt, ...);
-extern s32 AppendString(void* dst, const char* src);
+extern void* AppendString(void* dst, const char* src);
 
 
 
@@ -390,9 +390,9 @@ void ConstructScreenTextStyles(s32 a, s32 b);
 // empty text.
 void SetupScreenElementText(ScreenElement* self)
 {
-    s32 value = g_defaultFont;
+    Font* value = g_defaultFont;
     u32 flags = 0xFF808080;
-    self->font = (Font*)value;
+    self->font = value;
     self->scale = 1.0f;
     self->color = flags;
     self->text[0] = 0;

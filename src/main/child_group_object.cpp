@@ -88,7 +88,7 @@ void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
     FindOrBuildMemberGroup(&self->member5BC, self);
 }
 
-u32 CopyToFrontMemory(s32 size, void* src);
+u8* CopyToFrontMemory(s32 size, void* src);
 
 // Copies the collider and, if the source has a slot record (0x24 bytes), makes a copy of it in
 // front memory for this object.

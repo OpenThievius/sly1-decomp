@@ -59,7 +59,7 @@ extern f32 g_screenAdjustSavedX;
 extern f32 g_screenAdjustSavedY;
 
 
-s32 GetEntryName(s32 v);
+void* GetEntryName(s32 v);
 
 // The packet DrawLoadProgressBar builds on its stack: its memory, then the writer.
 struct BarPacket { u8 bytes[0x400]; PacketWriter f; };
@@ -511,7 +511,7 @@ char* GetMenuChoiceLabel(s32 index)
 void FormatGameSummary(GameProgress* self, char* dst)
 {
     s32 a = ComputeCompletionPercent(self);
-    s32 b = GetEntryName((self->levelIndex << 8) | self->entryIndex);
+    void* b = GetEntryName((self->levelIndex << 8) | self->entryIndex);
     s32 v = (s32)(self->totalTime * (1.0f / 60.0f));
     s32 t = v > 0 ? v : 1;
     FormatToString(dst, "%d%% - %s - %d:%02d", a, b, t / 60, t % 60);

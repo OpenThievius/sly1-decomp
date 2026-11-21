@@ -830,11 +830,11 @@ struct OptionalBlock {
 };
 
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
-u32 CopyToFrontMemory(s32 size, void* src);
+u8* CopyToFrontMemory(s32 size, void* src);
 
 // Reads a 0x20-byte block and gives a copy of it in front memory through *out, or 0 when its
 // two key words (1 and 7) are equal, which marks it as absent.
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out)
+void ReadOptionalBufferedBlock(BufferedStream* self, u8** out)
 {
     OptionalBlock r;
     ReadBufferedStreamBytes(self, 0x20, &r);
