@@ -301,7 +301,7 @@ void SetAgentGoalPoint(Agent* self, Vec4* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
 void PadPacketToQuadSlot(void* s, s32 target);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 struct BufferedStream;
 struct BufferedStream;
 struct LinkedItem;
@@ -3626,9 +3626,8 @@ void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, void* c, s32 d, s32* out)
         s32 t = r + 0xF;
         s32 u = r + 0x1E;
         s32 n = (t >= 0) ? t : u;
-        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
         // as a word (a physical address among them), so this call views it with a pointer.
-        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)(self, n >> 4, c);
+        AddDmaRefTag(self, n >> 4, c);
         if (out != 0) {
             *out = (s32)self->openHeader - 0xC;
         }
@@ -3649,7 +3648,7 @@ void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag)
 }
 
 // As WriteVifDirect, but the data is not copied: a DMA reference tag to it is added to the packet.
-void WriteVifDirectRef(PacketWriter* self, s32 a, s32 b, s32 c)
+void WriteVifDirectRef(PacketWriter* self, s32 a, void* b, s32 c)
 {
     PadPacketToQuadSlot(self, 3);
     u32* p = (u32*)self->cur;

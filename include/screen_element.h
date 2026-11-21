@@ -300,7 +300,7 @@ struct CaptionBox : ScreenElement {
     Font* smallFont;            // 0x310: a copy of the font at 0.7 by 0.8 (SetupTextPanel)
     f32 tickScroll;             // 0x314: the scroll of the tick marks
     s32 bandsQwc;               // 0x318: the quadword count of the GS packet of the bands behind the panel (SetupTextPanel)
-    s32 bandsPacket;            // 0x31C: where the packet's copy in front memory starts
+    void* bandsPacket;           // 0x31C: where the packet's copy in front memory starts
     s32 palette;                // 0x320: 0 .. 2, the colour pair func_00132500 picks
     void* child;                // 0x324: the game object the box follows (its kind at +0x2D0, its state at +0x2D4)
     s32 bankState;              // 0x328: which glyph bank is loaded (func_00135E78), 1 lists the two counters (func_00135F48)

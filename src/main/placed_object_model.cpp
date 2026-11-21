@@ -291,7 +291,7 @@ struct ModelStrip {
     s32 nkeys;              // 0x24
     s32 keys[4];            // 0x28
     s32 qwc[3];             // 0x38
-    u32 addr[3];            // 0x44
+    u8* addr[3];            // 0x44
 };
 
 // One morph target of a part.
@@ -300,7 +300,7 @@ struct ModelMorph {
     s32 nkeys;              // 0x04
     s32 keys[4];            // 0x08
     s32 qwc;                // 0x18
-    u32 addr;               // 0x1C
+    u8* addr;               // 0x1C
 };
 
 struct __attribute__((aligned(16))) ModelPart {
@@ -377,10 +377,10 @@ struct StripOutputs {
 // A pointer into a packet buffer moved with its copy.
 // Its arguments are in RemapMeshQueueValues's order (size, start, to).
 struct MovedPointer {
-    static void Fix(s32* p, u32 size, u32 start, u32 to)
+    static void Fix(s32* p, u32 size, u8* start, u8* to)
     {
         if (p) {
-            u32& v = *(u32*)p;
+            u8*& v = *(u8**)p;
             if (v >= start && v < start + size)
                 v += to - start;
         }
@@ -674,10 +674,10 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                                             (PacketSlot*)pw, outs.p);
                     break;
                 }
-                u32 starts[3];
+                u8* starts[3];
                 for (s32 n = 0; n < 3; n++) {
                     if (pw[n].cur != pw[n].begin) {
-                        DetachPacketBufferCopy((PacketWriter*)&pw[n], &strip->qwc[n], &starts[n], (s32*)&strip->addr[n], 0x13);
+                        DetachPacketBufferCopy((PacketWriter*)&pw[n], &strip->qwc[n], &starts[n], (void**)&strip->addr[n], 0x13);
                         RemapMeshQueueValues(queued, strip->qwc[n] * 16, starts[n], strip->addr[n]);
                         MovedPointer::Fix(outs.p[1], strip->qwc[n] * 16, starts[n], strip->addr[n]);
                         MovedPointer::Fix(outs.p[2], strip->qwc[n] * 16, starts[n], strip->addr[n]);
@@ -740,8 +740,8 @@ void ReadPlacedObjectModel(ModelRecord* self, void* stream, PlacedObject* owner)
                 s32 queued = g_meshQueueCount;
                 AllocateTempPacketBuffer((PacketWriter*)&pw, self->nweights * 128 + 0x400);
                 BuildMorphTargetPacket((MeshBuildState*)self, k++, (MorphTargetHeader*)m, nvecs, vecs, nextra, extra, ents, verts, weights, (PacketWriter*)&pw);
-                u32 start;
-                DetachPacketBufferCopy((PacketWriter*)&pw, &m->qwc, &start, (s32*)&m->addr, 0x13);
+                u8* start;
+                DetachPacketBufferCopy((PacketWriter*)&pw, &m->qwc, &start, (void**)&m->addr, 0x13);
                 RemapMeshQueueValues(queued, m->qwc * 16, start, m->addr);
                 // address arithmetic over a variable index
                 m->p = (u16*)((u8*)m->p + (s32)(m->addr - start));
@@ -876,13 +876,13 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     f32* uvOut;
     f32* posOut;
     s32 a;
-    s32 b;
+    u8* b;
     f32* wOut;
     s32 k;
     Vec3* dOut;
     u8* cOut;
     s32 c;
-    s32 d;
+    u8* d;
     s32 off;
     s32 hasUv;
     s32 tinted;
@@ -978,7 +978,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     }
     WriteStripMeshMscal(mode, pkt);
     if (node != 0 && (node->flags & 2)) {
-        ReserveVifUnpack(pkt, 4, 1, 0x16, &a, (u8**)&b);
+        ReserveVifUnpack(pkt, 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
         WriteVifMscal(pkt, g_nodeLinkProgram);
     }
@@ -1061,7 +1061,7 @@ void BuildStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 mode, S
     }
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
-        ReserveVifUnpack(pkt, 0xC, s->stride, off, &c, (u8**)&d);
+        ReserveVifUnpack(pkt, 0xC, s->stride, off, &c, &d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[i] = off;
         off += s->stride;
@@ -1092,9 +1092,9 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     Vec3* nDelta;
     f32* uvOut;
     s32 a;
-    s32 b;
+    u8* b;
     s32 c;
-    s32 d;
+    u8* d;
     s32 off;
     AnimCursor* node;
     s32 i;
@@ -1276,7 +1276,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
         node = ((CursorHook*)mesh->hook)->vt[5]((CursorHook*)mesh->hook, mesh);
     }
     if (node != 0 && (node->flags & 2)) {
-        ReserveVifUnpack((PacketWriter*)&pkt[2], 4, 1, 0x16, &a, (u8**)&b);
+        ReserveVifUnpack((PacketWriter*)&pkt[2], 4, 1, 0x16, &a, &b);
         QueueNodeLink(b, a, node);
         WriteVifMscal((PacketWriter*)&pkt[2], g_nodeLinkProgram);
     }
@@ -1302,7 +1302,7 @@ void BuildLitStripMeshPacket(MeshBuildState* self, StripMeshOwner* obj, s32 unus
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
         FrameSource* s = &mesh->strips[i];
-        ReserveVifUnpack((PacketWriter*)&pkt[2], 0xC, s->stride, off, &c, (u8**)&d);
+        ReserveVifUnpack((PacketWriter*)&pkt[2], 0xC, s->stride, off, &c, &d);
         QueueMeshStrip(mesh, s, d, c, n, node);
         hdr->p->strip[slot++] = off;
         off += s->stride;
@@ -1556,7 +1556,7 @@ void CopyAttachmentPart(AttachmentCopy* owner, void* partp, void* recp)
                             }
                         }
                     }
-                    RemapMeshQueueValues(first, size, (u32)old, (u32)e->buffers[j]);
+                    RemapMeshQueueValues(first, size, old, (u8*)e->buffers[j]);
                     if (linked) {
                         e->pointers = (PartPointers*)CopyToFrontMemory(0x34, e->pointers);
                         MovePointerInto(&e->pointers->positions, old, e->sizes[j] << 4, (u8*)e->buffers[j]);
@@ -1643,14 +1643,14 @@ struct LocalPacketWriter { u8 pad[0x30]; };
 struct ModelDmaQuadword { u64 a; u64 b; };
 struct AttachmentStripRecord {
     u8 pad0[0x18]; u8* f18; u8 pad1C[0x24 - 0x1C]; s32 nkeys; u8 pad28[0x38 - 0x28];
-    s32 qwc0; u8 pad3C[4]; s32 qwc2; s32 addr0; u8 pad48[4]; s32 addr2;
+    s32 qwc0; u8 pad3C[4]; s32 qwc2; u8* addr0; u8 pad48[4]; u8* addr2;
 };
-struct DmaPacketRow { s32 f0, f4, f8, fC, secondBuffer; u8 pad14[0x30 - 0x14]; };
-struct MorphEntry { u8 pad0[4]; s32 nkeys; u8 pad8[0x18 - 8]; s32 f18, addr; };
+struct DmaPacketRow { s32 f0; u8* f4; s32 f8; s32 fC; u8* secondBuffer; u8 pad14[0x30 - 0x14]; };
+struct MorphEntry { u8 pad0[4]; s32 nkeys; u8 pad8[0x18 - 8]; s32 f18; u8* addr; };
 struct AttachmentModelPart {
     u8 pad0[0x28]; s32 skinned; u8 pad2C[0x54 - 0x2C]; s32 link; s32 nstrips; AttachmentStripRecord* strips; s32 nmorphs; MorphEntry* morphs;
 };
-struct AttachmentDmaResult { u8 pad0[4]; DmaPacketRow* packets; u8 pad8[0x18 - 8]; s32 qwc[2]; s32 addr[2]; };
+struct AttachmentDmaResult { u8 pad0[4]; DmaPacketRow* packets; u8 pad8[0x18 - 8]; s32 qwc[2]; u8* addr[2]; };
 struct WeightedModelPart { u8 pad[0x40]; s32 nweights; };
 
 // Builds, for an attachment entry that is not skinned, the DMA chain the model draws from: the VIF
@@ -1737,7 +1737,7 @@ void BuildAttachmentDmaChain(void* selfArg, void* cfgArg, void* outArg, void* ct
             AddDmaRefTag((PacketWriter*)&buf, s->f18, s->addr);
         }
         AddDmaReturnTag((PacketWriter*)&buf);
-        DetachPacketBufferCopy((PacketWriter*)&buf, &out->qwc[pass], 0, &out->addr[pass], 0x19);
+        DetachPacketBufferCopy((PacketWriter*)&buf, &out->qwc[pass], 0, (void**)&out->addr[pass], 0x19);
         PopBackMemoryMark();
         if (n < 2) {
             out->qwc[1] = out->qwc[0];
@@ -1781,16 +1781,16 @@ struct PartMesh {
     s32 qwc0;               // 0x38
     s32 qwc1;               // 0x3C
     s32 qwc2;               // 0x40
-    s32 addr0;              // 0x44
-    s32 addr1;              // 0x48
-    s32 addr2;              // 0x4C
+    u8* addr0;              // 0x44
+    u8* addr1;              // 0x48
+    u8* addr2;              // 0x4C
 };
 struct PartStrip {
     PartSlotIds* slots;    // 0x00
     s32 nbones;             // 0x04
     s32 bones[4];           // 0x08
     s32 qwc;                // 0x18
-    s32 addr;               // 0x1C
+    u8* addr;               // 0x1C
 };
 struct PartLight { u8 pad0[0x27C]; void* f27C; };
 struct DrawnModelPart {
@@ -1814,10 +1814,10 @@ struct DrawnModelPart {
 };
 struct MeshRangeCache {
     s32 f00;                // 0x00
-    s32 f04;                // 0x04
+    u8* f04;                // 0x04
     u8 pad08[4];
     s32 f0C;                // 0x0C
-    s32 f10;                // 0x10
+    u8* f10;                // 0x10
     u8 pad14[4];
     f32 lastTime;           // 0x18
     s32 count;              // 0x1C
@@ -1831,7 +1831,7 @@ struct PartLightCache {
     u8 pad10[0x18 - 0x10];
     s32 f18;                // 0x18
     u8 pad1C[0x20 - 0x1C];
-    s32 refs[2];            // 0x20
+    void* refs[2];          // 0x20
 };
 struct PartOwnerClass { u8 pad0[8]; u32 flags; };
 struct PartOwner { PartOwnerClass* cls; u8 pad4[0x410 - 4]; s32 f410; };
@@ -1902,12 +1902,12 @@ struct VifPacketWriter {
     {
         *tag |= ((w->cur - (u8*)tag) >> 4) - 1;
     }
-    static void Refs(PacketWriter* w, s32 qwc, s32 addr)
+    static void Refs(PacketWriter* w, s32 qwc, void* addr)
     {
         *(u64*)w->cur = (s64)(qwc | 0x40000000) | ((s64)addr << 32);
         w->cur += 16;
     }
-    static void Call(PacketWriter* w, s32 addr)
+    static void Call(PacketWriter* w, void* addr)
     {
         *(u64*)w->cur = ((s64)addr << 32) | 0x50000000;
         w->cur += 16;
@@ -2135,7 +2135,7 @@ slow:
                 VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
                     ConeVolume* l = (ConeVolume*)lights[k];
-                    VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
+                    VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, l->packet);
                 }
                 VifPacketWriter::Cnt1(&g_vifPacketWriter);
                 VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2158,7 +2158,7 @@ slow:
                 VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
                     ConeVolume* l = (ConeVolume*)lights[k];
-                    VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
+                    VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, l->packet);
                 }
                 VifPacketWriter::Cnt1(&g_vifPacketWriter);
                 VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2180,7 +2180,7 @@ slow:
                 VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n300; k++) {
                     ConeVolume* l = (ConeVolume*)lights[k];
-                    VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
+                    VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, l->packet);
                 }
                 VifPacketWriter::Cnt1(&g_vifPacketWriter);
                 VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -2199,7 +2199,7 @@ slow:
                     VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                     for (k = 0; k < n304; k++) {
                         ConeVolume* l = (ConeVolume*)lights[k];
-                        VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, (s32)l->packet);
+                        VifPacketWriter::Refs(&g_vifPacketWriter, l->packetSize, l->packet);
                     }
                     VifPacketWriter::Cnt1(&g_vifPacketWriter);
                     VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);

@@ -104,7 +104,7 @@ void DrawPlacedObjectParts(DeferredRequest* self)
     s32 i;
     u8* base = (u8*)&g_vifPacketWriter;
     TextureRenderObject* s1 = (TextureRenderObject*)self->arg;
-    AddDmaRefTag((PacketWriter*)base, s1->firstPacket, s1->firstPacketSize);
+    AddDmaRefTag((PacketWriter*)base, s1->firstPacketQwc, s1->firstPacket);
     FillMemory(&f, 0, 0x80);
     f.kind = 3;
     f.fn = (void*)DrawModelPart;
@@ -133,7 +133,7 @@ void DrawPlacedObjectParts(DeferredRequest* self)
             off += 0x70;
         } while (i < s1->drawPartCount);
     }
-    AddDmaRefTag((PacketWriter*)&g_vifPacketWriter, s1->secondPacket, s1->secondPacketSize);
+    AddDmaRefTag((PacketWriter*)&g_vifPacketWriter, s1->secondPacketQwc, s1->secondPacket);
 }
 
 // A ListFrame (list_iter.h) as func_00153EC0 builds it, word by word.

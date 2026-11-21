@@ -43,7 +43,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 extern u8 g_screenClearPacketC[];
 PacketWriter* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendPacketToBothBuffers(void* chain);
@@ -417,8 +417,7 @@ void SendDisplayResetPacket(void)
 
     InitPacketBuffer((PacketWriter*)&a);
     UsePacketBufferMemory((PacketWriter*)&a, 2, &b);
-    // the tag's address is the packet's own, which AddDmaRefTag takes as its integer bits
-    ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)&a, 0x2C, g_screenClearPacketC);
+    AddDmaRefTag((PacketWriter*)&a, 0x2C, g_screenClearPacketC);
     AddDmaEndTag((PacketWriter*)&a);
     DetachPacketBuffer((PacketWriter*)&a, 0, 0);
     SendPacketToBothBuffers(&b);

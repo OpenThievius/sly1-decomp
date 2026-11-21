@@ -134,7 +134,7 @@ void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void CloseDmaTag(PacketWriter* self);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void BeginDmaTag(PacketWriter* self);
 
 
@@ -166,7 +166,7 @@ extern s32 g_frameReadySemaphore;
 
 
 extern s32 g_drawFrameData;
-extern s32 g_maskedImagesPacket;
+extern void* g_maskedImagesPacket;
 extern s32 g_gifChannel;
 
 struct DmaChannel;
@@ -372,9 +372,8 @@ void AddDmaRefTagIfChanged(void* list, void* value, void* end)
 {
     if (g_lastDmaRefStart != value) {
         g_lastDmaRefStart = value;
-        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
         // as a word (a physical address among them), so this call views it with a pointer.
-        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)list, ((u32)((u8*)end - (u8*)value) + 15) >> 4, value);
+        AddDmaRefTag((PacketWriter*)list, ((u32)((u8*)end - (u8*)value) + 15) >> 4, value);
     }
 }
 
@@ -436,7 +435,7 @@ void ActivateRenderFrame(RenderFrame* self)
     SwitchActiveImageMask(self->imageMask);
     if (self->hasMaskedImages != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
-        StartDmaChain((DmaChannel*)g_gifChannel, (void*)g_maskedImagesPacket);
+        StartDmaChain((DmaChannel*)g_gifChannel, g_maskedImagesPacket);
     }
 }
 

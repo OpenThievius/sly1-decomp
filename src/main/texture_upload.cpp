@@ -100,7 +100,7 @@ extern s32 g_imageSlotsA;
 void* InitPacketWriter(PacketWriter* f);
 void WriteVifFlush(PacketWriter* f);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
-void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
+void WriteVifDirectRef(PacketWriter* f, s32 a, void* b, s32 c);
 
 
 // Sets up the bump allocator (0x1E00 to 0x4000) and empties the mesh queue.
@@ -253,7 +253,7 @@ void SendMaskedImagesToGif(s32 self, BumpAllocator* arg)
 // Builds a stand-alone DMA packet that uploads the images selected by mask (PlaceMaskedImages in a
 // fresh bump allocator, then a GS register write and the end tag) and keeps it in the frame's out
 // pointer; returns that packet, or 0 when nothing was placed.
-s32 BuildMaskedImagesPacket(s32 self)
+void* BuildMaskedImagesPacket(s32 self)
 {
     TextureUploadPacket f;
 
@@ -297,7 +297,7 @@ void SubmitMeshQueueEntry(FrameTarget* self)
 // one when the strip is shared with an animation cursor) and fills it with the count, destination
 // address, flag and the strip's data pointer at the cursor's frame, submits it and, for a linked
 // entry, records the link on the cursor.
-void QueueMeshStrip(StripMesh* a0, FrameSource* a1, s32 a2, s32 a3, s32 a4, AnimCursor* a5)
+void QueueMeshStrip(StripMesh* a0, FrameSource* a1, u8* a2, s32 a3, s32 a4, AnimCursor* a5)
 {
     FrameTarget local;
     FrameTarget* e;
@@ -361,7 +361,7 @@ store:
 
 // Adds a copy entry (count, source and destination address) to the mesh queue, or uses a local one
 // when the queue is full, submits it and links the entry into the node's list.
-void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
+void QueueNodeLink(u8* a0, s32 a1, AnimCursor* a2)
 {
     FrameTarget local;
     FrameTarget* e;
@@ -389,9 +389,9 @@ void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2)
 
 // For the queue entries from idx on, moves destination addresses in [take, take + lo) to the same
 // offset from give.
-void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give)
+void RemapMeshQueueValues(s32 idx, u32 lo, u8* take, u8* give)
 {
-    u32 end = take + lo;
+    u8* end = take + lo;
 
     if (idx < g_meshQueueCount) {
         FrameTarget* e = &g_meshQueueEntries[idx];
@@ -421,7 +421,7 @@ void FlushMeshQueue(void)
 // gives the record space in a bump allocator (0x1400 to 0x1E00), builds its texture register and an
 // upload packet, and sends it together with the record's data. The records' masks are then reset to
 // the loaded flag (0x40000000). Returns the result flag.
-s32 UploadImagesByMask(u32 mask)
+void* UploadImagesByMask(u32 mask)
 {
     BumpAllocator span;
     PacketWriter fa;
@@ -429,7 +429,7 @@ s32 UploadImagesByMask(u32 mask)
     u8 buf[0xA0];
     s32 o0;
     u8* o1;
-    s32 res;
+    void* res;
     s32 i;
 
     InitBumpAllocator(&span, 0x1400, 0x1E00);

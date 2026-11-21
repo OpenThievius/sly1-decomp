@@ -921,7 +921,7 @@ void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
             AddGifRegisterWrite(&f, 0x51, ((u64)(y << 4) << 32) | ((u64)(x << 4) << 48));
             AddGifRegisterWrite(&f, 0x53, 0);
             AddGifImageTag(&f, 0x40);
-            AddDmaRefTag(&f, 0x40, addr & 0xFFFFFFF);
+            AddDmaRefTag(&f, 0x40, (void*)(addr & 0xFFFFFFF));
             addr += 0x400;
         }
     }

@@ -8,9 +8,9 @@ void PrepareUnzoomedGroup(void)
     UploadCameraOncePerFrame();
 
     if (g_currentWarpPage != 0) {
-        s32 v = g_maskImageUploads[g_currentWarpPage->slot];
+        void* v = g_maskImageUploads[g_currentWarpPage->slot];
         if (v != 0) {
-            *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
+            *(u64*)self->cur = ((u64)(u32)v << 32) | 0x50000000;
             self->cur = self->cur + 0x10;
         }
     }

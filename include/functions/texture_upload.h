@@ -28,13 +28,13 @@ void BuildImageTexRegister(ImageRecord* self, u32 a1);
 void StartImageUpload(ImageRecord* d, u32 dbp, void* ctx);
 s32 PlaceMaskedImages(s32 mask, BumpAllocator* b, PacketWriter* c);
 void SendMaskedImagesToGif(s32 self, BumpAllocator* arg);
-s32 BuildMaskedImagesPacket(s32 self);
+void* BuildMaskedImagesPacket(s32 self);
 void SubmitMeshQueueEntry(FrameTarget* self);
-void QueueMeshStrip(StripMesh* a0, FrameSource* a1, s32 a2, s32 a3, s32 a4, AnimCursor* a5);
-void QueueNodeLink(s32 a0, s32 a1, AnimCursor* a2);
-void RemapMeshQueueValues(s32 idx, u32 lo, u32 take, u32 give);
+void QueueMeshStrip(StripMesh* a0, FrameSource* a1, u8* a2, s32 a3, s32 a4, AnimCursor* a5);
+void QueueNodeLink(u8* a0, s32 a1, AnimCursor* a2);
+void RemapMeshQueueValues(s32 idx, u32 lo, u8* take, u8* give);
 void FlushMeshQueue(void);
-s32 UploadImagesByMask(u32 mask);
+void* UploadImagesByMask(u32 mask);
 void SetupTextureRenderTarget(TextureHeader* src, void* dst);
 
 #endif

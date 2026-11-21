@@ -158,7 +158,7 @@ s32 WaitGsPaths(s32 a0, s32 a1);
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 
 
 
@@ -262,9 +262,9 @@ void RewindPacketBuffer(PacketWriter* f);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
-void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
+void WriteVifDirectRef(PacketWriter* f, s32 a, void* b, s32 c);
 void CloseDmaTag(PacketWriter* f);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 
 // The file's .data, in retail's order (0x2626E8 to 0x262714): the three object lists.
 ObjectList g_targetCurveList = { 0 };

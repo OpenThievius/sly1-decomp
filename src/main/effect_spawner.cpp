@@ -536,7 +536,7 @@ extern s32 g_frameReadySemaphore;
 
 
 extern s32 g_drawFrameData;
-extern s32 g_maskedImagesPacket;
+extern void* g_maskedImagesPacket;
 extern s32 g_gifChannel;
 
 struct DmaChannel;
@@ -558,7 +558,7 @@ extern Font* g_fonts[];
 #include "font_frame.h"
 PacketWriter* InitGifPacket(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
 

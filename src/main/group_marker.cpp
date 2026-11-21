@@ -55,7 +55,7 @@ extern u8 g_groupMicroprogramEnd[];
 void UploadProjectionConstants(void);
 void UploadCameraOncePerFrame(void);
 extern WarpPage* g_currentWarpPage;   // the warp page on view (warp_menu sets its mode and cursor)
-extern s32 g_maskImageUploads[];
+extern void* g_maskImageUploads[];
 extern Camera* g_camera;
 void SnapCameraZoom(void* self, f32 x);
 void WriteCameraMatricesPacket(Camera* self);
@@ -317,9 +317,9 @@ void PrepareUnzoomedGroup(void)
     UploadCameraOncePerFrame();
 
     if (g_currentWarpPage != 0) {
-        s32 v = g_maskImageUploads[g_currentWarpPage->slot];
+        void* v = g_maskImageUploads[g_currentWarpPage->slot];
         if (v != 0) {
-            *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
+            *(u64*)self->cur = ((u64)(u32)v << 32) | 0x50000000;
             self->cur = self->cur + 0x10;
         }
     }

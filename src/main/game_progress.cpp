@@ -474,7 +474,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifMscalf(PacketWriter* s, void* program);
 void WriteVifFlushE(PacketWriter* s);
 void CloseDmaTag(PacketWriter* s);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void BeginDmaTag(PacketWriter* s);
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -2103,8 +2103,7 @@ void BuildLitVertexPacket(VertexBatch* batch)
     }
     CloseDmaTag(&g_vifPacketWriter);
     for (s32 t = 0; t < self->texCount; t++)
-        // the tag's address is the texture's data, which AddDmaRefTag takes as its integer bits
-        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
+        AddDmaRefTag(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
     BeginDmaTag(&g_vifPacketWriter);
     WriteVifMscal(&g_vifPacketWriter, g_litBatchSecondProgram);
     WriteVifFlushE(&g_vifPacketWriter);

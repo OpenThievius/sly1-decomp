@@ -290,7 +290,7 @@ extern u8* AllocateBackMemory(s32 size);
 void CloseDmaTag(PacketWriter* self);
 
 void CloseDmaTag(PacketWriter* self);
-u32 CopyToFrontMemory(s32 size, void* src);
+u8* CopyToFrontMemory(s32 size, void* src);
 
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
@@ -433,7 +433,7 @@ void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void ClearPacketBuffer(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 void PopBackMemoryMark(void);
 void AddGifUvEntry(PacketWriter* p, s32 a, s32 b);
 void WriteVifFlush(PacketWriter* p);
@@ -2245,7 +2245,7 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin)
 
 // Closes the buffer's tag and gives its quadword count and start; with out non-null a copy of the
 // data in front memory. The buffer is then cleared.
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags)
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags)
 {
     CloseDmaTag(self);
     u32 n = (self->curU - (u32)self->begin) >> 4;
@@ -2253,7 +2253,7 @@ void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out
         *count = n;
     }
     if (begin != 0) {
-        *begin = (u32)self->begin;
+        *begin = self->begin;
     }
     if (out != 0) {
         *out = CopyToFrontMemory(n << 4, self->begin);
@@ -2287,7 +2287,7 @@ void BeginDmaTag(PacketWriter* self)
 
 // Appends a DMA ref tag (id 4) with the given address and size halves. If a tag was open it is
 // closed first and a fresh count tag is opened after it.
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi)
 {
     s32 flag = 0;
     if (self->openHeader != 0) {
@@ -2296,7 +2296,7 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
     }
     u8* p = self->cur;
     self->cur = p + 16;
-    *(u64*)p = (u64)lo | 0x40000000 | ((u64)hi << 32);
+    *(u64*)p = (u64)lo | 0x40000000 | ((u64)(u32)hi << 32);
     // DMA tag record in the packet buffer, not an object
     *(u64*)(p + 8) = 0;
     if (flag != 0) {
@@ -2311,7 +2311,7 @@ void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi)
 
 // Appends a DMA call tag (id 5) with the given address; an open tag is closed first and reopened
 // after it.
-void AddDmaCallTag(PacketWriter* self, s32 hi)
+void AddDmaCallTag(PacketWriter* self, void* hi)
 {
     s32 flag = 0;
     if (self->openHeader != 0) {
@@ -2320,7 +2320,7 @@ void AddDmaCallTag(PacketWriter* self, s32 hi)
     }
     u8* p = self->cur;
     self->cur = p + 16;
-    *(u64*)p = ((u64)hi << 32) | 0x50000000;
+    *(u64*)p = ((u64)(u32)hi << 32) | 0x50000000;
     // DMA tag record in the packet buffer, not an object
     *(u64*)(p + 8) = 0;
     if (flag != 0) {
@@ -2446,7 +2446,7 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     UsePacketBufferMemory(&pa, 1, &q);
     ReserveGifPackedData(&pa, 0x24D, 0, 3, 0x412, 0);
     CopyWordsToWriter(&pb, 0xC, 1, (u32*)&q, 0xC);
-    DetachPacketBufferCopy(&pb, &self->firstPacket, 0, &self->firstPacketSize, 0x13);
+    DetachPacketBufferCopy(&pb, &self->firstPacketQwc, 0, &self->firstPacket, 0x13);
     PopBackMemoryMark();
     PushBackMemoryMark();
     ClearPacketBuffer(&pa);
@@ -2484,7 +2484,7 @@ void BuildTexturePackets(TextureRenderObject* self, RangeRecord* a)
     EndGifPacket(&pa);
     WriteVifFlush(&pb);
     WriteVifDirectFromWriter(&pb, &pa);
-    DetachPacketBufferCopy(&pb, &self->secondPacket, 0, &self->secondPacketSize, 0x13);
+    DetachPacketBufferCopy(&pb, &self->secondPacketQwc, 0, &self->secondPacket, 0x13);
     PopBackMemoryMark();
 }
 
