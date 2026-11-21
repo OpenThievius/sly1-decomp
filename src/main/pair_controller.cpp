@@ -794,7 +794,7 @@ void ComputeWalkerColliderContactValue(WalkerCollider* ctx, BodyContact* obj)
 // Computes the collision response as the collider's does, but when the other object of the contact
 // is of kind 0x43 or 0x42 it first sets the mode at +0x450 to 1 and the up vector to the z axis for
 // that call, then restores both.
-void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, BodyContact* a2, s32 a3, s32 a4, s32 a5)
+void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, BodyContact* a2, s32 a3, ContactEnd03* a4, ImpulseRow* a5)
 {
     Vec4 s0;
     Vec4 s1;
@@ -807,7 +807,7 @@ void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, BodyCont
             self->v440 = g_unitZVector;
         }
     }
-    ComputeColliderImpulseResponse(self, a1, a2, a3, (ContactEnd03*)a4, (ImpulseRow*)a5);
+    ComputeColliderImpulseResponse(self, a1, a2, a3, a4, a5);
     self->v440 = s0;
     self->q450 = s1;
 }

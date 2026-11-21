@@ -8,9 +8,11 @@
 
 struct BodyContact;
 struct Collider;
+struct ContactEnd03;
 struct ContactLimit03;
 struct FollowProbe;
 struct FootProbe;
+struct ImpulseRow;
 struct Mat3;
 struct PadRecord;
 struct PlacedObject;
@@ -31,7 +33,7 @@ void TrackFollowedMeshVertexVelocities(TurningCollider* self);
 void SetTurningColliderFollowedMesh(TurningCollider* self, Collider* other, s32 all);
 void UpdateTurningCollider(TurningCollider* self, f32 dt);
 s32 GetTurningColliderContactMode(void);
-void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, BodyContact* a2, s32 a3, ContactEnd03* a4, ImpulseRow* a5);
 void SetTurningColliderRotation(TurningCollider* self, Mat3* rot);
 void CopyTurningColliderMeshesInFrame(TurningCollider* self, Collider* other, s32 mode);
 void StepTurningCollider(TurningCollider* self, f32 dt);

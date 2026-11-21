@@ -391,10 +391,10 @@ struct Player : TurningCollider {
     Vec4 boundsPoints[3];  // 0x21D0: the points the player's bounds are expanded over
     void* aimTarget;        // 0x2200: the object aimed at
     BaseObject* boundObject; // 0x2204: the object aimed at (player_target.cpp)
-    s32 aimCurve;           // 0x2208: the curve object aimed at or ridden
+    void* aimCurve;           // 0x2208: the curve object aimed at or ridden
     f32 aimCurvePos;        // 0x220C: the time along the aim path (TrackAimTargetPoint)
     BaseObject* previousBoundObject; // 0x2210: the last f2204; cleared by aim state 0 (func_001C61E0)
-    s32 previousAimCurve;   // 0x2214: the same
+    void* previousAimCurve;   // 0x2214: the same
     f32 f2218;               // 0x2218
     s32 pathFlipped;        // 0x221C: set, the path's frame is turned about (func_001D1630)
     s32 state;              // 0x2220: the player's state, 0..16

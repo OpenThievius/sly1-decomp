@@ -550,7 +550,7 @@ void SetPlayerPath(Player* self, PathObject* path)
             TriggerScriptEvent((BaseObject*)path, 2, 0, 0);
             path->desc->m17((BaseObject*)path, self);
         }
-        self->aimCurve = (s32)path;
+        self->aimCurve = path;
         self->boundObject = 0;
         self->aimTarget = 0;
         TransformPointBetweenFrames(0, path->frame, &self->v140, &pos);

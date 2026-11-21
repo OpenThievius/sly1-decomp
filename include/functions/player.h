@@ -40,7 +40,7 @@ void ResolvePlayerContact(Player* self, BodyContact* c, s32 idx);
 void HandlePlayerNotification(Player* self, s32 kind, PlayerNotification* msg);
 s32 AimPlayerAtTarget(Player* self);
 void PosePlayerTargetPart(Player* self);
-void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d);
+void MeasurePlayerFootProbe(void* self, void* a, void* b, void* part, f32 k, void* d);
 s32 ProbePlayerFootGround(Player* self, void* record, void* part);
 void UpdatePlayerState0(Player* self);
 void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale);

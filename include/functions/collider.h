@@ -86,7 +86,7 @@ void SetColliderKindContactsDropped(Collider* self, s32 value);
 void ResolveContactHandler(Collider* self);
 Collider* FindHandlerForSlot(Collider* node, s32 offset);
 void UpdateAnchorModeFlags(Collider* self);
-s32 CollectContactingPartsToScriptList(Collider* self, s32 value);
+s32 CollectContactingPartsToScriptList(Collider* self, void* value);
 s32 CollectContactingParts(Collider* obj, s32* outCount, void*** outArr);
 s32 IsInTouchingList(TouchedObjectLink* node, Collider* value);
 void UpdateTouchingParts(Collider* self);

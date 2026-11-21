@@ -1553,9 +1553,9 @@ void UpdatePlayerTargetPhase(Player* self)
         if (self->targetMode == 4) {
             f32 k = 5.0f;
             u8* p1 = (u8*)&self->footProbeA;
-            MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
+            MeasurePlayerFootProbe(self, self->f628, self->f620, self->footPartA, k, p1);
             u8* p2 = (u8*)&self->footProbeB;
-            MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
+            MeasurePlayerFootProbe(self, self->f62C, self->f624, self->footPartB, k, p2);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->footPartA);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->footPartB);
         }

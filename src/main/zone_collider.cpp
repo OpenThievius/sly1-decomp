@@ -546,7 +546,7 @@ void AddAcceptedKind(MaskedCollider* r, s32 value)
 }
 
 // Adds an entry to the collider's list of 3 and turns on the list bit (2) of its mask.
-void AddMaskedColliderListEntry(MaskedCollider* obj, s32 value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = (void*)value; obj->mask |= 2; } }
+void AddMaskedColliderListEntry(MaskedCollider* obj, void* value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = value; obj->mask |= 2; } }
 
 // The collider's sound parameters, created on first use.
 void* GetMaskedColliderSoundParams(MaskedCollider* self)

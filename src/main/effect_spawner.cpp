@@ -170,7 +170,7 @@ void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
 
-struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; s32 ownerArgument; };
+struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; void* ownerArgument; };
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(ObjectList* p);
 
@@ -1872,7 +1872,7 @@ void SpawnRecordEffects(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Qu
         CopyEffectOwnerMargin(node, self);
         if (h) {
             if (h->ownerArgument) {
-                typedef void (*F)(EffectOwner*, s32);
+                typedef void (*F)(EffectOwner*, void*);
                 ((F)node->desc->m17)(node, h->ownerArgument);
             }
         }
@@ -1972,7 +1972,7 @@ void EmitParticleChunk(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Qua
         ApplyLookSourceToListedObject(set, (LookSource*)self);
         if (h) {
             if (h->ownerArgument) {
-                typedef void (*F)(WorldListedObject*, s32);
+                typedef void (*F)(WorldListedObject*, void*);
                 ((F)set->desc->m17)(set, h->ownerArgument);
             }
         }

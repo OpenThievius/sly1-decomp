@@ -704,7 +704,7 @@ void UpdateFrameCameraController(FrameCameraController* self, f32 dt)
     UpdateOrbitCameraPlacement(cam, 1, &target, &eye, 0, t * 100.0f + u * 20.0f, t * -15.0f + u * -7.0f, t * 0.25f + u, 0.0f, 0.0f, dt);
 }
 
-void ActivateValueCameraController(ValueCameraController* obj, s32 value) { obj->value = value; }
+void ActivateValueCameraController(ValueCameraController* obj, void* target) { obj->ptr = target; }
 
 void DeactivateValueCameraController(ValueCameraController* obj) { obj->value = 0; }
 

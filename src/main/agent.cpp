@@ -537,13 +537,13 @@ void UpdateAgent(Agent* self, f32 dt)
             Player* target = (Player*)self->desc08()->m62(self);
             if (target != 0 && target == g_player) {
                 if (target->contactOwner != 0 && IsObjectAttached((Collider*)target->contactOwner) != 0) {
-                    SetAgentPrimaryTarget(self, (s32)g_player->contactOwner);
+                    SetAgentPrimaryTarget(self, g_player->contactOwner);
                     if (self->desc08()->m57(self) == 0) {
                         SetAgentPrimaryTarget(self, 0);
                     } else {
                         for (s32 i = 0; i < ((AgentLinks*)self->roster)->count; i++) {
                             if (((AgentLinks*)self->roster)->found[i] != self) {
-                                SetAgentPrimaryTarget(self, (s32)g_player->contactOwner);
+                                SetAgentPrimaryTarget(self, g_player->contactOwner);
                             }
                         }
                     }
@@ -2128,9 +2128,9 @@ void StoreAgentTarget(Agent* self, s32* out)
 }
 
 // Sets the secondary target, which SelectAgentTarget uses when there is no primary one.
-void SetAgentSecondaryTarget(Agent* self, s32 value)
+void SetAgentSecondaryTarget(Agent* self, void* value)
 {
-    self->secondaryTarget = (void*)value;
+    self->secondaryTarget = value;
     self->hasSecondaryTarget = 1;
 
 }
@@ -2176,9 +2176,9 @@ void PickAgentSecondaryTarget(Agent* self)
 }
 
 // Sets the primary target, the first choice of SelectAgentTarget.
-void SetAgentPrimaryTarget(Agent* self, s32 value)
+void SetAgentPrimaryTarget(Agent* self, void* value)
 {
-    self->primaryTarget = (void*)value;
+    self->primaryTarget = value;
 }
 
 

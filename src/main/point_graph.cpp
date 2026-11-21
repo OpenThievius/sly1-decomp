@@ -590,15 +590,15 @@ s32 AddSeekingAgentObject(SeekingAgent* self, Agent* item)
 }
 
 // Stores the agent's state target.
-void SetSeekingAgentStateTarget(SeekingAgent* self, s32 value)
+void SetSeekingAgentStateTarget(SeekingAgent* self, void* value)
 {
-    self->stateTarget = (void*)value;
+    self->stateTarget = value;
 }
 
 // Stores the agent's walk target.
-void SetSeekingAgentTarget(SeekingAgent* self, s32 value)
+void SetSeekingAgentTarget(SeekingAgent* self, void* value)
 {
-    self->walkTarget = (void*)value;
+    self->walkTarget = value;
 }
 
 // Starts the switched collider's effect; with flag 0 also changes the agent to state 8 (clip f5F0).

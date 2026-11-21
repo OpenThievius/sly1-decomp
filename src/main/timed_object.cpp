@@ -80,7 +80,7 @@ void InitTimedObject(TimedObject* a0) {
     a0->state = -1;
 }
 
-void SetTimedObjectTarget(TimedObject* self, s32 value)
+void SetTimedObjectTarget(TimedObject* self, void* value)
 {
     self->trigger = (StateTrigger*)value;
 }

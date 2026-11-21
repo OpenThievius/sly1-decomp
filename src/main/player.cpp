@@ -1499,7 +1499,7 @@ s32 CollectBoundsSpans(Vec4* p, Vec4* a, Vec4* b, f32 radius, s32 count, Collide
 // was filled: samples the animation (at its marker 0x142 time, or 0) for the foot, the part and the
 // body, then stores in the record the probe's start, the segment's ends, the radius (the body's two
 // extents plus 10) and the first collider span hit by the segment.
-void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d)
+void MeasurePlayerFootProbe(void* self, void* a, void* b, void* part, f32 k, void* d)
 {
     Player* pl = (Player*)self;
     ProbeHolder* obj = (ProbeHolder*)b;
@@ -1600,7 +1600,7 @@ s32 ProbePlayerFootGround(Player* self, void* record, void* part)
 
 s32 AimPlayerAtTarget(void* self);
 
-void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d);
+void MeasurePlayerFootProbe(void* self, void* a, void* b, void* part, f32 k, void* d);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec4* origin, Vec4* vel, Vec4* velSum, Vec4* spin, Vec4* spinSum);
 
 
@@ -1620,9 +1620,9 @@ void UpdatePlayerState0(Player* self)
     if (self->footPartA == 0) return;
     u8* p1 = (u8*)&self->footProbeA;
     f32 k = 5.0f;
-    MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
+    MeasurePlayerFootProbe(self, self->f628, self->f620, self->footPartA, k, p1);
     u8* p2 = (u8*)&self->footProbeB;
-    MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
+    MeasurePlayerFootProbe(self, self->f62C, self->f624, self->footPartB, k, p2);
     if (ProbePlayerFootGround(self, p1, self->footPartA) != 0) {
         if (ProbePlayerFootGround(self, p2, self->footPartB) != 0) return;
     }
@@ -3390,6 +3390,7 @@ static inline Vu0::Vec NormalizeInPlace_175170(Vec4& v, const Vec4& fallback)
 // A word of another object by its offset. Its uses below are left raw: the objects they reach
 // (f2490, f2494, boundObject, aimCurve, leapTarget, the tracks) are of classes the code does not
 // show, so no type has these fields.
+// The base is a pointer (every use passes one): a word holding an address is not a base.
 #define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 
 // Changes the player's state and sub-state (nothing happens if both are unchanged): runs the

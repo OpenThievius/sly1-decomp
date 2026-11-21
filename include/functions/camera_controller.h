@@ -32,7 +32,7 @@ void DeactivateTargetCameraController(TargetCameraController* self);
 void InitFrameCameraController(FrameCameraController* self, Camera* a1);
 void ActivateFrameCameraController(FrameCameraController* self);
 void UpdateFrameCameraController(FrameCameraController* self, f32 dt);
-void ActivateValueCameraController(ValueCameraController* obj, s32 value);
+void ActivateValueCameraController(ValueCameraController* obj, void* target);
 void DeactivateValueCameraController(ValueCameraController* obj);
 void UpdateValueCameraController(ValueCameraController* ctl);
 

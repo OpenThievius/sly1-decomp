@@ -1316,9 +1316,9 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
         return;
     }
     if (other->oscillatorBlock != 0) {
-        Vec4 axes[2];
-        Vec4 dir = normal;
-        BuildPerpendicularPair(&dir, &axes[0], &g_unitXVector, &g_unitZVector);
+        Vec4 axes[3];  // the oscillator reads three offsets: the pair and the normal itself
+        axes[2] = normal;
+        BuildPerpendicularPair(&axes[2], &axes[0], &g_unitXVector, &g_unitZVector);
         ComputeOscillatorDisplacement((Oscillator*)(((OscillatorHolder*)other->oscillatorBlock)->oscillator), 50.0f, &point, &axes[0], 0, &axes[0], 0);
         Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(axes[0]), Vu0::Q(axes[1])), Vu0::Q(g_unitZVector)));
     }
@@ -1697,7 +1697,7 @@ void UpdateAnchorModeFlags(Collider* self)
 
 // Adds to a script list each object touching this collider (without repeats); gives 1 when all
 // fit and 0 when appending fails.
-s32 CollectContactingPartsToScriptList(Collider* self, s32 value)
+s32 CollectContactingPartsToScriptList(Collider* self, void* value)
 {
     Collider* ctx = self->root03();
     ContactRow03* n = ctx->contacts->head;

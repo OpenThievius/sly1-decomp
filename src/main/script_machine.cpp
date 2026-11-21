@@ -1661,6 +1661,14 @@ ScriptValue* ReturnScriptArgument(ScriptValue* ret, s32 count, ScriptValue* args
 // calls, GCC cross-jumps that return into the last one. func_00117AF0 gives its list back the same
 // way. The table D_00259958 holds func_00114BB0 as a built-in, and the evaluator calls
 // func_00119218 with its own temporary as the result's place.
+// The convention the functions returning RetValue rely on (MIPS, GCC 2.95): a function that gives
+// back a class with a constructor and destructor gets the place of the result as a hidden first
+// argument (a0), so its declared parameters sit one register later, and it returns that same
+// address in v0. Retail's callers and the built-in table D_00259958 call these functions as
+// plain functions of (result, declared parameters...): the evaluator casts EvalScriptAnd to
+// ScriptValue* (*)(ScriptValue*, R11B008Node*, ScriptScope*) and gives its own temporary as the
+// place. The casts are therefore exact for this target and are kept; the place is a 32-bit
+// pointer in the same register as any other argument, but the layout would differ on another ABI.
 struct RetValue : ScriptValue {
     RetValue() { InitScriptValue(this); }
     RetValue(const RetValue& o) { CopyConstructScriptValue(this, &o); }

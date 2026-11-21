@@ -71,6 +71,7 @@ typedef void (*PropertyGetter)(void* obj, void* out);
 // A property's setter (PropertyDescriptor::putter with flags 0x20, or the method at that offset
 // of the object's table): stores `value` into `obj`.
 typedef void (*PropertySetter)(void* obj, s32 value);
+typedef void (*PropertyPayloadSetter)(void* obj, void* payload);  // the setters of the vector, matrix, object and 0x2000 kinds take the payload's pointer
 ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d, ScriptValue* val);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
@@ -676,19 +677,19 @@ ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor
             fn(p, val->i);
             break;
         case 2:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 4:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 9:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 10:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 11:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 13:
             break;
@@ -696,7 +697,7 @@ ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor
             if (d->type & 0x1000) {
                 fn(p, val->i);
             } else if (d->type & 0x2000) {
-                fn(p, val->i);
+                ((PropertyPayloadSetter)fn)(p, val->p);
             }
             break;
         }

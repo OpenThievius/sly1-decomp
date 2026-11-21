@@ -356,11 +356,11 @@ struct ImpulseRow;
 
 // Computes the collider's impulse response with its mode (mode470) temporarily set to the one
 // the class's method 55 gives.
-void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void ComputeTurningColliderImpulseResponse(TurningCollider* self, s32 a1, BodyContact* a2, s32 a3, ContactEnd03* a4, ImpulseRow* a5)
 {
     s32 old = self->mode470;
     self->mode470 = self->desc06()->m55(self);
-    ComputeColliderImpulseResponse(self, a1, (BodyContact*)a2, a3, (ContactEnd03*)a4, (ImpulseRow*)a5);
+    ComputeColliderImpulseResponse(self, a1, a2, a3, a4, a5);
     self->mode470 = old;
 }
 

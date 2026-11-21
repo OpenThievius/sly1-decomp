@@ -513,6 +513,10 @@ void GetObjectAliasId(BaseObject* self, s32* out)
 // Runs the script handler stored under key in the object's script scope (nothing if there is
 // none): makes a new scope under the handler's own, defines the handler's self name as this
 // object and its parameters from list, and evaluates its body. Queued by TriggerScriptEvent.
+// The list arrives as QueuedCall's third word (k3, a 32-bit word on the PS2, where RunQueuedCalls
+// passes it on unchanged): TriggerScriptEvent queues the call with the list's address in that word
+// (or 0), so the word is a pointer here. AppendQueuedCall takes its words as s32 because the other
+// queued calls (all but this one) pass plain integers; on a 64-bit build the word is a hazard.
 void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
 {
     ScriptValue q0;

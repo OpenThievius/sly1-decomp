@@ -4295,7 +4295,7 @@ void GetReserveUnitCount(void* unused, s32* out);
 void SetAgentPathObjectId(Agent* self, s32 index);
 void SetAgentAngleLimitDegrees(Agent* self, f32 value);
 void StoreAgentTarget(Agent* self, s32* out);
-void SetAgentSecondaryTarget(Agent* self, s32 value);
+void SetAgentSecondaryTarget(Agent* self, void* value);
 void SetAgentMemberGroupId(Agent* self, s32 v);
 void SetAgentTargetSetId(Agent* self, s32 v);
 void IsAgentNearPathEnd(Agent* self, s32* out);

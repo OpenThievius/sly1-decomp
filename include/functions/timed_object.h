@@ -16,7 +16,7 @@ struct TimedGroupChild;
 struct TimedObject;
 
 void InitTimedObject(TimedObject* a0);
-void SetTimedObjectTarget(TimedObject* self, s32 value);
+void SetTimedObjectTarget(TimedObject* self, void* value);
 void EnterTimedObjectState(TimedObject* self, s32 state);
 s32 IsObjectInAcceptLists(TimedObject* self, void* value);
 s32 IsObjectExcluded(TimedObject* self, void* key);
