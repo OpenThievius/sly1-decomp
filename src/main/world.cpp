@@ -145,7 +145,7 @@ struct ScriptScope;
 s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
 struct R11B008Node;
 struct ScriptValue;
-void* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 void* AssignScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
 extern u8 g_markStacks[];
 

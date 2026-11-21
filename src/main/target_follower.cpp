@@ -251,10 +251,7 @@ s32 ChooseTargetFollowerMode(TargetFollower* self)
             }
         }
         if (c != 0 && mode == 2 && self->nextLaunchTime < g_gameTime) {
-            if (self->launchPool == 0) {
-                goto end;
-            }
-            if (HasObjectPoolChoice((ObjectPool*)self->launchPool) != 0) {
+            if (self->launchPool != 0 && HasObjectPoolChoice((ObjectPool*)self->launchPool) != 0) {
                 void* t = ChooseEntryTableObject((EntryTableObject*)self->followedObject->tuneObject);
                 if (t != 0) {
                     self->lookTarget = t;
@@ -283,7 +280,6 @@ s32 ChooseTargetFollowerMode(TargetFollower* self)
         break;
     }
     return mode;
-end:;
 }
 
 extern s32 g_padSelectFlags;

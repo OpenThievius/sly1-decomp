@@ -124,7 +124,12 @@ extern u32 g_scriptStreamExtras;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
 
-void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
+// Declared void on purpose, although the definition (script_machine.cpp) returns ret: as
+// SetExtraObjectProperty in base_object.cpp, the original returned a ScriptValue by value, a
+// call GCC 2.95 makes with no value register. Declared ScriptValue*, the call becomes a
+// `call_value` setting v0 and the second scheduling pass swaps `lw a1,0(v0)` and `lw a2,4(v0)`
+// in func_001C13E8 (EvalScriptEntry); world.cpp's caller compiles the same either way.
+void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.

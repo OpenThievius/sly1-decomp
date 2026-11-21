@@ -35,7 +35,17 @@
 struct Mat3;
 
 
-void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00183A90 and func_00183C38
+// Declared void on purpose, although the definition (object_properties.cpp) returns self. The
+// original returned a ScriptValue by value: retail's callers here construct the argument
+// (func_0011B008), pass a temporary as the hidden first argument and destroy both after the call
+// (func_0011B060 with in-charge 2), as GCC 2.95 does for a class returned in memory. GCC calls
+// such a function with no value register, a `call` insn, and the callee hands the address back
+// in v0. Declared ScriptValue* here, the call becomes a `call_value` setting v0, whose dependences
+// change the second scheduling pass's order: func_00183A90 and func_00183C38 then swap
+// `move a1,v0` and `move a0,sp` before func_0011B7D0 (cc1plus -dS -dR dumps, 2026-11-21). The
+// callers in script_machine.cpp compile the same either way. The project calls the value's class
+// through free functions (include/script_value.h), so the no-value call is spelled void.
+void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals);
 

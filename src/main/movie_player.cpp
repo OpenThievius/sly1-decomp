@@ -738,8 +738,14 @@ s32 IpuDmaSink::Idle()
     return 1;
 }
 
-// Declared to return a value it never sets: func_0018F448, its caller, is retail's only with a
-// callee that returns one.
+// Declared to return a value it never sets. Retail's code sets no result: v0 is 1 on the failed
+// path (the delay slot's store value of the other branch) and InitIopRingSink's result on the
+// other. Its one caller, func_0018F448 (InitMoviePlayback), ignores the result, but only a
+// declaration with one matches it: the call is then a call_value setting v0, and declared void
+// the next call (InitMpegLibrary) gets output dependences on the earlier calls instead, which
+// changes the priorities of the second scheduling pass and swaps `sw v0,0x58(s1)` and
+// `lui a1,0x3` before InitRingBuffer (cc1plus -dR -dS dumps, 2026-11-21). Falling off the end
+// of a non-void function is undefined in C++: a port must make this void or return a value.
 s32 StartMovieStream(MovieStream* self)
 {
     s32 r;
