@@ -205,7 +205,7 @@ s32 FindObjectAlongSegment(PlacedObject* self, Vec4* from, Vec4* to, f32* ratio)
     return found != 0;
 }
 
-extern "C" f32 ConvertDoubleToFloat(u64 bits);
+extern "C" f32 ConvertDoubleToFloat(double x);
 
 // Fills a table of n by m floats, spaced by stride bytes, with the products of two sets of
 // weights (rows[i] * cols[j]) given as doubles, where the first of each set is one minus the sum
@@ -213,7 +213,7 @@ extern "C" f32 ConvertDoubleToFloat(u64 bits);
 s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     f32 rows[16];
     f32 cols[16];
-    u64* ap = (u64*)((char*)__builtin_next_arg(out) - 32);
+    double* ap = (double*)((char*)__builtin_next_arg(out) - 32);
     f32 sum = 0.0f;
     s32 i;
     s32 j;
@@ -246,7 +246,7 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     return changed;
 }
 
-extern "C" u64 ConvertFloatToDouble(f32 x);
+extern "C" double ConvertFloatToDouble(f32 x);
 
 struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
 struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
@@ -337,9 +337,9 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
             hi = lo;
         }
     }
-    u64 hv = ConvertFloatToDouble(hi);
-    u64 lv = ConvertFloatToDouble(lo);
-    u64 tv = ConvertFloatToDouble(t);
+    double hv = ConvertFloatToDouble(hi);
+    double lv = ConvertFloatToDouble(lo);
+    double tv = ConvertFloatToDouble(t);
     if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
         SetBlendItemWeights(g, 0x50, 6, e);
         SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, &p->headingVelocity);

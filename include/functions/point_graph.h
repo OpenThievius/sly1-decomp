@@ -9,6 +9,7 @@
 struct Agent;
 struct AgentEvent;
 struct AgentRequest;
+struct Animation;
 struct BaseObject;
 struct Camera;
 struct ColliderSpan;
@@ -30,7 +31,7 @@ void InitContactlessCollider(ContactlessCollider* self);
 void QueueModelPartDraws(PlacedObject* self, Camera* cam);
 void InitSeekingAgent(SeekingAgent* self);
 void StartSeekingAgent(SeekingAgent* self);
-void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2);
+void EnterSeekingAgentState(SeekingAgent* self, s32 a1, Animation* a2);
 void LeaveSeekingAgentState(SeekingAgent* self, s32 mode);
 void UpdateSeekingAgentGoal(SeekingAgent* self, s32 flag);
 void UpdateSeekingAgentState(SeekingAgent* self);

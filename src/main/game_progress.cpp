@@ -241,18 +241,19 @@ extern u8 g_stripMeshMode1Program[];
 
 // the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
 struct SessionKey : IdentityKey {
-    s32 Same(SessionKey* o)
+    // static: a key can be null, which a method on this must not be called with
+    static s32 Same(SessionKey* k, SessionKey* o)
     {
-        if (this == o) {
+        if (k == o) {
             return 1;
         }
-        if (this == 0) {
+        if (k == 0) {
             return 0;
         }
         if (o == 0) {
             return 0;
         }
-        return ((signedWords[2] ^ signedWords[6]) ^ (o->signedWords[2] ^ o->signedWords[6])) == 0;
+        return ((k->signedWords[2] ^ k->signedWords[6]) ^ (o->signedWords[2] ^ o->signedWords[6])) == 0;
     }
 };
 
@@ -1364,7 +1365,7 @@ void ResumeAtSavedLevel(void)
         k = &g_sessionFadeKey;
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
+    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !SessionKey::Same(k, (SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.resumeState == 1) {
         if (g_resumeSoundSetupDone == 0) {

@@ -2180,7 +2180,7 @@ void InitWorld3Boss(World3Boss* self)
     g_world3BossPendingVoice = 0;
 }
 
-s32 ResolveAgentClip(Agent* self, s32 id);
+void* ResolveAgentClip(Agent* self, s32 id);
 void LoadAgent(Agent* self, void* reader);
 // Slot 10 of the third boss: loads the agent, then resolves its four clips from the table of clip
 // ids.
@@ -2188,7 +2188,7 @@ void LoadWorld3Boss(World3Boss* self, void* reader)
 {
     LoadAgent(self, reader);
     for (s32 i = 0; i < 4; i++) {
-        self->clips[i] = ResolveAgentClip(self, g_world3BossClipIds[i]);
+        self->clips[i] = (Animation*)ResolveAgentClip(self, g_world3BossClipIds[i]);
     }
 }
 
@@ -2546,7 +2546,7 @@ void DecrementWorld3BossGauge(World3Boss* self)
 // on for some walker keys, on leaving 0x10 or 0xB it decrements the gauge count (0xB also marks
 // level 3 done and saves the memory card); then the base agent state is entered and, for state 14
 // and states 2 and 13, the state player's start time and speed are set from the walker key.
-void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
+void EnterWorld3BossState(World3Boss* self, s32 a, Animation* b)
 {
     s32 r[3];
     switch (self->state) {
@@ -2571,7 +2571,7 @@ void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
         StartMemoryCardSave(&g_memoryCard);
         break;
     }
-    EnterAgentState(self, a, (Animation*)b);
+    EnterAgentState(self, a, b);
     switch (self->state) {
     case 14: {
         GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[1]);
@@ -2623,7 +2623,7 @@ void ScheduleWorld3BossBeatPress(World3Boss* self, TimelineEntry* e)
 {
     s32 dir = e->value;
     BeatPressEntry entry;
-    s32 clip;
+    Animation* clip;
     if (dir == 1) {
         clip = self->clips[1];
     } else {

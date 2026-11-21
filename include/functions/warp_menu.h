@@ -128,7 +128,7 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c);
 void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2);
 void LeaveWorld3BossState(World3Boss* self, s32 arg);
 void DecrementWorld3BossGauge(World3Boss* self);
-void EnterWorld3BossState(World3Boss* self, s32 a, s32 b);
+void EnterWorld3BossState(World3Boss* self, s32 a, Animation* b);
 void ScheduleWorld3BossBeatPress(World3Boss* self, TimelineEntry* e);
 void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* rec);
 void SyncWorld3BossEntries(World3Boss* self);

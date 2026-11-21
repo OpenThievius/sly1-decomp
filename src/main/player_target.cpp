@@ -341,6 +341,7 @@ void ScorePlayerTargetPlacement(Player* self, Vec4* point, BaseObject* obj, Vec4
 }
 
 typedef void (*PathShapeFn)(void* self, void* out, s32 x);
+typedef void (*PathShapeSampleFn)(void* self, f32 t, Vec4* pos, Vec4* tan);
 
 struct PathShape {
     PathShapeFn* vtbl;
@@ -386,7 +387,7 @@ void PlaceOnTargetObject(Player* self, PathTarget* node, Vec4* outA, Vec4* outB,
     f32 hi;
     PathShape* shape = node->shape;
     if (shape->vtbl[1] != 0) {
-        shape->vtbl[1](shape, &a, (s32)&b);
+        ((PathShapeSampleFn)shape->vtbl[1])(shape, t, &a, &b);
     }
     TransformPointBetweenFrames((PlacedObject*)node->frame, 0, &a, &c);
     TransformDirectionBetweenFrames((PlacedObject*)node->frame, 0, &b, &d);

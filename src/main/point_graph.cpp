@@ -61,7 +61,7 @@ struct Agent;
 
 void InitAgent(Agent* self);
 void StartAgent(Agent* self);
-s32 ResolveAgentClip(Agent* self, s32 id);
+void* ResolveAgentClip(Agent* self, s32 id);
 void RemoveItemKeeperMember(ItemKeeper* self, Agent* value);
 void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 struct ObjectPool;
@@ -305,19 +305,19 @@ void StartSeekingAgent(SeekingAgent* self)
 {
     StartAgent(self);
     ResolveObjectLinks(self, 2, g_pointGraphLinks);
-    self->f5F0 = (void*)ResolveAgentClip(self, 0xEF);
-    self->removeClip = ResolveAgentClip(self, 0x16C);
-    self->hurtClip = ResolveAgentClip(self, 0x16D);
-    self->removeClipAlt = ResolveAgentClip(self, 0x16A);
-    self->hurtClipAlt = ResolveAgentClip(self, 0x16B);
+    self->f5F0 = ResolveAgentClip(self, 0xEF);
+    self->removeClip = (Animation*)ResolveAgentClip(self, 0x16C);
+    self->hurtClip = (Animation*)ResolveAgentClip(self, 0x16D);
+    self->removeClipAlt = (Animation*)ResolveAgentClip(self, 0x16A);
+    self->hurtClipAlt = (Animation*)ResolveAgentClip(self, 0x16B);
 }
 
 // Called when the agent moves to a new state: sets up what the state needs (state 4 clears the
 // target and object count, state 0x10 picks the hurt clip by the request kind, and so on) and then
 // starts the animation clip a2.
-void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
+void EnterSeekingAgentState(SeekingAgent* self, s32 a1, Animation* a2)
 {
-    s32 a2v = a2;
+    Animation* a2v = a2;
     switch (self->state) {
     case 4:
         self->stateTarget = 0;
@@ -341,7 +341,7 @@ void EnterSeekingAgentState(SeekingAgent* self, s32 a1, s32 a2)
         }
         break;
     }
-    EnterAgentState(self, a1, (Animation*)a2v);
+    EnterAgentState(self, a1, a2v);
     s32 kind = self->state;
     if (kind == 0xB || kind == 0x10) {
         self->contactsDisabled = 0;

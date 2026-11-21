@@ -846,9 +846,9 @@ void CommitStateWalkerArrival(StateWalker* self)
 
 // When notification 5 comes from the walker's own player, commits its arrival and starts its
 // next edge.
-void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
+void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, AnimationPlayer* b)
 {
-    if (a == 5 && b == (s32)self->player) {
+    if (a == 5 && b == self->player) {
         CommitStateWalkerArrival(self);
         StartNextStateWalkerEdge(self);
     }

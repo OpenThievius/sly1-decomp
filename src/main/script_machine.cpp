@@ -1637,7 +1637,7 @@ ScriptValue* TestScriptListContains(ScriptValue* ret, s32 count, ScriptValue* ar
         }
     }
     CopyConstructScriptValue(ret, &A);
-    q = &D;
+    q = C + 2;
     if (C != q) {
         do {
             q--;
@@ -3875,7 +3875,7 @@ ScriptValue* EvalScriptCase(ScriptValue* ret, R11B008Node* expr, ScriptScope* sc
     } while (expr);
     CopyConstructScriptValue(ret, &a);
     DestroyScriptValue(&c, 2);
-    ScriptValue* p2 = &c;
+    ScriptValue* p2 = b + 2;
     if (b != p2) {
         do {
             p2--;

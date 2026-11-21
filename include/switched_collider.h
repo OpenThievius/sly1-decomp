@@ -826,10 +826,10 @@ struct SeekingAgent : Agent {
     void* partner;          // 0xC2C: an object (slot 91 calls its slot 80)
     s32 requestKind;        // 0xC30
     s32 requestInPool;      // 0xC34: set when the requester is in the partner's pool
-    s32 removeClip;         // 0xC38
-    s32 hurtClip;           // 0xC3C
-    s32 removeClipAlt;      // 0xC40
-    s32 hurtClipAlt;        // 0xC44
+    Animation* removeClip;         // 0xC38
+    Animation* hurtClip;           // 0xC3C
+    Animation* removeClipAlt;      // 0xC40
+    Animation* hurtClipAlt;        // 0xC44
     u8 padC48[0xC50 - 0xC48];
 };
 
@@ -868,8 +868,8 @@ struct TempoPlayerEntry {
 // 0x13, the tempo agent: counts beats at a tempo (UpdateWorld3Boss) for the class 0x1C
 // beat-press colliders to judge presses against (JudgeWorld3BeatPressInput).
 struct World3Boss : Agent {
-    s32 clips[4];           // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
-    s32 pendingClip;        // 0xC20: the clip of the scheduled press
+    Animation* clips[4];         // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
+    Animation* pendingClip;      // 0xC20: the clip of the scheduled press
     void* lines[4];         // 0xC24: the timelines of the links 0x4E7.. (func_001EC828 takes the one at fC40)
     World3Timeline* pendingTimeline; // 0xC34: the timeline to start when the beat clock restarts
     World3Timeline* heldTimeline; // 0xC38: the timeline it runs (EndHeldWorld3Timeline)

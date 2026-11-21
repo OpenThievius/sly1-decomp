@@ -45,14 +45,14 @@ void ReadSplinePathCurve(SplinePathCurve* self, void* src);
 void ResetSplineSegmentCache(SplinePathCurve* obj);
 void SampleSplineSegment(SplinePathCurve* self, s32 i);
 void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec4* a2);
-void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2);
+void SampleSplinePathAtLength(SplinePathCurve* self, void* a1, void* a2);
 void DrawSplinePathSegment(SplinePathCurve* self, s32 idx, Quad16* m, u8* a3, void* a4);
 void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b);
 f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0);
 f32 GetSplineTimeAtLength(SplinePathCurve* self, f32 t0);
 void FillSplinePathLengths(SplinePathCurve* self);
-void FindSplinePathNearestPoint(SplinePathCurve* self, Vec4* pos, void* anchor, s32 a3, s32 a4, f32* a5, f32* a6);
-void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
+void FindSplinePathNearestPoint(SplinePathCurve* self, Vec4* pos, void* anchor, void* a3, void* a4, f32* a5, f32* a6);
+void FindSplinePathNearestTime(SplinePathCurve* self, Vec4* a1, void* a2, void* a3, void* a4, f32* a5, f32* a6, f32 f12);
 void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
 #endif

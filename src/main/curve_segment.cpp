@@ -264,7 +264,7 @@ f32 MeasureCurveSegmentLength(const Vec4* p0, const Vec4* m0, const Vec4* p1, co
 }
 
 
-extern "C" f32 ConvertDoubleToFloat(u64 bits);
+extern "C" f32 ConvertDoubleToFloat(double x);
 
 // The search's start, a statement macro: how many window ends there are, and the cursor before
 // the first. It is the original's run-once loop: its loop notes make flow count the count's
@@ -288,7 +288,7 @@ void FindEarliestTimeWithinCurveLimits(s32 n, ...)
 
     for (i = 0; i < n; i++) {
         f32* c = *(f32**)((ap += 8) - 8);
-        f32 t = ConvertDoubleToFloat(*(u64*)((ap += 8) - 8));
+        f32 t = ConvertDoubleToFloat(*(double*)((ap += 8) - 8));
         for (j = 0; j < 4; j++) {
             switch (j) {
             case 0:
