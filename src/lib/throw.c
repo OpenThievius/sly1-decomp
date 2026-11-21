@@ -367,7 +367,7 @@ u8* ResolveSavedRegisterSlot(u32 idx, UnwindFrame* self, UnwindFrame* other)
 
 /* Copies one saved register (4, 8 or 16 bytes by its number) from one unwind state's storage to
  * another's. */
-s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
+void* CopySavedRegister(s32 a0, u32 a1, u32 a2)
 {
     u8* r1 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a1, 0);
     u8* r2 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a2, 0);
