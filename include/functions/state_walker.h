@@ -7,6 +7,7 @@
 #include "common.h"
 
 struct Animation;
+struct AnimationPlayer;
 struct BufferedStream;
 struct CameraPositionedObject;
 struct Collider;
@@ -50,7 +51,7 @@ void SetStateWalkerSpeed(StateWalker* self, f32 v);
 void TeleportStateWalker(StateWalker* self, s32 key);
 void StartNextStateWalkerEdge(StateWalker* self);
 void CommitStateWalkerArrival(StateWalker* self);
-void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b);
+void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, AnimationPlayer* b);
 void AdvanceStateWalkerTime(StateWalker* self, f32 t);
 void CallStateWalkerListeners(StateWalker* self, s32 a, void* b);
 void AddStateWalkerListener(StateWalker* self, PlacedObject** p);

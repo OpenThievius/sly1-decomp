@@ -20,7 +20,7 @@ struct GsTex0 {
     u64 csa : 5;
     u64 cld : 3;
 };
-struct TextureUploadPacket : PacketWriter { u8 span[0x10]; s32 out; };
+struct TextureUploadPacket : PacketWriter { u8 span[0x10]; void* out; };
 struct QueuedGifTags {
     s32 f0;
     u8 pad0[0xC];

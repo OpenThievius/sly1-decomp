@@ -635,6 +635,78 @@ class DeclsTest(unittest.TestCase):
                                "func_00100010": ("float", False), "func_00100018": ("value", False),
                                "func_00100020": ("value", True)})
 
+    def test_types_are_classified_as_pointer_or_integer(self):
+        import decls
+        types = decls.read_types(["typedef int s32;\ntypedef unsigned int u32;\ntypedef long long s64;\n"
+                                  "typedef float f32;\ntypedef s32 Handle;\ntypedef void* (*MakeFn)(s32 a);\n"
+                                  "enum Mode { A, B };\ntypedef enum { X, Y } Kind;\n"
+                                  "typedef s32 Twice;\ntypedef void* Twice;\n"
+                                  "typedef u64 U128 __attribute__((mode(TI)));\ntypedef unsigned long long u64;\n"])
+        cls = lambda text: decls.classify(text, types)
+        for text in ("s32", "u32", "s64", "Handle", "unsigned int", "static inline s32", "long", "bool", "Mode",
+                     "enum Mode", "Kind", "u64", "U128", "const s32"):
+            self.assertEqual(cls(text), "integer", text)
+        for text in ("void*", "const char*", "World *", "u128*", "Foo&", "MakeFn"):
+            self.assertEqual(cls(text), "pointer", text)
+        for text in ("void", "f32", "float"):
+            self.assertEqual(cls(text), "other", text)
+        for text in ("ScriptValue", "Twice", "struct Foo", "Unseen"):
+            self.assertEqual(cls(text), "unknown", text)
+
+    def test_a_pointer_declared_as_an_integer_is_found(self):
+        import decls
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src" / "main").mkdir(parents=True)
+            (root / "include").mkdir()
+            (root / "src" / "main" / "a.cpp").write_text(
+                "void* func_00100000(s32 a)\n{\n    return 0;\n}\n"
+                "s32 func_00100008(s32 a)\n{\n    return a;\n}\n"
+                "u32 func_00100010(s32 a)\n{\n    return a;\n}\n"
+                "ScriptValue func_00100018(s32 a)\n{\n    return a;\n}\n")
+            (root / "src" / "main" / "b.cpp").write_text(
+                "s32 func_00100000(s32 a);\nvoid* func_00100008(s32 a);\nu32 func_00100010(s32 a);\n"
+                "s32 func_00100018(s32 a);\n")
+            (root / "include" / "c.h").write_text("typedef int s32;\ntypedef unsigned int u32;\ntypedef int Handle;\nHandle func_00100000(s32 a);\n")
+            old = decls.ROOT
+            decls.ROOT = root
+            try:
+                stats = {}
+                rows = decls.problems(uses={}, bodies={}, stats=stats)
+            finally:
+                decls.ROOT = old
+        got = sorted((str(r[0]), r[2], r[3], r[4]) for r in rows)
+        self.assertEqual(got, [("include/c.h", "func_00100000", "integer", "defined pointer"),
+                               ("src/main/b.cpp", "func_00100000", "integer", "defined pointer"),
+                               ("src/main/b.cpp", "func_00100008", "pointer", "defined integer")])
+        self.assertEqual(stats["unclassified"], 1)     # the class returned by value is not compared
+
+    def test_the_expected_table_applies_to_pointer_and_integer_rows(self):
+        import decls
+        rows = [("src/main/a.cpp", 3, "func_00100000", "integer", "defined pointer"),
+                ("src/main/a.cpp", 9, "func_00100008", "pointer", "defined integer")]
+        left, known, stale = decls.split_expected(rows, {("func_00100000", "src/main/a.cpp", "integer"): "a script int"})
+        self.assertEqual([r[2] for r in left], ["func_00100008"])
+        self.assertEqual([r[2] for r in known], ["func_00100000"])
+        self.assertEqual(stale, [])
+
+    def test_expected_declarations_need_a_reason_and_must_not_go_stale(self):
+        import decls
+        rows = [("src/main/a.cpp", 3, "func_00100000", "void", "defined value"),
+                ("src/main/b.cpp", 9, "func_00100008", "void", "defined value")]
+        expected = {("func_00100000", "src/main/a.cpp", "void"): "retail's callers need it",
+                    ("func_00100010", "src/main/c.cpp", "void"): "no longer reported"}
+        left, known, stale = decls.split_expected(rows, expected)
+        self.assertEqual([r[2] for r in left], ["func_00100008"])
+        self.assertEqual([r[2] for r in known], ["func_00100000"])
+        self.assertEqual(stale, [("func_00100010", "src/main/c.cpp")])
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "t.tsv")
+            with open(path, "w") as f:
+                f.write("function\tfile\tdeclared\treason\nfunc_00100000\tsrc/main/a.cpp\tvoid\t\n")
+            with self.assertRaises(SystemExit):
+                decls.read_expected(path)
+
     def test_what_an_instruction_does_with_the_result(self):
         import decls
         use = lambda text, reg: decls.register_use(*decls.operands(text), reg)

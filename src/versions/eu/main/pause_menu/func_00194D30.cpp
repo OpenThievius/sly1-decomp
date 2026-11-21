@@ -52,11 +52,11 @@ void SetPauseMenuLayerPage(Self_194D30_eu* self, s32 idx, s32 value)
     }
     if (s2 == -1) {
         if (self->f56C != 0) {
-            PopStackElement((ElementStack*)g_elementStack);
+            PopStackElement(&g_elementStack);
         }
     } else {
         if (self->f56C == 0) {
-            PushStackElement((ElementStack*)g_elementStack, (ScreenElement*)self);
+            PushStackElement(&g_elementStack, (ScreenElement*)self);
         }
     }
 }

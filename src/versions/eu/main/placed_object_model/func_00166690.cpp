@@ -163,7 +163,7 @@ slow:
                 VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
                     u8* l = (u8*)lights[k];
-                    VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (l + 0x420));
                 }
                 VifPacketWriter::Cnt1(&g_vifPacketWriter);
                 VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -186,7 +186,7 @@ slow:
                 VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n304; k++) {
                     u8* l = (u8*)lights[k];
-                    VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (l + 0x420));
                 }
                 VifPacketWriter::Cnt1(&g_vifPacketWriter);
                 VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -208,7 +208,7 @@ slow:
                 VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                 for (k = 0; k < n300; k++) {
                     u8* l = (u8*)lights[k];
-                    VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                    VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (l + 0x420));
                 }
                 VifPacketWriter::Cnt1(&g_vifPacketWriter);
                 VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);
@@ -227,7 +227,7 @@ slow:
                     VifPacketWriter::Refs(&g_vifPacketWriter, e->qwc1, e->addr1);
                     for (k = 0; k < n304; k++) {
                         u8* l = (u8*)lights[k];
-                        VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (s32)(l + 0x420));
+                        VifPacketWriter::Refs(&g_vifPacketWriter, *(s32*)(l + 0x418), (l + 0x420));
                     }
                     VifPacketWriter::Cnt1(&g_vifPacketWriter);
                     VifPacketWriter::Mscal(&g_vifPacketWriter, g_litBatchSecondProgram);

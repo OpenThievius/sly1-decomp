@@ -21,7 +21,7 @@ void StartChildGroupObject(ChildGroupObject* self);
 void HandleChildGroupNotification(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
 void UpdateChildGroupObject(ChildGroupObject* self, f32 dt);
 void RefreshChildGroupObjectContacts(ChildGroupObject* self);
-void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, s32 a2, s32 a3, s32 a4, void* arg5);
+void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, void* a2, void* a3, void* a4, void* arg5);
 void HandleChildGroupObjectContact(ChildGroupObject* self, ContactPair* pair, s32 which);
 s32 HandleChildGroupObjectEvent(ChildGroupObject* self, ObjectEvent* ev);
 void RecordChildGroupPose(ChildGroupObject* self, Collider* obj, Vec4* pos, Vec4* z);

@@ -32,7 +32,10 @@ struct ImageRecord {
     u8 f9;                  // 0x9
     u16 bumpSize;       // 0x0A
     u32 bytes;          // 0x0C: its size (func_001B2CA8)
-    s32 data;           // 0x10: an offset, made absolute by func_001B2CA8
+    union {
+        s32 dataOffset; // 0x10: as read from the file, an offset
+        void* data;     // made absolute by func_001B2CA8
+    };
     s32 blockCount;     // 0x14: the size in 16-byte blocks (func_001B2CA8)
     u64 texWord;        // 0x18
 };
@@ -43,7 +46,10 @@ struct PaletteRecord {
     u32 f0;                 // 0x0
     u16 f4;                 // 0x4
     u16 bumpSize;       // 0x06
-    s32 data;           // 0x08
+    union {
+        s32 dataOffset; // 0x08: as read from the file, an offset
+        void* data;     // made absolute by func_001B2CA8
+    };
     s32 blockCount;     // 0x0C
     u64 texWordBits;    // 0x10
 };
@@ -105,9 +111,9 @@ struct Font {
         u64 texWordU;
     };
     s32 imageTagCount;      // 0x68
-    s32 imageTagData;       // 0x6C
+    void* imageTagData;      // 0x6C
     s32 paletteTagCount;    // 0x70
-    s32 paletteTagData;     // 0x74
+    void* paletteTagData;    // 0x74
     s32 glyphCount;         // 0x78
     FontGlyph* glyphs;    // 0x7C
     u32 mask;               // 0x80: bit in D_002622D8->flags marking the state as sent

@@ -403,7 +403,7 @@ held:
             if (skipStep) {
                 if (self->subState == 0x22) {
                     sub = 0x23;
-                    PopStackElement((ElementStack*)g_elementStack);
+                    PopStackElement(&g_elementStack);
                     break;
                 }
             } else if (self->subState == 0x22) {

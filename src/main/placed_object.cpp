@@ -189,7 +189,7 @@ extern f32 g_valueRampProfile[4];
 extern f32 g_frameStep;
 extern f32 g_frameDt;
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartPlacedObject(void* self);
 
 void GetOwnerValue(Attachment* self, f32* value, f32* slope);
@@ -308,7 +308,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
 
 
 void StartAnimationFromContext(PlacedObject* self);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
@@ -444,7 +444,7 @@ struct ScaledSpringFrame { U128 r; U128 a; U128 b; };
 
 void *StoreFloatAsQuadword(U128* out, f32 value);
 void* CopyQuadword(u128* out, void* src);
-U128 StoreQuadword(u128* out, u128 v);
+u128* StoreQuadword(u128* out, u128 v);
 void SetVelocitySpring(PlacedObject* self, Quad16* src);
 
 // A ramp profile (+0x21C, +0x220) as the setters copy it: four floats at an address they do not
@@ -565,7 +565,7 @@ struct SoundChoice {
 
 s32 ReadBufferedS8(BufferedStream* self);
 void* AllocateZeroedFrontMemory(s32 n);
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
+void ReadOptionalBufferedBlock(BufferedStream* self, u8** out);
 s32 ReadBufferedS16(BufferedStream* self);
 s32 ReadBufferedS32(BufferedStream* self);
 f32 ReadBufferedFloat(BufferedStream* r);
@@ -768,7 +768,6 @@ union EventScratch {
 
 extern u8 g_padRecord[];
 extern u8 g_moviePlayer[];
-extern u8 g_elementStack[];
 
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
@@ -1759,7 +1758,7 @@ void OrthonormalizeMatrix(Mat3* m);
 // Advances the object by one step: takes the position and rotation from its attachments, or
 // integrates velocity, acceleration and spin over the frame time, then moves each child that wants
 // it (desc flag 1). If anything moved and flag is 0, it calls the object's moved callback.
-void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
+void MovePlacedObject(PlacedObject* self, f32 dt, s32 flag)
 {
     Attachment* pa = self->positionAttachment;
     Attachment* ra = self->orientationAttachment;
@@ -1798,7 +1797,7 @@ void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt)
     BaseObject* obj;
     while ((obj = ListWalkNextBase::Of(&it)) != 0) {
         if ((obj->desc->flags & 1) != 0) {
-            ((void (*)(BaseObject*, f32, s32))obj->desc->m1B)(obj, dt, moved);
+            obj->desc->step(obj, dt, moved);
         }
     }
     if (moved != 0) {
@@ -4788,7 +4787,7 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
         switch (e->kind) {
         case 44:
         case 51:
-            ReadOptionalBufferedBlock((BufferedStream*)r, (u32*)&e->a8.i);
+            ReadOptionalBufferedBlock((BufferedStream*)r, (u8**)&e->a8.i);
             break;
         case 0: {
             SoundChoice t;
@@ -5601,7 +5600,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         if (id == -1) {
             return;
         }
-        busy = IsSoundEntryAvailable(id);
+        busy = IsSoundEntryLooping(id);
         if (self->p50 != 0 && busy != 0) {
             return;
         }
@@ -6030,14 +6029,14 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
         break;
     case 55:
     {
-        u8* sys = g_elementStack;
-        ((U32P*)&((ElementStack*)sys)->resumeState)->v = 0;
-        SetElementStackState((ElementStack*)sys, 0);
+        ElementStack* sys = &g_elementStack;
+        ((U32P*)&sys->resumeState)->v = 0;
+        SetElementStackState(sys, 0);
     }
         break;
     case 56:
     {
-        ElementStack* sys = (ElementStack*)g_elementStack;
+        ElementStack* sys = &g_elementStack;
         sys->resumeState = 1;
         SetElementStackState(sys, 1);
     }

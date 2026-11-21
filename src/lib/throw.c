@@ -55,7 +55,7 @@ typedef struct EhContext {
 
 UnwindFrame* FindFrameUnwindState(void* pc, UnwindFrame* frame);
 void* FillMemory(void* p, s32 value, s32 size);
-s32 CopyBytes(void* dst, void* src, s32 n);
+void* CopyBytes(void* dst, const void* src, s32 n);
 s32 CompareStrings(void* self, s32 v);
 void* EnterRuntimeLock(u32 size);
 void AbortProgram(void) __attribute__((noreturn));
@@ -367,7 +367,7 @@ u8* ResolveSavedRegisterSlot(u32 idx, UnwindFrame* self, UnwindFrame* other)
 
 /* Copies one saved register (4, 8 or 16 bytes by its number) from one unwind state's storage to
  * another's. */
-s32 CopySavedRegister(s32 a0, u32 a1, u32 a2)
+void* CopySavedRegister(s32 a0, u32 a1, u32 a2)
 {
     u8* r1 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a1, 0);
     u8* r2 = ResolveSavedRegisterSlot(a0, (UnwindFrame*)a2, 0);

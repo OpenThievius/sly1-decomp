@@ -410,7 +410,7 @@
 #define g_scriptEventOffsets                              D_00244EC0
 #define g_soundBankKeys                                   D_00244F40
 #define g_soundEntries                                    D_00245020
-#define g_soundEntryForcedAvailable                       D_00246838
+#define g_soundEntryForcedLoops                           D_00246838
 #define g_classDescriptorTable                            D_00247448
 #define g_crc32Table                                      D_002476A0
 #define g_discCheckReadMode                               D_00247AA0
@@ -1814,7 +1814,7 @@
 #define g_projectionConstantsUploaded                     D_0060478C
 #define g_soundBankHandles                                D_00604790
 #define g_soundBankLoaded                                 D_006047B0
-#define g_soundEntryAvailable                             D_006047D0
+#define g_soundEntryLoops                                 D_006047D0
 #define g_cachedVoiceParams                               D_006053E0
 #define g_sprChainTagsA                                   D_00605440
 #define g_sprChainTagsB                                   D_006054C0
@@ -2372,7 +2372,7 @@
 #define ResumeIopVoices                                   func_0011D6D8
 #define IsVoiceBusy                                       func_0011D708
 #define RequestVoiceCallback                              func_0011D730
-#define TestSoundInBank                                   func_0011D760
+#define TestSoundLoops                                    func_0011D760
 #define SetVoiceVolumePan                                 func_0011D798
 #define GetSoundPitchBase                                 func_0011D7D8
 #define SetVoicePitch                                     func_0011D810
@@ -5095,7 +5095,7 @@
 #define EnsureSoundBankLoaded                             func_001BE268
 #define EnsureSoundEntryBankLoaded                        func_001BE4A8
 #define InitSoundParams                                   func_001BE4D8
-#define IsSoundEntryAvailable                             func_001BE568
+#define IsSoundEntryLooping                               func_001BE568
 #define ClearStreamVoicePending                           func_001BE5D8
 #define IsStreamVoiceLocked                               func_001BE5E8
 #define StartLockedStreamVoice                            func_001BE5F8

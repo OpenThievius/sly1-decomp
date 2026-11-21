@@ -51,7 +51,7 @@ struct Obj_eu_1367B8 {
     u8 glyph;                   // 0x584
     u8 pad585[0x5A4 - 0x585];
     s32 bandsQwc;               // 0x5A4
-    s32 bandsPacket;            // 0x5A8
+    void* bandsPacket;          // 0x5A8
 };
 
 // PAL's layout, a word longer.

@@ -147,7 +147,7 @@ typedef char check_BlinkObject[sizeof(BlinkObject) == 0x620 ? 1 : -1];
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void InitTimedObject(TimedObject* self);                      // 0x30 slot 0
 void UpdateTimedObject(TimedObject* self, f32 dt);                      // 0x30 slot 17
-void SetTimedObjectTarget(TimedObject* self, s32 value);           // 0x30 slot 76
+void SetTimedObjectTarget(TimedObject* self, void* value);           // 0x30 slot 76
 void EnterTimedObjectState(TimedObject* self, s32 state);           // 0x30 slot 77
 void InitTimedGroup(TimedGroup* self);                      // 0x31 slot 0
 void LoadTimedGroup(TimedGroup* self, BufferedStream* stream);                      // 0x31 slot 10

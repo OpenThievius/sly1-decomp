@@ -21,7 +21,7 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
     if (self->f570->mode != 2) return;
     if (self->f570->warpChosen != 0) return;
     if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
-        PopStackElement((ElementStack*)g_elementStack);
+        PopStackElement(&g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
         return;
     }
@@ -47,13 +47,13 @@ void HandleWarpMenuInput(Obj_1F1A08_eu* self, PadRecord* t)
             if (s3 != 0) {
                 IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->f570->warpChosen = 1;
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            PopStackElement((ElementStack*)g_elementStack);
+            PopStackElement(&g_elementStack);
         }
     }
 

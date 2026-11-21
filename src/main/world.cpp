@@ -145,7 +145,7 @@ struct ScriptScope;
 s32 LookupScriptVariable(ScriptScope* scope, s32 key, s32 flag, ScriptValue* out);
 struct R11B008Node;
 struct ScriptValue;
-void* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
+ScriptValue* EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 void* AssignScriptVariable(ScriptValue* ret, ScriptScope* scope, s32 key, ScriptValue* value);
 extern u8 g_markStacks[];
 
@@ -178,7 +178,6 @@ s32 GetCachedVoiceParam(s32 index);
 
 extern s32 g_switchedColliderCount;
 extern s32 g_padSelectFlags;
-extern u8 g_elementStack[];
 struct ColoredTriangleSet;
 extern ColoredTriangleSet* g_coloredTriangleSet;
 extern f32 g_stepScale;
@@ -261,7 +260,7 @@ void SetPauseMenuLayerPage(PauseMenu* self, s32 mode, s32 value);
 s32 ReadBufferedU32(BufferedStream* self);
 void SkipBufferedBlock(BufferedStream* self);
 
-struct CloneBatch { s32 count; s32* values; };
+struct CloneBatch { s32 count; PlacedObject** values; };
 
 struct __attribute__((packed)) PackedCloneBatch { s32 n; void* buf; };
 
@@ -1094,7 +1093,7 @@ void ResetWorldSubsystems(World* a0)
         StopAllSoundsAndWait();
         ResetScreenResources();
         ShutDownScriptValuePools();
-        ResetElementStack((ElementStack*)g_elementStack);
+        ResetElementStack(&g_elementStack);
         ResetFrontMemory();
         // a field access here changes retail's code: the elements' callback words (onDone, onWarn)
         // are stored packed, and the elements are reached through byte pointers
@@ -1168,7 +1167,7 @@ s32 GetCachedVoiceParamBuiltin(void* unused, s32 index)
     return GetCachedVoiceParam(index);
 }
 
-void* RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2)
+void RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2)
 {
     RefreshCachedVoiceParam(a1, a2);
 }
@@ -1215,7 +1214,7 @@ void ReleaseCallRecords(World* self, T219CHook* node)
     }
 }
 
-QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Queues a call unless an identical one is already waiting in the world's queue.
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
@@ -1234,7 +1233,7 @@ void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
 
 // Queues a call (code, arg and two more words) at the end of the world's queued-call list, to
 // be run by RunQueuedCalls.
-QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
 {
     QueuedCall* e = (QueuedCall*)TakeCallRecord(self);
     e->code = code;
@@ -1420,7 +1419,7 @@ void PushCloneBatch(World* self, void* src, s32 n)
 }
 
 // Pops and gives back the last value of the world's clone batch number index.
-s32 PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->cloneBatches)[index]; s->count--; return s->values[s->count]; }
+PlacedObject* PopSpawnedClone(World* self, s32 index) { CloneBatch* s = &((CloneBatch*)self->cloneBatches)[index]; s->count--; return s->values[s->count]; }
 
 // A list walk's frame (as ListFrame) that pushes itself and pops itself when it goes.
 struct ColliderListWalker {
@@ -1754,7 +1753,7 @@ s32 ReadBufferedU8(BufferedStream* s);
 s32 ReadBufferedS16(BufferedStream* s);
 void SkipBufferedBlocks(BufferedStream* s);
 void ReadPropertyRecords(void* self, void* obj);
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
+void ReadOptionalBufferedBlock(BufferedStream* self, u8** out);
 void ReadBufferedString(BufferedStream* self, u8** out);
 void ReadSlotObjects(World* self, void* a1, void* a2);
 void ReadBufferedBlockBody(BufferedStream* s);
@@ -1813,9 +1812,9 @@ void LoadWorld(World* self, BufferedStream* s)
     }
     LoadScriptEntryTable(self, s);
     ReadPropertyRecords(self, s);
-    ReadOptionalBufferedBlock(s, (u32*)&self->commentaryRecord);
+    ReadOptionalBufferedBlock(s, (u8**)&self->commentaryRecord);
     ReadBufferedString(s, (u8**)&self->creditsText);
-    ReadOptionalBufferedBlock(s, (u32*)&self->stagedBank);
+    ReadOptionalBufferedBlock(s, (u8**)&self->stagedBank);
     LoadScreenResources(s);
     ReadSlotObjects(self, 0, s);
     ReadBufferedBlockBody(s);
@@ -1860,7 +1859,7 @@ void LoadWorld(World* self, BufferedStream* s)
     g_activeListFrames = frame.prev;
     RunQueuedCalls(self);
     UpdateScatterLevelLimits((ScatterController*)g_scatterController);
-    ResumeElementStackState(g_elementStack);
+    ResumeElementStackState(&g_elementStack);
     if (g_mapScreenList.current == 0 && g_saveData->levelIndex != 0) {
         AllocateZeroedFrontMemory(0x80000);
     }
@@ -2195,7 +2194,7 @@ void PopActiveSequenceElement(World* world)
     StepSequence* ctx = g_activeStepSequence;
     if (ctx != 0 && ctx->state2D4 != 4) {
         u32 t = (u32)(ctx->mode2D0 - 1);
-        if (t < 2) PopStackElement((ElementStack*)g_elementStack);
+        if (t < 2) PopStackElement(&g_elementStack);
     }
 }
 

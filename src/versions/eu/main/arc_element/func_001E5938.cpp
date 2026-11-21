@@ -28,7 +28,7 @@ void ChoosePlayerLinkedColliderTarget(PlayerLinkedCollider* self)
         SpanHit hit;
         PushBackMemoryMark();
         GatherCollidersInBox(self->world, 0, &lo, &hi, IsPlayerLinkedColliderCandidate, self, &n, &list);
-        u8* found = FindNearestSpanObject(0, &lo, &hi, n, (Collider**)list, (ColliderSpan*)&hit);
+        u8* found = (u8*)FindNearestSpanObject(0, &lo, &hi, n, (Collider**)list, (ColliderSpan*)&hit);
         if (found != 0 && *(s32*)(found + 8) != 1) {
             *(u8**)e0 = found;
             TransformPointBetweenFrames(0, (PlacedObject*)found, (Vec4*)&hit, (Vec4*)&pool->fF0);

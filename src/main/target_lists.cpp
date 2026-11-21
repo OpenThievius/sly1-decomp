@@ -78,7 +78,7 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 #include "dma_chain_block.h"
 
 extern u8 g_screenClearPacketC[];
-void* InitPacketBuffer(PacketWriter* self);
+PacketWriter* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
@@ -87,7 +87,8 @@ struct TexturePacketValue : PacketWriter { s32 value; };
 
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
 void AllocateTempPacketBuffer(PacketWriter* buffer, u32 count);
@@ -143,7 +144,8 @@ struct GsDBuff;
 extern "C" void SetUpDoubleBuffer(GsDBuff* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 extern "C" s32 SendDrawEnvironment(void* self);
 struct DmaChannel;
@@ -158,11 +160,12 @@ s32 WaitGsPaths(s32 a0, s32 a1);
 extern s32 g_imageSlotsB;
 extern s32 g_imageSlotsA;
 
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
@@ -171,7 +174,7 @@ extern s32 g_imageRecordCountA;
 extern s32 g_imageRecordCountB;
 
 
-void* IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 struct ChildListWalk {
     ObjectList* iter;
@@ -233,10 +236,10 @@ extern f32 g_gameTime[];
 
 
 
-extern "C" s32 GetGsInterruptMask(s32 mask);
+extern "C" s32 GetGsInterruptMask(void);
 extern "C" s32 SwapGsInterruptMask(s32 mask);
 extern "C" void SyncDataCache(s32 a);
-extern "C" s32 AwaitSemaphore(s32 a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 
 extern f32 g_gameTime[];
@@ -262,9 +265,9 @@ void RewindPacketBuffer(PacketWriter* f);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
-void WriteVifDirectRef(PacketWriter* f, s32 a, s32 b, s32 c);
+void WriteVifDirectRef(PacketWriter* f, s32 a, void* b, s32 c);
 void CloseDmaTag(PacketWriter* f);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 
 // The file's .data, in retail's order (0x2626E8 to 0x262714): the three object lists.
 ObjectList g_targetCurveList = { 0 };

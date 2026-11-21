@@ -3,7 +3,7 @@ func_001BE1E8	UnloadStagedBank	stops the voice D_00274728, unloads the bank D_00
 func_001BE268	EnsureSoundBankLoaded	loads bank n (key from D_00244F40, via func_0011D140) unless it is the current D_00274740, unloads the previous bank with func_0011D450, and on first load fills the per-entry flags D_006047D0 for every table entry of that bank; returns the bank handle
 func_001BE4A8	EnsureSoundEntryBankLoaded	passes the bank index stored in the first word of entry idx of the sound table D_00245020 to func_001BE268
 func_001BE4D8	InitSoundParams	allocates a 0x24-byte record with func_0018D5C0 and fills it with defaults: id -1, 3000.0, 300.0, 1.0, zeroes and -1.0 (the same 3000/300/1.0 triple func_001BFCD8 callers pass as ranges and volume)
-func_001BE568	IsSoundEntryAvailable	loads the entry's bank first when D_006047B0 says it is not loaded, then returns D_006047D0[idx], the flag func_001BE268 sets from func_0011D760 or D_00246838
+func_001BE568	IsSoundEntryLooping	loads the entry's bank first when D_006047B0 says it is not loaded, then returns D_006047D0[idx], the flag func_001BE268 sets from func_0011D760 or D_00246838
 func_001BE5D8	ClearStreamVoicePending	clears D_00274730; func_001BE728 registers it as the completion callback of its stream voice
 func_001BE5E8	IsStreamVoiceLocked	returns D_00274744, the lock func_001BE5F8 sets
 func_001BE5F8	StartLockedStreamVoice	unless the lock D_00274744 is set: stops the old stream voice, decodes the record's key words (xor of two pairs), starts a stream voice with func_0011E048, stores it in D_0027472C, sets the lock to 1 and ramps channels 1, 0 and 3 of func_001C06A0 to 0.5

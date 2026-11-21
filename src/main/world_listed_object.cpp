@@ -674,7 +674,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 // Slot 37 of the world-listed object: queues a deferred draw request (the particle packet writer,
 // radius from the source or 1.0) for it.
-void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, ScaledBlockSource* src)
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, void* unused, ScaledBlockSource* src)
 {
     DeferredRadiusRequest blk;
     FillMemory(&blk, 0, (u32)0x80);

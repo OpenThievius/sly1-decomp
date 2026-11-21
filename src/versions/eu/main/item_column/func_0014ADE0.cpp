@@ -24,7 +24,7 @@ struct Obj_14ADE0_eu {
 
 void DrawItemColumn(Obj_14ADE0_eu* self)
 {
-    if (D_00275BEC == 1) {
+    if (g_elementStack.count == 1) {
         f32 acc = self->f220;
         s32 i;
         for (i = 0; i < self->count; i++) {

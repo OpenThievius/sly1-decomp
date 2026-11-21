@@ -11,16 +11,10 @@
 
 #include "common.h"
 #include "ring_buffer.h"
+#include "stream_sink.h"
 
 struct IdentityKey;
 struct StreamReaderWindow;
-
-// Where a transfer's data goes: two virtual methods, which retail's vtables list in this order.
-class TransferSink {
-public:
-    virtual s32 Put(s32 size, u8* buf) = 0;
-    virtual s32 Idle() = 0;
-};
 
 // A ring buffer in the IOP's memory, read through the SIF.
 class IopRingSink : public TransferSink {

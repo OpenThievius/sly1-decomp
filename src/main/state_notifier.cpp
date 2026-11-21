@@ -56,7 +56,7 @@ extern f32 g_frameDt;
 struct BufferedStream;
 struct Collider;
 void ApplyScaledOffset(ScaledOffsetObject* self);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CompleteTimeRangeNotifier(TimeRangeNotifier* self);
 
 // What a notifier tells the world's object (World::endListener, its slot 27) or its listener (slot 31)
@@ -105,14 +105,14 @@ extern u8 g_scatterController[];
 extern u8 g_memoryCard[];
 struct ScatterController;
 extern void* g_deadlineNotifier;
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 extern f32 g_gameTime;
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CompleteCountdownNotifier(CountdownNotifier* self);
 
 extern s32 g_displayMode;
@@ -549,7 +549,7 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
     if (c != 0) {
         do {
             if (c->desc->flags & 1) {
-                ((void (*)(PlacedObject*, f32, s32))c->desc->m1B)(c, dt, 1);
+                c->desc->step(c, dt, 1);
             }
             PlacedObject* next = *(PlacedObject**)frame.cursor;
             frame.cursor = (u8*)next + frame.next_off;

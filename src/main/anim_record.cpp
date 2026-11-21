@@ -36,7 +36,7 @@
 #include "state_walker.h"
 #include "asm_func.h"
 
-extern u32 g_bufferedBlockData;
+extern u8* g_bufferedBlockData;
 // A GIF register word, built from a zeroed doubleword.
 struct GifWord {
     u64 bits;
@@ -58,8 +58,8 @@ extern s32 g_animRecordCount;
 extern AnimRecord* g_animRecords;
 extern s32 g_cursorAnimatorCount;
 extern CursorAnimator** g_cursorAnimators;
-extern s32 g_maskImageUploads[];
-extern s32 g_maskedImagesPacket;
+extern void* g_maskImageUploads[];
+extern void* g_maskedImagesPacket;
 void* InitGifPacket(PacketWriter* b);
 void ReserveGifPackedData(PacketWriter* self, u64 prim, s32 nloop, s32 nreg, u64 data, u8** out);
 void BeginGifTag(PacketWriter* self, s32 a1, s32 a2, u64 a3);
@@ -76,7 +76,7 @@ struct LoadedFont : Font {
 };
 extern s32 g_fontCount;
 extern LoadedFont* g_fontRecords;
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 extern AnimCursor* g_lastPendingCursor;
 extern AnimCursor* g_pendingCursors;
 struct FacingXY { f32 x; f32 y; };
@@ -112,8 +112,8 @@ s32 g_imageSlotsA = 0;
 s32 g_imageSlotsB = 0;
 s32 g_activeImageMask = 0;
 AnimCursor* g_pendingCursors = 0;
-s32 g_maskImageUploads[6] = {0};
-s32 g_maskedImagesPacket = 0;
+void* g_maskImageUploads[6] = {0};
+void* g_maskedImagesPacket = 0;
 s32 g_cursorAnimatorCount = 0;
 CursorAnimator** g_cursorAnimators = 0;
 AnimCursor* g_lastPendingCursor = 0;
@@ -182,7 +182,7 @@ void SendTextureRegisters(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx
 void ReadImageRecordB(void* a0, PaletteRecord* a1)
 {
     ReadBufferedStreamBytes((BufferedStream*)a0, 12, a1);
-    a1->data = g_bufferedBlockData + a1->data;
+    a1->data = g_bufferedBlockData + a1->dataOffset;
     a1->blockCount = (u32)((a1->f4 << 2) + 15) >> 4;
 }
 
@@ -216,9 +216,9 @@ void LoadImageRecordsB(void* self)
 void ReadImageRecordA(void* self, ImageRecord* obj)
 {
     ReadBufferedStreamBytes((BufferedStream*)self, 0x14, obj);
-    s32 base = g_bufferedBlockData;
+    u8* base = g_bufferedBlockData;
     u32 bytes = obj->bytes;
-    s32 off = obj->data;
+    s32 off = obj->dataOffset;
     obj->blockCount = (bytes + 0xF) >> 4;
     obj->data = base + off;
 
@@ -647,7 +647,7 @@ void BuildAnimRecordGifPackets(s32 mask)
     }
 }
 
-extern s32 g_fonts[5];
+extern Font* g_fonts[5];
 // Clears the level's screen resources: its record tables, fonts, animators and image masks.
 void ResetScreenResources(void)
 {

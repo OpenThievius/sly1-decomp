@@ -127,7 +127,7 @@ struct Mat3;
 typedef void (*Hook_CE40)(void* self);
 
 void StartPlacedObject(PlacedObject* self);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Starts the placed object and queues AttachMaskedColliderChildren for it.
 void StartMaskedCollider(MaskedCollider* self)
@@ -546,7 +546,7 @@ void AddAcceptedKind(MaskedCollider* r, s32 value)
 }
 
 // Adds an entry to the collider's list of 3 and turns on the list bit (2) of its mask.
-void AddMaskedColliderListEntry(MaskedCollider* obj, s32 value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = (void*)value; obj->mask |= 2; } }
+void AddMaskedColliderListEntry(MaskedCollider* obj, void* value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = value; obj->mask |= 2; } }
 
 // The collider's sound parameters, created on first use.
 void* GetMaskedColliderSoundParams(MaskedCollider* self)
@@ -1055,7 +1055,7 @@ void CollectZoneChildren(TriggerZoneRecord* self, Collider* a1)
 
 extern u8 g_flagTable[];
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Starts a zone record: mode -1, resolves the objects of both pairs, and, for a persistent
 // record whose flag-table bit is set, queues DeferZoneRecordActivation.
@@ -1080,7 +1080,7 @@ void StartZoneRecord(TriggerZoneRecord* self)
     }
 }
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Queued call: the first run (mode 0) queues itself once more with mode 0xC, and the run after
 // that activates the zone record, so the activation is deferred by a queue pass.

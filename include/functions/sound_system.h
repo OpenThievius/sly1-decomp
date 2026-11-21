@@ -23,7 +23,7 @@ void UnloadStagedBank(void);
 s32 EnsureSoundBankLoaded(s32 n);
 s32 EnsureSoundEntryBankLoaded(s32 idx);
 void InitSoundParams(SoundRecord** self);
-s32 IsSoundEntryAvailable(s32 idx);
+s32 IsSoundEntryLooping(s32 idx);
 void ClearStreamVoicePending(s32 reply, s64 arg);
 s32 IsStreamVoiceLocked(void);
 void StartLockedStreamVoice(KeyRecord* self);

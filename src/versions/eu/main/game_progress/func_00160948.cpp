@@ -10,7 +10,7 @@ void ResumeAtSavedLevel(void)
         k = (SessionKey*)((u8*)&g_sessionFadeKey + D_eu_00263710 * 0x20);
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
+    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !SessionKey::Same(k, (SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.resumeState == 1) {
         if (g_resumeSoundSetupDone == 0) {
@@ -30,7 +30,7 @@ void ResumeAtSavedLevel(void)
                 }
             }
             g_elementStack.resumeState = -1;
-            SetElementStackState((ElementStack*)&g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         }
     }
 }

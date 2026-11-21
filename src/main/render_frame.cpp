@@ -134,12 +134,13 @@ void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void CloseDmaTag(PacketWriter* self);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void BeginDmaTag(PacketWriter* self);
 
 
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 
 void* InitPacketWriter(PacketWriter* self);
 void ActivateRenderFrame(void* a, s32 b);
@@ -155,19 +156,20 @@ void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void WriteGsFinishPacket(void* self, void* p, u8** n);
 void CloseDrawBuffer(void* obj, void* a, u8** b);
 void ClearList(ObjectList* p);
-extern "C" s32 PostSemaphore(void* a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 extern ObjectList g_deferredReleaseListA;
 extern ObjectList g_deferredReleaseListB;
 extern ObjectList g_deferredReleaseListC;
 extern s32 g_buildFrameData;
-extern void* g_frameReadySemaphore;
+extern s32 g_frameReadySemaphore;
 
 
 
 extern s32 g_drawFrameData;
-extern s32 g_maskedImagesPacket;
-extern s32 g_gifChannel;
+extern void* g_maskedImagesPacket;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -179,12 +181,12 @@ extern u32 g_packetBufferMemory[];
 extern u8 g_codeChecksumSize[];
 extern s32 g_codeChecksumFailed;
 
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameDoneSemaphore;
 extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
 extern s32 g_fieldOffsetMode;
 
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void SendRenderFrameToDma(RenderFrame* self, s32 flag);
 void BlitFrameToDisplay(void);
 void ReleaseFrameNodes(RenderFrame* self);
@@ -192,23 +194,24 @@ void ReleaseFrameNodes(RenderFrame* self);
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
 extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
-extern void* g_frameReadySemaphore;
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameReadySemaphore;
+extern s32 g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-void* CreateLockSemaphore(s32 initCount, s32 maxCount);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void func_0015E678(void);
 
-extern void* g_frameReadySemaphore;
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameReadySemaphore;
+extern s32 g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 extern s32 g_fieldOffsetMode;
 
 void VerifyCodeChecksum(void);
-extern "C" s32 AwaitSemaphore(void* p);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void ActivateRenderFrame(RenderFrame* f);
 void BlitFrameToDisplay(void);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
@@ -227,14 +230,14 @@ void RemoveFromList(ObjectList* list, void* item);
 void AppendToList(ObjectList* self, void* item);
 void ClearList(ObjectList* l);
 extern void* g_drawingFrame;
-extern void* g_frameReadySemaphore;
+extern s32 g_frameReadySemaphore;
 extern volatile s32 g_renderThreadWaiting;
 
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameDoneSemaphore;
 extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* self);
 
@@ -372,9 +375,8 @@ void AddDmaRefTagIfChanged(void* list, void* value, void* end)
 {
     if (g_lastDmaRefStart != value) {
         g_lastDmaRefStart = value;
-        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
         // as a word (a physical address among them), so this call views it with a pointer.
-        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)list, ((u32)((u8*)end - (u8*)value) + 15) >> 4, value);
+        AddDmaRefTag((PacketWriter*)list, ((u32)((u8*)end - (u8*)value) + 15) >> 4, value);
     }
 }
 
@@ -436,7 +438,7 @@ void ActivateRenderFrame(RenderFrame* self)
     SwitchActiveImageMask(self->imageMask);
     if (self->hasMaskedImages != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
-        StartDmaChain((DmaChannel*)g_gifChannel, (void*)g_maskedImagesPacket);
+        StartDmaChain(g_gifChannel, g_maskedImagesPacket);
     }
 }
 
@@ -485,7 +487,7 @@ void RunRenderThread(void)
         *(volatile s32*)0x10003010 = 0;
         SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufA);
         BlitFrameToDisplay();
-        WaitDmaChannel((DmaChannel*)g_vif1Channel, 0, 0);
+        WaitDmaChannel(g_vif1Channel, 0, 0);
         PostSemaphore(g_frameDoneSemaphore);
         FlipDisplayFrame();
         g_fieldOffsetMode = 1;
@@ -671,7 +673,7 @@ s32 g_nextBuildFrameIndex = 0;
 void* g_drawingFrame = 0;
 // size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
 RenderFrame g_renderFrames[2] = {};
-void* g_frameReadySemaphore = 0;
+s32 g_frameReadySemaphore = 0;
 // size: pointer (lw/sw), 4-byte label
-void* g_frameDoneSemaphore = 0;
+s32 g_frameDoneSemaphore = 0;
 volatile s32 g_renderThreadWaiting = 0;

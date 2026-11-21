@@ -329,7 +329,6 @@ void StartPadPattern(PadPatternPlayer* self, PadPattern* p, f32 f);
 
 extern f32 g_frameStep;
 
-extern u8 g_elementStack[];
 
 extern u8 g_scatterController[];
 
@@ -795,11 +794,11 @@ void ComputeWalkerColliderContactValue(WalkerCollider* ctx, BodyContact* obj)
 // Computes the collision response as the collider's does, but when the other object of the contact
 // is of kind 0x43 or 0x42 it first sets the mode at +0x450 to 1 and the up vector to the z axis for
 // that call, then restores both.
-void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, BodyContact* a2, s32 a3, ContactEnd03* a4, ImpulseRow* a5)
 {
     Vec4 s0;
     Vec4 s1;
-    s32 n = *(s32*)(a2 + ((1 - a3) << 6));
+    Collider* n = a2->end[1 - a3].body;
     s0 = self->v440;
     s1 = self->q450;
     if (n != 0) {
@@ -808,7 +807,7 @@ void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, 
             self->v440 = g_unitZVector;
         }
     }
-    ComputeColliderImpulseResponse(self, a1, (BodyContact*)a2, a3, (ContactEnd03*)a4, (ImpulseRow*)a5);
+    ComputeColliderImpulseResponse(self, a1, a2, a3, a4, a5);
     self->v440 = s0;
     self->q450 = s1;
 }
@@ -1141,7 +1140,7 @@ void SetPairControllerState(PairController* self, s32 state)
         if (w) {
             CaptionBox* box = &g_typedTextCaptionBox;
             ((PtrP*)&box->child)->v = w;
-            PushStackElement((ElementStack*)g_elementStack, box);
+            PushStackElement(&g_elementStack, box);
         }
         break;
     }
@@ -1156,7 +1155,7 @@ void SetPairControllerState(PairController* self, s32 state)
         self->link = (LinkedObject*)v;
         if (v) {
             g_typedTextCaptionBox.child = (void*)v;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         for (o = self->head384; o; o = o->nextActive) SetPairedState(o, 8);
         ResetScatterLevels((ScatterController*)g_scatterController);
@@ -1166,7 +1165,7 @@ void SetPairControllerState(PairController* self, s32 state)
         self->link = (LinkedObject*)v;
         if (v) {
             g_typedTextCaptionBox.child = (void*)v;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         for (o = self->head384; o; o = o->nextActive) {
             BaseObject* l = (BaseObject*)o->partner;

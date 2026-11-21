@@ -2,6 +2,7 @@
 // The file from 0x184D78 to 0x185C18: an object sort, the aim helpers, the main loop with the
 // IOP modules it loads and the startup initializers it runs. Its name is ours, after the loop.
 #include "common.h"
+#include "screen_element.h"
 #include "asm_func.h"
 #include "functions/camera.h"
 #include "functions/class75_list.h"
@@ -69,7 +70,8 @@ struct SortKeyedObject : PlacedObject {
 
 
 
-extern s32 g_vif0Channel;
+struct DmaChannel;
+extern DmaChannel* g_vif0Channel;
 extern u8 g_vu0ProgramChain[];
 extern "C" void SyncDataCache(s32 unused);
 struct DmaChannel;
@@ -78,7 +80,8 @@ extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
 
-extern u8 g_vif1Channel[];
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
 extern u8 g_vu1ProgramChain[];
 
 extern "C" void SyncDataCache(s32 a);
@@ -93,7 +96,6 @@ struct DmaChannelFlags {
 
 
 extern s32 g_worldLoadRequest;
-extern u8 g_elementStack[];
 extern s32 g_frameCount;
 
 void RunStartupInitializers(void);
@@ -113,7 +115,7 @@ typedef void (*StartupFn)(void);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 
-s32 InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
+LoadProgress* InitLoadProgress(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
 void BeginLoadProgress(LoadProgress* p);
 void UpdateLoadProgress(LoadProgress* self, s32 value);
 void EndLoadProgress(LoadProgress* p);
@@ -293,8 +295,8 @@ void UploadLightVolumes(World* world)
         }
     }
     AddDmaEndTag(&pw);
-    SubmitPacketBuffer(&pw, (DmaChannel*)g_vif0Channel);
-    WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
+    SubmitPacketBuffer(&pw, g_vif0Channel);
+    WaitDmaChannel(g_vif0Channel, 0, 0);
     PopBackMemoryMark();
 }
 
@@ -498,7 +500,7 @@ extern "C" void RunMainLoop(s32 a, s32 b)
         UpdatePadConnection(&g_padRecord);
         RunCompletedButtonCode();
         UpdateMemoryCard(&g_memoryCard);
-        UpdateElementStack((ElementStack*)g_elementStack);
+        UpdateElementStack(&g_elementStack);
         AddElapsedTime(g_gameClock.dt);
         if (g_currentWorld != 0) {
             UpdateCameraLocation(g_camera);
@@ -507,9 +509,9 @@ extern "C" void RunMainLoop(s32 a, s32 b)
             if (g_currentWorld->desc->m11 != 0)
                 g_currentWorld->desc->m11(g_currentWorld, g_gameClock.dt);
             RunWorldFrameLists(g_currentWorld, g_camera);
-            QueueScreenElementDraws((ElementStack*)g_elementStack);
+            QueueScreenElementDraws(&g_elementStack);
             SubmitDeferredRequests(g_currentWorld, g_camera);
-            DrawAllScreenElements((ElementStack*)g_elementStack);
+            DrawAllScreenElements(&g_elementStack);
             SubmitRenderFrame();
         }
         g_frameCount++;
@@ -561,8 +563,8 @@ void SendVif0StartupPacket(void)
     s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)g_vif0Channel, g_vu0ProgramChain);
-    WaitDmaChannel((DmaChannel*)g_vif0Channel, 0, 0);
+    StartDmaChain(g_vif0Channel, g_vu0ProgramChain);
+    WaitDmaChannel(g_vif0Channel, 0, 0);
     s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
 }
@@ -571,12 +573,12 @@ void SendVif0StartupPacket(void)
 // waits for it to finish.
 void SendVif1StartupPacket()
 {
-    DmaChannelFlags* p = *(DmaChannelFlags**)g_vif1Channel;
+    DmaChannelFlags* p = (DmaChannelFlags*)g_vif1Channel;
     p->flags |= 0x40;
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)(*(void**)g_vif1Channel), g_vu1ProgramChain);
-    WaitDmaChannel((DmaChannel*)(*(void**)g_vif1Channel), 0, 0);
-    (*(DmaChannelFlags**)g_vif1Channel)->flags &= ~0x40;
+    StartDmaChain(g_vif1Channel, g_vu1ProgramChain);
+    WaitDmaChannel(g_vif1Channel, 0, 0);
+    ((DmaChannelFlags*)g_vif1Channel)->flags &= ~0x40;
 }
 
 // Runs the table of 0x1D startup initialisers in order behind a load-progress display (colours set

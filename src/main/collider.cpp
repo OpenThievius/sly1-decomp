@@ -114,7 +114,7 @@ void ReadFaceTree(BufferedStream* in, CollisionMesh* a, MeshTree* out);
 f32 ReadBufferedFloat(BufferedStream* in);
 void ReadBufferedRotation3(BufferedStream* self, void* out);
 void ReadBufferedVector3(BufferedStream* src, void* dst);
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 u16 ReadBufferedU16(BufferedStream* self);
 s32 ReadBufferedS16(BufferedStream* in);
 s32 ReadBufferedU32(BufferedStream* in);
@@ -1316,9 +1316,9 @@ void ApplyColliderAttachedSetContact(Collider* self, AttachedSet* other, f32 dt)
         return;
     }
     if (other->oscillatorBlock != 0) {
-        Vec4 axes[2];
-        Vec4 dir = normal;
-        BuildPerpendicularPair(&dir, &axes[0], &g_unitXVector, &g_unitZVector);
+        Vec4 axes[3];  // the oscillator reads three offsets: the pair and the normal itself
+        axes[2] = normal;
+        BuildPerpendicularPair(&axes[2], &axes[0], &g_unitXVector, &g_unitZVector);
         ComputeOscillatorDisplacement((Oscillator*)(((OscillatorHolder*)other->oscillatorBlock)->oscillator), 50.0f, &point, &axes[0], 0, &axes[0], 0);
         Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(axes[0]), Vu0::Q(axes[1])), Vu0::Q(g_unitZVector)));
     }
@@ -1697,7 +1697,7 @@ void UpdateAnchorModeFlags(Collider* self)
 
 // Adds to a script list each object touching this collider (without repeats); gives 1 when all
 // fit and 0 when appending fails.
-s32 CollectContactingPartsToScriptList(Collider* self, s32 value)
+s32 CollectContactingPartsToScriptList(Collider* self, void* value)
 {
     Collider* ctx = self->root03();
     ContactRow03* n = ctx->contacts->head;
@@ -1938,13 +1938,12 @@ void AdvanceColliderMeshMotion(Collider* self, f32 dt)
 }
 
 // Advances the mesh motion when the collider has a hook, then moves the placed object by x.
-void MoveCollider(Collider* self, f32 x, void* b)
+void MoveCollider(Collider* self, f32 x, s32 flag)
 {
     if (self->hook != 0) {
         AdvanceColliderMeshMotion(self, x);
     }
-    // MoveCollider still holds the step's flag as the pointer its own callers pass.
-    ((void (*)(Collider*, f32, void*))MovePlacedObject)(self, x, b);
+    MovePlacedObject(self, x, flag);
 }
 
 

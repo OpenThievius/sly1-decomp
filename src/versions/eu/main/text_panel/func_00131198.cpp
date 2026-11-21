@@ -14,7 +14,7 @@ struct Panel_131198_eu {
     Font* smallFont;            // 0x59C
     u8 pad5A0[0x5A4 - 0x5A0];
     s32 bandsQwc;               // 0x5A4
-    s32 bandsPacket;            // 0x5A8
+    void* bandsPacket;          // 0x5A8
     u8 pad5AC[0x5B0 - 0x5AC];
     void* child;                // 0x5B0
 };

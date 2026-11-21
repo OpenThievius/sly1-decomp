@@ -43,6 +43,6 @@ void ReadFaceTree(BufferedStream* self, CollisionMesh* in, MeshTree* out);
 void ReadLinkedItemArray(BufferedStream* src, s32* count, LinkedItem** out);
 void ReadBufferedString(BufferedStream* self, u8** out);
 void SkipBufferedBlock(BufferedStream* self);
-void ReadOptionalBufferedBlock(BufferedStream* self, u32* out);
+void ReadOptionalBufferedBlock(BufferedStream* self, u8** out);
 
 #endif

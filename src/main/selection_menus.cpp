@@ -26,7 +26,6 @@
 #include "shapes.h"
 #include "object_finder.h"
 #include "layout_137228.h"
-#include "element_stack_state.h"
 #include "functions/iop_commands.h"
 #include "functions/memory_card.h"
 #include "functions/oscillator.h"
@@ -47,12 +46,10 @@ extern f32 g_elapsedTime;
 extern s32 g_previousLevelIndex;
 extern u8 g_memoryCard[];
 extern s32 g_currentPlacedObject;
-extern u8 g_elementStack[];
 // An entry of the choice tables D_00262718 and D_00262788 (three words).
 struct ChoiceEntry { s32 a; s32 b; s32 c; };
 struct ChoiceTable { ChoiceEntry e[9]; s32 end; };
 extern ChoiceTable g_partHolderLinks;
-// The element stack (D_00275BC0) as func_0016AED8 sets its state word.
 extern ChoiceEntry g_currentPlacedObjectLinks[18];
 // The entry LookupEntryById gives for a choice's level: StartObjectFade fades it when its
 // two words differ.
@@ -243,10 +240,10 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
         if (self->walkers[2].walker) TeleportStateWalker(self->walkers[2].walker, g_choiceKeys[self->walkerChoice].walkerKey);
         if (self->walkers[3].walker) TeleportStateWalker(self->walkers[3].walker, g_choiceKeys[self->walkerChoice].walkerKey);
     }
-    PushStackElement((ElementStack*)g_elementStack, &g_selectionCaption);
+    PushStackElement(&g_elementStack, &g_selectionCaption);
 }
 
-void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 // Starts the placed object as the current one: sets its flag bits, makes it the global current
 // object, sets the element stack to state 2, resolves its links and queues the setup of its
 // choices.
@@ -255,8 +252,8 @@ void BecomeCurrentObject(CurrentPlacedObject* self)
     StartPlacedObject(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
     g_currentPlacedObject = (s32)self;
-    ((ElementStackState*)g_elementStack)->resumeState = 2;
-    SetElementStackState((ElementStack*)g_elementStack, 2);
+    g_elementStack.resumeState = 2;
+    SetElementStackState(&g_elementStack, 2);
     ResolveObjectLinks(self, 0x12, (ObjectLink*)g_currentPlacedObjectLinks);
     self->choice = -1;
     AppendQueuedCall(self->world, (void*)SetupCurrentObjectChoices, self, 0, 0);
@@ -367,7 +364,7 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
             }
         tail:
             if (s2) {
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
             }
         } else {
             void* h = self->walkers[3].walker;
@@ -511,14 +508,14 @@ void HandleSelectionCaptionInput(ObjectScreenCaption* self, PadRecord* arg)
             if (g_gridSelector.mode != 0) {
                 return;
             }
-            PushStackElement((ElementStack*)g_elementStack, &g_gridSelector);
+            PushStackElement(&g_elementStack, &g_gridSelector);
             return;
         }
         if (g_mapScreenList.mode != 0) {
             return;
         }
         g_mapScreenList.current = g_mapScreenList.nodes[idx];
-        PushStackElement((ElementStack*)g_elementStack, &g_mapScreenList);
+        PushStackElement(&g_elementStack, &g_mapScreenList);
         return;
     }
     if (p->currentEntry != p->index) {
@@ -672,7 +669,7 @@ void HandleGridSelectorInput(ChoiceGridCaption* ctx, PadRecord* o)
 
     if ((o->flags & 0x9B0) != 0 || (o->connectionMode == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(o, 0x9B0);
-        PopStackElement((ElementStack*)g_elementStack);
+        PopStackElement(&g_elementStack);
         return;
     }
     if ((o->flags & 0x40) != 0) {

@@ -96,7 +96,7 @@ void InitElementStack(ElementStack* self);
 struct StateGraph;
 void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_001EB598 differs in registers
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CopyPlayerAttachBlock(World3BeatPressCollider* self);
 struct SwitchedCollider;
 void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
@@ -293,7 +293,7 @@ void EndWorld3Timeline(void* p);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 typedef u64 Bits128 __attribute__((mode(TI)));
-s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out);
+void QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
@@ -301,7 +301,7 @@ void SetAgentGoalPoint(Agent* self, Vec4* p);
 void UpdateAgentGoal(Agent* self, s32 flag);
 void PadPacketToQuadSlot(void* s, s32 target);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 struct BufferedStream;
 struct BufferedStream;
 struct LinkedItem;
@@ -331,7 +331,7 @@ extern ColoredTriangleSet* g_coloredTriangleSet;
 // retail's caller evaluates them after the integers, as this order does.
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 g_packetWriterVtable[];
-s32 InitPacketBuffer(PacketWriter* self);
+PacketWriter* InitPacketBuffer(PacketWriter* self);
 // The ListFrame of func_001EECE0's walk of its children, opened and closed by its lifetime.
 struct ChildWalkFrame {
     s32* a; s32* b; s32 c; ChildWalkFrame* prev;
@@ -515,16 +515,9 @@ ObjectLink g_world1BossLinks[8] = {
     { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
     { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
 };
-// word read whole / address only, 4 bytes to next label
-// readers pass only its address; byte buffer, size to next label
-u8 g_elementStack[4] = {0};
-INCLUDE_DATA(D_00275BC4);
-// size: s32 read as one word (pooled_object.cpp and screen_element.cpp test bit 8)
-// size: s32 compared with 1 in item_column.cpp and 2 in pause_menu.cpp
-s32 D_00275BEC = 0;
-// size: s32, the element stack's resumeState (+0x30): compared with 1 and 2 in pause_menu.cpp and
-// screen_element.cpp, with the style in this file
-s32 D_00275BF0 = 0;
+// The whole element stack (0x34 bytes, to D_00275BF4): its first word is padding, the rest are the
+// state, the elements, their count and the resume state that the readers name by field.
+ElementStack g_elementStack = {0};
 // Unread and unexplained: a zero word and the table {3, 10, 6, 63, 3, 11, 5, 31} follow it up to
 // D_00275C18, which nothing reads; their bytes come from the disassembly.
 INCLUDE_DATA(D_00275BF4);
@@ -873,7 +866,7 @@ done:
 // Initialises the global element stack that the pause and map screens push to and pop from.
 void InitGlobalElementStack(void)
 {
-    InitElementStack((ElementStack*)g_elementStack);
+    InitElementStack(&g_elementStack);
 }
 
 // Clears the saved and pending states to -1, enters state 3 and leaves the stack holding only its
@@ -2187,7 +2180,7 @@ void InitWorld3Boss(World3Boss* self)
     g_world3BossPendingVoice = 0;
 }
 
-s32 ResolveAgentClip(Agent* self, s32 id);
+void* ResolveAgentClip(Agent* self, s32 id);
 void LoadAgent(Agent* self, void* reader);
 // Slot 10 of the third boss: loads the agent, then resolves its four clips from the table of clip
 // ids.
@@ -2195,7 +2188,7 @@ void LoadWorld3Boss(World3Boss* self, void* reader)
 {
     LoadAgent(self, reader);
     for (s32 i = 0; i < 4; i++) {
-        self->clips[i] = ResolveAgentClip(self, g_world3BossClipIds[i]);
+        self->clips[i] = (Animation*)ResolveAgentClip(self, g_world3BossClipIds[i]);
     }
 }
 
@@ -2553,7 +2546,7 @@ void DecrementWorld3BossGauge(World3Boss* self)
 // on for some walker keys, on leaving 0x10 or 0xB it decrements the gauge count (0xB also marks
 // level 3 done and saves the memory card); then the base agent state is entered and, for state 14
 // and states 2 and 13, the state player's start time and speed are set from the walker key.
-void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
+void EnterWorld3BossState(World3Boss* self, s32 a, Animation* b)
 {
     s32 r[3];
     switch (self->state) {
@@ -2578,7 +2571,7 @@ void EnterWorld3BossState(World3Boss* self, s32 a, s32 b)
         StartMemoryCardSave(&g_memoryCard);
         break;
     }
-    EnterAgentState(self, a, (Animation*)b);
+    EnterAgentState(self, a, b);
     switch (self->state) {
     case 14: {
         GetStateWalkerCurrentKey((StateWalker*)self->walker, &r[1]);
@@ -2630,7 +2623,7 @@ void ScheduleWorld3BossBeatPress(World3Boss* self, TimelineEntry* e)
 {
     s32 dir = e->value;
     BeatPressEntry entry;
-    s32 clip;
+    Animation* clip;
     if (dir == 1) {
         clip = self->clips[1];
     } else {
@@ -3633,9 +3626,8 @@ void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, void* c, s32 d, s32* out)
         s32 t = r + 0xF;
         s32 u = r + 0x1E;
         s32 n = (t >= 0) ? t : u;
-        // The tag's address is the data's pointer here, where AddDmaRefTag's other callers hold it
         // as a word (a physical address among them), so this call views it with a pointer.
-        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)(self, n >> 4, c);
+        AddDmaRefTag(self, n >> 4, c);
         if (out != 0) {
             *out = (s32)self->openHeader - 0xC;
         }
@@ -3656,7 +3648,7 @@ void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag)
 }
 
 // As WriteVifDirect, but the data is not copied: a DMA reference tag to it is added to the packet.
-void WriteVifDirectRef(PacketWriter* self, s32 a, s32 b, s32 c)
+void WriteVifDirectRef(PacketWriter* self, s32 a, void* b, s32 c)
 {
     PadPacketToQuadSlot(self, 3);
     u32* p = (u32*)self->cur;
@@ -3718,7 +3710,7 @@ s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
 // The mask of the leaves within radius of point under node: the walk follows the near side,
 // descends into the far side too where the sphere straddles the plane, and ORs each leaf's mask
 // (ExpandMaskThroughTable) into *out.
-s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out)
+void QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out)
 {
     if (node < 0) {
         *out = ExpandMaskThroughTable(self, node);
@@ -4499,7 +4491,7 @@ L0354:
     goto L02A0;
 
 L0364:
-    SetElementStackState((ElementStack*)g_elementStack, 8);
+    SetElementStackState(&g_elementStack, 8);
     self->mode = mode;
     goto L0404;
 
@@ -4514,7 +4506,7 @@ L0374:
 
 L038C:
     {
-        if (self->style == D_00275BF0) {
+        if (self->style == g_elementStack.resumeState) {
             s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 g_mapScreenList.current = g_mapScreenList.nodes[idx];
@@ -4544,6 +4536,9 @@ L0410:
 }
 
 // Starts the screen fade with a request of kind 1 for the given object and value (count passed on).
+// Retail leaves the request's f0C (the second arrival key QueueWorldLoad passes on) unset: it is
+// whatever the stack held, and StartScreenFade keeps it. Harmless while the first key is -1
+// (FindArrivalPoint then ignores the second); nothing may rely on its value.
 void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 {
     FadeRequest m;
@@ -4558,7 +4553,7 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count)
 // the page compares its cursor with it before confirming.
 s32 GetCurrentWarpEntry(void)
 {
-    if (D_00275BF0 != 2) {
+    if (g_elementStack.resumeState != 2) {
         return g_saveData->entryIndex;
     }
     return 10;
@@ -4816,7 +4811,7 @@ void UpdateWarpPage(WarpPage* self, f32 dt)
                 target = GetCurrentWarpEntry();
             }
             Animation* anim = self->entries[target].animation;
-            if (D_00275BF0 != 2) {
+            if (g_elementStack.resumeState != 2) {
                 self->entries[GetCurrentWarpEntry()].cursorLevel = 0.0f;
                 self->entries[self->cursor].cursorLevel = 1.0f;
                 self->entries[self->cursor].availableLevel = 1.0f;
@@ -5220,7 +5215,7 @@ void HandleWarpMenuInput(WarpPageList* self, PadRecord* t)
     if (self->current->mode != 2) return;
     if (self->current->warpChosen != 0) return;
     if ((t->flags & 0x910) != 0 || t->connectionMode == 1) {
-        PopStackElement((ElementStack*)g_elementStack);
+        PopStackElement(&g_elementStack);
         ClearPadPressedBits(&g_padRecord, 0x910);
         return;
     }
@@ -5246,13 +5241,13 @@ void HandleWarpMenuInput(WarpPageList* self, PadRecord* t)
             if (s3 != 0) {
                 IdentityKey* v = LookupEntryById((loc[0] << 8) | loc[1]);
                 self->current->warpChosen = 1;
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
                 StartObjectFade(v, -1, 2);
             } else {
                 StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            PopStackElement((ElementStack*)g_elementStack);
+            PopStackElement(&g_elementStack);
         }
     }
 
@@ -5287,7 +5282,7 @@ void SetWarpMenuOpen(WarpPageList* self, s32 a1)
         self->vt->m14(self);
         SetPadSelectFlags(1);
         ResetPadStepRepeat(&g_padRecord);
-        SetElementStackState((ElementStack*)g_elementStack, 7);
+        SetElementStackState(&g_elementStack, 7);
     } else {
         self->vt->m15(self);
         if (self->current->warpChosen == 0) {
@@ -5297,7 +5292,7 @@ void SetWarpMenuOpen(WarpPageList* self, s32 a1)
                 SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
-            SetElementStackState((ElementStack*)g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
             GameProgress* g = g_saveData;
             if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
                 ResumeStagedBankVoice();

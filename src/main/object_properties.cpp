@@ -71,6 +71,7 @@ typedef void (*PropertyGetter)(void* obj, void* out);
 // A property's setter (PropertyDescriptor::putter with flags 0x20, or the method at that offset
 // of the object's table): stores `value` into `obj`.
 typedef void (*PropertySetter)(void* obj, s32 value);
+typedef void (*PropertyPayloadSetter)(void* obj, void* payload);  // the setters of the vector, matrix, object and 0x2000 kinds take the payload's pointer
 ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor* d, ScriptValue* val);
 // A DMA tag of a chain (two doublewords; func_001C2430 writes the first).
 struct DmaTag { u64 lo; u64 hi; };
@@ -124,7 +125,12 @@ extern u32 g_scriptStreamExtras;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
 
-void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope); // stays void: retail returns a value, but declared so func_001C13E8 differs in registers
+// Declared void on purpose, although the definition (script_machine.cpp) returns ret: as
+// SetExtraObjectProperty in base_object.cpp, the original returned a ScriptValue by value, a
+// call GCC 2.95 makes with no value register. Declared ScriptValue*, the call becomes a
+// `call_value` setting v0 and the second scheduling pass swaps `lw a1,0(v0)` and `lw a2,4(v0)`
+// in func_001C13E8 (EvalScriptEntry); world.cpp's caller compiles the same either way.
+void EvalScriptExpression(ScriptValue* ret, R11B008Node* expr, ScriptScope* scope);
 // A type and a list of script values: func_001C1AD8 tells whether a value is among them.
 
 // The payloads of script values of kind 10 and 11 (two and three words), copied word by word.
@@ -671,19 +677,19 @@ ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor
             fn(p, val->i);
             break;
         case 2:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 4:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 9:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 10:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 11:
-            fn(p, val->i);
+            ((PropertyPayloadSetter)fn)(p, val->p);
             break;
         case 13:
             break;
@@ -691,7 +697,7 @@ ScriptValue* WritePropertyValue(ScriptValue* out, void* base, PropertyDescriptor
             if (d->type & 0x1000) {
                 fn(p, val->i);
             } else if (d->type & 0x2000) {
-                fn(p, val->i);
+                ((PropertyPayloadSetter)fn)(p, val->p);
             }
             break;
         }

@@ -88,7 +88,7 @@ extern f32 g_gameTime;
 extern f32 g_frameDt;
 
 
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 
 typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
 
@@ -411,7 +411,7 @@ CounterCaption g_completionPercentCaption;
 
 void InitObject(BaseObject* self);
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void SpawnObjectPoolCopies(ObjectPool* self);
 
 

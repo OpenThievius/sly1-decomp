@@ -37,7 +37,7 @@ void InitCommentaryPromptElement(Obj_11A338_eu* self)
         SetBestTimeState((SprintCaption*)self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs()) {
+        if (CommentaryRecord::differs((CommentaryRecord*)g_currentWorld->commentaryRecord)) {
             self->vt->f20(self, GetTextTableEntry(0xAA));
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->f38(self);

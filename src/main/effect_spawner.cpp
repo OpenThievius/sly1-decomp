@@ -8,6 +8,7 @@
 // smaller groups after them could be files of their own. Its name is ours, after its largest
 // family, the effect spawner, whose spawn record the member objects share.
 #include "common.h"
+#include "screen_element.h"
 #include "asm_functions.h"
 #include "effect_spawner.h"
 #include "attached_set.h"
@@ -123,7 +124,7 @@ struct StreamWord {
 
 void* AllocateFrontMemory(s32 size);
 struct BufferedStream;
-void* ReadBufferedU8(BufferedStream* self);
+s32 ReadBufferedU8(BufferedStream* self);
 StreamWord ReadBufferedU32(BufferedStream* self);
 
 void* AllocateFrontMemory(s32 size);
@@ -140,7 +141,7 @@ struct SpawnerLinkedObject { u8 pad00[0x18]; void* target; u8 pad1C[0x18]; s32 v
 
 EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void* CopyToFrontMemory(s32 size, void* owner);
 
@@ -169,7 +170,7 @@ void PopBackMemoryMark(void);
 void* AllocateBackMemory(s32 size);
 void CopyMemory(void* dst, void* src, u32 size);
 
-struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; s32 ownerArgument; };
+struct EffectOwnerSlot { s32* particleOwnerCache; s32* effectOwnerCache; void* ownerArgument; };
 f32 RandomFloatInRange(f32 a, f32 b);
 s32 IsListEmpty(ObjectList* p);
 
@@ -369,7 +370,6 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
 // with that colour at +0x60 (DeferredRequest's Rgba4 would copy it unaligned).
 struct __attribute__((aligned(4))) FadeColor { u8 c[4]; };
 struct FadeEffectRequest { void* fn; f32 f; s32 mode; u8 pad[0x54]; FadeColor col; u8 pad2[0x1C]; };
-extern s32 D_00275BC4;
 
 extern s32 g_displayMode;
 extern f32 g_gameTime;
@@ -461,8 +461,8 @@ struct FloatPair2 { f32 x; f32 y; };
 extern const VtableEntry g_fontMethods[22];
 void* AllocateObjectMemory(u32);
 
-extern s32 g_fonts[];
-extern s32 g_defaultFont;
+extern Font* g_fonts[];
+extern Font* g_defaultFont;
 
 
 
@@ -491,13 +491,14 @@ void BeginGifTag(void* obj, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(void* obj, s32 tag, s64 value);
 void BeginGifRegListTag(void* obj, s32 tag, s64 value);
 
-extern s32 g_defaultFont;
+extern Font* g_defaultFont;
 
 void CopyMemory(void* dst, void* src, u32 size);
 
 
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 
 
 
@@ -513,7 +514,7 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 struct GroundCandidate;
 struct GroundFilterContext;
 void PushBackMemoryMark(void* self);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PopBackMemoryMark(void);
 void GatherCollidersInSphere(World* world, Collider* skip, f32 radius, Vec4* center, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
 
@@ -525,19 +526,20 @@ void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 
 void ClearList(ObjectList* p);
-extern "C" s32 PostSemaphore(void* a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 extern ObjectList g_deferredReleaseListA;
 extern ObjectList g_deferredReleaseListB;
 extern ObjectList g_deferredReleaseListC;
 extern s32 g_buildFrameData;
-extern void* g_frameReadySemaphore;
+extern s32 g_frameReadySemaphore;
 
 
 
 extern s32 g_drawFrameData;
-extern s32 g_maskedImagesPacket;
-extern s32 g_gifChannel;
+extern void* g_maskedImagesPacket;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 struct DmaChannel;
 extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
@@ -549,7 +551,7 @@ extern "C" void StartDmaChain(DmaChannel* ch, void* tadr);
 
 
 extern s8 g_fontEscapeKeys[];
-extern s32 g_fonts[];
+extern Font* g_fonts[];
 
 
 // NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
@@ -558,7 +560,7 @@ extern s32 g_fonts[];
 #include "font_frame.h"
 PacketWriter* InitGifPacket(PacketWriter* p);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void DetachPacketBufferCopy(PacketWriter* self, s32* count, u32* begin, s32* out, s32 flags);
+void DetachPacketBufferCopy(PacketWriter* self, s32* count, u8** begin, void** out, s32 flags);
 
 // Matched: for loop over i with D_00262264 + i * 0x88.
 
@@ -579,12 +581,12 @@ extern u32 g_packetBufferMemory[];
 extern u8 g_codeChecksumSize[];
 extern s32 g_codeChecksumFailed;
 
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameDoneSemaphore;
 extern volatile s32 g_renderThreadWaiting;
 extern void* g_drawingFrame;
 extern s32 g_fieldOffsetMode;
 
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 
 
@@ -604,24 +606,25 @@ void AddGifXyzfRegListEntry(PacketWriter* s, s32 a, s32 b, s32 c, s32 d);
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
 extern u8 g_vifPacketMemory[], g_renderFrameDataMemory[];
-extern void* g_frameReadySemaphore;
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameReadySemaphore;
+extern s32 g_frameDoneSemaphore;
 extern s32 g_mainAndRenderThreads[];
 void SetListLinkOffset(ObjectList* self, s32 value);
 void AddInterruptHandler(s32 a0, void (*fn)(void), s32 a2);
-void* CreateLockSemaphore(s32 initCount, s32 maxCount);
+s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 void func_0015E678(void);
 
 
 
-extern void* g_frameReadySemaphore;
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameReadySemaphore;
+extern s32 g_frameDoneSemaphore;
 extern u32 g_renderFrameIndex;
-extern s32 g_vif1Channel;
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_vif1Channel;
+extern DmaChannel* g_gifChannel;
 extern s32 g_fieldOffsetMode;
 
-extern "C" s32 AwaitSemaphore(void* p);
+extern "C" s32 AwaitSemaphore(s32 sema);
 extern "C" s32 WaitDmaChannel(DmaChannel* ch, s32 mode, s32 timeout);
 
 
@@ -654,14 +657,14 @@ typedef float f32;
 void DrawFontQuad(Font* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, PacketWriter* s);
 extern void* g_drawingFrame;
-extern void* g_frameReadySemaphore;
+extern s32 g_frameReadySemaphore;
 extern volatile s32 g_renderThreadWaiting;
 
-extern void* g_frameDoneSemaphore;
+extern s32 g_frameDoneSemaphore;
 extern s32 g_nextBuildFrameIndex;
 extern s32 g_buildFrameData;
 
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void BeginDmaTag(PacketWriter* self);
 
@@ -1872,7 +1875,7 @@ void SpawnRecordEffects(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Qu
         CopyEffectOwnerMargin(node, self);
         if (h) {
             if (h->ownerArgument) {
-                typedef void (*F)(EffectOwner*, s32);
+                typedef void (*F)(EffectOwner*, void*);
                 ((F)node->desc->m17)(node, h->ownerArgument);
             }
         }
@@ -1972,7 +1975,7 @@ void EmitParticleChunk(EffectSpawnerRecord* self, EffectOwnerSlot* h, s32 n, Qua
         ApplyLookSourceToListedObject(set, (LookSource*)self);
         if (h) {
             if (h->ownerArgument) {
-                typedef void (*F)(WorldListedObject*, s32);
+                typedef void (*F)(WorldListedObject*, void*);
                 ((F)set->desc->m17)(set, h->ownerArgument);
             }
         }
@@ -3111,7 +3114,7 @@ void DrawScreenFill(u8* a0)
 // leaves the world's fade list. Does nothing unless the game is in state 3 and not in 1 or 2.
 void UpdateColorFade(ColorFade* self)
 {
-    if (D_00275BC4 != 3) return;
+    if (g_elementStack.state != 3) return;
     s32 g = g_displayMode;
     if (g == 1) return;
     if (g == 2) return;

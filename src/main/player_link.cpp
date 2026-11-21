@@ -545,13 +545,13 @@ void ReleaseFarPlayerLinks(Player* self)
         }
     } else {
         if (self->previousAimCurve != 0) {
-            TransformPointBetweenFrames(0, (PlacedObject*)(*(LinkedFrame**)&self->previousAimCurve)->parent, &((PlacedObject*)self->f23D4)->v140, &pos);
-            LinkItemFn fn = (LinkItemFn)((void**)(*(LinkedFrame**)&self->previousAimCurve)->item->desc)[12];
+            TransformPointBetweenFrames(0, (PlacedObject*)((LinkedFrame*)self->previousAimCurve)->parent, &((PlacedObject*)self->f23D4)->v140, &pos);
+            LinkItemFn fn = (LinkItemFn)((void**)((LinkedFrame*)self->previousAimCurve)->item->desc)[12];
             if (fn != 0) {
-                fn((*(LinkedFrame**)&self->previousAimCurve)->item, &pos, self->f2218, 0, &q, 0, 0, &self->f2218);
+                fn(((LinkedFrame*)self->previousAimCurve)->item, &pos, self->f2218, 0, &q, 0, 0, &self->f2218);
             }
             if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(q), Vu0::Q(q))) > 2500.0f) {
-                *(s32*)&self->previousAimCurve = 0;
+                self->previousAimCurve = 0;
             }
         }
     }

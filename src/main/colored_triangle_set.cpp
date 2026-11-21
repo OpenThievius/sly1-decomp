@@ -47,7 +47,8 @@ ColoredTriangleSet* g_coloredTriangleSet;
 struct BufferedStream;
 TrianglePoint* AllocateZeroedFrontMemory(s32 bytes);
 TriangleIndices* AllocateFrontMemory(s32 bytes);
-TriangleColor* FindAnimRecord(s32 key);
+struct AnimRecord;
+AnimRecord* FindAnimRecord(s32 key);
 
 
 
@@ -118,7 +119,7 @@ void LoadColoredTriangles(ColoredTriangleSet* self, Stream8E* rd)
     self->f5C = 1.0f;
     m = 0;
     for (; m < 5; m++) {
-        TriangleColor* p = FindAnimRecord(m + 0x48E);
+        TriangleColor* p = (TriangleColor*)FindAnimRecord(m + 0x48E);
         TriangleList* r = &self->lists[m];
         if (p != 0) {
             r->col = p[1];

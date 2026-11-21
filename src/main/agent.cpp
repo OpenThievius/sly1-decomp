@@ -199,7 +199,7 @@ void RemoveAgentFromParent(Agent* self)
     self->desc->m03(self);
 }
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 extern u8 g_flagTable[];
 
@@ -351,7 +351,7 @@ static inline void StoreScaledQuadword(Vec4* dst, f32 k, u8* p)
     StoreQuadword((u128*)dst, ScaleQuadword(tv, u));
 }
 extern "C" f32 Arccosine(f32 x);
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 typedef void (*AgentMotionFn)(void* self, Agent* agent, s32 a, s32 b, Vec4* out, f32 t, f32 u);
 
 // The agent's per-step motion: while following a clip's own motion it pushes along the clip's root
@@ -537,13 +537,13 @@ void UpdateAgent(Agent* self, f32 dt)
             Player* target = (Player*)self->desc08()->m62(self);
             if (target != 0 && target == g_player) {
                 if (target->contactOwner != 0 && IsObjectAttached((Collider*)target->contactOwner) != 0) {
-                    SetAgentPrimaryTarget(self, (s32)g_player->contactOwner);
+                    SetAgentPrimaryTarget(self, g_player->contactOwner);
                     if (self->desc08()->m57(self) == 0) {
                         SetAgentPrimaryTarget(self, 0);
                     } else {
                         for (s32 i = 0; i < ((AgentLinks*)self->roster)->count; i++) {
                             if (((AgentLinks*)self->roster)->found[i] != self) {
-                                SetAgentPrimaryTarget(self, (s32)g_player->contactOwner);
+                                SetAgentPrimaryTarget(self, g_player->contactOwner);
                             }
                         }
                     }
@@ -889,7 +889,7 @@ s32 IsAgentPathBlocker(void* unused, Collider* self)
 }
 
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // Whether two points are within reach of each other in the ground plane (x and y).
 static inline s32 IsNearPoint(Vu0::Vec a, Vu0::Vec b, f32 reach)
@@ -1515,7 +1515,7 @@ s32 HandleAgentObjectEvent(Agent* self, AgentHit* ev)
 #include "agent_request.h"
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 // Slot 76 of the agent: refuses (0) when slot 75 refuses the kind; otherwise builds a node query
 // from the request (its object, kind and the agent's position) and returns whether a node accepts
@@ -1955,11 +1955,11 @@ void SetAgentStateClip(Agent* self, s32 index, s32 value)
 }
 
 
-s32 GetAgentStateClip(Agent* self, s32 index)
+void* GetAgentStateClip(Agent* self, s32 index)
 {
     if (IsAgentSlotIndex(index) == 0)
         return 0;
-    return (s32)self->stateClips[index].obj;
+    return self->stateClips[index].obj;
 }
 
 // Adds an extra clip (a hit mask and a clip id) to the agent's list of at most 4; ResolveAgentClips
@@ -2128,9 +2128,9 @@ void StoreAgentTarget(Agent* self, s32* out)
 }
 
 // Sets the secondary target, which SelectAgentTarget uses when there is no primary one.
-void SetAgentSecondaryTarget(Agent* self, s32 value)
+void SetAgentSecondaryTarget(Agent* self, void* value)
 {
-    self->secondaryTarget = (void*)value;
+    self->secondaryTarget = value;
     self->hasSecondaryTarget = 1;
 
 }
@@ -2176,9 +2176,9 @@ void PickAgentSecondaryTarget(Agent* self)
 }
 
 // Sets the primary target, the first choice of SelectAgentTarget.
-void SetAgentPrimaryTarget(Agent* self, s32 value)
+void SetAgentPrimaryTarget(Agent* self, void* value)
 {
-    self->primaryTarget = (void*)value;
+    self->primaryTarget = value;
 }
 
 
@@ -2231,10 +2231,10 @@ s32 IsObjectOfKind(BaseObject* list, s32 key);
 // The agent's collision callback: adds a probe contact unless contacts are disabled and, for its
 // own target (or a parentless object of kind 0x4C), adds the mesh contacts between each attached
 // mesh key object and the other collider into hitContacts, which DispatchAgentContactHits reads.
-void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, FaceRef* a3, u8* a4, void* a5)
 {
     if (a0->contactsDisabled == 0) {
-        AddTurningColliderProbeContact(a0, a1, (void*)a4, (void*)a5);
+        AddTurningColliderProbeContact(a0, a1, a4, a5);
     }
     if (a1 != a0->desc08()->m62(a0)) {
         if (a1->parent != 0) {
@@ -2252,7 +2252,7 @@ void CollideAgentWithObject(Agent* a0, Collider* a1, s32 a2, s32 a3, s32 a4, s32
                               ((Collider*)e->obj)->tree.count,
                               (FaceRef*)((Collider*)e->obj)->tree.nodes, 0, (PooledContact**)&a0->hitContacts);
             } else if (a3 != 0) {
-                CreateMeshPairContacts((Collider*)e->obj, a1, a2, (FaceRef*)a3, (u8*)a4, (PooledContact**)&a0->hitContacts);
+                CreateMeshPairContacts((Collider*)e->obj, a1, a2, a3, a4, (PooledContact**)&a0->hitContacts);
             }
         }
     }
@@ -2513,7 +2513,7 @@ set:
 
 
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Creates a keeper record (class 0x89) and queues GroupAnimationEventObjects on it; StartAgent
 // calls it.
@@ -2666,7 +2666,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
     PopBackMemoryMark();
 }
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 // Queues UpdateItemKeeper on the world once, unless the keeper is in state 3 or already queued;

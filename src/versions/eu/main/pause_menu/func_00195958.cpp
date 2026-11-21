@@ -44,7 +44,7 @@ void ActivatePauseMenuSelection(Menu_195958_eu* self)
             Sub_195958_eu* s = (Sub_195958_eu*)&g_mapScreenList;
             if (s->f260 != 0) {
                 SetPauseMenuLayerPage(self, 0, -1);
-                PushStackElement((ElementStack*)g_elementStack, (ScreenElement*)s);
+                PushStackElement(&g_elementStack, (ScreenElement*)s);
                 return;
             }
             StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);

@@ -47,7 +47,7 @@ struct FreeSlot { FreeSlot* next; };
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct T219CHook;
 struct World;
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void ReleaseCallRecords(World* self, T219CHook* node);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 void* AllocateFrontMemory(s32 size);
@@ -846,9 +846,9 @@ void CommitStateWalkerArrival(StateWalker* self)
 
 // When notification 5 comes from the walker's own player, commits its arrival and starts its
 // next edge.
-void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, s32 b)
+void HandleStateWalkerTrackEnd(StateWalker* self, s32 a, AnimationPlayer* b)
 {
-    if (a == 5 && b == (s32)self->player) {
+    if (a == 5 && b == self->player) {
         CommitStateWalkerArrival(self);
         StartNextStateWalkerEdge(self);
     }
@@ -1050,7 +1050,7 @@ s32 IsCompanionAgentBlocker(CompanionAgent* self, Collider* ent)
 s32 IsPadSelectFlagHeld(World* world);
 struct ObjectGatherer;
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
 

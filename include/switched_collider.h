@@ -122,8 +122,8 @@ struct StepSequenceGroup {
 struct PlayerMessageRecord {
     s32 kind;               // 0x00
     s32 arg;                // 0x04
-    s32 data;               // 0x08
-    s32 fn;                 // 0x0C
+    void* data;             // 0x08: what the callback is called with (the sending object)
+    void (*fn)(void* sender, Player* self);   // 0x0C
 };
 
 // One of class 0x19's four slots at 0x6B0: an object and a position.
@@ -372,7 +372,7 @@ struct Player : TurningCollider {
         u8 trail[0x21C0 - 0x1520];  // 0x1520: a record func_001C29E8 and func_001C3028 work on
         struct {
             void* trailOwner;   // 0x1520: the object the trail follows (the player's f23D0)
-            s32 trailAnimRecord; // 0x1524: FindAnimRecord(0x15A)
+            void* trailAnimRecord; // 0x1524: FindAnimRecord(0x15A)
             u8 pad1528[0x1530 - 0x1528];
             f32 f1530;          // 0x1530
             u8 pad1534[0x1538 - 0x1534];
@@ -391,10 +391,10 @@ struct Player : TurningCollider {
     Vec4 boundsPoints[3];  // 0x21D0: the points the player's bounds are expanded over
     void* aimTarget;        // 0x2200: the object aimed at
     BaseObject* boundObject; // 0x2204: the object aimed at (player_target.cpp)
-    s32 aimCurve;           // 0x2208: the curve object aimed at or ridden
+    void* aimCurve;           // 0x2208: the curve object aimed at or ridden
     f32 aimCurvePos;        // 0x220C: the time along the aim path (TrackAimTargetPoint)
     BaseObject* previousBoundObject; // 0x2210: the last f2204; cleared by aim state 0 (func_001C61E0)
-    s32 previousAimCurve;   // 0x2214: the same
+    void* previousAimCurve;   // 0x2214: the same
     f32 f2218;               // 0x2218
     s32 pathFlipped;        // 0x221C: set, the path's frame is turned about (func_001D1630)
     s32 state;              // 0x2220: the player's state, 0..16
@@ -803,7 +803,7 @@ struct World2Boss : Agent {
     void* keyedObjects;     // 0xE24
     s32 phase;              // 0xE28: the number of phases passed
     s32 drawsRing;          // 0xE2C: set while the marker ring is drawn
-    s32 phaseClips[3];      // 0xE30
+    void* phaseClips[3];     // 0xE30
     s32 pendingWalkerTarget; // 0xE3C: the walker key to go to when state 16 ends
     Vec4 launchPoint;      // 0xE40
 };
@@ -826,10 +826,10 @@ struct SeekingAgent : Agent {
     void* partner;          // 0xC2C: an object (slot 91 calls its slot 80)
     s32 requestKind;        // 0xC30
     s32 requestInPool;      // 0xC34: set when the requester is in the partner's pool
-    s32 removeClip;         // 0xC38
-    s32 hurtClip;           // 0xC3C
-    s32 removeClipAlt;      // 0xC40
-    s32 hurtClipAlt;        // 0xC44
+    Animation* removeClip;         // 0xC38
+    Animation* hurtClip;           // 0xC3C
+    Animation* removeClipAlt;      // 0xC40
+    Animation* hurtClipAlt;        // 0xC44
     u8 padC48[0xC50 - 0xC48];
 };
 
@@ -868,8 +868,8 @@ struct TempoPlayerEntry {
 // 0x13, the tempo agent: counts beats at a tempo (UpdateWorld3Boss) for the class 0x1C
 // beat-press colliders to judge presses against (JudgeWorld3BeatPressInput).
 struct World3Boss : Agent {
-    s32 clips[4];           // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
-    s32 pendingClip;        // 0xC20: the clip of the scheduled press
+    Animation* clips[4];         // 0xC10: the clips of D_00275CF8 it resolves at load (ResolveAgentClip, func_001EBF40)
+    Animation* pendingClip;      // 0xC20: the clip of the scheduled press
     void* lines[4];         // 0xC24: the timelines of the links 0x4E7.. (func_001EC828 takes the one at fC40)
     World3Timeline* pendingTimeline; // 0xC34: the timeline to start when the beat clock restarts
     World3Timeline* heldTimeline; // 0xC38: the timeline it runs (EndHeldWorld3Timeline)

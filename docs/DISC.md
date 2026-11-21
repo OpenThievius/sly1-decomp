@@ -321,7 +321,12 @@ index at +0x2A, 480 at +0x24) and a MIDI-form event stream: 369 sequences in all
 {bank, record}), which names every record of the seven global banks once. Bank 0 is loaded at
 start (0x1BF130), the level's global bank (the level's s16, see Levels) on demand
 (0x1BE268); a load sends the start sector (0x11D140) and keeps the handle the driver
-returns, and the game then asks the driver about each of the bank's sounds (0x11D760). A
+returns, and the game then asks the driver (0x11D760, IOP command 0x1A) whether each of the
+bank's sounds loops. The answer is the keepWhenFar of the sound's record: a sound that answers
+1 goes on until stopped, and the per-frame update restarts its voice whenever the driver
+reports it over. The answer is the global record's u16 at +6, set for exactly the records whose
+samples loop (118 of 119 in the seven global banks); answering 1 for every sound made the game
+restart each one-shot effect as it ended. A
 sound starts with the bank handle and record number, a volume word (1.0 is 0x400) and a pitch
 word (0x11D598, from 0x1BFCD8), and the driver returns a voice to adjust and stop. The level
 bank (0x1BEB10, 0x1BEC58) is started once, record 0 at volume 0x400; the game sends nothing

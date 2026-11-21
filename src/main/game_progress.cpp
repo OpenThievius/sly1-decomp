@@ -30,7 +30,7 @@
 #include "word_copy.h"
 #include "camera.h"
 #include "object_finder.h"
-#include "element_stack_state.h"
+#include "element_stack.h"
 #include "mesh_face03.h"
 #include "functions/anim_record.h"
 #include "functions/base_object.h"
@@ -241,18 +241,19 @@ extern u8 g_stripMeshMode1Program[];
 
 // the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
 struct SessionKey : IdentityKey {
-    s32 Same(SessionKey* o)
+    // static: a key can be null, which a method on this must not be called with
+    static s32 Same(SessionKey* k, SessionKey* o)
     {
-        if (this == o) {
+        if (k == o) {
             return 1;
         }
-        if (this == 0) {
+        if (k == 0) {
             return 0;
         }
         if (o == 0) {
             return 0;
         }
-        return ((signedWords[2] ^ signedWords[6]) ^ (o->signedWords[2] ^ o->signedWords[6])) == 0;
+        return ((k->signedWords[2] ^ k->signedWords[6]) ^ (o->signedWords[2] ^ o->signedWords[6])) == 0;
     }
 };
 
@@ -286,7 +287,6 @@ struct PlayerListWalk {
     }
 };
 
-extern ElementStackState g_elementStack;
 extern SessionKey g_sessionFadeKey;
 extern s32 g_resumeSoundSetupDone;
 
@@ -330,7 +330,7 @@ void StartObjectFade(IdentityKey* obj, s32 value, s32 count);
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table g_gifPacketMethods[];
-s32 InitPacketBuffer(PacketWriter* a);
+PacketWriter* InitPacketBuffer(PacketWriter* a);
 
 void ApplyCompletionFlags(s32 mode);
 
@@ -474,7 +474,7 @@ extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void WriteVifMscalf(PacketWriter* s, void* program);
 void WriteVifFlushE(PacketWriter* s);
 void CloseDmaTag(PacketWriter* s);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void BeginDmaTag(PacketWriter* s);
 void CopyMemory(void* dst, void* src, u32 size);
 
@@ -1365,7 +1365,7 @@ void ResumeAtSavedLevel(void)
         k = &g_sessionFadeKey;
     }
     ClearTwoWords(D_002623D8);
-    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !k->Same((SessionKey*)&D_00275B04)) {
+    if (g_elementStack.resumeState != 1 || g_saveData->totalTime != 0.0f || !SessionKey::Same(k, (SessionKey*)&D_00275B04)) {
         StartObjectFade(k, -1, 1);
     } else if (g_elementStack.resumeState == 1) {
         if (g_resumeSoundSetupDone == 0) {
@@ -1385,7 +1385,7 @@ void ResumeAtSavedLevel(void)
                 }
             }
             g_elementStack.resumeState = -1;
-            SetElementStackState((ElementStack*)&g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
         }
     }
 }
@@ -2103,8 +2103,7 @@ void BuildLitVertexPacket(VertexBatch* batch)
     }
     CloseDmaTag(&g_vifPacketWriter);
     for (s32 t = 0; t < self->texCount; t++)
-        // the tag's address is the texture's data, which AddDmaRefTag takes as its integer bits
-        ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
+        AddDmaRefTag(&g_vifPacketWriter, self->tex[t]->n, self->tex[t]->data);
     BeginDmaTag(&g_vifPacketWriter);
     WriteVifMscal(&g_vifPacketWriter, g_litBatchSecondProgram);
     WriteVifFlushE(&g_vifPacketWriter);

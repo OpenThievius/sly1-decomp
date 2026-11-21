@@ -51,7 +51,7 @@ struct FrameTarget {
     s32 value;              // 0x04: where they come from
     union {
         struct QueuedGifTags* dst;  // 0x08: where they go (func_001694A0)
-        u32 dstAddr;        // 0x08: func_001696B8 moves the ones inside a range
+        u8* dstAddr;       // 0x08: func_001696B8 moves the ones inside a range
     };
     s32 flag;               // 0x0C: or-ed into the first tag (func_001694A0)
 };

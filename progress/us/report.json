@@ -5,15 +5,15 @@
   "matched_code": "1112400",
   "matched_code_percent": 100.0,
   "total_data": "431059",
-  "matched_data": "430919",
-  "matched_data_percent": 99.96752184735732,
+  "matched_data": "430959",
+  "matched_data_percent": 99.97680131954094,
   "total_functions": 4807,
   "matched_functions": 4807,
   "matched_functions_percent": 100.0,
   "complete_code": "1112400",
   "complete_code_percent": 100.0,
-  "complete_data": "430919",
-  "complete_data_percent": 99.96752184735732,
+  "complete_data": "430959",
+  "complete_data_percent": 99.97680131954094,
   "total_units": 193,
   "complete_units": 191
  },
@@ -5105,7 +5105,7 @@
      "address": "2984",
      "metadata": {
       "virtual_address": "1169248",
-      "demangled_name": "TestSoundInBank"
+      "demangled_name": "TestSoundLoops"
      }
     },
     {
@@ -35146,7 +35146,7 @@
      "address": "896",
      "metadata": {
       "virtual_address": "1828200",
-      "demangled_name": "IsSoundEntryAvailable"
+      "demangled_name": "IsSoundEntryLooping"
      }
     },
     {
@@ -53669,15 +53669,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "175156",
-    "matched_data": "175036",
-    "matched_data_percent": 99.93148964351778,
+    "matched_data": "175076",
+    "matched_data_percent": 99.95432642901186,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "175036",
-    "complete_data_percent": 99.93148964351778,
+    "complete_data": "175076",
+    "complete_data_percent": 99.95432642901186,
     "total_units": 1,
     "complete_units": 0
    },
@@ -53771,15 +53771,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "430919",
-    "matched_data_percent": 99.96752184735732,
+    "matched_data": "430959",
+    "matched_data_percent": 99.97680131954094,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "430919",
-    "complete_data_percent": 99.96752184735732,
+    "complete_data": "430959",
+    "complete_data_percent": 99.97680131954094,
     "total_units": 4,
     "complete_units": 2
    }

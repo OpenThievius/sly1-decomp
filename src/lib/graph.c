@@ -74,7 +74,7 @@ typedef struct GsOffset {
 s32 PrintFormatted(const char* fmt, ...);
 void SetVideoModeSyscall(s32 interlace, s32 mode, s32 field);
 void RemoveInterruptHandler(s32 cause, s32 id);
-s32 ReadGsInterruptMask(s32 mask);
+s32 ReadGsInterruptMask(void);
 s32 WriteGsInterruptMask(u64 mask);
 s32 DisableInterruptCause(s32 cause);
 GsParam* GetGsParams(void);
@@ -232,7 +232,7 @@ s32 SwapDoubleBuffer(void* self, s32 flag)
 /* Reads the GS interrupt mask, writes a new one and returns the old. */
 s32 SwapGsInterruptMask(s32 mask)
 {
-    s32 r = ReadGsInterruptMask(mask);
+    s32 r = ReadGsInterruptMask();
     WriteGsInterruptMask(mask);
     return r;
 }
@@ -263,9 +263,9 @@ void SetFieldDrawOffset(GsOffset* self, s16 a1, s16 a2, s16 a3)
 }
 
 /* Returns the GS interrupt mask (ReadGsInterruptMask). */
-s32 GetGsInterruptMask(s32 mask)
+s32 GetGsInterruptMask(void)
 {
-    return ReadGsInterruptMask(mask);
+    return ReadGsInterruptMask();
 }
 
 /* The display register of a mode: position, magnification, size. */

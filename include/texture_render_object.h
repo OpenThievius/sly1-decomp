@@ -11,10 +11,10 @@
 
 struct TextureRenderObject : PlacedObject {
     void* drawRange;        // 0x2D0: the range record func_00152E48 builds for; func_00153328 tests it before drawing
-    s32 firstPacket;        // 0x2D4: the first DMA packet func_00152E48 builds (func_001533A8 sends it)
-    s32 firstPacketSize;    // 0x2D8: its size
-    s32 secondPacket;       // 0x2DC: the second packet
-    s32 secondPacketSize;   // 0x2E0: its size
+    s32 firstPacketQwc;     // 0x2D4: the first DMA packet func_00152E48 builds (func_001533A8 sends it)
+    void* firstPacket;       // 0x2D8: its size
+    s32 secondPacketQwc;     // 0x2DC: the second packet
+    void* secondPacket;      // 0x2E0: its size
     u8 pad2E4[0x2F0 - 0x2E4];
 };
 

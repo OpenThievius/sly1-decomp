@@ -14,7 +14,7 @@ void ReadAnimationEvents(void* unused, Stream83* r, s32 flag, s32* count, AnimEv
         switch (e->kind) {
         case 44:
         case 51:
-            ReadOptionalBufferedBlock((BufferedStream*)r, (u32*)&e->a8.i);
+            ReadOptionalBufferedBlock((BufferedStream*)r, (u8**)&e->a8.i);
             break;
         case 0: {
             SoundChoice t;

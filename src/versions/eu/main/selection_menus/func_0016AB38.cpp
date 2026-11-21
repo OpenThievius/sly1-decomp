@@ -60,5 +60,5 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
             TeleportStateWalker(self->walkers[3].walker, key);
         }
     }
-    PushStackElement((ElementStack*)g_elementStack, &g_selectionCaption);
+    PushStackElement(&g_elementStack, &g_selectionCaption);
 }

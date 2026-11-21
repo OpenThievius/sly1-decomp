@@ -35,7 +35,17 @@
 struct Mat3;
 
 
-void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value); // stays void: retail returns a ScriptValue by value through the hidden pointer, a call with no value register, which a pointer return changes in func_00183A90 and func_00183C38
+// Declared void on purpose, although the definition (object_properties.cpp) returns self. The
+// original returned a ScriptValue by value: retail's callers here construct the argument
+// (func_0011B008), pass a temporary as the hidden first argument and destroy both after the call
+// (func_0011B060 with in-charge 2), as GCC 2.95 does for a class returned in memory. GCC calls
+// such a function with no value register, a `call` insn, and the callee hands the address back
+// in v0. Declared ScriptValue* here, the call becomes a `call_value` setting v0, whose dependences
+// change the second scheduling pass's order: func_00183A90 and func_00183C38 then swap
+// `move a1,v0` and `move a0,sp` before func_0011B7D0 (cc1plus -dS -dR dumps, 2026-11-21). The
+// callers in script_machine.cpp compile the same either way. The project calls the value's class
+// through free functions (include/script_value.h), so the no-value call is spelled void.
+void SetExtraObjectProperty(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
 
 ScriptValue* BuildScriptListFromPairs(ScriptValue* self, s32 n, s32* keys, sptr* vals);
 
@@ -135,7 +145,7 @@ extern const s32 g_scriptEventOffsets[];
 extern s32 g_scriptEventPairs[];
 
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 
@@ -503,6 +513,10 @@ void GetObjectAliasId(BaseObject* self, s32* out)
 // Runs the script handler stored under key in the object's script scope (nothing if there is
 // none): makes a new scope under the handler's own, defines the handler's self name as this
 // object and its parameters from list, and evaluates its body. Queued by TriggerScriptEvent.
+// The list arrives as QueuedCall's third word (k3, a 32-bit word on the PS2, where RunQueuedCalls
+// passes it on unchanged): TriggerScriptEvent queues the call with the list's address in that word
+// (or 0), so the word is a pointer here. AppendQueuedCall takes its words as s32 because the other
+// queued calls (all but this one) pass plain integers; on a 64-bit build the word is a hazard.
 void RunScriptEventHandler(BaseObject* self, s32 key, R11B008Node* list)
 {
     ScriptValue q0;

@@ -146,7 +146,7 @@ f32 D_00262E30 = 50.0f;
 
 // The path the player follows (0x23B8, 0x23BC): its frame, its curve, and whether it is a rail.
 struct PathRecord { u8 pad00[0x18]; PlacedObject* frame; u8 pad1C[0x34 - 0x1C]; PathCurve* curve; u8 pad38[0x40 - 0x38]; s32 isRail; };
-typedef s32 (*VFn_170410)(Player* self, void* out);
+typedef s32 (*VFn_170410)(Player* self, void* out, s32 end);
 
 f32 g_slideRateFirst = 0.8f;
 f32 g_slideRateSecond = 0.5f;
@@ -467,7 +467,7 @@ void LoadPlayer(Player* self, BufferedStream* stream)
 u8* CreatePoseSource(World* root, PlacedObject* value, const T2195_Vt* table);
 void InsertAttachment(PlacedObject* self, Attachment* src);
 void AddMatrixAttachment(PlacedObject* self, s32 key, Attachment** out);
-s32 FindAnimRecord(s32 key);
+AnimRecord* FindAnimRecord(s32 key);
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
 void* AllocateZeroedFrontMemory(s32 n);
 extern u8 g_childSumPoseSourceMethods[];
@@ -788,7 +788,7 @@ void StepPlayer(Player* self, f32 t)
 // fixed rates, state 7 none, a contact the player can stand on (virtual method 90) a fixed
 // friction, and state 4 other fixed rates for most sub-states. The friction is divided by the
 // gravity scale at the end.
-void ComputePlayerSlideRates(Player* self, BodyContact* out)
+void ComputePlayerSlideRates(Player* self, BodyContact* out, s32 end)
 {
     f32 a;
     f32 b;
@@ -797,7 +797,7 @@ void ComputePlayerSlideRates(Player* self, BodyContact* out)
         b = g_slideRateSecond;
     } else if (self->state == 7) {
         goto zero_both;
-    } else if (((VFn_170410*)self->desc)[90](self, out) != 0) {
+    } else if (((VFn_170410*)self->desc)[90](self, out, end) != 0) {
         if (self->state == 6 && self->targetMode == 4 && ((PathRecord*)self->targetTrack)->isRail != 0) {
             goto zero_both;
         }
@@ -1499,7 +1499,7 @@ s32 CollectBoundsSpans(Vec4* p, Vec4* a, Vec4* b, f32 radius, s32 count, Collide
 // was filled: samples the animation (at its marker 0x142 time, or 0) for the foot, the part and the
 // body, then stores in the record the probe's start, the segment's ends, the radius (the body's two
 // extents plus 10) and the first collider span hit by the segment.
-void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d)
+void MeasurePlayerFootProbe(void* self, void* a, void* b, void* part, f32 k, void* d)
 {
     Player* pl = (Player*)self;
     ProbeHolder* obj = (ProbeHolder*)b;
@@ -1556,7 +1556,7 @@ void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d
 }
 
 struct ProbeResult { u8 pad00[0x20]; Vec4 v20; };
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 void PushBackMemoryMark(void);
 void PopBackMemoryMark(void);
 void GatherCollidersInBox(World* world, Collider* skip, Vec4* a, Vec4* b, s32 (*filter)(void*, Collider*), void* arg, s32* count, Collider*** out);
@@ -1583,7 +1583,7 @@ s32 ProbePlayerFootGround(Player* self, void* record, void* part)
     TransformPointBetweenFrames(self, 0, &p->v30, &from);
     TransformPointBetweenFrames(self, 0, &p->v40, &to);
     GatherCollidersInBox(self->world, (Collider*)self->root, &from, &to, 0, 0, &count, &list);
-    s32 found = FindNearestSpanObject(0, &from, &to, count, list, &span);
+    Collider* found = FindNearestSpanObject(0, &from, &to, count, list, &span);
     PopBackMemoryMark();
     if (found != 0) {
         Vu0::Q(span.q[0]) = Vu0::Sub(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector));
@@ -1600,7 +1600,7 @@ s32 ProbePlayerFootGround(Player* self, void* record, void* part)
 
 s32 AimPlayerAtTarget(void* self);
 
-void MeasurePlayerFootProbe(void* self, s32 a, s32 b, void* part, f32 k, void* d);
+void MeasurePlayerFootProbe(void* self, void* a, void* b, void* part, f32 k, void* d);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec4* origin, Vec4* vel, Vec4* velSum, Vec4* spin, Vec4* spinSum);
 
 
@@ -1620,9 +1620,9 @@ void UpdatePlayerState0(Player* self)
     if (self->footPartA == 0) return;
     u8* p1 = (u8*)&self->footProbeA;
     f32 k = 5.0f;
-    MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
+    MeasurePlayerFootProbe(self, self->f628, self->f620, self->footPartA, k, p1);
     u8* p2 = (u8*)&self->footProbeB;
-    MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
+    MeasurePlayerFootProbe(self, self->f62C, self->f624, self->footPartB, k, p2);
     if (ProbePlayerFootGround(self, p1, self->footPartA) != 0) {
         if (ProbePlayerFootGround(self, p2, self->footPartB) != 0) return;
     }
@@ -2477,7 +2477,6 @@ void UpdatePlayerGrabs(Player* self);
 extern s32 g_controlBlockingElementCount;
 extern s32 g_resumeSoundSetupDone;
 extern StepSequence* g_playerStepSequence;
-extern u8 g_elementStack[];
 
 // Slot 73 of class 0x07: the player's control for a frame. Without control (an activation queued, the
 // entry queue running) the pad is a cleared record. It works out a jump (the pad's 0x40 bit near a
@@ -2881,7 +2880,7 @@ held:
             if (skipStep) {
                 if (self->subState == 0x22) {
                     sub = 0x23;
-                    PopStackElement((ElementStack*)g_elementStack);
+                    PopStackElement(&g_elementStack);
                     break;
                 }
             } else if (self->subState == 0x22) {
@@ -3391,6 +3390,7 @@ static inline Vu0::Vec NormalizeInPlace_175170(Vec4& v, const Vec4& fallback)
 // A word of another object by its offset. Its uses below are left raw: the objects they reach
 // (f2490, f2494, boundObject, aimCurve, leapTarget, the tracks) are of classes the code does not
 // show, so no type has these fields.
+// The base is a pointer (every use passes one): a word holding an address is not a base.
 #define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
 
 // Changes the player's state and sub-state (nothing happens if both are unchanged): runs the
@@ -3612,7 +3612,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 12:
             RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)&g_camera->ctl460, self, 0);
             if (D_00270454 != 0) {
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
             }
             break;
         case 9:
@@ -4470,7 +4470,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             RequestCameraSnap(g_camera, 0);
             g_typedTextCaptionBox.child = self->pendingCaption;
             self->pendingCaption = 0;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
             break;
         }
         case 35:
@@ -4869,10 +4869,9 @@ struct InteractTarget {
     u8 pad0[0x2D0];
     s32 mode;               // 0x2D0
 };
-extern s32 D_00275BC4;
 
 // Says what the player can do with an interact target, by state: out[0] (can start it) and out[1]
-// (can take it), mostly depending on the target's mode being 1. out[0] is cleared unless D_00275BC4
+// (can take it), mostly depending on the target's mode being 1. out[0] is cleared unless g_elementStack.state
 // is 3.
 void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
 {
@@ -4915,11 +4914,10 @@ void GetPlayerInteractFlags(Player* self, InteractTarget* other, s32* out)
         out[1] = 1;
         break;
     }
-    if (D_00275BC4 != 3)
+    if (g_elementStack.state != 3)
         out[0] = 0;
 }
 
-extern u8 g_elementStack[];
 
 
 // For an interact target of mode 1 or 2 shows it in the typed-text caption box. Otherwise, unless
@@ -4928,7 +4926,7 @@ void ReceivePlayerNode(Player* self, InteractTarget* node)
 {
     if ((u32)(node->mode - 1) < 2) {
         g_typedTextCaptionBox.child = node;
-        PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+        PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         return;
     }
     if (self->state != 0xC) {
@@ -4955,7 +4953,7 @@ void SetPlayerPosition(Player* self, Vec4* pos)
 void StartPlacedObject(void* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
 void SetFollowObjects(void* a, s32 b, s32 c);
-s32 FindAnimRecord(s32 key);
+AnimRecord* FindAnimRecord(s32 key);
 
 
 

@@ -85,7 +85,7 @@ void ClearObjectRecordValues(PlacedObject* records);
 void RecomputePlacedObjectFrame(PlacedObject* self);
 void ComputePlacedObjectWorldFrame(PlacedObject* self);
 void BeginPlacedObjectMove(PlacedObject* self);
-void MovePlacedObject(PlacedObject* self, s32 flag, f32 dt);
+void MovePlacedObject(PlacedObject* self, f32 dt, s32 flag);
 void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t);
 void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);

@@ -69,7 +69,7 @@ s32 FillRingBuffer(RingBuffer* self, s32 n, MemoryReader* port)
 // ring buffer into the sink o, one contiguous run at a time up to the wrap point. Advances readPos
 // and updates the held/space counters by whether the sink reports itself idle; gives back the bytes
 // moved. A non-positive n makes it do a single pass.
-s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o)
+s32 DrainRingBuffer(RingBuffer* self, s32 n, TransferSink* o)
 {
     s32 total = 0;
     s32 rem = n;
@@ -81,12 +81,12 @@ s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o)
         s32 chunk = self->size - self->readPos;
         if (rem < chunk)
             chunk = rem;
-        s32 s0 = o->methods->put((StreamSink*)((u8*)o + o->methods->adj1), chunk, self->buf + self->readPos);
+        s32 s0 = o->Put(chunk, self->buf + self->readPos);
         if (s0 == 0)
             break;
         self->readPos = (self->readPos += s0) % self->size;
         self->filled -= s0;
-        if (o->methods->idle((StreamSink*)((u8*)o + o->methods->adj2)) != 0)
+        if (o->Idle() != 0)
             self->held += s0;
         else
             self->space += s0;
@@ -127,7 +127,7 @@ void ConsumeSpan(RingBuffer* p, s32 n)
     p->held -= n;
 }
 
-extern "C" void* CopyBytes(void* dst, void* src, s32 n);
+extern "C" void* CopyBytes(void* dst, const void* src, s32 n);
 
 // Reads up to want bytes from the memory reader into dst, advances it and gives back the count
 // read.

@@ -67,7 +67,7 @@ struct PlayerBlendItem;
 struct TurningCollider;
 struct StateGraph;
 void StartAgent(Agent* self);
-s32 ResolveAgentClip(Agent* self, s32 id);
+void* ResolveAgentClip(Agent* self, s32 id);
 void EnterAgentState(Agent* self, s32 evt, Animation* arg);
 struct AgentNotification;
 s32 GetAgentRosterState(Agent* self);
@@ -184,10 +184,10 @@ struct __attribute__((aligned(16))) HitCandidate { u8 pad0[0x40]; f32 score; u8 
 // Tests the segment a1..a2 against each of the a3 colliders in the table a4 and gives back the one
 // hit with the lowest score (0 if none), copying that hit's record to a5 if given. When bit 0 of a0
 // is set, a first hit with a zero score is skipped in favour of the second.
-s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
+s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32* a4, void* a5, f32 f)
 {
     HitCandidate buf[2];
-    s32* table = (s32*)a4;
+    s32* table = a4;
     s32 best = 0;
     f32 bestScore = 3.4028234663852886e+38f;
     s32 i;
@@ -257,7 +257,7 @@ s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2)
 {
     u8 buf[0x70];
     s32 x;
-    s32 y;
+    s32* y;
     PushBackMemoryMark();
     GatherCollidersInBox(self->world, 0, (Vec4*)a1, (Vec4*)a2, (s32 (*)(void*, Collider*))IsWorld2BossBlocker, self, &x, (Collider***)&y);
     s32 r = FindNearestHitObject(0, a1, a2, x, y, buf, g_bossNearestHitRange);
@@ -387,7 +387,7 @@ void AdvanceWorld2BossPhase(World2Boss* self)
 {
     DecrementGaugeCount((GaugeBar*)&g_gaugeBarElement);
     s32 idx = self->phase;
-    ChangeAgentState(self, g_world2BossPhaseStates[idx], (void*)self->phaseClips[idx]);
+    ChangeAgentState(self, g_world2BossPhaseStates[idx], self->phaseClips[idx]);
     s32 n = self->phase;
     self->pendingWalkerTarget = g_world2BossPhaseValues[n];
     self->phase = n + 1;

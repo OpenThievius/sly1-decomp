@@ -103,7 +103,7 @@ void* FindLevelEntry(s32 key)
 
 // The record a level entry keeps at +8 (World::commentaryRecord points to it; func_001E00B0 streams it):
 // its two words at +4 and +0x1C differ while there is commentary to play.
-struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
+struct CommentaryRecord { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; static s32 differs(CommentaryRecord* r) { if (r == 0) return 0; return r->a != r->b; } };
 
 
 void* FindLevelEntry(s32 k);
@@ -125,7 +125,7 @@ void InitCommentaryPromptElement(SprintCaption* self)
         if (e->timerDuration != 0.0f) {
             g_currentWorld->timerDuration = e->timerDuration;
         }
-        if (!(((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs())) {
+        if (!CommentaryRecord::differs((CommentaryRecord*)g_currentWorld->commentaryRecord)) {
             g_currentWorld->commentaryRecord = (CommentaryRecord*)e->record;
         }
         if (g_currentWorld->creditsText == 0 || !GetStringLength((const char*)g_currentWorld->creditsText)) {
@@ -145,7 +145,7 @@ void InitCommentaryPromptElement(SprintCaption* self)
         SetBestTimeState(self, 0);
     }
     if (g_currentEntry->bits & 8) {
-        if (((CommentaryRecord*)g_currentWorld->commentaryRecord)->differs()) {
+        if (CommentaryRecord::differs((CommentaryRecord*)g_currentWorld->commentaryRecord)) {
             self->vt->m08(self, "Press &2L&. for Bonus Commentary");
             SetScreenElementHoldTime(self, 5.0f);
             self->vt->m14(self);

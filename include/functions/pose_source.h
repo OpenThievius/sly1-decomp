@@ -80,7 +80,7 @@ void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* 
 void ReadVectorKeyPositionCurve(VectorKeyPositionCurve* self, Stream83* arg);
 void GetVectorKeyPositionCurveTimes(VectorKeyPositionCurve* self, s32* outCount, f32** outArr);
 void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 c, void* p3, void* p4, f32 key, f32 scale);
-void* GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale);
+void GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale);
 void ReadAxisRotationCurve(AxisRotationCurve* self, Stream83* arg);
 void GetAxisRotationCurveKeyTimes(AxisRotationCurve* self, s32* outCount, f32** outTimes);
 void EvaluateKeyedRotationCurve(KeyedRotationCurve* self, PlacedObject* parent, s32 mode, void* output, void* state, f32 key, f32 scale);

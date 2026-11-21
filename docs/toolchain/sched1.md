@@ -682,6 +682,24 @@ more plausible than the stand-in, so it stays. What the bytes do say: the statem
 planes 3 to 8 before it had a value, its test was always false by w's or h's low bits, and its
 arm stored one field.
 
+Checked again (w3-standin, 2026-11-21): every insn that prints nothing and could hold the two
+picture stores, read from the passes' rules. A CLOBBER does not reach sched2 (reload deletes
+every CLOBBER but one of the function's value register, and a clobber of `v0` would hold the
+address, not the stores). A `trap_if` prints nothing only with an anti link to an earlier trap
+in its block, which would print, and this function divides by nothing. A USE of memory is the
+only one, and it names memory with no store ahead of the body only when its pseudo got no hard
+register (it crosses calls, so it is live into the body and then read: one of the six spilled
+plane pointers) and has no value yet, or when it has a memory equivalence: update_equiv_regs
+gives one only to a pseudo local to one block (this one is live into the body), and
+assign_parms only to a parameter passed on the stack (a ninth argument, which the one caller
+does not pass). An initialised pointer, a value equal to a field the function stores (the
+macroblock width, kept in a local), or a read-only global all need one of those and have
+none. So within the compiler's rules the original read an uninitialised plane pointer: a bug
+of the original, whose test is always false, is the only reading left. Probes: the stand-in's
+test before the early return (50 lines), a test folded from `rows & 0` (102, cse folds it
+before combine: no USE), the pointer compared with its own later value plus `w & 15` (692
+bytes: the compare is code).
+
 ### A value negated into itself crosses the call (func_001A2380)
 
 - **sched1's call rule.** sched_analyze makes an insn that sets a pseudo depend (anti) on the

@@ -38,11 +38,12 @@ struct NearestTimeResult {
 
 // The point the curve's slot 1 samples into (MeasurePathCurveDistance's call, with the time
 // still in $f12), and the spline's slot 1 and slot 11 as func_0014E6A8 and func_0014ED98 call
-// them, with the time slot 6 returns.
+// them, with the time slot 6 returns. Slot 11 is FindSplinePathNearestTime; retail's call sets
+// the first pointer before the time ($f12) and the other five after it, the order of this
+// type's parameters (the registers are the same in any order).
 typedef void (*CurveSamplePointFn)(PathCurve* self, Vec4* out, s32 flag);
-typedef f32 (*CurveTimeFn)(void* self);
-typedef void (*CurveSampleAtFn)(void* self, f32 t, s32 a1, void* a2);
-typedef void (*SplineSlot11Fn)(void* self, s32 p1, f32 x, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
+typedef void (*CurveSampleAtFn)(void* self, f32 t, void* a1, void* a2);
+typedef void (*SplineSlot11Fn)(SplinePathCurve* self, Vec4* a1, f32 t, void* a2, void* a3, void* a4, f32* a5, f32* a6);
 
 // A segment index and the fraction along it (FindNearestPathCurveSegment's two outputs).
 struct SegmentFraction { s32 idx; f32 t; };
@@ -610,11 +611,11 @@ void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec4* a2)
     }
 }
 
-// Samples the spline at the arc length given: converts it to a time (slot 6) and calls the
-// sampling slot 1 with it.
-void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
+// Samples the spline at the arc length given: converts it to a time (slot 6, the length passed
+// on in $f12) and calls the sampling slot 1 with it.
+void SampleSplinePathAtLength(SplinePathCurve* self, f32 length, void* a1, void* a2)
 {
-    f32 t = ((CurveTimeFn)self->vt->m06)(self);
+    f32 t = self->vt->m06(self, length);
     CurveSampleAtFn fn = (CurveSampleAtFn)self->vt->m01;
     if (fn) {
         fn(self, t, a1, a2);
@@ -702,7 +703,7 @@ void FillSplinePathLengths(SplinePathCurve* self)
 // squared distance (optionally with the difference constrained by an anchor), then the nearest time
 // is refined from that point's time with FindSplinePathNearestTime. The outputs a3..a6 are those of
 // that function.
-void FindSplinePathNearestPoint(SplinePathCurve* self, Vec4* pos, void* anchor, s32 a3, s32 a4, f32* a5, f32* a6)
+void FindSplinePathNearestPoint(SplinePathCurve* self, Vec4* pos, void* anchor, void* a3, void* a4, f32* a5, f32* a6)
 {
     Vec4 d;
     s32 best = -1;
@@ -723,13 +724,13 @@ void FindSplinePathNearestPoint(SplinePathCurve* self, Vec4* pos, void* anchor, 
             best = i;
         }
     }
-    FindSplinePathNearestTime(self, (s32)pos, (s32)anchor, a3, a4, a5, a6, self->times[best]);
+    FindSplinePathNearestTime(self, pos, anchor, a3, a4, a5, a6, self->times[best]);
 }
 
 // The spline version of FindPathCurveNearestTime: a local minimum search from time f12 of the
 // distance measured by MeasureSplinePathDistance, then the position and direction (a3, a4), the
 // time (a5) and the length (a6) at the minimum.
-void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
+void FindSplinePathNearestTime(SplinePathCurve* self, Vec4* a1, void* a2, void* a3, void* a4, f32* a5, f32* a6, f32 f12)
 {
     NearestTimeQuery ctx;
     NearestTimeResult out;
@@ -738,7 +739,7 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
     void* fn;
 
     ctx.curve = self;
-    ctx.a = (Vec4*)a1;
+    ctx.a = a1;
     ctx.b = (Vec4*)a2;
     f14 = self->times[0];
     f13 = (self->times[1] - f14) * 0.1f;
@@ -746,7 +747,7 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
     if (a3 != 0 || a4 != 0) {
         fn = (void*)self->vt->m01;
         if (fn != 0) {
-            ((void (*)(PathCurve*, s32, s32, f32))fn)(self, a3, a4, out.time);
+            ((void (*)(PathCurve*, void*, void*, f32))fn)(self, a3, a4, out.time);
         }
     }
     if (a5 != 0) {
@@ -757,19 +758,13 @@ void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s3
     }
 }
 
-// Calls slot 11 of the curve's table (if it has one) with the curve's current time (slot 6) and
-// the six arguments passed on unchanged.
-void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6)
+// Calls slot 11 of the curve's table (if it has one) with the time of the length given (slot 6)
+// and the six other arguments passed on unchanged.
+void ProjectOntoSplinePathNearLength(SplinePathCurve* self, f32 length, Vec4* a1, void* a2, void* a3, void* a4, f32* a5, f32* a6)
 {
-    s32 q4 = p4;
-    s32 q3 = p3;
-    s32 q2 = p2;
-    s32 q1 = p1;
-    s32 q6 = p6;
-    s32 q5 = p5;
-    f32 r = ((CurveTimeFn)self->vt->m06)(self);
+    f32 t = self->vt->m06(self, length);
     SplineSlot11Fn fn = (SplineSlot11Fn)self->vt->m11;
     if (fn != 0) {
-        fn(self, q1, r, q2, q3, q4, q5, q6);
+        fn(self, a1, t, a2, a3, a4, a5, a6);
     }
 }

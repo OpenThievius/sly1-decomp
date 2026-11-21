@@ -34,7 +34,7 @@ void SetPairControllerState(PairController* self, s32 state)
         s32 w = W(self, 0x658);
         if (w) {
             ((Packed_1A4EF0_eu*)&g_typedTextCaptionBox)->v = w;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         break;
     }
@@ -49,7 +49,7 @@ void SetPairControllerState(PairController* self, s32 state)
         P(self, 0x658) = v;
         if (v) {
             ((Glob_1A4EF0_eu*)&g_typedTextCaptionBox)->v = v;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) SetPairedState((PairedObject*)o, 8);
         ResetScatterLevels((ScatterController*)g_scatterController);
@@ -59,7 +59,7 @@ void SetPairControllerState(PairController* self, s32 state)
         P(self, 0x658) = v;
         if (v) {
             ((Glob_1A4EF0_eu*)&g_typedTextCaptionBox)->v = v;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) {
             BaseObject* l = (BaseObject*)P(o, 0x55C);

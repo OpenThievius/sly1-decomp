@@ -106,7 +106,6 @@ extern u8 g_movieDataRingBuffer[];
 // A block of data the decoder hands a stream callback.
 struct MovieDataBlock { u8 pad0[8]; u8* data; s32 size; };
 
-struct StreamSink;
 
 
 void* InitGifPacket(PacketWriter* self);
@@ -134,10 +133,11 @@ struct AttachedTransformFrame {
 
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
-extern "C" s32 AwaitSemaphore(s32 a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 extern u8 g_movieCrcTable[];
 
@@ -199,7 +199,7 @@ struct ReaderEmpty {
 };
 
 
-extern "C" void PostSemaphore(s32 a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 
 extern u8 g_movieDecoderWork[];
@@ -226,11 +226,11 @@ void StopMovieStream(MovieStream* self);
 s32 FeedMovieStream(MovieStream* self, s32 left, u8* right);
 void UpdateMovieStream(MovieStream* self);
 s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
-void PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
+s32 PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
 s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self);
 s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2);
 s32 AcceptMovieDecoderEvent(void);
-void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h);
+void UploadMovieFrame(void* p, u8* addr, s32 w, s32 h);
 void DrawMovieFrame(void* self, s32 a1, s32 a2);
 void QueueMovie(MoviePlayer* self, void* p);
 void PlayQueuedMovies(MoviePlayer* self);
@@ -276,7 +276,7 @@ void UnregisterContactListObject(ContactListObject* self)
 
 // Moves the collider with its position and orientation attachments set aside for the move,
 // after rebuilding its basis from its velocity when it is ready.
-void MoveContactListObject(ContactListObject* self, void* b, f32 x)
+void MoveContactListObject(ContactListObject* self, s32 flag, f32 x)
 {
     if (self->ready != 0) {
         BuildBasisFromX(&self->v150, &self->rot);
@@ -285,7 +285,7 @@ void MoveContactListObject(ContactListObject* self, void* b, f32 x)
     s32 s0 = (s32)self->orientationAttachment;
     self->positionAttachment = 0;
     self->orientationAttachment = 0;
-    MoveCollider(self, x, b);
+    MoveCollider(self, x, flag);
     self->positionAttachment = (Attachment*)s1;
     self->orientationAttachment = (Attachment*)s0;
 }
@@ -531,7 +531,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
     if (n != 0) {
         do {
             if (((PlacedObject*)n)->desc->flags & 1) {
-                ((void (*)(void*, f32, s32))((PlacedObject*)n)->desc->m1B)(n, dt, 1);
+                ((PlacedObject*)n)->desc->step((PlacedObject*)n, dt, 1);
             }
             void* c = f.cur;
             s32 o = f.off;
@@ -739,8 +739,14 @@ s32 IpuDmaSink::Idle()
     return 1;
 }
 
-// Declared to return a value it never sets: func_0018F448, its caller, is retail's only with a
-// callee that returns one.
+// Declared to return a value it never sets. Retail's code sets no result: v0 is 1 on the failed
+// path (the delay slot's store value of the other branch) and InitIopRingSink's result on the
+// other. Its one caller, func_0018F448 (InitMoviePlayback), ignores the result, but only a
+// declaration with one matches it: the call is then a call_value setting v0, and declared void
+// the next call (InitMpegLibrary) gets output dependences on the earlier calls instead, which
+// changes the priorities of the second scheduling pass and swaps `sw v0,0x58(s1)` and
+// `lui a1,0x3` before InitRingBuffer (cc1plus -dR -dS dumps, 2026-11-21). Falling off the end
+// of a non-void function is undefined in C++: a port must make this void or return a value.
 s32 StartMovieStream(MovieStream* self)
 {
     s32 r;
@@ -828,7 +834,7 @@ void UpdateMovieStream(MovieStream* self)
 {
     switch (self->state) {
     case 2:
-        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, (StreamSink*)&self->sink);
+        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, &self->sink);
         if (self->sink.freeBytes != 0) {
             break;
         }
@@ -838,7 +844,7 @@ void UpdateMovieStream(MovieStream* self)
     case 3: {
         IopRingSink* s0 = &self->sink;
         UpdateIopRingSink(s0);
-        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, (StreamSink*)s0);
+        DrainRingBuffer(&self->dataRing, self->sink.freeBytes, s0);
         break;
     }
     }
@@ -855,9 +861,9 @@ s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 }
 
 // Hands a block of movie data to the movie stream (FeedMovieStream).
-void PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
+s32 PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2)
 {
-    FeedMovieStream(&a2->stream, a1->size, a1->data);
+    return FeedMovieStream(&a2->stream, a1->size, a1->data);
 }
 
 // Decoder callback: feeds the decoder until the video ring holds 0x1000 bytes, padding the ring
@@ -877,7 +883,7 @@ s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self)
     {
         IpuDmaSink dma;
         ConsumeSpan(&self->videoRing, 0);
-        DrainRingBuffer(&self->videoRing, 0, (StreamSink*)&dma);
+        DrainRingBuffer(&self->videoRing, 0, &dma);
     }
     return 1;
 }
@@ -896,7 +902,7 @@ s32 AcceptMovieDecoderEvent(void)
 
 // Builds the packet that copies a decoded picture of w by h pixels from main memory (addr) into GS
 // memory in 16x16 blocks of 0x40 quadwords each, then a flush register write.
-void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
+void UploadMovieFrame(void* p, u8* addr, s32 w, s32 h)
 {
     s32 ny = w / 16;
     s32 nx = h / 16;
@@ -916,7 +922,7 @@ void UploadMovieFrame(void* p, s32 addr, s32 w, s32 h)
             AddGifRegisterWrite(&f, 0x51, ((u64)(y << 4) << 32) | ((u64)(x << 4) << 48));
             AddGifRegisterWrite(&f, 0x53, 0);
             AddGifImageTag(&f, 0x40);
-            AddDmaRefTag(&f, 0x40, addr & 0xFFFFFFF);
+            AddDmaRefTag(&f, 0x40, DMA_PHYSICAL_ADDRESS(addr));
             addr += 0x400;
         }
     }
@@ -1118,7 +1124,7 @@ void StepMovieFrame(MoviePlayer* self)
         return;
     }
     if (self->decoder.skipPicture == 0) {
-        UploadMovieFrame(self->uploadPacket, (s32)self->picture, self->decoder.width, self->decoder.height);
+        UploadMovieFrame(self->uploadPacket, self->picture, self->decoder.width, self->decoder.height);
         DrawMovieFrame(self->drawPacket, self->decoder.width, self->decoder.height);
         SyncDataCache(0);
     }

@@ -39,7 +39,7 @@ struct StateResetGroup;
 
 
 
-void* IsObjectOfKind(BaseObject* list, s32 key);
+s32 IsObjectOfKind(BaseObject* list, s32 key);
 
 
 // Initialises the agent with its sight cone: ranges 1000 and 1500, angles 45 and 180 degrees, a

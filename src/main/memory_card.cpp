@@ -36,12 +36,12 @@ extern u8 g_cardDirectoryBuffer[];
 extern u8 g_cardDirectoryPath[];
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
-extern "C" s32 AwaitSemaphore(void* a);
-extern "C" void PostSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
+extern "C" s32 PostSemaphore(s32 sema);
 s32 EndOwnThread();
 void SetThreadPriority(s32 thread, s32 b);
 void SetPauseMenuLayerPage(PauseMenu* self, s32 a, s32 b);
-s32 InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
+BufferedStream* InitBufferedStream(BufferedStream* o, s32 a, u8* b, s32 c);
 s32 OpenBufferedSectorStreamRange(BufferedStream* o, KeyId* p);
 void ReadBufferedStreamBytes(BufferedStream* self, s32 remaining, void* out);
 void CloseBufferedStream(BufferedStream* o);
@@ -92,7 +92,7 @@ void InitMemoryCardSystem(void)
 void InitBackgroundJob(BackgroundJob* self)
 {
     s32 r = CreateLockSemaphore(1, 1);
-    self->semaphoreId = r; self->thread = -1; self->result = 0x22;
+    self->semaphore = r; self->thread = -1; self->result = 0x22;
 }
 
 // The background thread's entry: waits for the job's semaphore, runs the job, stores its result,

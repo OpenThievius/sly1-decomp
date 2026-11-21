@@ -184,7 +184,7 @@ void SumBlendEntryVectors(s32 n, WeightedRow* rows, f32* scale, Vec4* out)
     }
 }
 ASM_FUNC(func_001D3A38);
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 // Casts the segment from one point to another against the colliders in its bounding box; gives 1
 // and the fraction of the way to the nearest hit in *ratio (1.0 when it hits nothing).
@@ -199,13 +199,13 @@ s32 FindObjectAlongSegment(PlacedObject* self, Vec4* from, Vec4* to, f32* ratio)
     b = *to;
     PushBackMemoryMark();
     GatherCollidersInBox(self->world, (Collider*)self, &a, &b, 0, 0, &count, &list);
-    s32 found = FindNearestSpanObject(0, &a, &b, count, list, &hit);
+    Collider* found = FindNearestSpanObject(0, &a, &b, count, list, &hit);
     *ratio = found != 0 ? Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.q[0]), Vu0::Q(a)))) / Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(b)))) : 1.0f;
     PopBackMemoryMark();
     return found != 0;
 }
 
-extern "C" f32 ConvertDoubleToFloat(u64 bits);
+extern "C" f32 ConvertDoubleToFloat(double x);
 
 // Fills a table of n by m floats, spaced by stride bytes, with the products of two sets of
 // weights (rows[i] * cols[j]) given as doubles, where the first of each set is one minus the sum
@@ -213,7 +213,7 @@ extern "C" f32 ConvertDoubleToFloat(u64 bits);
 s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     f32 rows[16];
     f32 cols[16];
-    u64* ap = (u64*)((char*)__builtin_next_arg(out) - 32);
+    double* ap = (double*)((char*)__builtin_next_arg(out) - 32);
     f32 sum = 0.0f;
     s32 i;
     s32 j;
@@ -246,7 +246,7 @@ s32 FillOuterProductTable(s32 stride, s32 n, s32 m, char* out, ...) {
     return changed;
 }
 
-extern "C" u64 ConvertFloatToDouble(f32 x);
+extern "C" double ConvertFloatToDouble(f32 x);
 
 struct BlendSpan { f32 t; u8 pad4[8]; f32 len; };
 struct BlendSpans { u8 pad0[8]; BlendSpan* a; u8 padC[8]; BlendSpan* b; };
@@ -337,9 +337,9 @@ void UpdateSixEntryBlendWeights(TurningCollider* p, void* e, BlendAnimationView*
             hi = lo;
         }
     }
-    u64 hv = ConvertFloatToDouble(hi);
-    u64 lv = ConvertFloatToDouble(lo);
-    u64 tv = ConvertFloatToDouble(t);
+    double hv = ConvertFloatToDouble(hi);
+    double lv = ConvertFloatToDouble(lo);
+    double tv = ConvertFloatToDouble(t);
     if (FillOuterProductTable(0x50, 3, 2, (char*)e, hv, lv, tv)) {
         SetBlendItemWeights(g, 0x50, 6, e);
         SumBlendEntryVectors(6, (WeightedRow*)e, (f32*)g->pC0->p8, &p->headingVelocity);
@@ -681,7 +681,7 @@ void RunPlayerCallback(Player* self)
 }
 
 
-typedef void (*PlayerRequestFn)(s32 data, Player* self);
+typedef void (*PlayerRequestFn)(void* data, Player* self);
 struct PlayerRequestMessage { Player* self; s32 v; };
 
 s32 MaskWorldBitsBySave(void);

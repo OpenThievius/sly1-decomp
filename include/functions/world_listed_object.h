@@ -31,7 +31,7 @@ void CopyWorldListedObject(WorldListedObject* self, BaseObject* src);
 s32 FilterParticleVerticesVu0(const f32* m, u128 scaleBits, Vec4* pos, Vec4* extra, Vec4* items, s32 count, s32 mode, void* boundA, void* boundB);
 void StepListedObjectParticles(WorldListedObject* self, f32 dt);
 void MoveWorldListedObject(WorldListedObject* self, f32 dt);
-void SubmitWorldListedObjectBlock(WorldListedObject* owner, s32 unused, ScaledBlockSource* src);
+void SubmitWorldListedObjectBlock(WorldListedObject* owner, void* unused, ScaledBlockSource* src);
 void WriteListedObjectParticlePacket(void* self);
 void UpdateMatchingListedObjects(s32 mask);
 

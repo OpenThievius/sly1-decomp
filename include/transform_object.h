@@ -76,7 +76,7 @@ struct CappedWordList {
     u8 pad0[0x4C];
     s32 cap;  // 0x4C
     U32P* items;  // 0x50
-    void* source;  // 0x54
+    s32 source;  // 0x54
 };
 
 // The 0x200-byte record a 0x79 shares with its copies (func_00158C28 counts them;

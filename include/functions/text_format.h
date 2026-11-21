@@ -10,7 +10,6 @@ struct FormatSpec;
 struct OutputBuffer;
 struct PaddedOutput;
 struct RecursiveLock;
-struct RegDouble;
 
 s32 ParseSignedDecimal(s8* s, s32* out);
 s32 ParseFormatSpec(s8* at, FormatSpec* spec, s32** va);
@@ -20,7 +19,7 @@ s32 GetConversionRadix(s8 c);
 s32 WriteIntegerDigits(u8* buf, s32 len, u64 value, u32 radixArg);
 void FormatIntegerArg(FormatSpec* self, OutputBuffer* sink, u64 value);
 s32 GetDecimalExponent(double v);
-s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b);
+s8 GetDecimalDigit(double self0, s32 a, s32 b);
 s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v);
 void FormatFloatArg(FormatSpec* spec, OutputBuffer* ctx, double value);
 void FormatConversionArg(FormatSpec* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len);

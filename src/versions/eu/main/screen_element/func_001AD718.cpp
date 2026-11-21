@@ -14,7 +14,7 @@ void UpdateHintGlyphElement(void* p)
     if (self->f570 != 0) {
         Ctx_eu_001AE468* c = (Ctx_eu_001AE468*)g_player;
         if (c == 0 || c->f2220 != 6) {
-            Mgr_eu_001AE468* m = (Mgr_eu_001AE468*)g_elementStack;
+            Mgr_eu_001AE468* m = (Mgr_eu_001AE468*)&g_elementStack;
             if (m->f4 == 3 && m->f2C < 2) {
                 self->vtbl[14](p);
                 return;

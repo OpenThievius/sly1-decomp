@@ -37,7 +37,6 @@
 #include "functions/render_frame.h"
 struct FormatSpec;
 struct PaddedOutput;
-struct RegDouble;
 
 
 
@@ -93,11 +92,11 @@ s32 CreateLockSemaphore(s32 initCount, s32 maxCount);
 
 // A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
 // how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
-struct RecursiveLock { s32 count; s32 last; void* sema; };
+struct RecursiveLock { s32 count; s32 last; s32 sema; };
 
 
 
-extern "C" void PostSemaphore(void* a);
+extern "C" s32 PostSemaphore(s32 sema);
 
 
 
@@ -112,7 +111,7 @@ extern "C" s64 RemainderUnsigned64(u64 num, u64 den);
 
 
 extern "C" s32 GetCurrentThreadId(void);
-extern "C" s32 AwaitSemaphore(void* a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 
 
@@ -220,7 +219,6 @@ struct PaddedOutput : OutputBuffer {
 
 
 
-struct RegDouble { u8 pad; };
 
 
 extern "C" f32 Power(f32 x, f32 y);
@@ -720,21 +718,19 @@ s32 GetDecimalExponent(double v)
 // Gives the character of the decimal digit of the value at position b (a is the value's decimal
 // exponent): '0' outside the 15 digits that follow the first, else the value scaled by 10^-b,
 // truncated, modulo 10.
-s8 GetDecimalDigit(RegDouble* self0, s32 a, s32 b)
+s8 GetDecimalDigit(double self0, s32 a, s32 b)
 {
-    RegDouble* self = self0;
+    double self = self0;
     s32 idx;
     if (a < b || a - 15 >= b) {
         idx = 0;
     } else {
         f32 t = Power(10.0f, (f32)(-b));
-        // The value is held in the register view its callers give it (written on double, the code
-        // changes), so each soft-float call goes through the real function cast to that view.
-        RegDouble* p = ((RegDouble* (*)(RegDouble*, double))MultiplyDoubles)(self, ConvertFloatToDouble(t));
-        self = ((RegDouble* (*)(RegDouble*))TruncateDouble)(p);
-        p = ((RegDouble* (*)(RegDouble*))TruncateDouble)(((RegDouble* (*)(RegDouble*, double))MultiplyDoubles)(self, 0.1));
-        p = ((RegDouble* (*)(RegDouble*, u64))MultiplyDoubles)(p, (u64)0x4024000000000000ULL);
-        idx = ((s32 (*)(RegDouble*))ConvertDoubleToS32)(((RegDouble* (*)(RegDouble*, RegDouble*))SubtractDoubles)(self, p));
+        double p = MultiplyDoubles(self, ConvertFloatToDouble(t));
+        self = TruncateDouble(p);
+        p = TruncateDouble(MultiplyDoubles(self, 0.1));
+        p = MultiplyDoubles(p, 10.0);
+        idx = ConvertDoubleToS32(SubtractDoubles(self, p));
     }
     return ((s8*)&g_hexDigits)[idx];
 }
@@ -781,14 +777,13 @@ s32 FormatFloatDigits(char* buf, s32 unused, FormatSpec* sp, double v)
         i = 0;
     }
     while (n-- > 0) {
-        // GetDecimalDigit takes the double as the register view the soft-float calls give it
-        *out++ = ((s8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
+        *out++ = GetDecimalDigit(r, e, i--);
     }
     if (sp->noprec == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
-            *out++ = ((s8 (*)(double, s32, s32))GetDecimalDigit)(r, e, i--);
+            *out++ = GetDecimalDigit(r, e, i--);
         }
         if (sp->conv == 'g' && buf < out) {
             while (buf < out && out[-1] == '0') out--;
@@ -1133,7 +1128,7 @@ LINKER_REMNANT(func_001E22B8);
 void InitRecursiveLock(RecursiveLock* self)
 {
     self->last = -1;
-    self->sema = (void*)CreateLockSemaphore(1, 1);
+    self->sema = CreateLockSemaphore(1, 1);
 }
 
 // Takes the lock: a thread that already holds it just counts one more entry, any other waits on the

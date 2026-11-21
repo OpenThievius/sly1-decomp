@@ -84,7 +84,7 @@ void DrawPauseMenu(Self_eu_194F80* self)
     page = self->f260;
     menu = &((Menu_eu_194F80*)&g_pauseMenuPages)[page];
     fade = 1.0f;
-    if (page == 0 && D_00275BEC == 2) {
+    if (page == 0 && g_elementStack.count == 2) {
         fade = 1.0f - D_00262CEC;
     }
     self->f284 = ApproachValueWithRamp(self->f284, fade, g_gameClock[5], (RampProfile*)g_fadeRampProfile, 0);

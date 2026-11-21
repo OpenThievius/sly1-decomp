@@ -51,7 +51,7 @@ void SetAcceptsFlaggedObjects(MaskedCollider* self, s32 enabled);
 void GetAcceptsFlaggedObjects(MaskedCollider* state, s32* result);
 void AddAcceptedObjectId(MaskedCollider* obj, s32 value);
 void AddAcceptedKind(MaskedCollider* r, s32 value);
-void AddMaskedColliderListEntry(MaskedCollider* obj, s32 value);
+void AddMaskedColliderListEntry(MaskedCollider* obj, void* value);
 void* GetMaskedColliderSoundParams(MaskedCollider* self);
 s32 IsObjectAccepted(MaskedCollider* self, BaseObject* msg);
 void UpdateTimedState(TimedStateObject* self, f32 dt);

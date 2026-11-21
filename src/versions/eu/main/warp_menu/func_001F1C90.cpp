@@ -48,7 +48,7 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
         self->vtbl[14](self);
         SetPadSelectFlags(1);
         ResetPadStepRepeat(&g_padRecord);
-        SetElementStackState((ElementStack*)g_elementStack, 7);
+        SetElementStackState(&g_elementStack, 7);
     } else {
         self->vtbl[15](self);
         if (self->f570->warpChosen == 0) {
@@ -58,7 +58,7 @@ void SetWarpMenuOpen(Obj_1F1C90_eu* self, s32 a1)
                 SetScreenElementSlideOutTime(self, an->length);
             }
             ClearPadSelectFlags(1);
-            SetElementStackState((ElementStack*)g_elementStack, 3);
+            SetElementStackState(&g_elementStack, 3);
             GameProgress* g = g_saveData;
             if (((g->levelIndex << 8) | g->entryIndex) == 0x308) {
                 ResumeStagedBankVoice();

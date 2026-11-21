@@ -9,9 +9,11 @@
 struct BodyContact;
 struct BufferedStream;
 struct Collider;
+struct ContactEnd03;
 union Contact_001A4538;
 struct GameProgress;
 struct HitTarget;
+struct ImpulseRow;
 struct MessageBody;
 struct ObjectCreator;
 struct ObjectEvent;
@@ -39,7 +41,7 @@ void HandleWalkerColliderNotification(WalkerCollider* self, s32 code, MessageBod
 void StepWalkerCollider(WalkerCollider* self, f32 dt);
 void ResolveWalkerColliderContact(Walker_001A4538* self, Contact_001A4538* c, s32 i);
 void ComputeWalkerColliderContactValue(WalkerCollider* ctx, BodyContact* obj);
-void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void ComputeWalkerColliderImpulseResponse(WalkerCollider* self, s32 a1, BodyContact* a2, s32 a3, ContactEnd03* a4, ImpulseRow* a5);
 s32 IsWalkerColliderCameraFree(void);
 void InitPairController(PairController* self);
 void SetPairControllerFirstTemplateId(PairController* obj, s32 value);

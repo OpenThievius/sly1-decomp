@@ -88,7 +88,7 @@ void LoadChildGroupObject(ChildGroupObject* self, BufferedStream* stream)
     FindOrBuildMemberGroup(&self->member5BC, self);
 }
 
-u32 CopyToFrontMemory(s32 size, void* src);
+u8* CopyToFrontMemory(s32 size, void* src);
 
 // Copies the collider and, if the source has a slot record (0x24 bytes), makes a copy of it in
 // front memory for this object.
@@ -236,7 +236,7 @@ PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3
 // Looks up the entry with the given key among the object's entries and, if found and the object
 // is active, creates a pooled contact for it (kind 9) carrying that entry's data and value; this
 // is the slot the class tables share with the other colliders.
-void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, s32 a2, s32 a3, s32 a4, void* arg5)
+void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, void* a2, void* a3, void* a4, void* arg5)
 {
     s32 i;
     if (self->active) {

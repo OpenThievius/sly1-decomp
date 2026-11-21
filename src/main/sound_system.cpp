@@ -125,7 +125,7 @@ extern f32 g_gameClock[];
 #include "sound_entry.h"
 extern SoundEntry g_soundEntries[];
 extern u8 g_soundBankLoaded[];
-extern u8 g_soundEntryAvailable[];
+extern u8 g_soundEntryLoops[];
 s32 EnsureSoundEntryBankLoaded(s32 idx);
 // NEAR: the lui of D_0026185C is scheduled before the sw of self->idx; retail stores idx first. Otherwise every instruction matches.
 
@@ -137,7 +137,7 @@ void SetSoundRecordPitch(PlayingSound* self, f32 x);
 
 extern const KeyRecord g_soundBankKeys[7];
 extern "C" s32 WaitDiscReady(s32 mode);
-s32 IsSoundEntryAvailable(s32 id);
+s32 IsSoundEntryLooping(s32 id);
 void InitSoundRecord(PlayingSound* self, PlayingSound** owner, s32 keepWhenFar, BaseObject* object, Quad16* position, f32 farRange, f32 nearRange, f32 baseVolume, f32 pitch, f32 f16, U64P* interval, U64P* p80);
 void ScheduleAmbientSoundRecord(PlayingSound* self);
 void StartSoundRecordVoice(PlayingSound* self, s32 id);
@@ -200,7 +200,7 @@ s32 GetCachedVoiceParam(s32 index);
 void RefreshCachedVoiceParam(s32 i, s32 unused1);
 s32 StepBiasedRandomWalk();
 void PlaySoundWithWanderingPitch(void);
-extern const s32 g_soundEntryForcedAvailable[772];
+extern const s32 g_soundEntryForcedLoops[772];
 s32 g_stagedBankState = 0;
 s32 g_stagedBankRecord = 0;
 s32 g_stagedBankVoice = 0;
@@ -292,7 +292,7 @@ s32 EnsureSoundBankLoaded(s32 n)
                 ((s32*)&g_soundBankLoaded)[n] = 1;
                 for (s32 i = 0; i < 0x303; i++) {
                     if (g_soundEntries[i].bank == n) {
-                        ((s32*)&g_soundEntryAvailable)[i] = TestSoundInBank(((s32*)&g_soundBankHandles)[n], g_soundEntries[i].index) != 0 || g_soundEntryForcedAvailable[i] != 0;
+                        ((s32*)&g_soundEntryLoops)[i] = TestSoundLoops(((s32*)&g_soundBankHandles)[n], g_soundEntries[i].index) != 0 || g_soundEntryForcedLoops[i] != 0;
                     }
                 }
             }
@@ -322,15 +322,16 @@ void InitSoundParams(SoundRecord** self)
     (*self)->startParam = 0;
 }
 
-// Whether the sound entry idx can be played, loading its bank first if it is not loaded.
-s32 IsSoundEntryAvailable(s32 idx)
+// Whether the sound entry idx loops (goes on until stopped), loading its bank first if it is not loaded.
+// StartSoundEffect passes the answer to InitSoundRecord as keepWhenFar.
+s32 IsSoundEntryLooping(s32 idx)
 {
     const SoundEntry* p = g_soundEntries + idx;
 
     if (((s32*)g_soundBankLoaded)[p->bank] == 0) {
         EnsureSoundEntryBankLoaded(idx);
     }
-    return ((s32*)g_soundEntryAvailable)[idx];
+    return ((s32*)g_soundEntryLoops)[idx];
 }
 
 // IOP reply callback: the stream voice's pending request is done.
@@ -1069,7 +1070,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
     if (id != -2) {
         s32 a1 = g_soundEntries[id].bank;
         if (a1 > 0 && a1 != g_currentWorld->soundBank) return;
-        s0 = IsSoundEntryAvailable(id);
+        s0 = IsSoundEntryLooping(id);
     } else {
         s0 = 0;
     }

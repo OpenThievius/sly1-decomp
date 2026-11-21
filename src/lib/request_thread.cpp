@@ -24,7 +24,7 @@ static u8 g_requestThreadStack[0x400];
 static s32 g_requestSemaphore;
 static RequestRing g_requestRing;
 
-extern "C" s32 AwaitSemaphore(s32 h);
+extern "C" s32 AwaitSemaphore(s32 sema);
 void RotateReadyThreads(s32 v);
 void WakeThread(s32 v);
 void PauseThread(s32 v);

@@ -220,7 +220,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
         case 12:
             RemoveCameraControllers(g_camera, 0xF, 6, (CameraController*)((u8*)g_camera + 0x460), self, 0);
             if (D_00270454 != 0) {
-                PopStackElement((ElementStack*)g_elementStack);
+                PopStackElement(&g_elementStack);
             }
             break;
         case 9:
@@ -1065,7 +1065,7 @@ void SetPlayerState(Player* self, s32 state, s32 sub)
             RequestCameraSnap(g_camera, 0);
             ((CaptionBox_175170_eu*)&g_typedTextCaptionBox)->child = self->pendingCaption;
             self->pendingCaption = 0;
-            PushStackElement((ElementStack*)g_elementStack, &g_typedTextCaptionBox);
+            PushStackElement(&g_elementStack, &g_typedTextCaptionBox);
             break;
         }
         case 35:

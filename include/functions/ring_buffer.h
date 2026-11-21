@@ -8,12 +8,12 @@
 
 struct MemoryReader;
 struct RingBuffer;
-struct StreamSink;
+struct TransferSink;
 
 void InitRingBuffer(RingBuffer* ring, s32 size, u8* buf);
 void ResetRingBuffer(RingBuffer* ring);
 s32 FillRingBuffer(RingBuffer* self, s32 n, MemoryReader* port);
-s32 DrainRingBuffer(RingBuffer* self, s32 n, StreamSink* o);
+s32 DrainRingBuffer(RingBuffer* self, s32 n, TransferSink* o);
 s32 FillRingBufferFromMemory(RingBuffer* self, s32 count, void* src);
 void ConsumeSpan(RingBuffer* p, s32 n);
 s32 ReadMemoryReader(MemoryReader* self, s32 want, void* dst);

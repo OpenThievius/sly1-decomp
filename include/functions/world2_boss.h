@@ -18,7 +18,7 @@ void LoadWorld2Boss(World2Boss* self, void* reader);
 void StartWorld2Boss(World2Boss* self);
 void DrawWorld2BossMarkerRing(DeferredRequest* request);
 void DrawWorld2Boss(World2Boss* self, AgentDrawArgs* args, void* arg2);
-s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f);
+s32 FindNearestHitObject(s32 a0, void* a1, void* a2, s32 a3, s32* a4, void* a5, f32 f);
 s32 IsWorld2BossBlocker(void* self, BlockerQuery* rec);
 s32 IsWorld2BossLineBlocked(World2Boss* self, void* a1, void* a2);
 s32 HasWorld2BossClearLine(World2Boss* self);

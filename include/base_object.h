@@ -71,9 +71,12 @@ struct BaseObjectDescriptor {
     void (*m16)(BaseObject* self, BaseObject* other);     // 0x68: 0x02: func_00124868
     void (*m17)(BaseObject* self, BaseObject* other);     // 0x6C: listen to other (func_001832F0)
     void (*m18)(BaseObject* self, BaseObject* other);     // 0x70: let go of other (func_00183320)
-    void (*m19)(BaseObject* self, void* fn, s32 ctx);     // 0x74: add a callback (func_00183290)
-    void (*m1A)(BaseObject* self, s32 fn, s32 ctx);       // 0x78: remove a callback (func_001832C0)
-    void (*m1B)(BaseObject* self, void* message);  // 0x7C: receive a message
+    void (*m19)(BaseObject* self, void* fn, void* ctx);    // 0x74: AddObjectCallback (func_00183290)
+    void (*m1A)(BaseObject* self, void* fn, void* ctx);    // 0x78: RemoveObjectCallback (func_001832C0)
+    union {
+        void (*m1B)(BaseObject* self, void* message);  // 0x7C: receive a message
+        void (*step)(BaseObject* self, f32 dt, s32 flag);  // 0x7C: in placed objects the slot holds the mover (MovePlacedObject and its overrides)
+    };
 };
 
 // A class descriptor that is only a head (tools/classes.py's `head`): the parent's descriptor

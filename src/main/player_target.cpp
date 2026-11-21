@@ -341,6 +341,7 @@ void ScorePlayerTargetPlacement(Player* self, Vec4* point, BaseObject* obj, Vec4
 }
 
 typedef void (*PathShapeFn)(void* self, void* out, s32 x);
+typedef void (*PathShapeSampleFn)(void* self, f32 t, Vec4* pos, Vec4* tan);
 
 struct PathShape {
     PathShapeFn* vtbl;
@@ -386,7 +387,7 @@ void PlaceOnTargetObject(Player* self, PathTarget* node, Vec4* outA, Vec4* outB,
     f32 hi;
     PathShape* shape = node->shape;
     if (shape->vtbl[1] != 0) {
-        shape->vtbl[1](shape, &a, (s32)&b);
+        ((PathShapeSampleFn)shape->vtbl[1])(shape, t, &a, &b);
     }
     TransformPointBetweenFrames((PlacedObject*)node->frame, 0, &a, &c);
     TransformDirectionBetweenFrames((PlacedObject*)node->frame, 0, &b, &d);
@@ -580,7 +581,7 @@ struct TargetSpanHit {
 };
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 
 // Tests whether a leap arc is blocked: walks the Hermite arc in 0.1 s steps over the colliders in
@@ -1552,9 +1553,9 @@ void UpdatePlayerTargetPhase(Player* self)
         if (self->targetMode == 4) {
             f32 k = 5.0f;
             u8* p1 = (u8*)&self->footProbeA;
-            MeasurePlayerFootProbe(self, (s32)self->f628, (s32)self->f620, self->footPartA, k, p1);
+            MeasurePlayerFootProbe(self, self->f628, self->f620, self->footPartA, k, p1);
             u8* p2 = (u8*)&self->footProbeB;
-            MeasurePlayerFootProbe(self, (s32)self->f62C, (s32)self->f624, self->footPartB, k, p2);
+            MeasurePlayerFootProbe(self, self->f62C, self->f624, self->footPartB, k, p2);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p1, (u8*)self->footPartA);
             CollectPlayerTargetSpans((TargetPlayerView*)self, (TargetProbe*)p2, (u8*)self->footPartB);
         }

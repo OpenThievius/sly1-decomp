@@ -1,0 +1,4 @@
+function	file	declared	reason
+func_001C2320	src/main/base_object.cpp	void	the original returned a ScriptValue by value, which GCC 2.95 calls without reading $v0; declared as a pointer, two instructions change places in three callers (the comment at the declaration)
+func_0011A080	src/main/object_properties.cpp	void	the original returned a ScriptValue by value, which GCC 2.95 calls without reading $v0; declared as a pointer, two instructions change places in three callers (the comment at the declaration)
+func_001DDBF8	src/main/object_host_functions.cpp	integer	the script built-in hands the pointer PushSoundLevel returned to SetScriptValueInt as the sound level handle, an int in the script value, as retail does; typing it a pointer needs a pointer-to-integer cast at the call, and the definition cannot return an integer without one (a 64-bit port must keep the handle in 4 bytes)

@@ -128,7 +128,7 @@ void ApplyWorld3BossTransform(World3Boss* self, void* s, void* c);
 void DrawWorld3Boss(World3Boss* self, Camera* cam, void* arg2);
 void LeaveWorld3BossState(World3Boss* self, s32 arg);
 void DecrementWorld3BossGauge(World3Boss* self);
-void EnterWorld3BossState(World3Boss* self, s32 a, s32 b);
+void EnterWorld3BossState(World3Boss* self, s32 a, Animation* b);
 void ScheduleWorld3BossBeatPress(World3Boss* self, TimelineEntry* e);
 void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* rec);
 void SyncWorld3BossEntries(World3Boss* self);
@@ -183,7 +183,7 @@ void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8*
 void CopyWordsToWriter(PacketWriter* s, s32 a1, s32 size, u32* src, s32 a4);
 void WriteVifUnpack(PacketWriter* self, s32 a, s32 b, void* c, s32 d, s32* out);
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
-void WriteVifDirectRef(PacketWriter* self, s32 a, s32 b, s32 c);
+void WriteVifDirectRef(PacketWriter* self, s32 a, void* b, s32 c);
 void WriteVifDirectFromWriter(PacketWriter* a0, PacketWriter* a1);
 void InitValueListObject(ValueListObject* self);
 void LoadValueList(ValueListObject* self, void* src);

@@ -41,13 +41,14 @@ extern "C" s32 SwapDoubleBuffer(void* self, s32 flag);
 #include "dma_chain_block.h"
 
 extern u8 g_screenClearPacketC[];
-void* InitPacketBuffer(PacketWriter* self);
+PacketWriter* InitPacketBuffer(PacketWriter* self);
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
-void AddDmaRefTag(PacketWriter* self, s32 lo, s32 hi);
+void AddDmaRefTag(PacketWriter* self, s32 lo, void* hi);
 void AddDmaEndTag(PacketWriter* self);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
 void SendPacketToBothBuffers(void* chain);
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void* InitGifPacket(PacketWriter* f);
 void BeginDmaTag(PacketWriter* f);
@@ -56,7 +57,7 @@ void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
 void EndGifPacket(PacketWriter* f);
 void AddDmaEndTag(PacketWriter* f);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
-void SendGsPacketAndWait(s32 channel, void* b);
+void SendGsPacketAndWait(DmaChannel* channel, void* b);
 
 void BeginGifTag(void* p, s32 a, s32 b, u64 c);
 void AddGifRegisterWrite(PacketWriter* self, u64 a1, u64 a2);
@@ -74,7 +75,8 @@ void ResetDisplayBuffers(void);
 s32 HandleVblankStart(s32 cause);
 s32 HandleGsFinish(s32 cause);
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 extern "C" s32 SendDrawEnvironment(void* self);
 struct DmaChannel;
@@ -112,17 +114,18 @@ s32 WaitGsPaths(s32 a0, s32 a1);
 
 
 
-extern s32 g_gifChannel;
+struct DmaChannel;
+extern DmaChannel* g_gifChannel;
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 void DetachPacketBuffer(PacketWriter* self, u32* outCount, u8** outBegin);
-void SendGsPacketAndWait(s32 channel, void* b);
+void SendGsPacketAndWait(DmaChannel* channel, void* b);
 void FlipDisplayFrame(void);
 
 extern "C" s32 GetGsInterruptMask(void);
 extern "C" s32 SwapGsInterruptMask(s32 mask);
 extern "C" void SyncDataCache(s32 a);
-extern "C" s32 AwaitSemaphore(s32 a);
+extern "C" s32 AwaitSemaphore(s32 sema);
 
 void UsePacketBufferMemory(PacketWriter* self, s32 count, void* memory);
 
@@ -315,14 +318,14 @@ s32 HandleGsFinish(s32 cause)
 
 // Starts a DMA chain on the given channel and sleeps on the GS FINISH semaphore; HandleGsFinish
 // posts it once the GS reports FINISH (CSR bit 1).
-void SendGsPacketAndWait(s32 channel, void* b)
+void SendGsPacketAndWait(DmaChannel* channel, void* b)
 {
     g_gsFinishWaiting = 1;
     *(volatile u64*)0x12001000 |= 2;
     s32 r = GetGsInterruptMask();
     SwapGsInterruptMask(r & -0x201);
     SyncDataCache(0);
-    StartDmaChain((DmaChannel*)channel, b);
+    StartDmaChain(channel, b);
     AwaitSemaphore(g_gsFinishSemaphore);
 }
 
@@ -403,9 +406,9 @@ void SendPacketToBothBuffers(void* chain)
         }
         SendDrawEnvironment(p);
         i++;
-        StartDmaChain((DmaChannel*)g_gifChannel, chain);
+        StartDmaChain(g_gifChannel, chain);
     } while (i < 2);
-    WaitDmaChannel((DmaChannel*)g_gifChannel, 0, 0);
+    WaitDmaChannel(g_gifChannel, 0, 0);
 }
 
 // Builds a small packet of one 0x2C-quadword block (g_screenClearPacketC) and sends it to both
@@ -417,8 +420,7 @@ void SendDisplayResetPacket(void)
 
     InitPacketBuffer((PacketWriter*)&a);
     UsePacketBufferMemory((PacketWriter*)&a, 2, &b);
-    // the tag's address is the packet's own, which AddDmaRefTag takes as its integer bits
-    ((void (*)(PacketWriter*, s32, void*))AddDmaRefTag)((PacketWriter*)&a, 0x2C, g_screenClearPacketC);
+    AddDmaRefTag((PacketWriter*)&a, 0x2C, g_screenClearPacketC);
     AddDmaEndTag((PacketWriter*)&a);
     DetachPacketBuffer((PacketWriter*)&a, 0, 0);
     SendPacketToBothBuffers(&b);

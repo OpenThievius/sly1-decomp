@@ -20,11 +20,10 @@ struct Obj_eu_1AE9C0 {
     u8 pad8[0x518];
     s32* f520;
     u8 pad524[0x4C];
-    s32 f570;
+    AnimRecord* f570;
 };
 
 void SetupScreenElementText(Obj_eu_1AE9C0* self);
-void* FindAnimRecord(s32 id);
 void SetScreenElementSize(Obj_eu_1AE9C0* self, f32 x, f32 y);
 const char* GetTextTableEntry(s32 id);
 
@@ -37,7 +36,7 @@ void InitTitleElement(Obj_eu_1AE9C0* self)
         self->f520 = (s32*)D_eu_0027DBA0;
         *self->f520 = (s32)GetFontById(2);
     }
-    s32 r = (s32)FindAnimRecord(0x493);
+    AnimRecord* r = FindAnimRecord(0x493);
     self->f570 = r;
     if (r != 0) {
         SetScreenElementSize(self, 366.75f, 165.75f);

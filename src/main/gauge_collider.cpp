@@ -230,7 +230,7 @@ struct NodeQueryFrame {
     s32 kind;
     u8 pad14[0x40 - 0x14];
 };
-s32 FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
+PlacedObject* FindNodeForQuery(NodeQuery* q, s32 n, PlacedObject** list);
 
 // The file's .data, in retail's order.
 f32 g_gaugeNoticeTopSpeed = 2200.0f;
@@ -670,11 +670,11 @@ void UpdateGaugeCollider(GaugeCollider* self, f32 dt)
         if (hit != 0) {
             *(Quad16*)&dir = span.q[2];
             if (IsObjectOfKind(hit, 0x1F) != 0 && ((PlacedObject*)hit)->oscillatorBlock != 0) {
-                Vec4 pair[2];
-                Vec4 in = dir;
-                BuildPerpendicularPair(&in, pair, &g_unitXVector, &g_unitZVector);
-                ComputeOscillatorDisplacement(((OscillatorBlock*)((PlacedObject*)hit)->oscillatorBlock)->oscillator, 50.0f, (Vec4*)&span, pair, 0, pair, 0);
-                Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
+                Vec4 basis[3];  // the oscillator reads three offsets: the pair and the direction itself
+                basis[2] = dir;
+                BuildPerpendicularPair(&basis[2], basis, &g_unitXVector, &g_unitZVector);
+                ComputeOscillatorDisplacement(((OscillatorBlock*)((PlacedObject*)hit)->oscillatorBlock)->oscillator, 50.0f, (Vec4*)&span, basis, 0, basis, 0);
+                Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(basis[0]), Vu0::Q(basis[1])), Vu0::Q(g_unitZVector)));
             }
             if (!(dir.z < 0.7f)) {
                 goto keep;
@@ -979,12 +979,11 @@ void ApplyGaugeColliderAttachedSetContact(GaugeCollider* self, AttachedSet* set,
     Vec4 gains;
     f32 depth = MeasureAttachedSetContactDepth(set, (TurningCollider*)self, &point, &normal);
     if (set->oscillatorBlock != 0) {
-        Vec4 pair[2];
-        Vec4 n;
-        n = normal;
-        BuildPerpendicularPair(&n, pair, &g_unitXVector, &g_unitZVector);
-        ComputeOscillatorDisplacement(((OscillatorBlock*)set->oscillatorBlock)->oscillator, 50.0f, &point, pair, 0, pair, 0);
-        Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(pair[0]), Vu0::Q(pair[1])), Vu0::Q(g_unitZVector)));
+        Vec4 basis[3];  // the oscillator reads three offsets: the pair and the normal itself
+        basis[2] = normal;
+        BuildPerpendicularPair(&basis[2], basis, &g_unitXVector, &g_unitZVector);
+        ComputeOscillatorDisplacement(((OscillatorBlock*)set->oscillatorBlock)->oscillator, 50.0f, &point, basis, 0, basis, 0);
+        Vu0::Set(normal, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(basis[0]), Vu0::Q(basis[1])), Vu0::Q(g_unitZVector)));
     }
     f32 push = self->pushFactor * set->pushFactor;
     f32 hold = self->dragFactor * set->dragFactor;

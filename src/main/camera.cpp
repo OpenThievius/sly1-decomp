@@ -250,7 +250,7 @@ void UpdateCameraMatrices(Camera* self);
 
 
 void InitIdentityMatrix(Mat4* self);
-void* InvertMatrix4x4(void* a0, void* a1);
+s32 InvertMatrix4x4(void* a0, void* a1);
 Mat4A MultiplyMatrices(const Mat4A& a, const Mat4A& b);
 
 

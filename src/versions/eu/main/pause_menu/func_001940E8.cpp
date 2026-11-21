@@ -16,11 +16,11 @@ void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
         s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             PauseStagedBankVoice();
-            SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
+            SetElementStackState((Obj_1940E8_eu*)&g_elementStack, 5);
         } else if (g_activeStepSequence != 0) {
-            SetElementStackState((Obj_1940E8_eu*)g_elementStack, 5);
+            SetElementStackState((Obj_1940E8_eu*)&g_elementStack, 5);
         } else {
-            u8* base = g_elementStack;
+            u8* base = (u8*)&g_elementStack;
             if (((s32*)base)[1] == 3) {
                 SetElementStackState((Obj_1940E8_eu*)base, 4);
             } else {
@@ -35,13 +35,13 @@ void SetPauseMenuOpen(Obj_1940E8_eu* self, s32 mode) {
         s32 key = (g_saveData->levelIndex << 8) | g_saveData->entryIndex;
         if (key == 0x308) {
             ResumeStagedBankVoice();
-            SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);
+            SetElementStackState((Obj_1940E8_eu*)&g_elementStack, 3);
         } else if (g_activeStepSequence != 0) {
-            SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);
+            SetElementStackState((Obj_1940E8_eu*)&g_elementStack, 3);
         } else if (self->f570 != 0) {
-            SetElementStackState((Obj_1940E8_eu*)g_elementStack, 3);
+            SetElementStackState((Obj_1940E8_eu*)&g_elementStack, 3);
         } else {
-            SetElementStackState((Obj_1940E8_eu*)g_elementStack, 6);
+            SetElementStackState((Obj_1940E8_eu*)&g_elementStack, 6);
         }
         ChangePauseMenuPage(self, self->f570, -1);
         ((VFn_1940E8_eu)self->vtbl[15])(self);

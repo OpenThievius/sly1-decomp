@@ -159,7 +159,8 @@ struct BlendAnimation;
 struct Collider;
 struct BlendAnimationView;
 void SetWorld5ModeColliderMode(World5ModeCollider* self, s32 mode);
-s32 FindAnimRecord(s32 key);
+struct AnimRecord;
+AnimRecord* FindAnimRecord(s32 key);
 
 // Starts the world 5 mode collider: resolves its links, makes its follow objects and state
 // walker, builds the five-weight blend animation (rest, minus and plus x and y) with the rest
@@ -225,7 +226,7 @@ tail:
 
 
 // Moves the collider, then calls slot 0x12 of its descriptor if it has one.
-void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, void* arg)
+void MoveWorld5ModeCollider(World5ModeCollider* self, f32 t, s32 flag)
 {
     MoveCollider(self, t, 0);
     void (*fn)(BaseObject*) = self->desc->m12;
@@ -753,7 +754,7 @@ void InitWorld5Boss(World5Boss* self)
 }
 
 void SetWorld5BossMode(World5Boss* self, s32 a1);
-s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
+void PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
 // Starts the world 5 boss: resolves its links, builds its three combined blend animations (mode
 // 0, mode 1 and a loop) each at weight 1, enters mode 0 and starts the loop animation.
@@ -938,7 +939,7 @@ done:
 
 
 // Starts the boss's looping animation (or replaces it by none when flag is 0) on the loop player.
-s32 PlayWorld5BossLoop(World5Boss* self, s32 flag)
+void PlayWorld5BossLoop(World5Boss* self, s32 flag)
 {
     void* p = 0;
     if (flag != 0) {

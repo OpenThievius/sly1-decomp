@@ -26,6 +26,8 @@ struct PadRecord;   // the pad's state (include/pad_record.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
+// The same for a pointer: an element's field that holds an object and is stored unaligned.
+struct __attribute__((packed)) T217D_Ptr { void* v; };
 // A float that may sit at any address: storing one is a pair of unaligned stores (swl, swr).
 struct __attribute__((packed)) T217D_Float { f32 v; };
 // A colour as four bytes (red, green, blue, alpha), copied as a whole.
@@ -300,7 +302,7 @@ struct CaptionBox : ScreenElement {
     Font* smallFont;            // 0x310: a copy of the font at 0.7 by 0.8 (SetupTextPanel)
     f32 tickScroll;             // 0x314: the scroll of the tick marks
     s32 bandsQwc;               // 0x318: the quadword count of the GS packet of the bands behind the panel (SetupTextPanel)
-    s32 bandsPacket;            // 0x31C: where the packet's copy in front memory starts
+    void* bandsPacket;           // 0x31C: where the packet's copy in front memory starts
     s32 palette;                // 0x320: 0 .. 2, the colour pair func_00132500 picks
     void* child;                // 0x324: the game object the box follows (its kind at +0x2D0, its state at +0x2D4)
     s32 bankState;              // 0x328: which glyph bank is loaded (func_00135E78), 1 lists the two counters (func_00135F48)
@@ -368,7 +370,7 @@ struct AimReticle : ScreenElement {
     u8 pad268[0x270 - 0x268];
     f32 aim[4];                 // 0x270: the aim, x and y in -1..1, and the zoom (func_00181ED0); the sprite's place as a fraction of the screen (func_001821B0)
     void* target;               // 0x280: the class 0x75 object the aim chose last (func_00181ED0)
-    s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
+    void* icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
     f32 alphaScale;             // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 
@@ -446,16 +448,6 @@ extern CounterCaption g_completionPercentCaption;    // D_002181F0
 typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];
 typedef char check_T217D_330[sizeof(ButtonHintElement) == 0x260 ? 1 : -1];
 
-// The stack of screen elements the menus push and pop (g_elementStack, D_00275BC0): its state
-// (SetElementStackState), and the elements, whose top gets the pad each frame
-// (UpdateElementStack, warp_menu.cpp).
-struct ElementStack {
-    u8 pad00[4];
-    s32 state;              // 0x04: 0 .. 8 (SetElementStackState)
-    f32 stateTime;          // 0x08: the clock when the state was set
-    ScreenElement* items[8]; // 0x0C: items[count - 1] is the top
-    s32 count;              // 0x2C: 1 for the base element alone
-    s32 resumeState;        // 0x30: the state that state 3 stands for, -1 for 3 itself
-};
+#include "element_stack.h"
 
 #endif

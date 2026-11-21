@@ -162,7 +162,7 @@ typedef s32 (*ObjectFilterFn)(void* a, void* b);
 
 struct GroundCandidate;
 struct GroundFilterContext;
-s32 FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
+Collider* FindNearestSpanObject(s32 flags, Vec4* a1, Vec4* a2, s32 count, Collider** list, ColliderSpan* out);
 
 struct GroundFilterContext { u8 pad[0x50]; s32 root; };
 struct GroundCandidate { u8 pad0[0x50]; s32 root; u8 pad1[0x278]; u32 flagsHigh; u8 pad2[0x268]; u64 flags; };
@@ -670,7 +670,7 @@ s32 FindObjectCyclerGroundPoint(ObjectCycler* self, Quadword128* out)
         GatherCollidersInSphere(self->world, self, 500.0f, &hit, 0, 0, &count, &list);
         below = hit;
         below.z = below.z - 500.0f;
-        s32 r = FindNearestSpanObject(0, &hit, &below, count, list, &span);
+        Collider* r = FindNearestSpanObject(0, &hit, &below, count, list, &span);
         PopBackMemoryMark();
         if (r != 0) {
             *out = *(Quadword128*)&span;
@@ -757,7 +757,7 @@ s32 IsObjectCyclerUnsupported(ObjectCycler* self)
     GatherCollidersInSphere(self->world, 0, self->searchRadius, &self->v140, (s32 (*)(void*, Collider*))(s32 (*)(GroundFilterContext*, GroundCandidate*))IsCyclerGroundCandidate, self, &fr.a, &fr.b);
     fr.q = self->v140;
     fr.q.z = fr.q.z - self->searchRadius;
-    s32 r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);
+    Collider* r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);
     PopBackMemoryMark();
     self->lastLookTime = tbl[1];
     return r == 0;
