@@ -76,7 +76,7 @@ void CopyTargetVector(TargetVector* self, TargetVector* src);
 void LoadPointObject(PointObject* self, void* other);
 void ConvertPositionToWorld(BaseObject* self, Vec4* out);
 void ReparentPointObject(PointObject* self, BaseObject* value);
-s32 ConvertPointObjectPosition(PointObject* self, void* other);
+void ConvertPointObjectPosition(PointObject* self, void* other);
 void LoadTextPointObject(TextPointObject* self, void* other);
 void ResetTextPointToHalf(TextPointObject* self);
 

@@ -189,7 +189,7 @@ extern f32 g_valueRampProfile[4];
 extern f32 g_frameStep;
 extern f32 g_frameDt;
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartPlacedObject(void* self);
 
 void GetOwnerValue(Attachment* self, f32* value, f32* slope);
@@ -308,7 +308,7 @@ void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
 
 
 void StartAnimationFromContext(PlacedObject* self);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
                    f32 fa, f32 fb, f32 fc, f32 fd, f32 fe, f32* p4, U64P* p5);
 

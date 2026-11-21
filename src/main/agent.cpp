@@ -199,7 +199,7 @@ void RemoveAgentFromParent(Agent* self)
     self->desc->m03(self);
 }
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 extern u8 g_flagTable[];
 
@@ -2513,7 +2513,7 @@ set:
 
 
 void* CreateTypedRecord(s32 index, void* a1, BaseObject* a2, s32 a3, s32 a4);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Creates a keeper record (class 0x89) and queues GroupAnimationEventObjects on it; StartAgent
 // calls it.
@@ -2666,7 +2666,7 @@ void GroupAnimationEventObjects(ItemKeeper* self)
     PopBackMemoryMark();
 }
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 // Queues UpdateItemKeeper on the world once, unless the keeper is in state 3 or already queued;

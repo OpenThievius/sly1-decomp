@@ -47,7 +47,7 @@ struct FreeSlot { FreeSlot* next; };
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 struct T219CHook;
 struct World;
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void ReleaseCallRecords(World* self, T219CHook* node);
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 void* AllocateFrontMemory(s32 size);

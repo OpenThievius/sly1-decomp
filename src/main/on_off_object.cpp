@@ -71,7 +71,7 @@ extern f32 g_gameTime;
 
 
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 

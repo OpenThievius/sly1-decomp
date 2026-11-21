@@ -146,7 +146,7 @@ void AddPathFollowerActiveEntry(PathFollower* item, void* a, f32 x, f32 y, s32 b
 void ResetPathFollower(PathFollower* st);
 void SetCachedVoiceParamBuiltin(void* self, s32 a, s32 b);
 s32 GetCachedVoiceParamBuiltin(void*,s32);
-void* RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2);
+void RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2);
 s32 TestLevelEntryFlag1(void* self, s32 obj);
 s32 TestLevelEntryFlag2(void* self, s32 obj);
 s32 TestLevelEntryFlag4(void* self, s32 obj);

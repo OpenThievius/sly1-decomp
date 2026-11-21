@@ -127,7 +127,7 @@ struct Mat3;
 typedef void (*Hook_CE40)(void* self);
 
 void StartPlacedObject(PlacedObject* self);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Starts the placed object and queues AttachMaskedColliderChildren for it.
 void StartMaskedCollider(MaskedCollider* self)
@@ -1055,7 +1055,7 @@ void CollectZoneChildren(TriggerZoneRecord* self, Collider* a1)
 
 extern u8 g_flagTable[];
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Starts a zone record: mode -1, resolves the objects of both pairs, and, for a persistent
 // record whose flag-table bit is set, queues DeferZoneRecordActivation.
@@ -1080,7 +1080,7 @@ void StartZoneRecord(TriggerZoneRecord* self)
     }
 }
 
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Queued call: the first run (mode 0) queues itself once more with mode 0xC, and the run after
 // that activates the zone record, so the activation is deferred by a queue pass.

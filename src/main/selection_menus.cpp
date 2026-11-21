@@ -243,7 +243,7 @@ void SetupCurrentObjectChoices(CurrentPlacedObject* self)
     PushStackElement(&g_elementStack, &g_selectionCaption);
 }
 
-void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_0016AED8 differs in registers
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 // Starts the placed object as the current one: sets its flag bits, makes it the global current
 // object, sets the element stack to state 2, resolves its links and queues the setup of its
 // choices.

@@ -1072,7 +1072,7 @@ void EvaluateAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32
 
 // Evaluates the three per-axis curves at key (the method shares its body with the axis position
 // evaluation, without the angles and notification).
-void* GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
+void GetAxisRotationCurve(AxisRotationCurve* self, PlacedObject* other, s32 flags, f32* values, f32* slopes, f32 key, f32 scale)
 {
     EvaluateAxisCurves(self->axis, other, flags, &self->base, values, slopes, key, scale);
 }

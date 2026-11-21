@@ -141,7 +141,7 @@ struct SpawnerLinkedObject { u8 pad00[0x18]; void* target; u8 pad1C[0x18]; s32 v
 
 EffectSpawnerRecord* GetOwnSpawnRecord(EffectSpawner* self, s32 mode);
 void ResolveSpawnRecordTargets(SpawnTargetRecord* rec, SpawnTargetOwner* owner);
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 void* CopyToFrontMemory(s32 size, void* owner);
 

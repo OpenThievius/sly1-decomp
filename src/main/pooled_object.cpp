@@ -118,7 +118,6 @@ extern f32 g_gameClock[];
 
 
 
-s32 AreMenusAndFadeClear(void* zero);
 
 extern f32 g_gameTime[];
 
@@ -164,7 +163,7 @@ extern ObjectLink g_takerLinks[3];
 
 void SyncPooledHolderWithPlayer(PooledHolder* self);
 struct StateGraph;
-void* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 
 
@@ -310,7 +309,6 @@ void SkipRemainingSteps(StepSequence* self);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 
-ListLink* GetListLinks(void* a, void* b);
 
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 void SetListLinkOffset(ObjectList* self, s32 offset);
@@ -319,7 +317,6 @@ void SetListLinkOffset(ObjectList* self, s32 offset);
 extern s32 g_resumeSoundSetupDone;
 void SetStepSequenceState(StepSequence* self, s32 mode);
 
-ListLink* GetListLinks(ObjectList* node, u32 value);
 void ClearList(ObjectList* node);
 
 

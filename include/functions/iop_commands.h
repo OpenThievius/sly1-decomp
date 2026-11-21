@@ -15,7 +15,7 @@ void NotifyIopBanksChanged(void);
 void UnloadSoundBank(s32 arg);
 void SetIopVolumeChannel(s32 a0, s32 a1);
 s32 GetIopVolumeChannel(s32 arg);
-s32 SetIopSoundOptionFlag(s32 arg);
+void SetIopSoundOptionFlag(s32 arg);
 void QueueIopCommandD(s32 x, s32 y);
 void QueueIopChannelConfig(s32 a0, s32 a1, s32 a2);
 s32 StartSoundVoice(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);

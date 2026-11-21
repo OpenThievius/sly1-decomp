@@ -78,7 +78,7 @@ typedef char check_TextPointObject[sizeof(TextPointObject) == 0x60 ? 1 : -1];
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void LoadPointObject(PointObject* self, void* other);         // 0x7E slot 10
 void ReparentPointObject(PointObject* self, BaseObject* value);            // 0x7E slot 21
-s32 ConvertPointObjectPosition(PointObject* self, void* other);           // 0x7E slot 22
+void ConvertPointObjectPosition(PointObject* self, void* other);           // 0x7E slot 22
 void InitTargetPoint(TargetPoint* self);                       // 0x7F slot 0
 void RegisterTargetPoint(TargetPoint* self);                       // 0x7F slot 6
 void UnregisterTargetPoint(TargetPoint* self);                       // 0x7F slot 7

@@ -352,7 +352,7 @@ s32 GetIopVolumeChannel(s32 arg)
 
 
 // Queues IOP command 11 with a flag taken from the save data's option bit 0x40.
-s32 SetIopSoundOptionFlag(s32 arg)
+void SetIopSoundOptionFlag(s32 arg)
 {
     s32 local = arg;
     QueueIopCommand(11, 4, &local, 0, 0);

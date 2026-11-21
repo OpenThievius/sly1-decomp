@@ -1167,7 +1167,7 @@ s32 GetCachedVoiceParamBuiltin(void* unused, s32 index)
     return GetCachedVoiceParam(index);
 }
 
-void* RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2)
+void RefreshCachedVoiceParamBuiltin(void* unused, s32 a1, s32 a2)
 {
     RefreshCachedVoiceParam(a1, a2);
 }
@@ -1214,7 +1214,7 @@ void ReleaseCallRecords(World* self, T219CHook* node)
     }
 }
 
-QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 
 // Queues a call unless an identical one is already waiting in the world's queue.
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
@@ -1233,7 +1233,7 @@ void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4)
 
 // Queues a call (code, arg and two more words) at the end of the world's queued-call list, to
 // be run by RunQueuedCalls.
-QueuedCall* AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d)
 {
     QueuedCall* e = (QueuedCall*)TakeCallRecord(self);
     e->code = code;

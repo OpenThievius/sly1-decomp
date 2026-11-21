@@ -754,7 +754,7 @@ void InitWorld5Boss(World5Boss* self)
 }
 
 void SetWorld5BossMode(World5Boss* self, s32 a1);
-s32 PlayWorld5BossLoop(World5Boss* self, s32 a1);
+void PlayWorld5BossLoop(World5Boss* self, s32 a1);
 
 // Starts the world 5 boss: resolves its links, builds its three combined blend animations (mode
 // 0, mode 1 and a loop) each at weight 1, enters mode 0 and starts the loop animation.
@@ -939,7 +939,7 @@ done:
 
 
 // Starts the boss's looping animation (or replaces it by none when flag is 0) on the loop player.
-s32 PlayWorld5BossLoop(World5Boss* self, s32 flag)
+void PlayWorld5BossLoop(World5Boss* self, s32 flag)
 {
     void* p = 0;
     if (flag != 0) {

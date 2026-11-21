@@ -74,8 +74,6 @@ extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 
 
 
-struct WeightCurve;
-WeightCurve* CreateWeightCurve(s32 a);
 
 void* AllocateFrontMemory(s32 size);
 

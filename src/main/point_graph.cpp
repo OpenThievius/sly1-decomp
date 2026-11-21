@@ -1424,7 +1424,7 @@ void ReparentPointObject(PointObject* self, BaseObject* value)
 }
 
 // Converts the point's position, in place, from the frame of other to world space.
-s32 ConvertPointObjectPosition(PointObject* self, void* other)
+void ConvertPointObjectPosition(PointObject* self, void* other)
 {
     void* p = &self->pos;
     TransformPointBetweenFrames((PlacedObject*)other, 0, (Vec4*)p, (Vec4*)p);

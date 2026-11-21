@@ -34,7 +34,7 @@ void UpdateWorld5Boss(World5Boss* self, f32 dt);
 void ShowWorld5BossBar(World5Boss* self);
 s32 HandleWorld5BossEvent(World5Boss* self, ObjectEvent* msg);
 void SetWorld5BossMode(World5Boss* self, s32 mode);
-s32 PlayWorld5BossLoop(World5Boss* self, s32 flag);
+void PlayWorld5BossLoop(World5Boss* self, s32 flag);
 void SetWorld5BossTarget(World5Boss* self, s32 index);
 void PlayWorld5BossTarget(World5Boss* self);
 void InitWorld5Countdown(World5Countdown* self);

@@ -47,7 +47,7 @@ void StopMovieStream(MovieStream* self);
 s32 FeedMovieStream(MovieStream* self, s32 left, u8* right);
 void UpdateMovieStream(MovieStream* self);
 s32 AcceptMovieDataIntoRing(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
-void PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
+s32 PassMovieDataToStream(void* a0, MovieDataBlock* a1, MoviePlayer* a2);
 s32 FlushMovieToIpu(void* u0, void* u1, MoviePlayer* self);
 s32 FeedMovieDecoderWithoutWaiting(void* a0, s32 a1, MoviePlayer* a2);
 s32 AcceptMovieDecoderEvent(void);

@@ -96,7 +96,7 @@ void InitElementStack(ElementStack* self);
 struct StateGraph;
 void StartPlacedObject(PlacedObject* self);
 void ResolveObjectLinks(BaseObject* self, s32 count, ObjectLink* item);
-void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d); // stays void: retail returns a value, but declared so func_001EB598 differs in registers
+void AppendQueuedCall(World* self, void* code, void* arg, s32 c, s32 d);
 void CopyPlayerAttachBlock(World3BeatPressCollider* self);
 struct SwitchedCollider;
 void HandleSwitchedColliderActivation(SwitchedCollider* self, void* activator);
@@ -293,7 +293,7 @@ void EndWorld3Timeline(void* p);
 // The definition's parameters in the order the call below writes them: retail's caller
 // evaluates its float arguments there, and only their place in the list decides that.
 typedef u64 Bits128 __attribute__((mode(TI)));
-s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out);
+void QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out);
 typedef void (*AttachNotifyFn)(void* self, void* arg);
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst);
 void ApplyPlacedObjectTransform(PlacedObject* self, Camera* cam, ScaledTransform* xf);
@@ -3711,7 +3711,7 @@ s32 ExpandMaskThroughTable(ValueListObject* self, s32 bits)
 // The mask of the leaves within radius of point under node: the walk follows the near side,
 // descends into the far side too where the sphere straddles the plane, and ORs each leaf's mask
 // (ExpandMaskThroughTable) into *out.
-s32 QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out)
+void QueryValueTreeMask(ValueListObject* self, sptr node, Bits128 point, f32 radius, s32* out)
 {
     if (node < 0) {
         *out = ExpandMaskThroughTable(self, node);
