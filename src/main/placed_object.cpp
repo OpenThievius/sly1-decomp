@@ -681,11 +681,11 @@ void CommitChunk(StreamReader* self);
 void StartLinkedObjectAnimation(Animation* self);
 void AppendQueuedCallOnce(World* self, void* a1, void* a2, s32 a3, s32 a4);
 
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out);
 
 
 AnimationPlayer* FindAnimationPlayerByScope(Animation* self, s32 key);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out);
 void SeekAnimationPlayer(AnimationPlayer* self, s32 mode, f32 a, f32 b);
 
 void FindOrCreateAnimationPlayerAndSeek(void* self, BaseObject* key, s32 a2, s32 a3, void** out, f32 fa, f32 fb);
@@ -779,7 +779,7 @@ struct TrackAttachment : TrackFollowAttachment {
     void SetMode(s32 mode) { mode1 = mode; }
 };
 void ChoosePoseSourceModes(Attachment* obj);
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out);
 void NotifyAnimationPlayerCallbacks(AnimationPlayer* self, s32 a1, void* a2);
 void SelectValueEntryByKey(PlacedObject* self, s32 key);
 s32 IsObjectOfKind(BaseObject* list, s32 key);
@@ -1816,7 +1816,9 @@ typedef void (*RotationAtFn)(PlacedObject* self, f32 t, Mat3* rot, Vec4* spin);
 // Like AccumulateFrameChain, but each object's position and rotation come from its own methods
 // evaluated at time t. Gives the combined position, rotation, velocity and spin of self relative to
 // top (any output may be null).
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin)
 {
     PlacedObject* chain[16];
     Vec4 P;
@@ -1874,15 +1876,16 @@ void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, 
 
 // Converts a position, rotation, velocity and spin from self's frame to top's frame as they are at
 // time t, using ComputeObjectFrameAtTime (any argument may be null).
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin)
 {
     Mat3 m;
     Vec4 p;
     Vec4 v;
     Vec4 w;
     Vec4 r;
-    ComputeObjectFrameAtTime(self, top, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
-                             (spin != 0 || vel != 0) ? &w : 0, t);
+    ComputeObjectFrameAtTime(self, top, t, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0, (spin != 0 || vel != 0) ? &w : 0);
     if (pos != 0 || vel != 0) {
         if (pos != 0) {
             Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(*pos));
@@ -4969,7 +4972,7 @@ void StartLinkedObjectAnimation(Animation* self)
     } else {
         v = 0;
     }
-    CreateAnimationPlayerWithoutPresetTargets(self, v, 0, (AnimationPlayer**)scratch, 0.0f, 1.0f);
+    CreateAnimationPlayerWithoutPresetTargets(self, v, 0.0f, 1.0f, 0, (AnimationPlayer**)scratch);
 }
 
 // Makes a player for the animation starting at time fa with speed fb, and links it into the
@@ -5082,7 +5085,9 @@ void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetB
 }
 
 // CreateAnimationPlayer with no preset target lists (0, 0).
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out)
 {
     CreateAnimationPlayer(self, alt, 0, 0, flags, out, fa, fb);
 }
@@ -5122,7 +5127,7 @@ void FindOrCreateAnimationPlayerAndSeek(void* self, BaseObject* key, s32 a2, s32
     if (hit) {
         *dst = hit;
     } else {
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)self, key, a3, (AnimationPlayer**)dst, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)self, key, 0.0f, 1.0f, a3, (AnimationPlayer**)dst);
     }
     SeekAnimationPlayer((AnimationPlayer*)*dst, a2, fa, fb);
 }
@@ -5145,8 +5150,7 @@ void ReplaceAnimationPlayer(Animation* anim, BaseObject* owner, s32 flags, Anima
         *out = 0;
     }
     if (anim != 0) {
-        // retail's call sets the floats up before the last two arguments
-        ((void (*)(Animation*, BaseObject*, f32, f32, s32, AnimationPlayer**))CreateAnimationPlayerWithoutPresetTargets)(anim, owner, fa, fb, flags, out);
+        CreateAnimationPlayerWithoutPresetTargets(anim, owner, fa, fb, flags, out);
     }
 }
 
@@ -5810,7 +5814,7 @@ void RunAnimationEvent(AnimationPlayer* self, AnimEvent* msg, s32* out)
             b = 0;
         }
         if (a != 0) {
-            CreateAnimationPlayerWithoutPresetTargets((Animation*)a, b, 0, 0, *(f32*)&((EventObjectPair*)msg->a8.p)->f8, ((EventObjectPair*)msg->a8.p)->fC);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)a, b, *(f32*)&((EventObjectPair*)msg->a8.p)->f8, ((EventObjectPair*)msg->a8.p)->fC, 0, 0);
         }
         break;
     }

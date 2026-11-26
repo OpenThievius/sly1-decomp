@@ -613,7 +613,7 @@ static inline f32 TiltRotation(Mat3* out, Mat3* turn, const Mat3& m, const Vec4&
 {
     const u128* q = (const u128*)&m;
     f32 angle = ComputeAngleBetweenVectors((Vec4*)((const Vec4*)&q[2]), (Vec4*)&to, axis);
-    BuildAxisAngleMatrix((const Vec4*)axis, (Mat3*)turn, angle);
+    BuildAxisAngleMatrix((const Vec4*)axis, angle, (Mat3*)turn);
     const u128* p = (const u128*)turn;
     u128 a0 = p[0];
     u128 a1 = p[1];
@@ -748,7 +748,7 @@ void StepPlayer(Player* self, f32 t)
     case 13:
         switch (self->subState) {
         case 0x38:
-            BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, (Mat3*)&m, self->heading);
+            BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, self->heading, (Mat3*)&m);
             TurnColliderTowardRotation(self, g_frameDt[0], &m, g_turnTowardRotationRates);
             break;
         case 0x36:
@@ -1304,7 +1304,7 @@ struct PosedPart { u8 pad00[0x10]; s8 state; s8 next; u8 pad12[0x20 - 0x12]; Vec
 
 void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
 void ComputeObjectMotionInFrame(PlacedObject* self, PlacedObject* top, Vec4* origin, Vec4* vel, Vec4* velSum, Vec4* spin, Vec4* spinSum);
-void TransformPointAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t);
+void TransformPointAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 // The smaller of two floats (min.s; through an inline function the result takes b's register).
 static inline f32 MinF(f32 a, f32 b) { return a <? b; }
@@ -1347,7 +1347,7 @@ void PosePlayerTargetPart(Player* self)
             Mat3 m;
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(((PosedPart*)self->footPartA)->offset), Vu0::Q(((PosedPart*)self->footPartB)->offset));
             f32 angle = D_00263850 * ArctangentOfRatio(d.z, D_00263854);
-            BuildAxisAngleMatrix((const Vec4*)&g_unitYVector, (Mat3*)&m, angle);
+            BuildAxisAngleMatrix((const Vec4*)&g_unitYVector, angle, (Mat3*)&m);
             Vu0::Q(((PosedPart*)self->rigPoseSource)->offset) = Vu0::Add(Vu0::Q(*(Vec4*)D_00263840), Vu0::Rotate(m, Vu0::Sub(Vu0::Q(*(Vec4*)D_00263800), Vu0::Q(*(Vec4*)D_00263840))));
             angles = D_00263810;
         }
@@ -1449,7 +1449,7 @@ motion:
     ComputeObjectMotionInFrame(frame, 0, at, &vel, 0, 0, 0);
     TransformPointBetweenFrames(0, (PlacedObject*)frame, at, &along);
     Vu0::Q(side) = Vu0::Zero();
-    TransformPointAtTime(frame, 0, &along, 0, &side, 0, g_motionLookaheadTime);
+    TransformPointAtTime(frame, 0, g_motionLookaheadTime, &along, 0, &side, 0);
     Vu0::Q(k) = Vu0::DivX(Vu0::Sub(Vu0::Add(Vu0::Q(rest), Vu0::Q(side)), Vu0::Q(vel)), Vu0::ScalarAt(g_motionLookaheadTime));
     f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(k), Vu0::Q(k))));
     if (0.0001f < dist) {
@@ -1641,7 +1641,7 @@ void PlacePlayerOnGround(Player* self, void* target, f32 angle, f32 scale)
     Vec4 tmp = self->v140;
     tmp.z = tmp.z - 75.0f;
     Vec4 out;
-    ComputeBallisticLaunchVelocity(&tmp, (Vec4*)target, &out, (u8*)self, angle);
+    ComputeBallisticLaunchVelocity(angle, &tmp, (Vec4*)target, &out, (u8*)self);
     self->desc02()->m20(self, &out);
     if (self->state != 4) {
         SetPlayerState(self, 2, 6);
@@ -1693,7 +1693,7 @@ void OrientPlayerSpinPart(Player* self, Mat3* out, f32 t)
     } else {
         axis = g_unitXVector;
     }
-    BuildAxisAngleMatrix((const Vec4*)&axis, (Mat3*)&m, self->spinAngle - g_frameDt[0] * self->spinRate * t);
+    BuildAxisAngleMatrix((const Vec4*)&axis, self->spinAngle - g_frameDt[0] * self->spinRate * t, (Mat3*)&m);
     Mat3 a;
     Mat3 c;
     MulRotationThenCopy(&c, self->rot, m);
@@ -1804,9 +1804,8 @@ void RecomputePlayerFrame(Player* self)
             goto clear;
         }
         f32 k = 6.0f;
-        // retail's caller evaluates the radius before the probe, as the fifth argument
-        ((void (*)(void*, PlacedObject*, void*, PlacedObject*, f32, FollowProbe*))BuildPartProbeTowardLink)(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)&self->footProbeA));
-        ((void (*)(void*, PlacedObject*, void*, PlacedObject*, f32, FollowProbe*))BuildPartProbeTowardLink)(self, (PlacedObject*)self->linkPartB, self->linkPartB, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)&self->footProbeB));
+        BuildPartProbeTowardLink(self, (PlacedObject*)a1, a1, (PlacedObject*)self->f620, k, (FollowProbe*)((u8*)&self->footProbeA));
+        BuildPartProbeTowardLink(self, (PlacedObject*)self->linkPartB, self->linkPartB, (PlacedObject*)self->f624, k, (FollowProbe*)((u8*)&self->footProbeB));
     }
     return;
 clear:
@@ -1916,16 +1915,15 @@ void PrunePlayerContacts(Player* self)
                     s32 k = (n->end[0].body != self);
                     if (n->end[k].part == self->heldObject) {
                         void* other = n->end[1 - k].body;
-                        // PrunePlayerContacts matches only with k passed in $a2, which no other
-                        // call of IsObjectOfKind sets
-                        if (other == 0 || ((s32 (*)(void*, s32, s32))IsObjectOfKind)(other, 0x46, k) == 0) {
+                        if (other == 0 || IsObjectOfKind((BaseObject*)other, 0x46) == 0) {
                             *slot = n->next;
                             n->next = head;
                             head = n;
                         } else {
                             slot = &n->next;
                         }
-                    } else if ((void*)n->end[1 - k].body == ((ContactChainOwner*)self->contactOwner) && ((s32 (*)(Player*, BodyContact*))self->desc06()->m56)(self, n)) {
+                    // slot 90 takes the contact's end: retail has k in $a2 for it
+                    } else if ((void*)n->end[1 - k].body == ((ContactChainOwner*)self->contactOwner) && ((s32 (*)(Player*, BodyContact*, s32))self->desc06()->m56)(self, n, k)) {
                         *slot = n->next;
                         n->next = ((ContactChainOwner*)self->contactOwner)->chain;
                         ((ContactChainOwner*)self->contactOwner)->chain = n;
@@ -5172,8 +5170,7 @@ void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec4* vel, Vec
         p = src->v10;
     }
     a = g_zeroVector;
-    // retail's caller evaluates the time before the pointers, as the third argument
-    ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))TransformPointAtTime)((PlacedObject*)parent, 0, dt, &p, 0, &a, 0);
+    TransformPointAtTime((PlacedObject*)parent, 0, dt, &p, 0, &a, 0);
     u128 end = Vu0::Add(Vu0::Q(p), Vu0::Q(off));
     u128 v = Vu0::DivX(Vu0::Sub(end, Vu0::Q(self->v140)), Vu0::Scalar(dt));
     v = Vu0::MulAddX(v, Vu0::Q(self->gravity), Vu0::Scalar(dt * -0.5f));
@@ -5284,7 +5281,7 @@ void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider**
         prev = start;
         f32 total = 1.0f;
         for (f32 u = 0.0f; u < g_targetArcDurations[i]; u += 0.25f) {
-            EvaluateHermiteVectorSegment(g_targetArcDurations[i], &start, &a, &b, &c, g_targetArcDurations[i] <? (u + 0.25f), 1.0f, &cur, 0, 0);
+            EvaluateHermiteVectorSegment(g_targetArcDurations[i], g_targetArcDurations[i] <? (u + 0.25f), 1.0f, &start, &a, &b, &c, &cur, 0, 0);
             s32 n = CollectSpansFromList(&prev, &cur, count, list, 8, spans);
             for (s32 k = 0; k < n; k++) {
                 total += Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(spans[k].q[0]), Vu0::Q(spans[k].q[1]))));

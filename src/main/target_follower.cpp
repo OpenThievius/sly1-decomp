@@ -155,7 +155,7 @@ void StepTargetFollower(TargetFollower* self, f32 t)
     if (self->stepHalted != 0) {
         return;
     }
-    BuildAxisAngleMatrix(&g_unitZVector, (Mat3*)&buf, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, (Mat3*)&buf);
     TurnColliderTowardRotation((Collider*)self, t, (Mat3*)&buf, (f32*)self->sub5B0);
 }
 
@@ -422,7 +422,7 @@ void LaunchPoolItemAtTarget(TargetFollower* self)
         t->f6F0 = tune->flightTime;
     } else {
         Vec4 dir;
-        if (ComputeBallisticLaunchVelocity(&b, &a, &dir, 0, tune->launchAngle) == 0) {
+        if (ComputeBallisticLaunchVelocity(tune->launchAngle, &b, &a, &dir, 0) == 0) {
             return;
         }
         u128 d1 = Vu0::Sub(Vu0::Q(b), Vu0::Q(a));
@@ -466,7 +466,7 @@ void LaunchTargetFollowerAtFollowed(TargetFollower* self)
     Vec4 d;
     ConvertPositionToWorld((BaseObject*)self->followedObject->anchor, (Vec4*)&target);
     target.z = target.z + self->heightOffset;
-    ComputeBallisticLaunchVelocity(&self->v140, &target, &vel, (u8*)self, 0.5f);
+    ComputeBallisticLaunchVelocity(0.5f, &self->v140, &target, &vel, (u8*)self);
     SetColliderAnchors(self, 0, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &vel);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));

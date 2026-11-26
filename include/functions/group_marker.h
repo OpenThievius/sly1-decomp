@@ -24,7 +24,7 @@ void PrepareStandardGroup(void);
 void PrepareAlternateBlockGroup(void);
 void PrepareUnzoomedGroup(void);
 void SubmitDeferredRequests(World* world, void* camera);
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
+void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, f32 x0, f32 y0, f32 x1, f32 y1, PacketWriter* p);
 void InitGroupMarkers(void);
 
 #endif

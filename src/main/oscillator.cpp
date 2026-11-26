@@ -233,7 +233,7 @@ struct TargetLaunchFrame {
 
 void ChooseBestTargetCandidate(Player* self, s32 n, BaseObject** items, TargetHit* out, f32* outf);
 void ComputeTargetArc(Player* self, TargetArcSource* src, f32 dt, Vec4* vel, Vec4* pos, Vec4* acc);
-void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec4* v, f32 angle, Mat3* out);
 void SetPlayerState(Player* self, s32 a, s32 b);
 void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f);
 
@@ -475,7 +475,7 @@ void RefreshOscillatorFrames(Oscillator* self)
                         Vu0::Vec qv; qv.q = qc;
                         f32 a = Vu0::ToFloatMoved(Vu0::Dot(qv, Vu0::Vec::Of(ent->axis))) * (ent->rate * 6.2831855f);
                         k = ent->index;
-                        ComputeSinCos(&sn, &cs, a);
+                        ComputeSinCos(a, &sn, &cs);
                         out->f[k++] = cs * *w;
                         out->f[k] = sn * *w;
                         break;
@@ -544,7 +544,7 @@ void ComputeOscillatorDisplacement(Oscillator* self, f32 time, Vec4* in, Vec4* d
         }
         f32 phase = Vu0::ToFloatMoved(Vu0::Dot(base, Vu0::Vec::Of(e->v10))) * scale + g_gameClock.time * e->frequency + e->phaseOffset;
         f32 sn, cs;
-        ComputeSinCos(&sn, &cs, phase * 6.2831855f);
+        ComputeSinCos(phase * 6.2831855f, &sn, &cs);
         u128 c = Vu0::FromFloatAt(cs);
         pos = Vu0::MulAddX2(pos, Vu0::Vec::Of(e->v20), WeightOf(c), Vu0::Vec::Of(e->v40), Vu0::Vec::Scalar(sn));
         if (outB != 0) {
@@ -688,7 +688,7 @@ void EvaluateOscillator(Oscillator* self)
         case 0: {
             f32 phase = g_gameClock.time * e->frequency + e->phaseOffset;
             f32 sn, cs;
-            ComputeSinCos(&sn, &cs, phase * 6.2831855f);
+            ComputeSinCos(phase * 6.2831855f, &sn, &cs);
             u128 c = Vu0::FromFloatAt(cs);
             Vec4 a;
             Vec4 b;
@@ -717,9 +717,9 @@ void EvaluateOscillator(Oscillator* self)
             Mat3 turn;
             Vec4 axis;
             f32 tilt = EvaluateNoiseBlend((NoiseBlend*)e->blend80);
-            BuildAxisAngleMatrix(&e->v20, &turn, tilt);
+            BuildAxisAngleMatrix(&e->v20, tilt, &turn);
             Vu0::Set(axis, Vu0::Rotate(turn, Vu0::Vec::Of(e->v10)).q);
-            BuildAxisAngleMatrix(&axis, &m, angle);
+            BuildAxisAngleMatrix(&axis, angle, &m);
             fa->r[0].x = m.r[0].x - 1.0f;
             fa->r[0].y = m.r[0].y;
             fa->r[0].z = m.r[0].z;
@@ -1061,7 +1061,7 @@ void PlaceAtArrivalPoint(TransformSet* self)
     who->vt->setSpin(who, (void*)&g_zeroVector);
     ActivateSwitchedCollider(who);
     for (s32 i = 0; i < self->count; i++) {
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objects[i], 0, 0, 0, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objects[i], 0, 0.0f, 1.0f, 0, 0);
     }
     SetGatheredWalkerTargets(self->world, self->keyedCount, (ZoneTargetEntry*)self->keyed, self, 1);
     for (s32 i = 0; i < self->idCount; i++) {
@@ -1285,7 +1285,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
     SetObjectSubGroupState(self, 5);
     for (i = 0; i < self->count; i++) {
         it = (Animation*)self->items[i];
-        CreateAnimationPlayerWithoutPresetTargets(it, 0, 0, 0, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(it, 0, 0.0f, 1.0f, 0, 0);
         next = 0;
         if (found != 0 || HasAnimationEventKind19(it) != 0) {
             next = 1;
@@ -1685,7 +1685,7 @@ void LaunchPlayerAtTrackedNode(TrackedTargetChoice* ctx, Player* self)
         self->desc02()->m1D(self, (Vec4*)f.b);
         self->desc02()->m20(self, (Vec4*)&g_zeroVector);
         self->desc02()->m21(self, (Vec4*)&g_zeroVector);
-        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, (Mat3*)f.c, self->heading);
+        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, self->heading, (Mat3*)f.c);
         self->desc02()->m1E(self, (Mat3*)f.c);
         SetPlayerState(self, 2, 2);
     } else {

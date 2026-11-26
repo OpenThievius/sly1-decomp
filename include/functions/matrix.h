@@ -21,7 +21,7 @@ void InitIdentityMatrix(Mat4* self);
 void TransformByMatrixWithW(const Quad16* m, const Vec4* v, f32 w, Vec4* out);
 void CopyTransposedMatrix(Quad16* src, Quad16* dst);
 void AddMatrices(f32* a, f32* b, f32* out);
-void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec4* v, f32 angle, Mat3* out);
 void BuildRotationFromVector(Vec4* v, Mat3* mat);
 void BuildEulerRotationMatrix(f32* in, f32* out);
 void BuildMatrixFromRotationAndTranslation(const Vec4* pos, const Mat3* rot, Mat4A* out);

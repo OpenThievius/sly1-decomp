@@ -22,7 +22,7 @@ struct World;
 
 f32 GetSurfacePairFriction(SurfacePair* p);
 f32 GetSurfacePairBounce(SurfacePair* p);
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
+PooledContact* CreatePooledContact(void* a0, void* a1, void* a2, void* a3, f32 f, s32 a4, void* a5, void* a6, void* a7);
 void RefreshContactEndPoints(World* world, s32 n, BodyContact** list);
 void NotifyContactEnds(World* world, s32 n, BodyContact** list);
 void FreePooledContactChain(World* world, BodyContact* head);

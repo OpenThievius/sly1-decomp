@@ -401,7 +401,7 @@ void RaiseObjectFlag(FlaggedObject* self)
     }
     SaveFlagTableSnapshot((FlagTable*)g_flagTable, self->childId, idx);
     for (s32 i = 0; i < self->countA; i++) {
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->objsA[i], 0, 0.0f, 1.0f, 0, 0);
     }
     if (self->handle != 0) {
         SetStateWalkerTarget(self->handle, sel);

@@ -26,7 +26,7 @@ void PlaceOnTargetObject(Player* self, PathTarget* node, Vec4* outA, Vec4* outB,
 f32 ScoreTargetObjectAt(TargetCostContext* self, f32 t);
 f32 ScoreTargetPointAt(TargetCostContext* self, f32 t);
 f32 ScoreTargetCurveAt(TargetCostContext* self, f32 t);
-void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out1, Vec4* out2, Vec4* out3, f32 t);
+void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, f32 t, Vec4* point, f32* out1, Vec4* out2, Vec4* out3);
 f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t);
 f32 ScoreTargetPathNearest(PathScoreContext* self);
 s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, void* pa, void* pb, Vec4* pc, void* pd, Vec4* pe);

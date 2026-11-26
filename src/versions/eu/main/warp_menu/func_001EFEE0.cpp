@@ -16,7 +16,6 @@ void DrawScreenFade(ScreenFade* self)
         }
         draw:
     f32 v = self->opacity * 255.0f;
-    // retail's caller evaluates the colour and the packet before the corners
-    ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(0, 0, 0, (s32)v, &g_gsPacketWriter, 0.0f, 0.0f, 640.0f, 468.61017f);
+    WriteColoredSpritePacket(0, 0, 0, (s32)v, 0.0f, 0.0f, 640.0f, 468.61017f, &g_gsPacketWriter);
     }
 }

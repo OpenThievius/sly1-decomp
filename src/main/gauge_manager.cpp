@@ -724,7 +724,7 @@ void RunGaugeTimedEvent(GaugeManager* self)
         if (made == 0) {
             anchor = pos;
         }
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)slot->animation, (BaseObject*)slot->obj, 0, (AnimationPlayer**)&slot->key, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)slot->animation, (BaseObject*)slot->obj, 0.0f, 1.0f, 0, (AnimationPlayer**)&slot->key);
         made++;
         AddAnimationPlayerRecordCallback((AnimationPlayer*)slot->key, (PlacedObject**)self);
         self->contactAgents = self->contactAgents + 1;
@@ -766,7 +766,7 @@ void ActivateRandomGaugeSlot(GaugeManager* self)
     c->desc02()->m1E(c, (Mat3*)v1);
     c->desc02()->m20(c, (Vec4*)g_zeroVector);
     c->desc02()->m21(c, (Vec4*)g_zeroVector);
-    CreateAnimationPlayerWithoutPresetTargets((Animation*)s->animation, (BaseObject*)s->obj, 0, (AnimationPlayer**)&s->key, 0.0f, 1.0f);
+    CreateAnimationPlayerWithoutPresetTargets((Animation*)s->animation, (BaseObject*)s->obj, 0.0f, 1.0f, 0, (AnimationPlayer**)&s->key);
     AddAnimationPlayerRecordCallback((AnimationPlayer*)s->key, (PlacedObject**)self);
     self->slotAgents = self->slotAgents + 1;
     f32 r = RandomFloatInRange(self->delayMin, self->delayMax);

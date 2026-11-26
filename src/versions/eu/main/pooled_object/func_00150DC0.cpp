@@ -85,7 +85,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             }
         }
         if (a0) {
-            CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 1, &self->player2F8, 0.0f, 1.0f);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 0.0f, 1.0f, 1, &self->player2F8);
             AddAnimationPlayerRecordCallback(self->player2F8, (PlacedObject**)self);
         }
         nm = (u16*)msg->text;

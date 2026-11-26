@@ -299,8 +299,7 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         Vec4 k;
         Mat3 basis;
         f32 t = self->stateEnd + dt - g_gameClock[1];
-        // Retail's caller evaluates the floats first: the call names them first.
-        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
+        EvaluateHermiteVectorSegment(t, dt, 1.0f, &self->pos, &self->v150, &self->v5F0, &self->v600, &pos, &vel, 0);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(vel), Vu0::Q(self->v150));
         *(u128*)&k = Vu0::FromFloat(1.0f / dt);
         Vu0::Q(accel) = Vu0::MulX(Vu0::Q(accel), *(u128*)&k);
@@ -308,7 +307,7 @@ void StepObjectCycler(ObjectCycler* self, f32 dt)
         AddColliderForce(self, &accel);
         Vu0::Q(accel) = Vu0::Sub(Vu0::Q(accel), Vu0::Q(self->gravity));
         BuildBasisFromXAndZHint(&vel, &accel, &basis);
-        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)g_cyclerRotationRamp, 0, &k, dt);
+        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)g_cyclerRotationRamp, dt, 0, &k);
         self->desc02()->m21(self, &k);
         break;
     }

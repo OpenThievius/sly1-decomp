@@ -447,7 +447,7 @@ void FadeScreenToBlack(f32 t)
             i++;
             UsePacketBufferMemory(&f, 0x40, &f.value);
             BeginDmaTag(&f);
-            WriteColoredSpritePacket(0.0f, 0.0f, 640.0f, 492.80002f, 0, 0, 0, v, &f);
+            WriteColoredSpritePacket(0, 0, 0, v, 0.0f, 0.0f, 640.0f, 492.80002f, &f);
             BeginGifTag(&f, 0, 1, 0xE);
             AddGifRegisterWrite(&f, 0x61, 0);
             EndGifPacket(&f);

@@ -486,7 +486,7 @@ void FinishSwitchedCollider(SwitchedCollider* self)
         s1->desc02()->m21(s1, (Vec4*)&g_zeroVector);
         void* r = (void*)FindFirstObjectById(self->world, 1, 0x18C, s1);
         if (r != 0) {
-            CreateAnimationPlayerWithoutPresetTargets((Animation*)r, s1, 0, 0, 0.0f, 1.0f);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)r, s1, 0.0f, 1.0f, 0, 0);
         }
     } else {
         s32 v = (s32)self->f588[1];

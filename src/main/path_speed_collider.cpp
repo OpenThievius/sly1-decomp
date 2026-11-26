@@ -174,9 +174,7 @@ void MoveC24Object(PathSpeedCollider* self, s32 a1, f32 dt)
         BuildBasisFromXAndZHint(&vel, &t, &basis);
         self->pos = pos;
         self->v150 = vel;
-        // Retail's caller evaluates the limit first: the call names its float argument first.
-        ((void (*)(f32, Mat3*, Mat3*, RampProfile*, Mat3*, Vec4*))ApproachRotationWithRamp)(
-            dt, &self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, &self->rot, &self->v160);
+        ApproachRotationWithRamp(&self->rot, &basis, (RampProfile*)g_pathSpeedColliderRotationRamp, dt, &self->rot, &self->v160);
     }
     ScopedListFrame frame(&self->children);
     void* head = *(void**)&self->children;

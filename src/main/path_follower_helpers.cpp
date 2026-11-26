@@ -127,7 +127,7 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                 f32* range = (g_currentWorld->soundBank == 3) ? g_wheelParticleTurnRangeWorld3 : g_wheelParticleTurnRange;
                 // The angle is a statement of its own: &m is formed at the call, after it.
                 f32 a = RandomFloatInRange(range[0], range[1]);
-                BuildAxisAngleMatrix(&g_unitYVector, &m, a);
+                BuildAxisAngleMatrix(&g_unitYVector, a, &m);
                 // The tilt's range through a pointer, as the turn's: loop.c then moves its
                 // address out of the loop with the %hi of its first word.
                 f32* tilt = g_wheelParticleTiltRange;
@@ -146,7 +146,7 @@ void EmitPathFollowerWheelParticles(PathFollower* self)
                     break;
                 }
                 s32 front = (s32)i < 2;
-                BuildAxisAngleMatrix(&g_unitZVector, &n, b);
+                BuildAxisAngleMatrix(&g_unitZVector, b, &n);
                 MulRotation(&m, n, m);
                 TransformPointBetweenFrames(0, self, &s->contactPoint, &spawn.pos);
                 // The offset stored in each arm: the join after them makes CSE read it back

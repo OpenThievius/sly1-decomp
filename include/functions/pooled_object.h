@@ -80,7 +80,7 @@ void RaiseScatterLevels(ScatterController* self, f32 amount);
 void RaiseScatterLevelForObject(ScatterController* obj, FlaggedObject* node);
 void ResetScatterLevels(ScatterController* object);
 void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag);
-void SetScatterLevel(ScatterController* object, f32 unused);
+void SetScatterLevel(ScatterController* object, f32 level);
 void SetListLinkOffset(ObjectList* self, s32 offset);
 void ClearList(ObjectList* p);
 void ClearListLinks(ListLink* p);

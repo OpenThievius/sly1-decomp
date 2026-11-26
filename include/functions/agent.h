@@ -81,7 +81,7 @@ void StoreAgentTarget(Agent* self, s32* out);
 void SetAgentSecondaryTarget(Agent* self, void* value);
 void PickAgentSecondaryTarget(Agent* self);
 void SetAgentPrimaryTarget(Agent* self, void* value);
-void ComputeAgentContactValue(Agent* self, BodyContact* out);
+void ComputeAgentContactValue(Agent* self, BodyContact* out, s32 end);
 void ClampAgentContactLimit(Agent* self, s32 flags, ContactLimit03* out);
 void SetAgentAngleLimitDegrees(Agent* self, f32 value);
 void AddAgentStateTrigger(Agent* self, StateTrigger* value);

@@ -120,7 +120,9 @@ struct FreeListPool;
 // depth, point, normal and kind, the body and the point in each part's frame at both ends, the
 // surface-pair friction and bounce and the vertex and face involved; lets each end's handler
 // (slot 60) see it, completes it (NotifyContactEnds) and links it to the front of the list *a7.
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+PooledContact* CreatePooledContact(void* a0, void* a1, void* a2, void* a3, f32 f, s32 a4, void* a5, void* a6, void* a7)
 {
     s32 surfaces[2];
     Vec4 k;
@@ -642,16 +644,14 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
             for (c = g; c != 0; c = c->next) {
                 c->face54->flags &= ~8;
             }
-            CreatePooledContact(bestDot - bestFace->dist, objs[0], objs[1], kp, bestFace, 1,
-                                &((Vec4*)objs[0]->meshCopy.verts)[key], bestFace, list);
+            CreatePooledContact(objs[0], objs[1], kp, bestFace, bestDot - bestFace->dist, 1, &((Vec4*)objs[0]->meshCopy.verts)[key], bestFace, list);
             for (h = g; h != 0; h = h->next) {
                 if (h->face54 == bestFace) {
                     continue;
                 }
                 f32 d = DotFloat(Vu0::Vec::Of(h->r1), Vu0::Vec::Of(bestFace->normal));
                 if (d < bestDot) {
-                    CreatePooledContact(d - bestFace->dist, objs[0], objs[1], &h->r1, bestFace, 2, h->edge,
-                                        bestFace, list);
+                    CreatePooledContact(objs[0], objs[1], &h->r1, bestFace, d - bestFace->dist, 2, h->edge, bestFace, list);
                 }
             }
         }
@@ -691,7 +691,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
                 Vu0::Vec t1 = Vu0::Vec::Scalar(params[1]);
                 Vu0::Vec b1 = Vu0::Vec::Of(*seg[3]);
                 *(Vu0::Vec*)&pts[1] = Vu0::MulXSum(a1, s1, b1, t1);
-                CreatePooledContact(-depth, self, other, pts, &normal, 3, e->edge, h->edge, list);
+                CreatePooledContact(self, other, pts, &normal, -depth, 3, e->edge, h->edge, list);
             }
         } else {
             MeshEdge* edge = e->edge;
@@ -726,8 +726,7 @@ void CreateMeshPairContacts(Collider* self, Collider* other, s32 a2, FaceRef* a3
             if (c != 0) {
                 continue;
             }
-            CreatePooledContact(DotFloatMoved(Vu0::Vec::Of(*p), Vu0::Vec::Of(face->normal)) - face->dist, self, other,
-                                p, face, 1, p, face, list);
+            CreatePooledContact(self, other, p, face, DotFloatMoved(Vu0::Vec::Of(*p), Vu0::Vec::Of(face->normal)) - face->dist, 1, p, face, list);
         }
     next:;
     }
@@ -991,7 +990,7 @@ void AddMeshContacts(Collider* a0, f32 radius, Vec4* a1, Collider* a2, s32 a3, F
     s32 n = CollectMeshHits(a1, radius, a3, a4, a5, &a2->meshCopy, 0x40, ents);
     for (s32 i = n - 1; i >= 0; i--) {
         MeshHitEntry* e = &ents[i];
-        CreatePooledContact(e->depth, a0, a2, e, &e->normal, e->kind, 0, e->part, a6);
+        CreatePooledContact(a0, a2, e, &e->normal, e->depth, e->kind, 0, e->part, a6);
     }
 }
 
@@ -1024,7 +1023,7 @@ void AddSphereSphereContact(Collider* self, Collider* other, void* a2)
         Vu0::Q(k) = Vu0::FromFloat(-rs);
         Vu0::Q(point) = Vu0::MulAddX(Vu0::Q(self->v140), Vu0::Q(n), Vu0::Q(k));
     }
-    CreatePooledContact(dist - sum, self, other, &point, &n, 7, 0, 0, a2);
+    CreatePooledContact(self, other, &point, &n, dist - sum, 7, 0, 0, a2);
 }
 
 // The point of a collision part that lies furthest against direction a1: the vertex of its mesh
@@ -1079,7 +1078,7 @@ s32 AddSweptPartMeshContact(void* a0, void* a1, s32 a2, void* a3, void* a4, void
     void* p = recs[idx].p50;
     // the object's class is not known
     FindPartSupportPoint(a0, p, &v1, &v2, *(f32*)((u8*)p + 0x10));
-    CreatePooledContact(v2.x, a0, a1, &v1, p, 8, 0, p, a5);
+    CreatePooledContact(a0, a1, &v1, p, v2.x, 8, 0, p, a5);
     return 1;
 }
 
@@ -1143,7 +1142,7 @@ s32 AddSweptPartSphereContact(void* a0, void* a1, void* a2)
         return 0;
     }
     FindPartSupportPoint(a0, loc.b, loc.a, &loc.fb, loc.fa);
-    CreatePooledContact(loc.fb, a0, a1, loc.a, loc.b, 9, 0, 0, a2);
+    CreatePooledContact(a0, a1, loc.a, loc.b, loc.fb, 9, 0, 0, a2);
     return 1;
 }
 

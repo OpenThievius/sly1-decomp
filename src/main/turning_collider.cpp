@@ -126,7 +126,9 @@ struct FollowProbe {
 // from a point radius below the part's position, back along the direction from the link record's
 // anchor object toward the link's point, for that distance minus 15. Leaves active at 0 when there
 // is no link or the distance is under 0.0001.
-void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, FollowProbe* out, f32 radius)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, f32 radius, FollowProbe* out)
 {
     Vec4 pos;
     Vec4 dir;
@@ -516,7 +518,7 @@ void ClampColliderContactLimit(Collider* self, s32 flags, ContactLimit03* limit)
 // Builds the heading matrix: a rotation about Z by the heading.
 void BuildTurningColliderHeadingMatrix(TurningCollider* self)
 {
-    BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &self->headingMatrix);
 }
 
 
@@ -712,7 +714,7 @@ void CollectTurningColliderContacts(TurningCollider* self)
                         f32 depth = Vu0::ToFloat(dot);
                         *(Vu0::Vec*)&p = Vu0::MulAddX(Vu0::Vec::Of(c->end[1 - j].point), Vu0::Vec::Of(n),
                                                  Vu0::Vec::Scalar(depth));
-                        CreatePooledContact(depth, self, c->end[1 - j].part, &p, &n, 10, 0, 0, &c->next);
+                        CreatePooledContact(self, c->end[1 - j].part, &p, &n, depth, 10, 0, 0, &c->next);
                     }
                 }
             }
@@ -757,7 +759,7 @@ void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* 
             switch (span.spanKind) {
             case 0: {
                 f32 d0 = Vu0::ToFloat(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
-                CreatePooledContact(d0, self, obj, (void*)self->probeVertex, &span.q[2], 1, (void*)self->probeVertex, span.face50, out);
+                CreatePooledContact(self, obj, (void*)self->probeVertex, &span.q[2], d0, 1, (void*)self->probeVertex, span.face50, out);
                 break;
             }
             case 1: {
@@ -766,7 +768,7 @@ void AddTurningColliderProbeContact(TurningCollider* self, Collider* obj, void* 
                 Vu0::Q(span.q[2]) = Vu0::MulX(Vu0::Q(span.q[2]), Vu0::Q(k));
                 f32 d1 = Vu0::ToFloatViaBits(Vu0::Dot(Vu0::Q(diff), Vu0::Q(span.q[2])));
                 d1 = -d1;
-                CreatePooledContact(d1, obj, self, (void*)self->probeVertex, &span.q[2], 4, 0, (void*)self->probeVertex, out);
+                CreatePooledContact(obj, self, (void*)self->probeVertex, &span.q[2], d1, 4, 0, (void*)self->probeVertex, out);
                 break;
             }
             }
@@ -793,7 +795,7 @@ void GetTurningColliderPose(TurningCollider* self, void* matrix, Vec4* out, f32 
     f32 turn;
     f32 r = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     f32 angle = ApproachAngleWithRamp(r, self->heading, limit, &self->turnGain, &turn);
-    BuildAxisAngleMatrix(&g_unitZVector, (Mat3*)matrix, angle);
+    BuildAxisAngleMatrix(&g_unitZVector, angle, (Mat3*)matrix);
     Vec4 k;
     Vu0::Q(k) = Vu0::FromFloatAt(turn);
     Vu0::Q(*out) = Vu0::MulX(Vu0::Q(g_unitZVector), Vu0::Q(k));

@@ -231,7 +231,7 @@ void RefreshChildGroupObjectContacts(ChildGroupObject* self)
 
 
 struct PooledContact;
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
+PooledContact* CreatePooledContact(void* a0, void* a1, void* a2, void* a3, f32 f, s32 a4, void* a5, void* a6, void* a7);
 
 // Looks up the entry with the given key among the object's entries and, if found and the object
 // is active, creates a pooled contact for it (kind 9) carrying that entry's data and value; this
@@ -245,8 +245,7 @@ void RunKeyedChildGroupEntry(ChildGroupObject* self, void* key, void* a2, void* 
         }
         if (i < self->entryCount) {
             ChildHitRecord* e = &self->entries[i];
-            // Retail's caller evaluates the depth last: the call names it last.
-            ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
+            CreatePooledContact(self, key, e, &e->data, e->value, 9, 0, 0, arg5);
         }
     }
 }

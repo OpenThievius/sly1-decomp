@@ -2421,7 +2421,7 @@ ScriptValue* GetScriptBallisticVelocity(ScriptValue* ret, s32 count, ScriptValue
     void* s1 = args[0].p;
     void* fc = args[1].p;
     ConvertScriptValueToFloat(&v, &args[2]);
-    ComputeBallisticLaunchVelocity((Vec4*)s1, (Vec4*)fc, (Vec4*)p, (u8*)s3, v.f);
+    ComputeBallisticLaunchVelocity(v.f, (Vec4*)s1, (Vec4*)fc, (Vec4*)p, (u8*)s3);
     DestroyScriptValue(&v, 2);
     SetScriptValueVectorA(&q, p);
     CopyConstructScriptValue(ret, &q);
@@ -2493,7 +2493,7 @@ void MatrixToAxisAngle(Mat3* m, f32* angle, Vec4* axis);
 void ResetMatrixHomogeneous(HomogeneousMatrix* self);
 
 void MultiplyMatrices3x3(Mat3* a, Mat3* b, Mat3* out);
-void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle);
+void BuildAxisAngleMatrix(const Vec4* v, f32 angle, Mat3* out);
 
 // The script's rotation-blend built-in: takes the rotation between the matrices args[0] and args[1]
 // as an axis and an angle, scales the angle by the weight args[2] and applies that partial rotation
@@ -2510,7 +2510,7 @@ ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue*
     f32* m = AcquireMatrixPayload();
     MultiplyMatrices3x3((Mat3*)args[0].p, (Mat3*)args[1].p, &delta);
     MatrixToAxisAngle(&delta, &angle, (Vec4*)&axis);
-    BuildAxisAngleMatrix(&axis, &delta, angle * args[2].f);
+    BuildAxisAngleMatrix(&axis, angle * args[2].f, &delta);
     const Mat3* src = (const Mat3*)args[0].p;
     u128 v0 = Vu0::Q(src->r[0]);
     Vu0::Q(b.r[0]) = Vu0::Q(a.r[0]) = Vu0::RotateUntied(delta, v0);

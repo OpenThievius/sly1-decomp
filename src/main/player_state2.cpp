@@ -937,7 +937,7 @@ extern f32 D_00263E74;
 extern f32 D_00264040;
 extern f32 D_00264044;
 extern f32 D_00264048[2];
-void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc);
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 extern f32 g_gameTime;
 extern f32 g_gameClock[];
@@ -1070,7 +1070,7 @@ void UpdatePlayerState2(Player* p)
             SetPlayerState(p, 6, 0x10);
             break;
         }
-        ComputeObjectFrameAtTime((PlacedObject*)p->heldObject, 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        ComputeObjectFrameAtTime((PlacedObject*)p->heldObject, 0, rec->time - g_gameClock[1], &b, 0, &c, 0);
         ((LeapPoseSource*)p->selfPoseSource)->aim = b;
         ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         ((LeapPoseSource*)p->selfPoseSource)->land = c;
@@ -1100,7 +1100,7 @@ void UpdatePlayerState2(Player* p)
         }
         b = ((LeapTargetObject*)p->leapTarget)->pos;
         c = g_zeroVector;
-        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->leapTarget)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->leapTarget)->frame), 0, rec->time - g_gameClock[1], &b, 0, &c, 0);
         ((LeapPoseSource*)p->selfPoseSource)->aim = b;
         ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         ((LeapPoseSource*)p->selfPoseSource)->land = c;
@@ -1117,7 +1117,7 @@ void UpdatePlayerState2(Player* p)
         }
         b = ((LeapTargetObject*)p->targetNode)->pos;
         c = g_zeroVector;
-        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetNode)->frame), 0, &b, 0, &c, 0, rec->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetNode)->frame), 0, rec->time - g_gameClock[1], &b, 0, &c, 0);
         ((LeapPoseSource*)p->selfPoseSource)->aim = b;
         ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         ((LeapPoseSource*)p->selfPoseSource)->land = c;
@@ -1136,7 +1136,7 @@ void UpdatePlayerState2(Player* p)
         if (t->desc->m1 != 0) {
             t->desc->m1(t, p->trackPos, &b, 0);
         }
-        TransformPointAtTime((PlacedObject*)(((LeapTrackOwner*)p->targetTrack)->frame), 0, &b, 0, 0, 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTrackOwner*)p->targetTrack)->frame), 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1], &b, 0, 0, 0);
         ((LeapPoseSource*)p->selfPoseSource)->aim = b;
         ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         break;
@@ -1152,7 +1152,7 @@ void UpdatePlayerState2(Player* p)
         PlaceOnTargetPoint((TargetPoint*)p->targetPoint, &b, 0, p->targetPointPlace);
         TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTargetObject*)p->targetPoint)->frame), &b, &b);
         c = g_zeroVector;
-        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetPoint)->frame), 0, &b, 0, &c, 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetPoint)->frame), 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1], &b, 0, &c, 0);
         ((LeapPoseSource*)p->selfPoseSource)->aim = b;
         ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         ((LeapPoseSource*)p->selfPoseSource)->land = c;
@@ -1170,7 +1170,7 @@ void UpdatePlayerState2(Player* p)
         PlaceOnTargetCurve((TargetCurve*)p->targetCurve, &b, 0, p->targetCurvePos);
         TransformPointBetweenFrames(0, (PlacedObject*)(((LeapTargetObject*)p->targetCurve)->frame), &b, &b);
         c = g_zeroVector;
-        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetCurve)->frame), 0, &b, 0, &c, 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1]);
+        TransformPointAtTime((PlacedObject*)(((LeapTargetObject*)p->targetCurve)->frame), 0, ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1], &b, 0, &c, 0);
         ((LeapPoseSource*)p->selfPoseSource)->aim = b;
         ((LeapPoseSource*)p->selfPoseSource)->aim.z += 75.0f;
         ((LeapPoseSource*)p->selfPoseSource)->land = c;
@@ -1182,7 +1182,7 @@ void UpdatePlayerState2(Player* p)
         if (rec->time < g_gameTime) {
             SetPlayerState(p, 3, 0x33);
         } else {
-            ScorePlayerLeapToPoint(p, (BaseObject*)(((LeapTrackOwner*)p->boundObject)->frame), &((LeapTargetObject*)p->boundObject)->pos, 0, &rec->aim, &rec->land, rec->time - g_gameTime);
+            ScorePlayerLeapToPoint(p, (BaseObject*)(((LeapTrackOwner*)p->boundObject)->frame), rec->time - g_gameTime, &((LeapTargetObject*)p->boundObject)->pos, 0, &rec->aim, &rec->land);
         }
         break;
     }
@@ -1200,10 +1200,8 @@ void UpdatePlayerState2(Player* p)
     if (p->subState < 16) {
         if (p->subState >= 9) {
             f32 t = ((LeapPoseSource*)p->selfPoseSource)->time - g_gameClock[1] + g_gameClock[2];
-            // Retail's caller evaluates the floats first: the call names them first.
-            ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
-            // Retail's caller evaluates the floats first: the call names them first.
-            ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
+            EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &b);
+            EvaluateHermiteVectorSegment(t, t, 1.0f, &p->pos, &p->v150, &((LeapPoseSource*)p->selfPoseSource)->aim, &((LeapPoseSource*)p->selfPoseSource)->land, 0, 0, &c);
             if (D_00264048[0] < (Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(b))) + Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(c)))) * (t * 0.5f)) {
                 SetPlayerState(p, 2, 2);
             }

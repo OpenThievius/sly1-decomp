@@ -113,7 +113,7 @@ struct RampProfile;
 struct Mat3;
 void SendHitCountColliderRequest(HitCountCollider* self, BaseObject* value);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
-void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
 extern "C" f32 Cosine(f32 x);
 
 // Per-frame update of the hit-count collider: updates it as a switched collider, handles a
@@ -143,7 +143,7 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
             self->hitPlayer = 0;
         }
     } else if (self->hitPending) {
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->hitClip, self, 0, &self->hitPlayer, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)self->hitClip, self, 0.0f, 1.0f, 0, &self->hitPlayer);
         self->hitsLeft = self->hitsLeft - 1;
         D_0026E228[0] = -1;
     }
@@ -171,8 +171,8 @@ void UpdateHitCountCollider(HitCountCollider* self, f32 t)
         if (g_gameTime[0] - self->markStartTime > 2.0f) self->acceptedMark = 0;
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, (Mat3*)buf, self->aimHeading - ang);
-    ApproachRotationWithRamp(&self->aimObject->rot, (Mat3*)buf, (RampProfile*)g_hitCountRotationRamp, (Mat3*)buf2, 0, t);
+    BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, self->aimHeading - ang, (Mat3*)buf);
+    ApproachRotationWithRamp(&self->aimObject->rot, (Mat3*)buf, (RampProfile*)g_hitCountRotationRamp, t, (Mat3*)buf2, 0);
     self->aimObject->desc02()->m1E(self->aimObject, (Mat3*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;

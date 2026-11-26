@@ -30,7 +30,7 @@ s32 IsTintBlendColliderRequestBlocked(TintBlendCollider* self, s32 mode);
 void ContinueTintBlendColliderRequest(TintBlendCollider* self, TintBlendCollider* other);
 s32 AcceptTintBlendColliderRequest(TintBlendCollider* self, OwnerMessage* req);
 void CollectTintBlendColliderContacts(TintBlendCollider* self);
-void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out);
+void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out, s32 end);
 void HandleTintBlendColliderNotification(TintBlendCollider* self, s32 code, MessageBody* rec);
 s32 GetTintBlendColliderRequestPhase(TintBlendCollider* self);
 void SetTintBlendColliderState(TintBlendCollider* self, s32 mode);

@@ -408,7 +408,7 @@ void NotifyPlayerGroundObject(Player* self)
             GetObjectWorldPosition(o, &lo);
             // the object's class is not known
             hi = *(Vec4*)((u8*)o + 0x40);
-            TransformPointAtTime((PlacedObject*)((BaseObject*)obj)->parent, 0, &hi, 0, 0, 0, g_gameClock[2]);
+            TransformPointAtTime((PlacedObject*)((BaseObject*)obj)->parent, 0, g_gameClock[2], &hi, 0, 0, 0);
             if (out.z <= lo.z) {
                 if (hi.z <= out.z) {
                     hit = 1;
@@ -982,7 +982,7 @@ void StepPathFollower(PathFollower* self, f32 dt)
     f32 h = ((ValueRange*)g_headingAlignRange)->Limit(((QuadraticCurve*)g_headingAlignCurve)->Eval(Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(heading), Vu0::Q(self->rot.r[0])))));
     Vec4 want;
     Mat3 roll;
-    BuildAxisAngleMatrix(&g_unitZVector, &roll, (spinL.z + c.z * (dt * 0.5f)) * dt);
+    BuildAxisAngleMatrix(&g_unitZVector, (spinL.z + c.z * (dt * 0.5f)) * dt, &roll);
     f32 speed;
     if (1.0f < tilt) {
         speed = tilt * self->maxSpeed;

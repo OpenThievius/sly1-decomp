@@ -87,14 +87,14 @@ f32 ApproachValueClampingVelocity(f32 a, f32 b, f32 c, f32 d, void* self, f32* o
 f32 ApproachAngleWithRamp(f32 a, f32 b, f32 c, void* self, f32* out);
 f32 ApproachAngleClampingVelocity(f32 f12, f32 f13, f32 f14, f32 f15, void* self, f32* a1);
 u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec4* vel);
-void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
 s32 RandomIntInRange(s32 a, s32 b);
 f32 RandomFloatInRange(f32 a, f32 b);
 f32 RandomGaussian(f32 mean, f32 deviation, f32 limit);
 s32 AreFloatsNearlyEqual(f32 a, f32 b, f32 tolerance);
 s32 SolveQuadratic(f32 a, f32 b, f32 c, f32* roots);
 void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out);
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
+void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 double TruncateDouble(double x);
 f32 TruncateFloat(f32 x);
 f32 WrapModulo(f32 x, f32 y);
@@ -163,9 +163,9 @@ void FindSegmentClosestParams(Vec4* a, Vec4* b, Vec4* c, Vec4* d, f32* out2, f32
 void FindClosestPointsOnSegments(const Vec4* p0, const Vec4* p1, const Vec4* q0, const Vec4* q1, f32* st, f32* dist, Vec4* dir);
 void GetVectorAngles(Vec3* v, f32* a1, f32* a2);
 void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out);
-s32 ComputeBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle);
+s32 ComputeBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
 s32 ComputeLaunchVelocityToPoint(f32 speed, Vec4* from, Vec4* to, Vec4* out, u8* rec);
-void ForwardBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle);
+void ForwardBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
 void ClampVectorLength(Vec4* v, Vec4* out, f32 max);
 PacketWriter* InitPacketWriter(PacketWriter* self);
 void PadPacketToQuadSlot(PacketWriter* s, s32 target);

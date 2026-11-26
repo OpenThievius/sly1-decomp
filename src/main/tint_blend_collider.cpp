@@ -270,7 +270,7 @@ void SimulateRedirectChain(RedirectObject* self)
             f32 angle = ComputeAngleBetweenVectors(&a, &d, &axis);
             if (self->maxBend < angle) {
                 Mat3 r;
-                BuildAxisAngleMatrix(&axis, &r, angle - self->maxBend);
+                BuildAxisAngleMatrix(&axis, angle - self->maxBend, &r);
                 *(Vec*)&a = Vu0::Rotate(r, Vec::Of(a));
                 *(Vec*)&step->pos = Vu0::Add(Vec::Of(prev->pos), Vec::Of(a));
             }
@@ -360,7 +360,7 @@ void InitTintBlendCollider(TintBlendCollider* self)
     InitTurningCollider(self);
     f = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     self->heading = f;
-    BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, f);
+    BuildAxisAngleMatrix(&g_unitZVector, f, &self->headingMatrix);
     self->state = -1;
     self->tintStartTime = -10.0f;
     (*(Quad16*)&self->headingWeightCurve) = g_tintBlendHeadingWeightCurve;
@@ -577,8 +577,8 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     ComputePolarOffset((Vec3*)&axis, stick, 1.0f, 0.0f);
     Vu0::Q(axis) = Vu0::Cross(Vu0::Q(g_unitZVector), Vu0::Q(axis));
     f32 lean = g_unitRange.Limit(Quadratic(g_tintLeanCurve, pad->stickMagnitude));
-    BuildAxisAngleMatrix(&axis, &tilt, g_leanTiltFactor[0] * lean);
-    BuildAxisAngleMatrix(&g_unitZVector, &turn, self->heading);
+    BuildAxisAngleMatrix(&axis, g_leanTiltFactor[0] * lean, &tilt);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &turn);
     // Row 0 is stored after rows 1 and 2: the six stores of this block tie in sched1 and go in
     // the order they are written (docs/toolchain/sched1.md, "Argument moves held back").
     u128 p0 = Vu0::RotateUntied(tilt, Vu0::Q(turn.r[0]));
@@ -595,7 +595,7 @@ void ControlTintBlendCollider(TintBlendCollider* self, f32 dt, PadRecord* pad)
     // stores, and its sums are scheduled among the rows' loads (docs/toolchain/sched1.md,
     // "Argument moves held back").
     f32 lean2 = g_unitRange.Limit(Quadratic(D_00275820, pad->stickMagnitude));
-    BuildAxisAngleMatrix(&axis, &m, g_tintBodyLeanFactor[0] * lean);
+    BuildAxisAngleMatrix(&axis, g_tintBodyLeanFactor[0] * lean, &m);
     PlacedObject* frame = ((TintPart*)self->primaryPart)->frame;
     rot = MultiplyByTransposedMatrix3x3(frame->m110, RotatedRows(m, frame->m110));
     ((TintBody*)self->primaryPartAttachment)->m40 = rot;
@@ -802,18 +802,18 @@ void CollectTintBlendColliderContacts(TintBlendCollider* self)
 
 struct TintBlendOutput { u8 pad0[0x94]; f32 contactValue; s32 f98; };
 
-typedef s32 (*TintBlendTestFn)(void* self, void* out);
+typedef s32 (*TintBlendTestFn)(void* self, void* out, s32 end);
 
 extern f32 g_gameTime;
 
 // Sets the contact's value: when the class's method 56 says so, a quadratic ramp in the time
 // since the tint started, clamped to the unit range and scaled by a constant; otherwise 0.
-void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
+void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out, s32 end)
 {
     TintBlendCollider* obj = self;
     TintBlendOutput* o = (TintBlendOutput*)out;
 
-    if (((TintBlendTestFn)obj->desc06()->m56)(self, out)) {
+    if (((TintBlendTestFn)obj->desc06()->m56)(self, out, end)) {
         f32 d = g_gameTime - obj->tintStartTime;
         f32 lo = ((f32*)&g_unitRange)[0];
         f32 hi = ((f32*)&g_unitRange)[1];
@@ -915,7 +915,7 @@ void SetTintBlendColliderState(TintBlendCollider* self, s32 mode)
         case 2:
         case 3:
             self->headingVelocity = g_zeroVector;
-            BuildAxisAngleMatrix(&g_unitZVector, &self->headingMatrix, self->heading);
+            BuildAxisAngleMatrix(&g_unitZVector, self->heading, &self->headingMatrix);
 
             self->f580 = 0;
             break;

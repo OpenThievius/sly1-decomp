@@ -803,7 +803,7 @@ void StartNextStateWalkerEdge(StateWalker* self)
             self->player = 0;
             if (e->anim != 0)
             {
-                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->object, self->playerFlags, &self->player, fa, fb);
+                CreateAnimationPlayerWithoutPresetTargets(e->anim, (BaseObject*)self->object, fa, fb, self->playerFlags, &self->player);
                 if (self->player != 0)
                 {
                     AddAnimationPlayerCallback(self->player, (void*)HandleStateWalkerTrackEnd, self);

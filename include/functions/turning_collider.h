@@ -23,7 +23,7 @@ struct Vec4;
 void InitTurningCollider(TurningCollider* self);
 void StartTurningCollider(TurningCollider* self);
 void SetTurningColliderLinkFlag(TurningCollider* self, s32 a1);
-void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, FollowProbe* out, f32 radius);
+void BuildPartProbeTowardLink(void* unused0, PlacedObject* self, void* unused2, PlacedObject* obj, f32 radius, FollowProbe* out);
 void KeepNearestPartSpan(void* unused, void* a1, void* a2, FootProbe* self);
 void PlacePartAtProbeSpan(void* unused0, PlacedObject* other, PlacedObject* self, FootProbe* rec);
 void DrawTurningCollider(TurningCollider* self, void* unused1, void* unused2);

@@ -145,7 +145,7 @@ void AddTrailPoint(TrailRing* self, Vec4* pos, Mat3* mat, s32 flag, f32 scale, f
             TrailFrame frame;
             Vec4 dp;
             fn = (f32)n;
-            BuildAxisAngleMatrix(&axis, &step, angle / fn);
+            BuildAxisAngleMatrix(&axis, angle / fn, &step);
             Vu0::Q(frame.pos) = Vu0::Q(self->vC60);
             f32 ninv = -1.0f / fn;
             f32 inv = 1.0f / fn;

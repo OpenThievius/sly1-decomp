@@ -247,7 +247,7 @@ void StartNextQueueEntry(EntryQueue* self)
         p->focusPoint = pos;
         p->desc02()->m1D(p, &pos);
         p->heading = heading;
-        BuildAxisAngleMatrix(&g_unitZVector, &rot, heading);
+        BuildAxisAngleMatrix(&g_unitZVector, heading, &rot);
         p->desc02()->m1E(p, &rot);
         p->desc02()->m20(p, (Vec4*)&g_zeroVector);
         p->desc02()->m21(p, (Vec4*)&g_zeroVector);
@@ -375,7 +375,7 @@ void StartNextQueueEntry(EntryQueue* self)
         if (obj == 0 || !IsObjectOfKind(obj, 0x83)) {
             break;
         }
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)obj, 0, 0, (AnimationPlayer**)&player, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)obj, 0, 0.0f, 1.0f, 0, (AnimationPlayer**)&player);
         if (e->state != 0) {
             goto done;
         }

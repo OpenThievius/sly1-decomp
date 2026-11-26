@@ -29,7 +29,7 @@ void DrawSpinningSpriteElement(SpinningSprite_eu* self)
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
     AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x30000);
     *(u32*)&col = 0x80FFFFFF;
-    BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * g_walkerSpinRate);
+    BuildAxisAngleMatrix(&g_unitZVector, g_gameTime * g_walkerSpinRate, &m);
     BeginGifTag(&g_gsPacketWriter, 0x5C, 3, 0x412);
     col.a = (u8)(s32)(self->f288 * (f32)col.a);
     for (u32 i = 0; i < 4; i++) {

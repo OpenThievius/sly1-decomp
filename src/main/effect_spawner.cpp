@@ -2101,8 +2101,7 @@ void GenerateSpawnSetupPair(s32 n, void* owner, SpawnSetup* first, SpawnSetup* s
             f32 t = ((f32*)first->out[3])[i] - g_gameClock[1];
             if (!AreFloatsNearlyEqual(t, last, 0.0001f)) {
                 last = t;
-                // retail's caller evaluates the time before the pointers, as the third argument
-                ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))ComputeObjectFrameAtTime)((PlacedObject*)(((EffectSpawnerRecord*)r->rec)->target), 0, last, &P, &M, &V, &W);
+                ComputeObjectFrameAtTime((PlacedObject*)(((EffectSpawnerRecord*)r->rec)->target), 0, last, &P, &M, &V, &W);
             }
             Vec4* p = (Vec4*)(i * 16 + second->out[0]);
             Vu0::Set(tmp, Vu0::Rotate(M, Vu0::Q(*p)));
@@ -2330,7 +2329,7 @@ void TurnMatrixBySpin(EffectSpinRecord* spin, f32 dt, f32* out)
         } else {
             axis = spin->axis;
         }
-        BuildAxisAngleMatrix((const Vec4*)&axis, (Mat3*)&turn, spin->rate * dt);
+        BuildAxisAngleMatrix((const Vec4*)&axis, spin->rate * dt, (Mat3*)&turn);
     }
     Mat4A term;
     Mat4A scaled;

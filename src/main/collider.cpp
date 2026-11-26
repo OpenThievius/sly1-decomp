@@ -1963,7 +1963,7 @@ void ApplyColliderImpulseEvent(void* a0, f32 value, void* a1, void* a2)
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(*target), Vu0::Q(vel)), Vu0::Q(g_unitZVector)));
     f32 zero = 0.0f;
     contact = 0;
-    CreatePooledContact(zero, self, 0, origin, &dir, 0xC, 0, 0, &contact);
+    CreatePooledContact(self, 0, origin, &dir, zero, 0xC, 0, 0, &contact);
     *(Vec4*)((u8*)&contact->end[1] + 0x30) = *target;
     contact->bounce = zero;
     contact->friction = 1.0f;

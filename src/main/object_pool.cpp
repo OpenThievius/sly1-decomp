@@ -991,13 +991,11 @@ s32 LaunchChosenPoolObject(ObjectPool* pool, s32 aim)
                 if (self->heading.flags & 1) {
                     f32 t;
                     GetPlacementRecordPitch((u8*)h, &t, self->frame);
-                    // Retail's caller evaluates the angle before the vectors' addresses: the call names it first.
-                    ((void (*)(f32, Vec4*, Vec4*, Vec4*, u8*))ForwardBallisticLaunchVelocity)(t, &pos, &to, &self->velocity, (u8*)obj);
+                    ForwardBallisticLaunchVelocity(t, &pos, &to, &self->velocity, (u8*)obj);
                 } else if (self->heading.flags & 4) {
                     ComputeLaunchVelocityToPoint(h->speed, &pos, &to, &self->velocity, (u8*)obj);
                 } else {
-                    // Retail's caller evaluates the angle before the vectors' addresses: the call names it first.
-                    ((s32 (*)(f32, Vec4*, Vec4*, Vec4*, u8*))ComputeBallisticLaunchVelocity)(0.5f, &pos, &to, &self->velocity, (u8*)obj);
+                    ComputeBallisticLaunchVelocity(0.5f, &pos, &to, &self->velocity, (u8*)obj);
                 }
             }
         }
@@ -1170,11 +1168,10 @@ void ComputeFrameFollowerPoint(FrameFollower* self, Vec4* target, Vec4* out, voi
         } else {
             t = v;
         }
-        // retail's caller evaluates the time before the pointers, as the third argument
-        ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))ComputeObjectFrameAtTime)((PlacedObject*)frame, 0, t, &here, &rot, 0, 0);
+        ComputeObjectFrameAtTime((PlacedObject*)frame, 0, t, &here, &rot, 0, 0);
         Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*local)), Vu0::Q(here));
         if (to != 0) {
-            ComputeObjectFrameAtTime((PlacedObject*)to, 0, &pos2, &rot2, 0, 0, t);
+            ComputeObjectFrameAtTime((PlacedObject*)to, 0, t, &pos2, &rot2, 0, 0);
             Vu0::Q(*out) = Vu0::RotateTransposed(rot2, Vu0::Sub(Vu0::Q(*out), Vu0::Q(pos2)));
         }
         break;

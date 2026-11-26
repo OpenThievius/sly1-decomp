@@ -314,7 +314,7 @@ s32 HasWorld2BossClearLine(World2Boss* self)
 one:
     return 1;
 second:
-    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, (Vec4*)loc.buf, 0, 0, 0, D_002649C8);
+    ComputeObjectFrameAtTime((PlacedObject*)sub, 0, D_002649C8, (Vec4*)loc.buf, 0, 0, 0);
     if (IsWorld2BossLineBlocked(self, &self->v140, loc.buf) == 0) {
         goto one;
     }
@@ -538,7 +538,7 @@ void UpdateWorld2BossState(World2Boss* self)
             f32 dist = Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(Vu0::Sub(Vec::Of(tgt->v140), Vec::Of(self->v140)).q,
                                                         Vu0::Sub(Vec::Of(tgt->v140), Vec::Of(self->v140)).q)));
             f32 t = g_unitRange.Clamp(((QuadraticCurve*)&curve)->Eval(dist));
-            ComputeObjectFrameAtTime(tgt, 0, &self->launchPoint, 0, 0, 0, t <? limit);
+            ComputeObjectFrameAtTime(tgt, 0, t <? limit, &self->launchPoint, 0, 0, 0);
             Vu0::Q(to) = Vu0::Sub(Vec::Of(self->launchPoint), Vec::Of(self->v140)).q;
             SetAgentFacingAngles(self, ArctangentOfRatio(to.y, to.x), 0.0f);
         }

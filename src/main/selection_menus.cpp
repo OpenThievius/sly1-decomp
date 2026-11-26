@@ -344,7 +344,7 @@ void ConfirmCurrentObjectChoice(CurrentPlacedObject* self)
             MarkProgressStageFlag(idx);
             elt = *(void**)(table + (self->choice << 2));
             if (elt != 0) {
-                CreateAnimationPlayerWithoutPresetTargets((Animation*)elt, self, 0, 0, 0.0f, 1.0f);
+                CreateAnimationPlayerWithoutPresetTargets((Animation*)elt, self, 0.0f, 1.0f, 0, 0);
                 elt = *(void**)(table + (self->choice << 2));
                 if (elt != 0 && HasAnimationEventKind19((Animation*)elt) != 0) {
                     goto tail;

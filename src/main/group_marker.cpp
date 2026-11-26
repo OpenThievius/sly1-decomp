@@ -364,7 +364,9 @@ void SubmitDeferredRequests(World* world, void* camera)
 
 // Writes a flat-coloured rectangle sprite from (x0, y0) to (x1, y1) in screen coordinates and an
 // RGBA colour to the GS packet, alpha-blended unless the alpha is 255.
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, f32 x0, f32 y0, f32 x1, f32 y1, PacketWriter* p)
 {
     u32 col;
     BeginGifTag(p, a <= 0xFE ? 0x46 : 6, 5, 0x441EE);

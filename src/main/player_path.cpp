@@ -466,14 +466,14 @@ void ControlPlayerOnPath(Player* self, PathPad* pad)
 }
 
 struct PooledContact;
-PooledContact* CreatePooledContact(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, void* a5, void* a6, void* a7);
+PooledContact* CreatePooledContact(void* a0, void* a1, void* a2, void* a3, f32 f, s32 a4, void* a5, void* a6, void* a7);
 
 // The player held on its path: the contact row for the path's frame's root (or the player's own
 // list at +0x4B4 when the frame has no flag 2), the point and direction at the player's length in
 // world space, and three contacts of kind 0xB, along the two directions across the path and along
-// it, each at the offset of the player's point from the path's. The float is the last parameter of
-// CreatePooledContact here, as for func_0013B9D8: the $f12 move then follows the integer argument
-// moves in insn order, which sched1's tie-break needs (docs/TOOLCHAIN.md, "local-alloc").
+// it, each at the offset of the player's point from the path's. The depth is the fifth parameter
+// of CreatePooledContact, where every caller's code has its $f12 move among the integer moves
+// (docs/TOOLCHAIN.md, "local-alloc").
 void PinPlayerToPath(Player* self)
 {
     Vec4 pos;
@@ -505,12 +505,9 @@ void PinPlayerToPath(Player* self)
     BuildPerpendicularPair(&dir, perp, &g_unitXVector, &g_unitZVector);
     TransformPointBetweenFrames(self, 0, &self->v23E0, &local);
     Vu0::Q(delta) = Vu0::Sub(Vu0::Add(Vu0::Q(local), Vu0::Q(self->pathPoseOffset)), Vu0::Q(pos));
-    // Retail's caller evaluates the depth last: the call names it last.
-    ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, path->frame, &local, &perp[0], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))));
-    // Retail's caller evaluates the depth last: the call names it last.
-    ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, path->frame, &local, &perp[1], 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))));
-    // Retail's caller evaluates the depth last: the call names it last.
-    ((PooledContact* (*)(void*, void*, void*, void*, s32, void*, void*, void*, f32))CreatePooledContact)(self, path->frame, &local, &dir, 0xB, 0, 0, row, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))));
+    CreatePooledContact(self, path->frame, &local, &perp[0], Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[0]))), 0xB, 0, 0, row);
+    CreatePooledContact(self, path->frame, &local, &perp[1], Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(perp[1]))), 0xB, 0, 0, row);
+    CreatePooledContact(self, path->frame, &local, &dir, Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(delta), Vu0::Q(dir))), 0xB, 0, 0, row);
     *link = (BodyContact*)row->head;
 }
 

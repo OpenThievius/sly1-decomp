@@ -222,8 +222,8 @@ void ApplyLinkConstraint(PlacedObject* self)
         c = -1.0f;
     }
     Mat3 bend;
-    // retail's call evaluates the angle before the pointers
-    ((void (*)(f32, const Vec4*, Mat3*))BuildAxisAngleMatrix)(Arccosine(c) - angle, &axis, &bend);
+    f32 turn = Arccosine(c) - angle;
+    BuildAxisAngleMatrix(&axis, turn, &bend);
     Vec4 bent;
     Vec4 reachv;
     *(Vec*)&w = *(Vec*)&bent = Vu0::Rotate(bend, Vec::Of(w));
@@ -234,7 +234,7 @@ void ApplyLinkConstraint(PlacedObject* self)
     Vec4 dir;
     dir = t;
     *(Vec*)&dir = Vu0::DivX(Vec::Of(t), Vu0::Length(Vec::Of(t)));
-    BuildAxisAngleMatrix(&dir, &twist, self->linkRecord->angle);
+    BuildAxisAngleMatrix(&dir, self->linkRecord->angle, &twist);
     Mat3 R;
     MulRotationInto(&R, twist, swing);
     swing = R;

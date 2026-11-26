@@ -135,7 +135,9 @@ LINKER_REMNANT(func_00188848);
 
 // Builds the rotation matrix about the unit axis v by angle radians (Rodrigues' formula) into the
 // 3x3 part of out.
-void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void BuildAxisAngleMatrix(const Vec4* v, f32 angle, Mat3* out)
 {
     const f32* axis = &v->x;
     f32 (*m)[4] = (f32 (*)[4])out;
@@ -145,7 +147,7 @@ void BuildAxisAngleMatrix(const Vec4* v, Mat3* out, f32 angle)
     s32 j;
     f32 t;
 
-    ComputeSinCos(&s, &c, angle);
+    ComputeSinCos(angle, &s, &c);
     t = 1.0f - c;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
@@ -181,7 +183,7 @@ void BuildRotationFromVector(Vec4* v, Mat3* mat)
         Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(1.0f / len);
         Vu0::Q(axis) = Vu0::MulX(q, Vu0::Q(k));
-        BuildAxisAngleMatrix(&axis, mat, len);
+        BuildAxisAngleMatrix(&axis, len, mat);
     } else {
         *(Matrix3x4*)mat = g_identityMatrix;
     }
@@ -193,9 +195,9 @@ void BuildRotationFromVector(Vec4* v, Mat3* mat)
 void BuildEulerRotationMatrix(f32* in, f32* out)
 {
     f32 sc[6];
-    ComputeSinCos(&sc[0], &sc[1], in[0]);
-    ComputeSinCos(&sc[2], &sc[3], in[1]);
-    ComputeSinCos(&sc[4], &sc[5], in[2]);
+    ComputeSinCos(in[0], &sc[0], &sc[1]);
+    ComputeSinCos(in[1], &sc[2], &sc[3]);
+    ComputeSinCos(in[2], &sc[4], &sc[5]);
     f32 sa = sc[0], ca = sc[1], sb = sc[2], cb = sc[3], cg = sc[5], sg = sc[4];
     f32 sasb = sa * sb;
     f32 casb = ca * sb;
@@ -396,8 +398,8 @@ void BuildYawPitchMatrix(f32 yaw, f32 pitch, Mat3* out)
 {
     Mat3 a;
     Mat3 b;
-    BuildAxisAngleMatrix((const Vec4*)g_unitZVector, &a, yaw);
-    BuildAxisAngleMatrix((const Vec4*)g_unitYVector, &b, -pitch);
+    BuildAxisAngleMatrix((const Vec4*)g_unitZVector, yaw, &a);
+    BuildAxisAngleMatrix((const Vec4*)g_unitYVector, -pitch, &b);
     MulRotation(out, a, b);
 }
 
@@ -637,7 +639,7 @@ void BuildShortestArcRotation(const Vec4* from, const Vec4* to, Mat3* out)
     u128 cosine = Vu0::Dot(Vu0::Q(a), Vu0::Q(b));
     *(u128*)&axis = Vu0::DivX(*(u128*)&axis, Vu0::Scalar(len));
     f32 angle = Arccosine(Vu0::ToFloatMoved(cosine));
-    BuildAxisAngleMatrix(&axis, out, angle);
+    BuildAxisAngleMatrix(&axis, angle, out);
 }
 
 // Fills a projection matrix from six floats: x and y scales, x and y offsets, and the depth terms

@@ -148,7 +148,9 @@ void EvaluateHermiteSegment(f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd, 
 // The cubic Hermite segment from p0 (tangent m0) to p1 (tangent m1) over dur, at time t: the
 // point into pos, the velocity (scaled by k) into vel and the acceleration (by k squared)
 // into acc, each when given.
-void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc)
 {
     Vec4 d;
     f32 u = t / dur;
@@ -212,16 +214,16 @@ void BlendRotationsWithSpin(f32 dur, f32 t, f32 e, Mat3* a, const Vec4* wa, Mat3
         f32 len;
         Vu0::Q(axis) = Vu0::Q(*wa);
         len = NormalizeAxis(axis, g_unitZVector);
-        BuildAxisAngleMatrix(&axis, &rot, uvv * dur * len);
+        BuildAxisAngleMatrix(&axis, uvv * dur * len, &rot);
         MulRotationRowsX(&m1, rot, *a);
         Vu0::Q(axis) = Vu0::Q(*wb);
         len = NormalizeAxis(axis, g_unitZVector);
-        BuildAxisAngleMatrix(&axis, &rot, -uuv * dur * len);
+        BuildAxisAngleMatrix(&axis, -uuv * dur * len, &rot);
         MulRotationRowsX(&m2, rot, *b);
         MultiplyMatrices3x3(&m1, &m2, &rot);
         f32 angle;
         MatrixToAxisAngle(&rot, &angle, &axis);
-        BuildAxisAngleMatrix(&axis, &rot, angle * (uuv * (3.0f - dur) + uuu));
+        BuildAxisAngleMatrix(&axis, angle * (uuv * (3.0f - dur) + uuu), &rot);
         MulRotationRowsX(out, rot, m1);
     }
     if (outW != 0) {
@@ -249,7 +251,7 @@ void SampleCurvePoints(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, 
     f32 cur = start;
     s32 i;
     for (i = 0; i < count; i++) {
-        EvaluateHermiteVectorSegment(dur, p0, m0, p1, m1, cur, 1.0f, (Vec4*)(out + i), 0, 0);
+        EvaluateHermiteVectorSegment(dur, cur, 1.0f, p0, m0, p1, m1, (Vec4*)(out + i), 0, 0);
         cur += step;
     }
 }

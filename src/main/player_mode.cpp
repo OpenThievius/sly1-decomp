@@ -475,6 +475,6 @@ void HandleCountedColliderNotification(CountedCollider* self, s32 kind, ObjectMe
 {
     HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 10) {
-        CreatePooledContact(0.0f, self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 10, 0, 0, &self->contacts);
+        CreatePooledContact(self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 0.0f, 10, 0, 0, &self->contacts);
     }
 }
