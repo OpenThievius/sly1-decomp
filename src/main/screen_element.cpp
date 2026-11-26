@@ -1385,7 +1385,7 @@ void DrawGauge(GaugeBar* self)
     {
     Rgba4 col;
     col.r = 0x20; col.g = 0x20; col.b = 0x20; col.a = 0xC0;
-    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, &g_gsPacketWriter);
+    WriteColoredSpritePacket(0x20, 0x20, 0x20, 0xC0, out.x, out.y, out.x + out.w, out.y + out.h, &g_gsPacketWriter);
     {
         out.x = self->x + self->barX;
         out.y = self->y + self->barY + y;
@@ -1396,7 +1396,7 @@ void DrawGauge(GaugeBar* self)
         b.r = 0xC0; b.g = 0xC0; b.b = 0xC0; b.a = 0xFF;
         LerpRgba4::Do(&col, &a, &b, t);
     }
-    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, col.r, col.g, col.b, col.a, &g_gsPacketWriter);
+    WriteColoredSpritePacket(col.r, col.g, col.b, col.a, out.x, out.y, out.x + out.w, out.y + out.h, &g_gsPacketWriter);
     }
     PushFontScale(self->font, self->scale, self->scale);
     ElementFontView* text = (ElementFontView*)self->font;

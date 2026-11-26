@@ -603,7 +603,7 @@ void SampleSplinePathAtTime(SplinePathCurve* self, f32 t, void* a1, Vec4* a2)
     s32 i = FindPathCurveSegmentByTime(self, t, &a, &b);
     s32 off = i * 16;
     s32 next = off + 16;
-    EvaluateHermiteVectorSegment(b, (const Vec4*)((u8*)self->points + off), (const Vec4*)((u8*)self->outTan + off), (const Vec4*)((u8*)self->points + next), (const Vec4*)((u8*)self->inTan + next), a, 1.0f, (Vec4*)a1, a2, 0);
+    EvaluateHermiteVectorSegment(b, a, 1.0f, (const Vec4*)((u8*)self->points + off), (const Vec4*)((u8*)self->outTan + off), (const Vec4*)((u8*)self->points + next), (const Vec4*)((u8*)self->inTan + next), (Vec4*)a1, a2, 0);
     if (a2) {
         u128 v = Vu0::Q(*a2);
         u128 fb = Vu0::Q(g_unitXVector);

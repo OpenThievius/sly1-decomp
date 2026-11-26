@@ -941,7 +941,7 @@ void EvaluateVectorKeyCurve(s32 count, VectorKey* keys, s32 flags, f32* values, 
     CurveSegment s;
     FindCurveSegment(key, flags, 0x40, count, (u8*)keys, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
-    EvaluateHermiteVectorSegment(s.delta, (const Vec4*)(p + 0x10), (const Vec4*)(p + 0x30), (const Vec4*)(p + 0x50), (const Vec4*)(p + 0x60), s.diff, scale, (Vec4*)values, (Vec4*)slopes, 0);
+    EvaluateHermiteVectorSegment(s.delta, s.diff, scale, (const Vec4*)(p + 0x10), (const Vec4*)(p + 0x30), (const Vec4*)(p + 0x50), (const Vec4*)(p + 0x60), (Vec4*)values, (Vec4*)slopes, 0);
 }
 
 // Reads a list of vector keys from the stream: a count, then per key the time (in 1/60 s, stored in
@@ -1373,7 +1373,7 @@ void EvaluateBlendedRotationCurve(RotationCurveKind2* o, PlacedObject* cam, s32 
                 BuildEulerRotationMatrix((f32*)&x0, (f32*)&rotA);
                 MultiplyMatrices3x3(&rotA, out0, &prod);
                 MatrixToAxisAngle(&prod, &angle, &axis);
-                BuildAxisAngleMatrix(&axis, &prod, angle * w / (w + e->weight));
+                BuildAxisAngleMatrix(&axis, angle * w / (w + e->weight), &prod);
                 MulRotationRowsOnce(out0, prod, rotA);
             }
             w += e->weight;
@@ -1949,7 +1949,7 @@ void ApplyPoseSourcePosition(TrackFollowAttachment* self)
         } else {
             Vec4 p;
             Vec4 v;
-            EvaluateHermiteVectorSegment(left, &owner->pos, &owner->v150, &A, &B, dt, 1.0f, &p, &v, 0);
+            EvaluateHermiteVectorSegment(left, dt, 1.0f, &owner->pos, &owner->v150, &A, &B, &p, &v, 0);
             owner->pos = p;
             owner->v150 = v;
         }
@@ -2092,7 +2092,7 @@ void ApplyPoseSourceRotation(Attachment* self)
             owner->v160 = B;
             settle = self->mode1 != 9;
         } else {
-            BuildAxisAngleMatrix(&axis, &m, reach);
+            BuildAxisAngleMatrix(&axis, reach, &m);
             MulRotationIntoRotX(owner, m, owner->rot);
             OrthonormalizeMatrix(&owner->rot);
             Vu0::Q(owner->v160) = Vu0::MulAddX(Vu0::Q(rest), Vu0::Q(axis), Vu0::ScalarAt(rate));

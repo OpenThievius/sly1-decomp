@@ -553,7 +553,7 @@ void StepGaugeCollider(GaugeCollider* self, f32 dt)
     Mat3 a;
 
     StepCollider(self, dt);
-    BuildAxisAngleMatrix(&g_unitZVector, &b, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &b);
     BuildShortestArcRotation(&g_unitZVector, &self->groundNormal, &a);
     {
         u128 a0 = Vu0::Q(a.r[0]);
@@ -579,7 +579,7 @@ void StepGaugeCollider(GaugeCollider* self, f32 dt)
     Mat3 v;
     Mat3 c;
     RotateMatrixUpright(&self->rot, &u, &v);
-    BuildAxisAngleMatrix(&g_unitZVector, &c, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &c);
     c = MultiplyByTransposedMatrix3x3(u, c);
     Vec4 force;
     f32 turn = __builtin_fabsf(WrapAngle(ArctangentOfRatio(v.r[0].y, v.r[0].x) - self->heading));
@@ -718,7 +718,7 @@ GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
     Vec4 start;
     Vec4 diff;
     GaugeHeld* best = 0;
-    BuildAxisAngleMatrix(&g_unitZVector, &rot, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &rot);
     Vu0::Q(ahead) = Vu0::MulAddX(Vu0::Vec::Of(self->pos), Vu0::Vec::Of(self->v150), Vu0::Vec::ScalarAt(D_0026A828)).q;
     ConvertPositionToWorld((BaseObject*)self->carryNode, &here);
     Vu0::Q(start) = Vu0::Add(Vu0::Rotate(rot, Vu0::Vec::Of(((GaugeNodeRec*)self->carryNode)->q40)), Vu0::Vec::Of(ahead)).q;
@@ -737,7 +737,7 @@ GaugeHeld* FindHeldObjectAhead(GaugeCollider* self)
         if (o->taken != 0) {
             continue;
         }
-        ComputeObjectFrameAtTime((PlacedObject*)o->anchor->target, 0, &framePos, &frameRot, 0, 0, D_0026A828);
+        ComputeObjectFrameAtTime((PlacedObject*)o->anchor->target, 0, D_0026A828, &framePos, &frameRot, 0, 0);
         ConvertPositionToWorld((BaseObject*)o->anchor, &world);
         Vu0::Q(world) = Vu0::Add(Vu0::Vec::Of(world), Vu0::Vec::Of(diff)).q;
         Vu0::Q(end) = Vu0::Add(Vu0::Rotate(frameRot, Vu0::Vec::Of(o->anchor->q40)), Vu0::Vec::Of(framePos)).q;

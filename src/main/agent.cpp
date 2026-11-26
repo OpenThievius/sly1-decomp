@@ -394,7 +394,7 @@ void StepAgent(Agent* self, f32 dt)
         Vec4 w;
         Vec4 v;
         f32 left = *(f32*)&self->arrivalTime - g_gameTime[0];
-        EvaluateHermiteVectorSegment(left, &self->pos, &self->v150, &self->hermiteEnd, &self->hermiteEndVelocity, left <? dt, 1.0f, &p, &w, 0);
+        EvaluateHermiteVectorSegment(left, left <? dt, 1.0f, &self->pos, &self->v150, &self->hermiteEnd, &self->hermiteEndVelocity, &p, &w, 0);
         Vu0::Q(v) = Vu0::DivX(Vu0::Sub(Vu0::Q(w), Vu0::Q(self->v150)), Vu0::Scalar(dt));
         ClampVectorLength(&v, &v, 20000.0f);
         AddColliderForce(self, &v);
@@ -445,8 +445,7 @@ void SetAgentFacingAngles(Agent* self, f32 x, f32 y)
     if (t != 0) {
         BuildYawPitchMatrix(x, y, &self->headingMatrix);
     } else {
-        // retail's call evaluates the angle before the matrix
-        ((void (*)(const Vec4*, f32, Mat3*))BuildAxisAngleMatrix)((const Vec4*)&g_unitZVector, x, &self->headingMatrix);
+        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, x, &self->headingMatrix);
     }
 }
 
@@ -588,7 +587,7 @@ void UpdateAgent(Agent* self, f32 dt)
         } else {
             push = g_unitZVector;
         }
-        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, &spin, self->heading);
+        BuildAxisAngleMatrix((const Vec4*)&g_unitZVector, self->heading, &spin);
         BuildShortestArcRotation(&g_unitZVector, &push, &arc);
         MulRotationInto(self, arc, spin);
     }
@@ -1261,7 +1260,7 @@ void LeaveAgentState(Agent* self, s32 mode)
 
 void SetAnimationPlayerSpeed(AnimationPlayer* t, f32 x);
 struct ScatterController;
-void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
+void CreateAnimationPlayerWithoutPresetTargets(Animation* self, BaseObject* alt, f32 fa, f32 fb, s32 flags, AnimationPlayer** out);
 void CreateAnimationPlayer(Animation* self, BaseObject* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb);
 Attachment* FindPlayerAttachmentByOwner(AnimationPlayer* a0, s32 owner);
 void TransformPointBetweenFrames(PlacedObject* from, PlacedObject* to, Vec4* in, Vec4* out);
@@ -1308,7 +1307,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
     case 1:
         if (((Animation*)self->mainClip) != 0 && evt != 2) {
             Attachment* v;
-            CreateAnimationPlayerWithoutPresetTargets(((Animation*)self->mainClip), self, 1, &self->mainPlayer, self->resumeTime, self->savedClipSpeed);
+            CreateAnimationPlayerWithoutPresetTargets(((Animation*)self->mainClip), self, self->resumeTime, self->savedClipSpeed, 1, &self->mainPlayer);
             v = FindPlayerAttachmentByOwner(self->mainPlayer, GetEffectiveObjectId(self));
             if ((void*)v == self->positionAttachment) {
                 v->mode0 = 5;
@@ -1409,7 +1408,7 @@ void EnterAgentState(Agent* self, s32 evt, Animation* arg)
             mode |= 4;
         }
         if (self->bindingKey == -1 || self->bindingObject == 0) {
-            CreateAnimationPlayerWithoutPresetTargets(tgt, self, mode, &self->statePlayer, w * tgt->length, 1.0f);
+            CreateAnimationPlayerWithoutPresetTargets(tgt, self, w * tgt->length, 1.0f, mode, &self->statePlayer);
         } else {
             CreateAnimationPlayer(tgt, self, 1, (TargetBinding*)&self->bindingKey, mode, &self->statePlayer, w * tgt->length, 1.0f);
         }

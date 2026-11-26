@@ -18,8 +18,7 @@ void DrawLoadProgressBar(LoadProgress* o)
         u8 b = o->barColor.b;
         f32 y = TruncateFloat(471.037048f) * 0.915254235f;
         f32 z = (f32)(n2 + 10);
-        // retail's caller evaluates the colour and the packet before the corners
-        ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(r, g, b, 255, &buf.f, 10.0f, y, z, TruncateFloat(471.037048f) * 0.915254235f + 5.49152565f);
+        WriteColoredSpritePacket(r, g, b, 255, 10.0f, y, z, TruncateFloat(471.037048f) * 0.915254235f + 5.49152565f, &buf.f);
     }
     if (o->stalls <= 0) {
         c = o->color0;
@@ -35,8 +34,7 @@ void DrawLoadProgressBar(LoadProgress* o)
         f32 x = (f32)(n2 + 10);
         f32 y = TruncateFloat(471.037048f) * 0.915254235f;
         f32 z = (f32)(n1 + 10);
-        // retail's caller evaluates the colour and the packet before the corners
-        ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(r, g, b, 255, &buf.f, x, y, z, TruncateFloat(471.037048f) * 0.915254235f + 5.49152565f);
+        WriteColoredSpritePacket(r, g, b, 255, x, y, z, TruncateFloat(471.037048f) * 0.915254235f + 5.49152565f, &buf.f);
     }
     EndGifPacket(&buf.f);
     AddDmaEndTag(&buf.f);

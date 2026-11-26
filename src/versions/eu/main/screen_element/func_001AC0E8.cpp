@@ -21,7 +21,7 @@ struct Col_eu_1ACEE0 { s32 v[4]; };
 extern Q3_eu_1ACEE0 D_eu_0027DB10;
 
 void SetTextLayoutVerticalPlacement(Rect_eu_1ACEE0* out, s32 flag);
-void WriteColoredSpritePacket(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, PacketWriter* p);
+void WriteColoredSpritePacket(s32 r, s32 g, s32 b, s32 a, f32 x0, f32 y0, f32 x1, f32 y1, PacketWriter* p);
 void PushFontScale(Text_eu_1ACEE0* handle, f32 a, f32 b);
 void DrawFontString(Font *self, const char *str, StringLayout *par, Vec4U *clip, PacketWriter *s);
 void PopFontScale(Text_eu_1ACEE0* handle);
@@ -78,7 +78,7 @@ void DrawGauge(Self_eu_1ACEE0* self)
     {
     Rgba_eu_1ACEE0 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
-    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, (PacketWriter*)&g_gsPacketWriter);
+    WriteColoredSpritePacket(0x20, 0x20, 0x20, 0xC0, out.x, out.y, out.x + out.w, out.y + out.h, (PacketWriter*)&g_gsPacketWriter);
     {
         out.x = self->f52C + self->f590;
         out.y = self->f530 + self->f594 + y;
@@ -89,7 +89,7 @@ void DrawGauge(Self_eu_1ACEE0* self)
         b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
         LerpRgba_eu_1ACEE0::Do(&col, &a, &b, t);
     }
-    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], (PacketWriter*)&g_gsPacketWriter);
+    WriteColoredSpritePacket(col.c[0], col.c[1], col.c[2], col.c[3], out.x, out.y, out.x + out.w, out.y + out.h, (PacketWriter*)&g_gsPacketWriter);
     }
     PushFontScale(self->text, self->f51C, self->f51C);
     VEnt_eu_1ACEE0* ve = &self->text->vtbl[8];

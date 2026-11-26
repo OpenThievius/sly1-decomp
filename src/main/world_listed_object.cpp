@@ -626,7 +626,7 @@ void MoveWorldListedObject(WorldListedObject* self, f32 dt)
             }
             case 2: {
                 end -= g_gameClock[1];
-                EvaluateHermiteVectorSegment(end, pos, vel, &((VecPair*)node->extraRecord)[j].a, &((VecPair*)node->extraRecord)[j].b, end <? dt, 1.0f, npos, nvel, 0);
+                EvaluateHermiteVectorSegment(end, end <? dt, 1.0f, pos, vel, &((VecPair*)node->extraRecord)[j].a, &((VecPair*)node->extraRecord)[j].b, npos, nvel, 0);
                 if (out != j) {
                     ((VecPair*)node->extraRecord)[out] = ((VecPair*)node->extraRecord)[j];
                 }

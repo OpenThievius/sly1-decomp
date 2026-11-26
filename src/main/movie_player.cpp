@@ -298,7 +298,7 @@ void LaunchContactListObject(ContactListObject* self, PlacedObject* a, Vec4* v)
     self->anchorObject = a;
     self->anchorOffset = *v;
     if (self->animation != 0) {
-        CreateAnimationPlayerWithoutPresetTargets(self->animation, self, 0, (AnimationPlayer**)&self->animationPlayer, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(self->animation, self, 0.0f, 1.0f, 0, (AnimationPlayer**)&self->animationPlayer);
     }
     if (self->ready != 0) {
         s32 still = 0;
@@ -436,7 +436,7 @@ void LaunchTimedContactListObject(ContactListGlider* self, PlacedObject* target,
     if (0.0f < speed) {
         self->time6FC = g_gameTime + speed;
     } else {
-        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, g_movieFrameLookahead);
+        ComputeObjectFrameAtTime(self->anchorObject, 0, g_movieFrameLookahead, &pos, &rot, 0, 0);
         Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
         Vu0::Q(d) = Vu0::MulX(Vu0::Q(self->v150), Vu0::Scalar(-0.5f));
         ClampVectorLength(&d, &d, self->rate6F4 * 0.75f);
@@ -480,7 +480,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         Vec4 vel;
         Mat3 rot;
         f32 remain = self->time6FC - now + dt;
-        ComputeObjectFrameAtTime(self->anchorObject, 0, &pos, &rot, 0, 0, g_movieFrameLookahead <? remain);
+        ComputeObjectFrameAtTime(self->anchorObject, 0, g_movieFrameLookahead <? remain, &pos, &rot, 0, 0);
         Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(self->anchorOffset)), Vu0::Q(pos));
         s32 still = 0;
         if (__builtin_fabsf(Vu0::ToFloatMoved(Vu0::Q(self->v700))) < 0.0001f
@@ -495,8 +495,7 @@ void MoveTimedContactListObject(ContactListGlider* self, s32 hold, f32 dt)
         }
         Vec4 outPos;
         Vec4 outVel;
-        // Retail's caller evaluates the floats first: the call names them first.
-        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(remain, dt, 1.0f, &self->pos, &self->v150, &pos, &vel, &outPos, &outVel, &accel);
+        EvaluateHermiteVectorSegment(remain, dt, 1.0f, &self->pos, &self->v150, &pos, &vel, &outPos, &outVel, &accel);
         self->pos = outPos;
         self->v150 = outVel;
     } else {

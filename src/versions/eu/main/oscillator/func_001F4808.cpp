@@ -31,7 +31,7 @@ void StartObjectSubGroupFinish(ObjectSubGroup* self)
     SetObjectSubGroupState(self, 5);
     for (i = 0; i < self->count; i++) {
         it = (Animation*)self->items[i];
-        CreateAnimationPlayerWithoutPresetTargets(it, 0, 0, 0, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(it, 0, 0.0f, 1.0f, 0, 0);
         next = 0;
         if (found != 0 || HasAnimationEventKind19(it) != 0) {
             next = 1;

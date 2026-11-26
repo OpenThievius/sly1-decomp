@@ -650,7 +650,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
             SetColliderAnchors(self, 3, 0, 3, 0);
             SetPooledObjectState(self, 4);
             if (self->watchedAnimation != 0) {
-                CreateAnimationPlayerWithoutPresetTargets((Animation*)self->watchedAnimation, self, 0, (AnimationPlayer**)&self->watched, 0.0f, 1.0f);
+                CreateAnimationPlayerWithoutPresetTargets((Animation*)self->watchedAnimation, self, 0.0f, 1.0f, 0, (AnimationPlayer**)&self->watched);
                 if (self->watched != 0) {
                     SetPooledObjectState(self, 3);
                 }
@@ -711,7 +711,7 @@ void UpdateHeldPooledObject(PooledObject* self, f32 dt)
     } else if (hi < t) {
         t = hi;
     }
-    ComputeObjectFrameAtTime(self->holder, 0, &at, 0, 0, 0, t);
+    ComputeObjectFrameAtTime(self->holder, 0, t, &at, 0, 0, 0);
     at.z = at.z + self->holdHeight;
     u128 k = Vu0::ScalarAt(self->holdSpeed);
     Vu0::Set(dir, Vu0::MulX(Vu0::NormalizeOr(Vu0::Sub(Vec::Of(at), Vec::Of(self->v140)), Vec::Of(g_zeroVector)).q, k));
@@ -1501,7 +1501,7 @@ void HandleStepSequenceMessage(StepSequence* self, SequenceMessage* msg)
             }
         }
         if (a0) {
-            CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 1, &self->player2F8, 0.0f, 1.0f);
+            CreateAnimationPlayerWithoutPresetTargets((Animation*)a0, (BaseObject*)s2, 0.0f, 1.0f, 1, &self->player2F8);
             AddAnimationPlayerRecordCallback(self->player2F8, (PlacedObject**)self);
         }
         nm = msg->text;

@@ -1271,7 +1271,7 @@ void FitStepToPointGraph(PointGraphObject* self, f32 scale, Vec4* pos, Vec4* ste
         Mat3 scaled;
         Vec4 weight;
         Mat3 rows;
-        BuildAxisAngleMatrix(&g_unitZVector, &turn, g_turnAngleSearchOrder[i]);
+        BuildAxisAngleMatrix(&g_unitZVector, g_turnAngleSearchOrder[i], &turn);
         Vu0::Vec k;
         k.q = Vu0::ScalarMovedReg(scale);
         *(Vu0::Vec*)&rows.r[0] = Vu0::MulX(Vu0::Vec::Of(turn.r[0]), k);

@@ -70,6 +70,6 @@ void StartNumberedAgent(NumberedAgent* self) { StartAgent(self); self->number=g_
 // Stores the sine and cosine of value in the pair's first two floats and clears its third word.
 void SetSinCosPair(f32 value, SinCosPair* self)
 {
-    ComputeSinCos(&self->b, (f32*)self, value);
+    ComputeSinCos(value, &self->b, (f32*)self);
     self->value = 0;
 }

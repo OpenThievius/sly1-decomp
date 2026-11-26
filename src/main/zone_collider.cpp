@@ -1688,12 +1688,12 @@ void ReleaseTriggerZoneContacts(TriggerZone* self)
     }
     f32 x = fa - ga;
     if (x < -1e-4f) {
-        BodyContact* c = (BodyContact*)CreatePooledContact(x, self, 0, where, &w[0], 10, 0, 0, &self->contacts4B4);
+        BodyContact* c = (BodyContact*)CreatePooledContact(self, 0, where, &w[0], x, 10, 0, 0, &self->contacts4B4);
         c->bounce = 0.0f;
     } else {
         x = fb - gb;
         if (x < -1e-4f) {
-            BodyContact* c = (BodyContact*)CreatePooledContact(x, self, 0, where, &w[1], 10, 0, 0, &self->contacts4B4);
+            BodyContact* c = (BodyContact*)CreatePooledContact(self, 0, where, &w[1], x, 10, 0, 0, &self->contacts4B4);
             c->bounce = 0.0f;
         }
     }

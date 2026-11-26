@@ -144,7 +144,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         args.frame = o->frame;
         args.c = o->v40;
         FindLocalMinimum((MinimumFn)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, &cost);
-        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, t, &args.c, 0, &cur0, &cur1);
         if (o != keep) {
             if (cost >= g_targetMaxCost) {
                 continue;
@@ -206,7 +206,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             o->shape->desc->m2(o->shape, &args.c, tVectorBest, 0);
         }
         FindLocalMinimum((MinimumFn)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, 0);
-        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, t, &args.c, 0, &cur0, &cur1);
         if (o != keep) {
             TransformPointBetweenFrames((PlacedObject*)o->frame, 0, &args.c, &p);
             if (AddTargetObstructionCost(t, (BaseObject*)self, 0, 0, &self->v140, &self->v150, &cur0, &cur1, &p)) {

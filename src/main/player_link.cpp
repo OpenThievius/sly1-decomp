@@ -356,7 +356,7 @@ void TurnPlayerTowardLinkedObject(Player* self)
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
     BuildShortestArcRotation(&g_unitZVector, &d, &a);
-    BuildAxisAngleMatrix(&g_unitZVector, &b, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &b);
     MulRotation(&r, a, b);
     TurnColliderTowardRotation(self, g_frameDt[0], &r, g_linkTurnRamp);
 }
@@ -427,7 +427,7 @@ void ControlPlayerOnLinkedObject(Player* self, void* pad)
     }
     GetObjectWorldPosition((BaseObject*)self->boundObject, &pos);
     Vu0::Set(dir, Vu0::NormalizeOr(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140)), Vu0::Q(g_unitZVector)));
-    BuildAxisAngleMatrix(&g_unitZVector, &m, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &m);
     Vu0::Q(local) = Vu0::RotateTransposed(m, Vu0::Q(dir));
     f32 angle = WrapAngle(ArctangentOfRatio(local.z, local.x) - 1.57079637f);
     s32 state = self->subState;
@@ -619,13 +619,13 @@ void AddPlayerObjectContacts(Player* self, s32 flags, BaseObject* node, Vec4* or
     Vu0::Q(d) = Vu0::Sub(Vu0::Add(Vu0::Q(*offset), Vu0::Q(self->pathPoseOffset)), Vu0::Q(*origin));
     Vu0::Q(d) = Vu0::RotateTransposed(m, Vu0::Q(d));
     if (first != 0 || ((flags & 8) != 0 && d.x < 0.0001f)) {
-        CreatePooledContact(d.x, self, n, offset, &m.r[0], first != 0 ? 11 : 10, 0, 0, head);
+        CreatePooledContact(self, n, offset, &m.r[0], d.x, first != 0 ? 11 : 10, 0, 0, head);
     }
     if (each != 0 || ((flags & 0x10) != 0 && d.y < 0.0001f)) {
-        CreatePooledContact(d.y, self, n, offset, &m.r[1], each != 0 ? 11 : 10, 0, 0, head);
+        CreatePooledContact(self, n, offset, &m.r[1], d.y, each != 0 ? 11 : 10, 0, 0, head);
     }
     if (third != 0 || ((flags & 0x20) != 0 && d.z < 0.0001f)) {
-        CreatePooledContact(d.z, self, n, offset, &m.r[2], third != 0 ? 11 : 10, third != 0 ? 0 : *(void**)&self->probeVertex, 0, head);
+        CreatePooledContact(self, n, offset, &m.r[2], d.z, third != 0 ? 11 : 10, third != 0 ? 0 : *(void**)&self->probeVertex, 0, head);
     }
     *last = *head;
 }
@@ -683,9 +683,9 @@ void ComputePlayerLinkPose(Player* self, Vec4* pos, Mat3* rotA, Mat3* rotB)
     u128 reach = Vu0::FromFloatAt(((LinkSource*)self->boundObject)->reach);
     Vu0::Q(k) = reach;
     Vu0::Q(a) = Vu0::MulAddX(here, Vu0::NormalizeOr(Vu0::Q(gap), Vu0::Q(g_zeroVector)), reach);
-    BuildAxisAngleMatrix(&g_unitXVector, &axis, g_linkPoseTiltA);
+    BuildAxisAngleMatrix(&g_unitXVector, g_linkPoseTiltA, &axis);
     MulRotation(rotA, arc, axis);
-    BuildAxisAngleMatrix(&g_unitXVector, rotB, g_linkPoseTiltB);
+    BuildAxisAngleMatrix(&g_unitXVector, g_linkPoseTiltB, rotB);
     u128 turned = Vu0::Rotate(*rotB, Vu0::Q(((PlacedObject*)self->f23D4)->pos));
     u128 sum = Vu0::Add(Vu0::Q(((PlacedObject*)self->f23D0)->pos), turned);
     u128 moved = Vu0::Rotate(*rotA, sum);
@@ -698,7 +698,7 @@ void ComputePlayerLinkPose(Player* self, Vec4* pos, Mat3* rotA, Mat3* rotB)
 typedef u64 Quad128 __attribute__((mode(TI)));
 Quad128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec4* vel);
 struct Mat3;
-void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit);
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin);
 extern f32 g_gameClock[];
 
 struct LinkPoseTarget {
@@ -741,8 +741,8 @@ void UpdatePlayerLinkPose(Player* self)
     LinkPoseView* v = (LinkPoseView*)self;
     ComputePlayerLinkPose(self, &pos, &a, &b);
     *(Quad128*)&v->offset = ApproachPointWithRamp(*(Quad128*)&v->offset, *(const Quad128*)&g_zeroVector, g_gameClock[2], (RampProfile*)g_linkPoseOffsetRamp, 0);
-    ApproachRotationWithRamp(&v->rotA, (Mat3*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotA, 0, g_gameClock[2]);
-    ApproachRotationWithRamp(&v->rotB, (Mat3*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, &v->rotB, 0, g_gameClock[2]);
+    ApproachRotationWithRamp(&v->rotA, (Mat3*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, g_gameClock[2], &v->rotA, 0);
+    ApproachRotationWithRamp(&v->rotB, (Mat3*)&g_identityMatrix, (RampProfile*)g_linkPoseRotationRamp, g_gameClock[2], &v->rotB, 0);
     Vu0::Q(((LinkPoseTarget*)self->snapshotPoseFirst)->pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(v->offset));
     MulRotationInto((LinkPoseTarget*)self->snapshotPoseFirst, v->rotA, a);
     MulRotationInto((LinkPoseTarget*)self->snapshotPoseSecond, v->rotB, b);

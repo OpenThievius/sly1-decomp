@@ -49,7 +49,7 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
             f32 dist = Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Vec::Of((*(Camera**)g_camera)->position), Vu0::Vec::Of(*(Vec4*)(obj + 0x140)))));
             f32 fov = 2.0f * Arctangent(size / (self->distanceFactor * dist));
             fov = self->zoomMin >? fov;
-            ComputeObjectFrameAtTime((PlacedObject*)obj, 0, &pos, 0, 0, 0, 0.1f);
+            ComputeObjectFrameAtTime((PlacedObject*)obj, 0, 0.1f, &pos, 0, 0, 0);
             Vu0::Q(span) = Vu0::Sub(Vu0::Vec::Of(pos), Vu0::Vec::Of(*(Vec4*)(obj + 0x140))).q;
             Camera* gc = *(Camera**)g_camera;
             Vu0::Q(mid) = Vu0::Add(Vu0::Vec::Of(*(Vec4*)(obj + 0x140)), Vu0::MulX(Vu0::Vec::Of(span), Vu0::Vec::Scalar(0.5f))).q;
@@ -281,9 +281,9 @@ void UpdateTargetCameraController(TargetCameraController* self, u8* eye0, PadRec
         Mat3 mz;
         Mat3 my;
         Mat3 mx;
-        BuildAxisAngleMatrix(&g_unitZVector, &mz, a);
-        BuildAxisAngleMatrix(&g_unitYVector, &my, -b);
-        BuildAxisAngleMatrix(&g_unitXVector, &mx, *(f32*)((u8*)s->target + 0x328));
+        BuildAxisAngleMatrix(&g_unitZVector, a, &mz);
+        BuildAxisAngleMatrix(&g_unitYVector, -b, &my);
+        BuildAxisAngleMatrix(&g_unitXVector, *(f32*)((u8*)s->target + 0x328), &mx);
         Mat3 rot;
         Mat3 m;
         MulRotationThenCopy(&m, mz, my);

@@ -285,7 +285,7 @@ s32 ChooseNearbyPlayerTarget(PlayerTargetState* self, void* target, s32* out)
     return r;
 }
 
-void EvaluateHermiteVectorSegment(f32 dur, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, f32 t, f32 k, Vec4* pos, Vec4* vel, Vec4* acc);
+void EvaluateHermiteVectorSegment(f32 dur, f32 t, f32 k, const Vec4* p0, const Vec4* m0, const Vec4* p1, const Vec4* m1, Vec4* pos, Vec4* vel, Vec4* acc);
 
 static inline f32 MinF(f32 a, f32 b) { return b <? a; }
 // Scores landing on a moving target: when the player can reach the point's height, it builds a
@@ -324,11 +324,9 @@ void ScorePlayerTargetPlacement(Player* self, Vec4* point, BaseObject* obj, Vec4
         *outTime = t;
     }
     if (outCost != 0) {
-        // Retail's caller evaluates the floats first: the call names them first.
-        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, 0.0f, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
+        EvaluateHermiteVectorSegment(t, 0.0f, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg1);
         f32 a = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg1), Vu0::Q(seg1))));
-        // Retail's caller evaluates the floats first: the call names them first.
-        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(t, t, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
+        EvaluateHermiteVectorSegment(t, t, 1.0f, (const Vec4*)self->probeVertex, point, &reach, &vel, 0, 0, &seg2);
         f32 b = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(seg2), Vu0::Q(seg2))));
         *outCost = ((a + b) * (t * 0.5f)) <? 1000000.0f;
     }
@@ -470,7 +468,9 @@ static inline f32 NormalizeVector(Vec4& v, const Vec4& fallback)
 // place under gravity: within the reach D_00274E08 the cost is the miss distance less the reach,
 // too far above or below it is the height plus 1010000, otherwise it follows the sideways
 // acceleration that closes the gap. It also gives the leap's end point and velocity.
-void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out1, Vec4* out2, Vec4* out3, f32 t)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, f32 t, Vec4* point, f32* out1, Vec4* out2, Vec4* out3)
 {
     Vec4 pos0;
     Vec4 p;
@@ -479,8 +479,7 @@ void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out
     Vec4 vel;
     Vu0::Set(pos0, Vu0::MulAddX2(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Scalar(t), Vu0::Q(self->gravity), Vu0::Scalar(t * (t * 0.5f))));
     p = *point;
-    // retail's caller evaluates the time before the pointers, as the third argument
-    ((void (*)(PlacedObject*, PlacedObject*, f32, Vec4*, Mat3*, Vec4*, Vec4*))TransformPointAtTime)((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
+    TransformPointAtTime((PlacedObject*)obj, 0, t, &p, 0, 0, 0);
     Vu0::Set(d, Vu0::Sub(Vu0::Q(p), Vu0::Q(pos0)));
     f32 r = g_targetReach;
     f32 dist2 = Vu0::ToFloatMoved(Vu0::Dot(Vu0::Q(d), Vu0::Q(d)));
@@ -532,8 +531,7 @@ struct PathScoreArgs { Player* self; BaseObject* obj; s32 pad[2]; s32 c[4]; };
 f32 ScoreTargetPathAt(PathScoreArgs* o, f32 t)
 {
     f32 out;
-    // retail's caller evaluates the time first, as the first argument
-    ((void (*)(f32, Player*, BaseObject*, Vec4*, f32*, Vec4*, Vec4*))ScorePlayerLeapToPoint)(t, o->self, o->obj, (Vec4*)o->c, &out, 0, 0);
+    ScorePlayerLeapToPoint(o->self, o->obj, t, (Vec4*)o->c, &out, 0, 0);
     return out;
 }
 
@@ -608,8 +606,7 @@ s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, vo
     GatherCollidersInBox(self->world, (Collider*)self, &lo, &hi, (s32 (*)(void*, Collider*))a1, a2, &n0, &n1);
     f32 t = 0.0f;
     for (;;) {
-        // Retail's caller evaluates the floats first: the call names them first.
-        ((void (*)(f32, f32, f32, const Vec4*, const Vec4*, const Vec4*, const Vec4*, Vec4*, Vec4*, Vec4*))EvaluateHermiteVectorSegment)(limit, t, 1.0f, (const Vec4*)pa, (const Vec4*)pb, pc, (const Vec4*)pd, &q, 0, 0);
+        EvaluateHermiteVectorSegment(limit, t, 1.0f, (const Vec4*)pa, (const Vec4*)pb, pc, (const Vec4*)pd, &q, 0, 0);
         if (t != 0.0f) {
             if (FindNearestSpanObject(0, &p, &q, n0, n1, (ColliderSpan*)&hit) != 0) {
                 if (100.0f < Vu0::ToFloat(Vu0::Length(Vu0::Sub(Vu0::Q(hit.point), Vu0::Q(*pc))))) {
@@ -742,7 +739,7 @@ f32 AddRepeatTargetPenalty(Player* self, void* target, f32 a, f32 b);
 s32 AddTargetObstructionCost(f32 limit, BaseObject* self, void* a1, void* a2, void* pa, void* pb, Vec4* pc, void* pd, Vec4* pe);
 void FindLocalMinimum(MinimumFn fn, void* ctx, f32 x, f32 step, f32 lo, f32 hi, f32* outX, f32* outY);
 void PlaceOnTargetObject(Player* self, PathTarget* node, Vec4* outA, Vec4* outB, f32 t);
-void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, Vec4* point, f32* out1, Vec4* out2, Vec4* out3, f32 t);
+void ScorePlayerLeapToPoint(Player* self, BaseObject* obj, f32 t, Vec4* point, f32* out1, Vec4* out2, Vec4* out3);
 extern "C" f32 ArctangentOfRatio(f32 y, f32 x);
 struct PlayingSound;
 void StartSoundEffect(s32 id, PlayingSound** out, BaseObject* p2, Vec4* p3,
@@ -905,7 +902,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
         args.frame = o->frame;
         args.c = o->v40;
         FindLocalMinimum((MinimumFn)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, &cost);
-        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, t, &args.c, 0, &cur0, &cur1);
         if (o != keep) {
             if (cost >= g_targetMaxCost) {
                 continue;
@@ -967,7 +964,7 @@ s32 ChoosePlayerTargetByCost(Chooser* self, TargetCand* keep)
             o->shape->desc->m2(o->shape, &args.c, tVectorBest, 0);
         }
         FindLocalMinimum((MinimumFn)ScoreTargetPathAt, &args, 0.5f, 0.25f, 0.25f, 3.0f, &t, 0);
-        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, &args.c, 0, &cur0, &cur1, t);
+        ScorePlayerLeapToPoint((Player*)self, (BaseObject*)args.frame, t, &args.c, 0, &cur0, &cur1);
         if (o != keep) {
             TransformPointBetweenFrames((PlacedObject*)o->frame, 0, &args.c, &p);
             if (AddTargetObstructionCost(t, (BaseObject*)self, 0, 0, &self->v140, &self->v150, &cur0, &cur1, &p)) {

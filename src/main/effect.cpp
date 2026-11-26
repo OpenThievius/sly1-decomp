@@ -916,7 +916,7 @@ void MoveEffect(Effect* self, f32 dt)
         len = Vu0::ToFloatMoved(Vu0::Length(Vu0::Q(self->spin)));
         if (0.0001f < len) {
             Vu0::Q(frame.r[0]) = Vu0::MulX(Vu0::Q(self->spin), Vu0::Scalar(1.0f / len));
-            BuildAxisAngleMatrix(&frame.r[0], (Mat3*)&frame.r[1], len * dt);
+            BuildAxisAngleMatrix(&frame.r[0], len * dt, (Mat3*)&frame.r[1]);
             MulRotationRowsIndexed(&res, *(Mat3*)&frame.r[1], *(Mat3*)self->rotation);
             *(Mat3*)self->rotation = res;
         }
@@ -1130,8 +1130,7 @@ void MoveDriftingEffect(Effect* self, f32 dt)
         Vu0::Q(dir) = Vu0::DivX(Vu0::Q(dir), Vu0::Length(Vu0::Q(dir)));
         BuildPerpendicularPair(&dir, side, &g_unitXVector, &g_unitZVector);
         f32 speed = RandomFloatInRange(100.0f, (1.0f - r * 3.3333333f) * 300.0f + 100.0f);
-        // Retail's caller evaluates the angle before the outputs' addresses: the call names it first.
-        ((void (*)(f32, f32*, f32*))ComputeSinCos)(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
+        ComputeSinCos(RandomFloatInRange(0.0f, 6.2831855f), &s, &c);
         Vu0::Q(push) = Vu0::MulXSum(Vu0::Q(side[0]), Vu0::Scalar(s * speed), Vu0::Q(side[1]), Vu0::Scalar(c * speed));
         Vu0::Q(self->pos) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(push), Vu0::Scalar(dt));
     }
@@ -1623,7 +1622,7 @@ void MoveCameraSpaceEffect(Effect* self, f32 f)
     Quad219C b;
     f32 t = self->start + self->life - g_gameTime;
     t = t >? f;
-    EvaluateHermiteVectorSegment(t, (const Vec4*)&self->f120, (const Vec4*)&self->qA0, (const Vec4*)self->params, (const Vec4*)(self->params->rows + 4), f, 1.0f, (Vec4*)&a, (Vec4*)&b, 0);
+    EvaluateHermiteVectorSegment(t, f, 1.0f, (const Vec4*)&self->f120, (const Vec4*)&self->qA0, (const Vec4*)self->params, (const Vec4*)(self->params->rows + 4), (Vec4*)&a, (Vec4*)&b, 0);
     *(Quad219C*)&self->f120 = a;
     self->qA0 = b;
     UnprojectCameraPoint(g_camera, (f32*)&a, (Vec4*)&self->pos);
@@ -1651,8 +1650,8 @@ void DrawCameraSpaceEffect(Effect* self, Camera* cam)
     MultiplyMatrices3x3(c, (Mat3*)&cam->g80, &view);
     MatrixToAxisAngle(&view, &angle, &axis);
     t = (g_gameTime - self->start) / self->life;
-    BuildAxisAngleMatrix(&axis, &a, angle * t);
-    BuildAxisAngleMatrix((Vec4*)&self->params->rows[16], &b, (t + t) * 3.14159274f);
+    BuildAxisAngleMatrix(&axis, angle * t, &a);
+    BuildAxisAngleMatrix((Vec4*)&self->params->rows[16], (t + t) * 3.14159274f, &b);
     MulRotationRowsInto(&r1, a, b);
     MulRotationRowsIntoIndexed(&r2, r1, *c);
     out = r2;
@@ -1720,7 +1719,7 @@ void UpdateEmitterEffect(Effect* self, f32 dt)
 {
     Mat3 axisRot;
     Mat3 m;
-    BuildAxisAngleMatrix(&g_unitZVector, &axisRot, *(f32*)&self->qA0.b * dt);
+    BuildAxisAngleMatrix(&g_unitZVector, *(f32*)&self->qA0.b * dt, &axisRot);
     MulRotationRowsIndexed(&m, axisRot, *(Mat3*)self->rotation);
     s32 fire = 0;
     Vec4* cam = (Vec4*)&g_camera->g80;
@@ -1922,7 +1921,7 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
         if (rest < step) {
             do {
                 t = (pos + step) / (pos - rest);
-                BuildAxisAngleMatrix(&g_unitXVector, &m, p->heading);
+                BuildAxisAngleMatrix(&g_unitXVector, p->heading, &m);
                 f32 k = size * scaleMin;
                 MulRotationRowsX(&rot, cam->rot3A0, m);
                 Vu0::Vec w0 = Vu0::Vec::Scalar(1.0f - t);
@@ -1947,7 +1946,7 @@ void DrawPhasedEffect(Effect* self, Camera* cam)
                 if (dh <= 0.0f) {
                     dh += 6.28318548f;
                 }
-                BuildAxisAngleMatrix(&g_unitXVector, &m, p->heading + t * dh);
+                BuildAxisAngleMatrix(&g_unitXVector, p->heading + t * dh, &m);
                 f32 k = size * scaleMin;
                 MulRotationRowsX(&rot, cam->rot3A0, m);
                 Vu0::Q(v) = Vu0::MulAddX(Vu0::Vec::Of(p[1].base), Vu0::Vec::Of(rot.r[2]), Vu0::Vec::Scalar(k)).q;
@@ -2271,7 +2270,7 @@ static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
 // (docs/TOOLCHAIN.md, "An inline's pointer parameter and frame stores").
 static inline void TurnEffectAboutRow(Effect* o, const Mat3& rot, Mat3* turn, f32 angle)
 {
-    BuildAxisAngleMatrix(&rot.r[1], turn, angle);
+    BuildAxisAngleMatrix(&rot.r[1], angle, turn);
     const u128* p = (const u128*)turn;
     u128 a0 = p[0];
     u128 a1 = p[1];
@@ -2570,7 +2569,7 @@ void DrawFacingEffect(Effect* self, Camera* cam)
         ClampedQuadratic::Clamp(fade, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_facingEffectFadeCurve, k), (const ValueRange*)g_facingEffectFadeRange);
         draw.alpha = a * fade;
         draw.scale = 1.0f;
-        BuildAxisAngleMatrix(&g_unitXVector, &axis, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_facingEffectRollCurve, t));
+        BuildAxisAngleMatrix(&g_unitXVector, ClampedQuadratic::Eval((const QuadraticCoeffs*)g_facingEffectRollCurve, t), &axis);
         MulRotationRowsX(&rot, basis, axis);
         BuildScaledTransformMatrix(&pos.x, (f32(*)[4])&rot, &scale.x, draw.m);
         ((PlacedObject*)self->p20)->desc02()->m26((PlacedObject*)self->p20, cam, &draw);
@@ -2601,7 +2600,7 @@ void TakeDelayedEffectSourcePose(Effect* self)
     self->rotation[0] = src->m110.r[0];
     self->rotation[1] = src->m110.r[1];
     self->rotation[2] = src->m110.r[2];
-    ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, &pos, &rot, 0, 0, self->life);
+    ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, self->life, &pos, &rot, 0, 0);
     Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos)), Vu0::Scalar(1.0f / self->life),
                                      Vu0::Q(self->qC0), Vu0::Scalar(self->life * -0.5f));
     MultiplyMatrices3x3(&rot, (Mat3*)self->rotation, &turn);
@@ -2651,15 +2650,15 @@ void MoveDelayedEffect(Effect* self, f32 f)
         self->prevPos = self->pos;
         t = self->start + self->life - g_gameClock[1];
         t = f >? t;
-        ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, &pos, &rot, 0, 0, t);
+        ComputeObjectFrameAtTime((PlacedObject*)self->p20, 0, t, &pos, &rot, 0, 0);
         u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->pos));
         u128 w1 = Vu0::Scalar(1.5f / t);
         u128 w2 = Vu0::Scalar(-0.5f);
         u128 w3 = Vu0::Scalar(0.25f);
         u128 c = Vu0::MulX(Vu0::Q(self->qC0), Vu0::Scalar(t));
         Vu0::Q(v10) = Vu0::MulXSum3(d, w1, Vu0::Q(self->qA0), w2, c, w3);
-        EvaluateHermiteVectorSegment(t, (const Vec4*)&self->pos, (const Vec4*)&self->qA0, &pos, &v10, f, 1.0f, &v20, &v30, 0);
-        BuildAxisAngleMatrix((Vec4*)&self->f120, &turn, self->f130 * t / self->life);
+        EvaluateHermiteVectorSegment(t, f, 1.0f, (const Vec4*)&self->pos, (const Vec4*)&self->qA0, &pos, &v10, &v20, &v30, 0);
+        BuildAxisAngleMatrix((Vec4*)&self->f120, self->f130 * t / self->life, &turn);
         self->pos = *(Quad219C*)&v20;
         self->qA0 = *(Quad219C*)&v30;
         MulRows(self->rotation, turn, rot);

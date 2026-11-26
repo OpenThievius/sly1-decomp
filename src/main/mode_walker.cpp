@@ -278,7 +278,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             Vu0::Q(m.r[1]) = n;
             Vu0::Q(m.r[0]) = Vu0::Cross(n, Vu0::Q(m.r[2]));
             TransformRotationBetweenFrames(0, (PlacedObject*)(self->fBC4->parent), &m, &m);
-            ApproachRotationWithRamp(&self->fBC4->rot, &m, (RampProfile*)g_walkerRotationRamp, &m, 0, dt);
+            ApproachRotationWithRamp(&self->fBC4->rot, &m, (RampProfile*)g_walkerRotationRamp, dt, &m, 0);
             (*(FrameFn**)self->fBC4)[34](self->fBC4, &m);
             UnprojectCameraPoint(g_camera, (f32*)g_modeWalkerScreenPoint, &pos);
             Vu0::Q(d) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->fBC0->v140));
@@ -294,7 +294,7 @@ void ControlModeWalker(ModeWalker* self, PadStick* pad, f32 dt)
             MultiplyMatrices3x3(&self->fBC0->m1A0, &m, &m2);
             TransformRotationBetweenFrames((PlacedObject*)self->fBC0->parent, (PlacedObject*)self->fBCC->parent, &m2, &m2);
             MatrixToAxisAngle(&m2, &angle, &k);
-            BuildAxisAngleMatrix(&k, &self->fBD0->rot, D_0026413C * angle);
+            BuildAxisAngleMatrix(&k, D_0026413C * angle, &self->fBD0->rot);
             ClearRootTries(self);
         }
     }
@@ -683,7 +683,7 @@ void DrawSpinningSpriteElement(AimReticle* self)
     BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
     AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x30000);
     *(u32*)&col = 0x80FFFFFF;
-    BuildAxisAngleMatrix(&g_unitZVector, &m, g_gameTime * g_walkerSpinRate);
+    BuildAxisAngleMatrix(&g_unitZVector, g_gameTime * g_walkerSpinRate, &m);
     BeginGifTag(&g_gsPacketWriter, 0x5C, 3, 0x412);
     col.a = (u8)(s32)(self->alphaScale * (f32)col.a);
     for (u32 i = 0; i < 4; i++) {

@@ -467,11 +467,11 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
         Vu0::Q(w) = Vu0::Sub(Vu0::Q(lead->placementObject->v140), Vu0::Q(self->pos));
         w.z *= g_notifierAimZScale;
         BuildBasisFromX(&w, &m);
-        BuildAxisAngleMatrix((const Vec4*)g_unitXVector, (Mat3*)&n, -2.5f);
+        BuildAxisAngleMatrix((const Vec4*)g_unitXVector, -2.5f, (Mat3*)&n);
         MulRotation(&m, m, n);
         f32 t = ApproachAngleWithRamp(self->spinAngle, 0.0f, dt, g_notifierRollRamp, 0);
         self->spinAngle = t;
-        BuildAxisAngleMatrix((const Vec4*)&self->spinAxis.x, (Mat3*)&p, t);
+        BuildAxisAngleMatrix((const Vec4*)&self->spinAxis.x, t, (Mat3*)&p);
         SetRotationProduct(self, p, m);
         break;
     }
@@ -483,12 +483,12 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
         Mat3* rot = &self->rot;
         NotifierLead* lead = (NotifierLead*)GetActiveSwitchedColliderData();
         f32 t = self->stateSince + g_notifierArriveTime - g_gameTime;
-        ComputeObjectFrameAtTime(lead->timingObject, 0, &v, &m, 0, 0, t);
+        ComputeObjectFrameAtTime(lead->timingObject, 0, t, &v, &m, 0, 0);
         MultiplyMatrices3x3(rot, &m, &n);
         f32 angle;
         MatrixToAxisAngle(&n, &angle, (Vec4*)&w.x);
         f32 k = dt / (t >? dt);
-        BuildAxisAngleMatrix((const Vec4*)&w.x, (Mat3*)&n, angle * k);
+        BuildAxisAngleMatrix((const Vec4*)&w.x, angle * k, (Mat3*)&n);
         SetRotationProductRows(self, n, *rot);
         Vu0::Q(self->pos) = Vu0::MulXSum(Vu0::Q(v), Vu0::Scalar(k), Vu0::Q(self->pos), Vu0::Scalar(1.0f - k));
         break;
@@ -498,7 +498,7 @@ void MoveStateNotifier(StateNotifier* self, f32 dt, s32 quiet)
         f32 t = g_player->aimEndTime - g_gameTime;
         t = t >? 0.0f;
         f32 k = dt / (t + dt);
-        ComputeObjectFrameAtTime((PlacedObject*)g_player->f23D4, 0, &v, 0, 0, 0, t);
+        ComputeObjectFrameAtTime((PlacedObject*)g_player->f23D4, 0, t, &v, 0, 0, 0);
         Vu0::Q(self->pos) = Vu0::MulXSum(Vu0::Q(v), Vu0::Scalar(k), Vu0::Q(self->pos), Vu0::Scalar(1.0f - k));
         break;
     }
@@ -969,7 +969,7 @@ void SetStateNotifierState(StateNotifier* self, s32 state)
             Vu0::Q(dir) = Vu0::Sub(Vu0::Q(((NotifierLead*)active)->placementObject->v140), Vu0::Q(self->v140));
             dir.z = dir.z * g_notifierAimZScale;
             BuildBasisFromX(&dir, &m10);
-            BuildAxisAngleMatrix((const Vec4*)g_unitXVector, (Mat3*)&m40, -2.5f);
+            BuildAxisAngleMatrix((const Vec4*)g_unitXVector, -2.5f, (Mat3*)&m40);
             MulRotationRowsX(&m10, m10, m40);
             MultiplyMatrices3x3(&m10, &self->m110, &m40);
             MatrixToAxisAngle(&m40, &self->spinAngle, &self->spinAxis);

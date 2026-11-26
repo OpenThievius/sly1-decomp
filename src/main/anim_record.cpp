@@ -1225,7 +1225,7 @@ void StepCircleAnimator(CircleAnimator* self)
     if (self->cursor.record != 0) {
         f32 t[2];
         f32 ang = WrapAngle(g_gameTime * self->omega);
-        ComputeSinCos(&t[0], &t[1], ang);
+        ComputeSinCos(ang, &t[0], &t[1]);
         t[0] = t[0] * self->radius + self->centerU;
         t[1] = t[1] * self->radius + self->centerV;
         SetCursorCoords(&self->cursor, t[0], t[1]);

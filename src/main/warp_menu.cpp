@@ -273,10 +273,10 @@ void RunWorld3TimelineEntry(World3Timeline* self, TimelineEntry* msg);
 TimelineEntry* AppendWorld3TimelineEntry(World3Timeline* self, s32 a, s32 b, f32 c);
 // What ComputeSinCos writes for func_001ED650.
 struct SinCos { f32 sine; f32 cosine; };
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle);
+void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut);
 void RegisterSwitchedCollider(SwitchedCollider* self);
 void AddAnimationPlayerRecordCallback(AnimationPlayer* a0, PlacedObject** a1);
-s32 ComputeBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle);
+s32 ComputeBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec);
 s32 WriteVifUnpackHeader(PacketWriter* self, s32 a, s32 b, s32 c);
 void ReleaseAttachRecords(World* self, ColliderAttachment* node);
 void SetScreenFadeMode(void* o, s32 mode);
@@ -328,7 +328,6 @@ void* AllocateZeroedFrontMemory(s32 n);
 void ReserveVifUnpack(PacketWriter* s, s32 a, s32 size, s32 d, s32* outSize, u8** outCursor);
 struct ColoredTriangleSet;
 extern ColoredTriangleSet* g_coloredTriangleSet;
-// retail's caller evaluates them after the integers, as this order does.
 void WriteVifDirect(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 g_packetWriterVtable[];
 PacketWriter* InitPacketBuffer(PacketWriter* self);
@@ -1559,7 +1558,9 @@ u128 ApproachPointWithRamp(u128 from, u128 to, f32 limit, RampProfile* ramp, Vec
 // is taken as an axis and angle, ApproachValueWithRamp gives how far it turns this step, and the
 // new rotation (or the target itself when it arrives) goes to outRot and the angular velocity along
 // the axis to outSpin; either may be null.
-void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* outRot, Vec4* outSpin, f32 limit)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, f32 limit, Mat3* outRot, Vec4* outSpin)
 {
     Mat3 rel;
     Mat3 built;
@@ -1574,7 +1575,7 @@ void ApproachRotationWithRamp(Mat3* from, Mat3* to, RampProfile* ramp, Mat3* out
         if (travel == angle) {
             *outRot = *to;
         } else {
-            BuildAxisAngleMatrix(&axis, &built, travel);
+            BuildAxisAngleMatrix(&axis, travel, &built);
             MulRotationRowsX(outRot, built, *from);
         }
     }
@@ -1675,7 +1676,9 @@ void RemapQuadraticParameter(Vec3* in, f32 s, f32 t, Vec3* out)
 // Computes sine and cosine of an angle in radians: the angle is reduced to a half turn around zero
 // (flipping its sign for odd half turns), the sine comes from a degree-9 polynomial and the cosine
 // from the square root of 1 - sine squared, with the sign of the half turn.
-void ComputeSinCos(f32* sinOut, f32* cosOut, f32 angle)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void ComputeSinCos(f32 angle, f32* sinOut, f32* cosOut)
 {
     f32 t = (angle + 1.5707964f) * 0.31830987f;
     s32 n = (s32)t;
@@ -2123,7 +2126,7 @@ struct FramePoint_001EBD10 {
     Mat3 m50;              // 0x50
 };
 
-void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin, f32 t);
+void ComputeObjectFrameAtTime(PlacedObject* self, PlacedObject* top, f32 t, Vec4* pos, Mat3* rot, Vec4* vel, Vec4* spin);
 
 // Position and velocity of the collider at time t: the plain placed-object answer, or, when it is
 // anchored to a point on another object, that point's position and velocity in the other object's
@@ -2138,7 +2141,7 @@ void GetWorld3BeatPressColliderPositionAt(World3BeatPressCollider* self, f32 t, 
     Mat3 rot;
     Vec4 v;
     Vec4 w;
-    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, &p, &rot, &v, &w, t);
+    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, t, &p, &rot, &v, &w);
     Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
     Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->frameAnchor)->point)));
 }
@@ -2155,7 +2158,7 @@ void GetWorld3BeatPressColliderRotationAt(World3BeatPressCollider* self, f32 t, 
     }
     Mat3 m;
     Vec4 w;
-    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, 0, &m, 0, &w, t);
+    ComputeObjectFrameAtTime((PlacedObject*)(((FramePoint_001EBD10*)self->frameAnchor)->object), 0, t, 0, &m, 0, &w);
     FramePoint_001EBD10* f = (FramePoint_001EBD10*)self->frameAnchor;
     MulRotationRowsIndexed(rot, m, f->m50);
     *spin = w;
@@ -2689,7 +2692,7 @@ void HandleWorld3BossNotification(World3Boss* self, s32 kind, TempoNoticeRec* re
             u8* r = line->rec;
             FramePoint_001EBD10* fp = (FramePoint_001EBD10*)((World3BeatPressCollider*)self->beatPressCollider)->lineAnchors[self->direction];
             GetPlacementRecordTransform((PlacementRecord*)sub, &a, b.r, 0);
-            ComputeObjectFrameAtTime((PlacedObject*)fp->object, 0, &p, &rot, 0, 0, t);
+            ComputeObjectFrameAtTime((PlacedObject*)fp->object, 0, t, &p, &rot, 0, 0);
             Vu0::Q(line->vF0) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(fp->point)));
             f32 d = Vu0::ToFloatMoved(Vu0::Length(Vu0::Sub(Vu0::Q(a), Vu0::Q(line->vF0)))) / t;
             // the object's class is not known
@@ -3113,7 +3116,7 @@ LINKER_REMNANT(func_001ED638);
 void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z)
 {
     SinCos p;
-    ComputeSinCos(&p.sine, &p.cosine, angle);
+    ComputeSinCos(angle, &p.sine, &p.cosine);
     out->x = p.cosine * scale;
     out->y = p.sine * scale;
     out->z = z;
@@ -3123,8 +3126,8 @@ void ComputePolarOffset(Vec3* out, f32 angle, f32 scale, f32 z)
 void ComputeDirectionFromAngles(Vec3* out, f32 first, f32 second, f32 scale)
 {
     f32 t[4];
-    ComputeSinCos(&t[0], &t[1], first);
-    ComputeSinCos(&t[2], &t[3], second);
+    ComputeSinCos(first, &t[0], &t[1]);
+    ComputeSinCos(second, &t[2], &t[3]);
     out->x = t[3] * t[1] * scale;
     out->y = t[3] * t[0] * scale;
     out->z = t[2] * scale;
@@ -3295,8 +3298,8 @@ void GetVectorAngles(Vec3* v, f32* a1, f32* a2)
 void RotateVectorByTwoAngles(Vec3* in, Vec3* b, Vec3* out)
 {
     f32 t[4];
-    ComputeSinCos(&t[0], &t[1], in->y);
-    ComputeSinCos(&t[2], &t[3], in->z);
+    ComputeSinCos(in->y, &t[0], &t[1]);
+    ComputeSinCos(in->z, &t[2], &t[3]);
     out->x = t[1] * t[3] * b->x - t[2] * b->y;
     out->y = t[1] * t[2] * b->x + t[3] * b->y;
     out->z = -t[0] * b->x + b->z;
@@ -3309,7 +3312,9 @@ extern "C" f32 Tangent(f32 x);
 // The launch velocity from from to to under the gravity at 0x358 of rec (the world's when null),
 // its angle above the straight line by angle's sine of the way to vertical. The speed's product
 // is a variable of its own: retail moves the square root into q's register before it.
-s32 ComputeBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+s32 ComputeBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec)
 {
     Vec4 d;
     f32 h;
@@ -3409,9 +3414,11 @@ s32 ComputeLaunchVelocityToPoint(f32 speed, Vec4* from, Vec4* to, Vec4* out, u8*
     return 1;
 }
 
-void ForwardBallisticLaunchVelocity(Vec4* from, Vec4* to, Vec4* out, u8* rec, f32 angle)
+// The floats stand among the other parameters where retail's callers evaluate them: the EE passes
+// them in their own registers, so only a caller's code shows their place.
+void ForwardBallisticLaunchVelocity(f32 angle, Vec4* from, Vec4* to, Vec4* out, u8* rec)
 {
-    ComputeBallisticLaunchVelocity(from, to, out, rec, angle);
+    ComputeBallisticLaunchVelocity(angle, from, to, out, rec);
 }
 
 // Writes v to out, scaled down to length max when it is longer.
@@ -4352,8 +4359,7 @@ void DrawScreenFade(ScreenFade* self)
         }
         draw:
     f32 v = self->opacity * 255.0f;
-    // retail's caller evaluates the colour and the packet before the corners
-    ((void (*)(s32, s32, s32, s32, PacketWriter*, f32, f32, f32, f32))WriteColoredSpritePacket)(0, 0, 0, (s32)v, &g_gsPacketWriter, 0.0f, 0.0f, 640.0f, 492.80002f);
+    WriteColoredSpritePacket(0, 0, 0, (s32)v, 0.0f, 0.0f, 640.0f, 492.80002f, &g_gsPacketWriter);
     }
 }
 
@@ -5316,8 +5322,7 @@ void DrawColoredCircle(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s3
                   (u32)(s32)((cy * 0.454545468f + 1936.0f) * 16.0f), 0, 0);
     loc.k = 0;
     for (i = 0; i < n + 1; i++) {
-        // Retail's caller evaluates the angle before the outputs' addresses: the call names it first.
-        ((void (*)(f32, f32*, f32*))ComputeSinCos)(WrapAngle(angle), &loc.x, &loc.y);
+        ComputeSinCos(WrapAngle(angle), &loc.x, &loc.y);
         loc.x = loc.x * radius + cx;
         loc.y = loc.y * radius + cy;
         if ((i & 1) && (flags & 2)) {

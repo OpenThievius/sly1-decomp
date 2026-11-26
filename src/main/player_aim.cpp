@@ -529,7 +529,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
     u8* list = g_class75List;
     f32 bestDist = 300.0f;
     Class75Object* best = 0;
-    BuildAxisAngleMatrix(&g_unitZVector, &rot, self->heading);
+    BuildAxisAngleMatrix(&g_unitZVector, self->heading, &rot);
     {
         Vec4 k;
         Vu0::Q(k) = Vu0::FromFloat(a);
@@ -544,8 +544,7 @@ void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f3
         if ((n->count & mode) == 0) {
             continue;
         }
-        // retail's caller passes the time as the fifth argument, between the pointers
-        ((void (*)(PlacedObject*, PlacedObject*, Vec4*, Mat3*, f32, Vec4*, Vec4*))ComputeObjectFrameAtTime)((PlacedObject*)n->parent, 0, &objOrigin, &objRot, a, 0, 0);
+        ComputeObjectFrameAtTime((PlacedObject*)n->parent, 0, a, &objOrigin, &objRot, 0, 0);
         GetObjectWorldPosition(n, &delta);
         Vu0::Q(delta) = Vu0::Add(Vu0::Q(delta), Vu0::Q(local));
         Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec4*)&n->pos)), Vu0::Q(objOrigin));

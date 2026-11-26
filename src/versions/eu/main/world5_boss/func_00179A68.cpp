@@ -114,9 +114,9 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         if (rel.x < 0.0f) {
             sx = -sx;
         }
-        BuildAxisAngleMatrix(&g_unitXVector, &pitch, g_world5PitchCoefficients[0] + sx * (g_world5PitchCoefficients[1] + sx * g_world5PitchCoefficients[2]));
+        BuildAxisAngleMatrix(&g_unitXVector, g_world5PitchCoefficients[0] + sx * (g_world5PitchCoefficients[1] + sx * g_world5PitchCoefficients[2]), &pitch);
         f32 sy = pad->stickY;
-        BuildAxisAngleMatrix(&g_unitYVector, &yaw, g_world5YawCoefficients[0] + sy * (g_world5YawCoefficients[1] + sy * g_world5YawCoefficients[2]));
+        BuildAxisAngleMatrix(&g_unitYVector, g_world5YawCoefficients[0] + sy * (g_world5YawCoefficients[1] + sy * g_world5YawCoefficients[2]), &yaw);
         *(Vu0::Vec*)&to = Vu0::Sub(Vu0::Vec::Of(((PlacedObject*)self->aimFrame)->v140), Vu0::Vec::Of(self->v140));
         BuildBasisFromXAndZHint(&to, &g_unitZVector, &face);
         f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(self->v150), Vu0::Q(self->v150))));
@@ -125,7 +125,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         n.q = Vu0::FromFloats(-self->v150.y, self->v150.x, 0.0f);
         *(Vu0::Vec*)&axis = n;
         *(Vu0::Vec*)&axis = Vu0::NormalizeOr(Vu0::Vec::Of(axis), Vu0::Vec::Of(g_unitXVector));
-        BuildAxisAngleMatrix(&axis, &tilt, angle);
+        BuildAxisAngleMatrix(&axis, angle, &tilt);
         Mat3 m3;
         Mat3 m2;
         Mat3 m1;
@@ -139,7 +139,7 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
         break;
     }
     default:
-        BuildAxisAngleMatrix(&g_unitZVector, &self->m620, self->heading);
+        BuildAxisAngleMatrix(&g_unitZVector, self->heading, &self->m620);
         for (i = 0; i < 2; i++) {
             mats[i] = self->turnedParts[i]->m1A0;
         }
@@ -148,14 +148,12 @@ void ControlWorld5ModeCollider(World5ModeCollider* self, f32 dt, PadRecord* pad)
     }
     Mat3 rot;
     for (i = 0; i < 2; i++) {
-        // Retail's caller evaluates the limit before the output rotation: the call names it there.
-        ((void (*)(Mat3*, Mat3*, RampProfile*, f32, Mat3*, Vec4*))ApproachRotationWithRamp)(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
+        ApproachRotationWithRamp(&self->turnedParts[i]->rot, &mats[i], (RampProfile*)g_world5PartRotationRamp, dt, &rot, 0);
         self->turnedParts[i]->desc02()->m1E(self->turnedParts[i], &rot);
     }
     if (self->thirdTurnedPart->orientationAttachment == 0) {
         MulRotationRowsIndexed(&aim, aim, self->thirdTurnedPart->m1A0);
-        // Retail's caller evaluates the limit before the output rotation: the call names it there.
-        ((void (*)(Mat3*, Mat3*, RampProfile*, f32, Mat3*, Vec4*))ApproachRotationWithRamp)(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
+        ApproachRotationWithRamp(&self->thirdTurnedPart->rot, &aim, (RampProfile*)g_world5AimRotationRamp, dt, &rot, 0);
         self->thirdTurnedPart->desc02()->m1E(self->thirdTurnedPart, &rot);
     }
     HandleStepSequenceSkipButtons(self, pad);

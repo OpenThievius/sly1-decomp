@@ -767,7 +767,7 @@ void SpinNumberedItemTransform(NumberedItem* self, void* a1, void* a2)
         return;
     }
     self->spinAngle = self->spinAngle + self->spinSpeed * g_gameClock[2];
-    BuildAxisAngleMatrix(&g_unitZVector, &axis, self->spinAngle);
+    BuildAxisAngleMatrix(&g_unitZVector, self->spinAngle, &axis);
     MulRotation(&turned, *&self->m110, axis);
     if (self->parent != 0) {
         RotateMatrixUpright(&turned, 0, &turned);
@@ -2075,7 +2075,7 @@ void PlaceFramePointAtTime(void* self, FramePoint_0019CE50* p, Vec4* out, f32 t)
 {
     Vec4 pos;
     Mat3 rot;
-    ComputeObjectFrameAtTime((PlacedObject*)p->object, 0, &pos, &rot, 0, 0, t);
+    ComputeObjectFrameAtTime((PlacedObject*)p->object, 0, t, &pos, &rot, 0, 0);
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
 }
 
@@ -2092,7 +2092,7 @@ void PlaceFramePointInOwnerFrame(void* self, void* p, void* out, f32 t)
     Vec4 point;
     Mat3 rot;
     PlaceFramePointAtTime(self, (FramePoint_0019CE50*)p, &point, t);
-    ComputeObjectFrameAtTime((PlacedObject*)(((FrameOwner_0019CEC0*)self)->object), 0, &pos, &rot, 0, 0, t);
+    ComputeObjectFrameAtTime((PlacedObject*)(((FrameOwner_0019CEC0*)self)->object), 0, t, &pos, &rot, 0, 0);
     Vu0::Q(point) = Vu0::Sub(Vu0::Q(point), Vu0::Q(pos));
     Vu0::Q(*(Vec4*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
 }

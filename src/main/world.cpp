@@ -685,11 +685,11 @@ void UpdatePathFollowerAttachmentFrames(PathFollower* self, ParentFrame* frame)
             *(Quad_1DA7E0*)&s->placedPos = ApproachPointWithRamp(*(Quad_1DA7E0*)&s->placedPos, *(Quad_1DA7E0*)&s->obj->v190, g_gameClock[2], (RampProfile*)g_wheelAttachRamp, 0);
         }
         if ((s32)i < 2) {
-            BuildAxisAngleMatrix(&g_unitZVector, &tilt, self->steerAngle);
+            BuildAxisAngleMatrix(&g_unitZVector, self->steerAngle, &tilt);
         } else {
             tilt = g_identityMatrix;
         }
-        BuildAxisAngleMatrix(&g_unitYVector, &turn, s->turnAngle);
+        BuildAxisAngleMatrix(&g_unitYVector, s->turnAngle, &turn);
         MulMatInto(&world, tilt, turn);
         if (s->obj2 != 0) {
             Vec4 moved;

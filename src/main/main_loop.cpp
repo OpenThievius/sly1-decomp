@@ -459,7 +459,7 @@ void GetAimRotation(AimAttachment* self, f32 dt, Mat3* rot, Vec4* vec)
         *rot = owner->rot;
         return;
     }
-    ComputeObjectFrameAtTime((PlacedObject*)(ResolveAimTarget(self)), 0, &pos, &m, 0, 0, dt);
+    ComputeObjectFrameAtTime((PlacedObject*)(ResolveAimTarget(self)), 0, dt, &pos, &m, 0, 0);
     Vu0::Q(pos) = Vu0::Add(Vu0::Rotate(m, Vu0::Q(self->point)), Vu0::Q(pos));
     TransformPointBetweenFrames(0, (PlacedObject*)self->owner->parent, &pos, &pos);
     *(u128*)&d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->owner->pos));

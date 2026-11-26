@@ -623,7 +623,7 @@ void SetWalkerColliderState(WalkerCollider* self, s32 n)
         else SetStateWalkerTarget((StateWalker*)self->stateWalker, snd);
     }
     if (h) {
-        CreateAnimationPlayerWithoutPresetTargets((Animation*)h, self, 1, (AnimationPlayer**)&self->stateAnimPlayer, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets((Animation*)h, self, 0.0f, 1.0f, 1, (AnimationPlayer**)&self->stateAnimPlayer);
     }
     if (self->stateSound) {
         if (kind == *self->stateSound) return;
@@ -1260,7 +1260,7 @@ void SpawnPairedObject(PairController* self)
         pos.z = self->tune350;
         o->desc02()->m1D(o, &pos);
         f32 spin = RandomFloatInRange(0.0f, 6.2831855f);
-        BuildAxisAngleMatrix(&g_unitZVector, &turn, spin);
+        BuildAxisAngleMatrix(&g_unitZVector, spin, &turn);
         o->desc02()->m1E(o, &turn);
         o->desc02()->m20(o, (Vec4*)&g_zeroVector);
         o->desc02()->m21(o, (Vec4*)&g_zeroVector);
@@ -2366,7 +2366,7 @@ void SetObjectCreatorState(ObjectCreator* self, s32 idx)
             break;
         }
         }
-        if (s2 != 0) CreateAnimationPlayerWithoutPresetTargets((Animation*)s2, self, 0, (AnimationPlayer**)&self->activeHandle, 0.0f, 1.0f);
+        if (s2 != 0) CreateAnimationPlayerWithoutPresetTargets((Animation*)s2, self, 0.0f, 1.0f, 0, (AnimationPlayer**)&self->activeHandle);
     }
 }
 
