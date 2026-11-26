@@ -802,18 +802,18 @@ void CollectTintBlendColliderContacts(TintBlendCollider* self)
 
 struct TintBlendOutput { u8 pad0[0x94]; f32 contactValue; s32 f98; };
 
-typedef s32 (*TintBlendTestFn)(void* self, void* out);
+typedef s32 (*TintBlendTestFn)(void* self, void* out, s32 end);
 
 extern f32 g_gameTime;
 
 // Sets the contact's value: when the class's method 56 says so, a quadratic ramp in the time
 // since the tint started, clamped to the unit range and scaled by a constant; otherwise 0.
-void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out)
+void ComputeTintBlendColliderContactValue(TintBlendCollider* self, void* out, s32 end)
 {
     TintBlendCollider* obj = self;
     TintBlendOutput* o = (TintBlendOutput*)out;
 
-    if (((TintBlendTestFn)obj->desc06()->m56)(self, out)) {
+    if (((TintBlendTestFn)obj->desc06()->m56)(self, out, end)) {
         f32 d = g_gameTime - obj->tintStartTime;
         f32 lo = ((f32*)&g_unitRange)[0];
         f32 hi = ((f32*)&g_unitRange)[1];

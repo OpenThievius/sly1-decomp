@@ -1915,16 +1915,15 @@ void PrunePlayerContacts(Player* self)
                     s32 k = (n->end[0].body != self);
                     if (n->end[k].part == self->heldObject) {
                         void* other = n->end[1 - k].body;
-                        // PrunePlayerContacts matches only with k passed in $a2, which no other
-                        // call of IsObjectOfKind sets
-                        if (other == 0 || ((s32 (*)(void*, s32, s32))IsObjectOfKind)(other, 0x46, k) == 0) {
+                        if (other == 0 || IsObjectOfKind((BaseObject*)other, 0x46) == 0) {
                             *slot = n->next;
                             n->next = head;
                             head = n;
                         } else {
                             slot = &n->next;
                         }
-                    } else if ((void*)n->end[1 - k].body == ((ContactChainOwner*)self->contactOwner) && ((s32 (*)(Player*, BodyContact*))self->desc06()->m56)(self, n)) {
+                    // slot 90 takes the contact's end: retail has k in $a2 for it
+                    } else if ((void*)n->end[1 - k].body == ((ContactChainOwner*)self->contactOwner) && ((s32 (*)(Player*, BodyContact*, s32))self->desc06()->m56)(self, n, k)) {
                         *slot = n->next;
                         n->next = ((ContactChainOwner*)self->contactOwner)->chain;
                         ((ContactChainOwner*)self->contactOwner)->chain = n;

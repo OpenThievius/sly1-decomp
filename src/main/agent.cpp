@@ -2184,7 +2184,7 @@ void SetAgentPrimaryTarget(Agent* self, void* value)
 
 // Slot 0x100 of the agent: the friction and bounce of a contact: fixed constants while contacts are
 // disabled, else its contact value as friction when slot 86 accepts, else zeros.
-void ComputeAgentContactValue(Agent* self, BodyContact* out)
+void ComputeAgentContactValue(Agent* self, BodyContact* out, s32 end)
 {
     if (self->contactsDisabled != 0) {
         f32 a = g_agentDisabledContactFriction;
@@ -2192,7 +2192,7 @@ void ComputeAgentContactValue(Agent* self, BodyContact* out)
         out->friction = a;
         out->bounce = b;
     } else {
-        if (((s32 (*)(Agent*, void*))self->desc06()->m56)(self, out) != 0) {
+        if (((s32 (*)(Agent*, void*, s32))self->desc06()->m56)(self, out, end) != 0) {
             f32 t = self->contactValue;
             out->bounce = 0.0f;
             out->friction = t;

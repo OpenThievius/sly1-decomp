@@ -267,7 +267,7 @@ extern void* GetIndexedTargetSlot(void* self, s32 index);
 extern "C" void* FillMemory(void* p, s32 value, s32 size);
 
 f32 ClampToRange(ValueRange* span, f32 x);
-void SetScatterLevel(ScatterController* object, f32 unused);
+void SetScatterLevel(ScatterController* object, f32 level);
 f32 ClampToRange(ValueRange* span, f32 x);
 
 extern f32 ClampToRange(ValueRange* span, f32 x);
@@ -1983,10 +1983,10 @@ void ScatterObjectsAtPoint(ScatterController* self, void* p, s32 n, s32 flag)
     }
 }
 
-// Stores the clamped level in the current entry's first level.
-void SetScatterLevel(ScatterController* object, f32 unused)
+// Stores the level, clamped to the table's range, in the current entry's first level.
+void SetScatterLevel(ScatterController* object, f32 level)
 {
-	f32 value = ((f32 (*)(void*))ClampToRange)(object->table);
+	f32 value = ClampToRange((ValueRange*)object->table, level);
 	g_currentEntry->dt = value;
 }
 
